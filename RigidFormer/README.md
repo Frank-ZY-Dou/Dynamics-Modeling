@@ -18,6 +18,14 @@ On standard benchmarks, RigidFormer outperforms or matches mesh-based baselines 
 
 ---
 
+## TODO
+
+- [ ] Release dataset processing scripts.
+- [ ] Release inference code for the MOVi datasets.
+- [ ] Release training code for the MOVi datasets.
+
+---
+
 ## Qualitative Results
 
 > Meshes are shown only for visualization; our model operates on point inputs. Click any preview to open the full-quality MP4.
@@ -71,24 +79,35 @@ On standard benchmarks, RigidFormer outperforms or matches mesh-based baselines 
 
 <table>
 <tr>
-<td width="33%"><a href="assets/PartialPC_sample_1.mp4"><img src="assets/gifs/PartialPC_sample_1.gif" width="100%"/></a></td>
-<td width="33%"><a href="assets/PartialPC_sample_2.mp4"><img src="assets/gifs/PartialPC_sample_2.gif" width="100%"/></a></td>
-<td width="33%"><a href="assets/PartialPC_sample_3.mp4"><img src="assets/gifs/PartialPC_sample_3.gif" width="100%"/></a></td>
+<td width="25%"><a href="assets/PartialPC_sample_1.mp4"><img src="assets/gifs/PartialPC_sample_1.gif" width="100%"/></a></td>
+<td width="25%"><a href="assets/PartialPC_sample_2.mp4"><img src="assets/gifs/PartialPC_sample_2.gif" width="100%"/></a></td>
+<td width="25%"><a href="assets/PartialPC_sample_3.mp4"><img src="assets/gifs/PartialPC_sample_3.gif" width="100%"/></a></td>
+<td width="25%"><a href="assets/PartialPC_sample_4.mp4"><img src="assets/gifs/PartialPC_sample_4.gif" width="100%"/></a></td>
 </tr>
 <tr>
-<td width="33%"><a href="assets/PartialPC_sample_4.mp4"><img src="assets/gifs/PartialPC_sample_4.gif" width="100%"/></a></td>
-<td width="33%"><a href="assets/PartialPC_sample_5.mp4"><img src="assets/gifs/PartialPC_sample_5.gif" width="100%"/></a></td>
-<td width="33%"><a href="assets/PartialPC_sample_6.mp4"><img src="assets/gifs/PartialPC_sample_6.gif" width="100%"/></a></td>
+<td width="25%"><a href="assets/PartialPC_sample_5.mp4"><img src="assets/gifs/PartialPC_sample_5.gif" width="100%"/></a></td>
+<td width="25%"><a href="assets/PartialPC_sample_6.mp4"><img src="assets/gifs/PartialPC_sample_6.gif" width="100%"/></a></td>
+<td width="25%"><a href="assets/PartialPC_sample_7.mp4"><img src="assets/gifs/PartialPC_sample_7.gif" width="100%"/></a></td>
+<td width="25%"><a href="assets/PartialPC_sample_8.mp4"><img src="assets/gifs/PartialPC_sample_8.gif" width="100%"/></a></td>
+</tr>
+</table>
+
+### From Rigid to Soft
+
+> A learnable skinning module and physics-informed supervision turn sparse anchor dynamics into full-mesh deformation.
+
+<table>
+<tr>
+<td width="25%"><a href="assets/Soft_Bodies_1.mp4"><img src="assets/gifs/Soft_Bodies_1.gif" width="100%"/></a></td>
+<td width="25%"><a href="assets/Soft_Bodies_2.mp4"><img src="assets/gifs/Soft_Bodies_2.gif" width="100%"/></a></td>
+<td width="25%"><a href="assets/Soft_Bodies_3.mp4"><img src="assets/gifs/Soft_Bodies_3.gif" width="100%"/></a></td>
+<td width="25%"><a href="assets/Soft_Bodies_4.mp4"><img src="assets/gifs/Soft_Bodies_4.gif" width="100%"/></a></td>
 </tr>
 <tr>
-<td width="33%"><a href="assets/PartialPC_sample_7.mp4"><img src="assets/gifs/PartialPC_sample_7.gif" width="100%"/></a></td>
-<td width="33%"><a href="assets/PartialPC_sample_8.mp4"><img src="assets/gifs/PartialPC_sample_8.gif" width="100%"/></a></td>
-<td width="33%"><a href="assets/PartialPC_sample_9.mp4"><img src="assets/gifs/PartialPC_sample_9.gif" width="100%"/></a></td>
-</tr>
-<tr>
-<td width="33%"><a href="assets/PartialPC_sample_10.mp4"><img src="assets/gifs/PartialPC_sample_10.gif" width="100%"/></a></td>
-<td width="33%"><a href="assets/PartialPC_sample_11.mp4"><img src="assets/gifs/PartialPC_sample_11.gif" width="100%"/></a></td>
-<td width="33%"><a href="assets/PartialPC_sample_12.mp4"><img src="assets/gifs/PartialPC_sample_12.gif" width="100%"/></a></td>
+<td width="25%"><a href="assets/Soft_Bodies_5.mp4"><img src="assets/gifs/Soft_Bodies_5.gif" width="100%"/></a></td>
+<td width="25%"><a href="assets/Soft_Bodies_6.mp4"><img src="assets/gifs/Soft_Bodies_6.gif" width="100%"/></a></td>
+<td width="25%"><a href="assets/Soft_Bodies_7.mp4"><img src="assets/gifs/Soft_Bodies_7.gif" width="100%"/></a></td>
+<td width="25%"><a href="assets/Soft_Bodies_8.mp4"><img src="assets/gifs/Soft_Bodies_8.gif" width="100%"/></a></td>
 </tr>
 </table>
 
