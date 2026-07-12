@@ -8,7 +8,7 @@
 
 **Robotics: Science and Systems (RSS) 2026**
 
-$\color{#A31F34}{\textbf{Finalist for the Outstanding Student Paper and Outstanding Paper Awards}}$
+<img src="https://img.shields.io/badge/Finalist_for_the_Outstanding_Student_Paper_and_Outstanding_Paper_Awards-A31F34" alt="Finalist for the Outstanding Student Paper and Outstanding Paper Awards">
 
 Zhiyang Dou<sup>1</sup>, John U. Onyemelukwe<sup>1*</sup>, Hangxing Zhang<sup>1*</sup>, Heng Zhang<sup>1</sup>, Minghao Guo<sup>1</sup>, Yunsheng Tian<sup>1</sup>,<br>
 Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>, Peter Yichen Chen<sup>1</sup>, Yuri Ivanov<sup>2&dagger;</sup> and Wojciech Matusik<sup>1</sup>
