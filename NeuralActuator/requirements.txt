@@ -1,0 +1,14 @@
+jax[cuda12]>=0.5.0
+flax
+optax
+mujoco>=3.2.0
+mujoco-mjx>=3.2.0
+numpy
+pandas
+pyyaml
+torch
+tensorboard
+tqdm
+opencv-python-headless
+scikit-learn
+scipy>=1.10

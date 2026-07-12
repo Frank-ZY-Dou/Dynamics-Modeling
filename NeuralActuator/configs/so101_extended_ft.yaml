@@ -1,0 +1,73 @@
+# SO-101 extended, stage 2: velocity-supervised low-LR fine-tune of the extended checkpoint.
+model_type: transformer
+hidden_dim: 192
+latent_dim: 96
+num_heads: 4
+num_layers: 4
+d_ff: 384
+pool_type: "mean"
+use_gated_attention: true
+dropout_rate: 0.1
+feature_dim: 42
+history_length: 8
+
+# Starting checkpoint: the best_test output of the extended scratch run
+# (scripts/train_so101_extended.sh), the base the released extended checkpoint was tuned from.
+resume_from: outputs/so101_extended_params_best_test.pkl
+
+epochs: 15000
+batch_size: 16
+lr: 1e-5
+lr_schedule: cosine
+lr_warmup_epochs: 200
+lr_decay_epochs: 12000
+grad_clip: 1.0
+weight_decay: 0.0001
+ema_decay: 0.999
+zero_init_torque_head: false
+skip_nonfinite_updates: true
+seed: 3
+
+rollout_steps: 320
+curriculum_epochs: [6000, 12000]
+curriculum_steps: [128, 256]
+data_dt: 0.01605
+downsample_factor: 1
+sim_step_size: 5
+mjcf_path: robot_so101/so101_torque_scene.xml
+
+use_residual_torque: false
+current_source: load
+torque_clip: 5.0
+backbone_activation: silu
+init_pos_noise_std: 0.05
+normalize_features: true
+qvel_clip: 10.0
+
+pos_loss_weight: 100.0
+vel_loss_weight: 5.0
+force_loss_weight: 30.0
+gate_loss_weight: 1.0
+condition_loss_weight: 0.0
+force_focal_weight: 5.0
+gate_focal_weight: 0.0
+mask_invalid_force: true
+
+val_interval: 10
+eval_interval: 100
+eval_ema_params: true
+target_mae_threshold: 2.0
+target_force_threshold: 0.25
+log_dir: "outputs/logs_so101_extended_ft"
+
+task_dirs:
+  - data/so101/go_up_and_stay_still/empty
+  - data/so101/go_up_and_stay_still/200g
+  - data/so101/go_up_and_stay_still/300g
+  - data/so101/go_up_and_stay_still/400g
+  - data/so101/go_up_and_stay_still/500g
+  - data/so101/pick_and_place/empty
+  - data/so101/pick_and_place/200g
+  - data/so101/pick_and_place/300g
+  - data/so101/pick_and_place/400g
+  - data/so101/pick_and_place/500g

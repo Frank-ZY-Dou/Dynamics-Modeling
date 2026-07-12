@@ -1,0 +1,141 @@
+model_type: transformer
+hidden_dim: 192
+latent_dim: 96
+num_heads: 4
+num_layers: 4
+d_ff: 384
+pool_type: "mean"
+use_gated_attention: true
+dropout_rate: 0.1
+feature_dim: 36
+history_length: 8
+
+epochs: 100000
+batch_size: 16
+lr: 1e-4
+lr_schedule: cosine
+lr_warmup_epochs: 1000
+grad_clip: 1.0
+weight_decay: 0.0001
+ema_decay: 0.999
+zero_init_torque_head: false
+skip_nonfinite_updates: true
+
+rollout_steps: 256
+curriculum_epochs: [2000, 5000]
+curriculum_steps: [128, 192]
+data_dt: 0.017
+downsample_factor: 1
+sim_step_size: 4
+mjcf_path: robot/scene.xml
+
+use_residual_torque: false
+torque_constant: 1.3
+init_pos_noise_std: 0.15
+goal_aperture_noise_std: 0.0
+normalize_features: true
+qvel_clip: 10.0
+gripper_torque_clip: 1.5
+
+pos_loss_weight: 100.0
+gripper_loss_weight: 0.02
+force_loss_weight: 0.0
+gate_loss_weight: 0.0
+condition_loss_weight: 0.0
+force_focal_weight: 5.0
+gate_focal_weight: 0.0
+mask_invalid_force: false
+
+val_interval: 10
+eval_interval: 100
+target_mae_threshold: 0.8
+target_gripper_threshold: 0.15
+target_force_threshold: 0.25
+target_condition_threshold: 0.0
+log_dir: "outputs/logs_no_load_no_gripper"
+
+datasets:
+  - data/force_unlabeled/backward_forward/train/001.csv
+  - data/force_unlabeled/backward_forward/train/002.csv
+  - data/force_unlabeled/backward_forward/train/003.csv
+  - data/force_unlabeled/backward_forward/train/004.csv
+  - data/force_unlabeled/backward_forward/train/005.csv
+  - data/force_unlabeled/backward_forward/train/006.csv
+  - data/force_unlabeled/backward_forward/train/007.csv
+  - data/force_unlabeled/backward_forward/train/008.csv
+  - data/force_unlabeled/circular_ccw/train/001.csv
+  - data/force_unlabeled/circular_ccw/train/002.csv
+  - data/force_unlabeled/circular_ccw/train/003.csv
+  - data/force_unlabeled/circular_ccw/train/004.csv
+  - data/force_unlabeled/circular_ccw/train/005.csv
+  - data/force_unlabeled/circular_ccw/train/006.csv
+  - data/force_unlabeled/circular_ccw/train/007.csv
+  - data/force_unlabeled/circular_ccw/train/008.csv
+  - data/force_unlabeled/circular_cw/train/001.csv
+  - data/force_unlabeled/circular_cw/train/002.csv
+  - data/force_unlabeled/circular_cw/train/003.csv
+  - data/force_unlabeled/circular_cw/train/004.csv
+  - data/force_unlabeled/circular_cw/train/005.csv
+  - data/force_unlabeled/circular_cw/train/006.csv
+  - data/force_unlabeled/circular_cw/train/007.csv
+  - data/force_unlabeled/circular_cw/train/008.csv
+  - data/force_unlabeled/go_up_and_stay_still/train/001.csv
+  - data/force_unlabeled/go_up_and_stay_still/train/002.csv
+  - data/force_unlabeled/go_up_and_stay_still/train/003.csv
+  - data/force_unlabeled/go_up_and_stay_still/train/004.csv
+  - data/force_unlabeled/go_up_and_stay_still/train/005.csv
+  - data/force_unlabeled/go_up_and_stay_still/train/006.csv
+  - data/force_unlabeled/go_up_and_stay_still/train/007.csv
+  - data/force_unlabeled/go_up_and_stay_still/train/008.csv
+  - data/force_unlabeled/joint_sweep_motor11/train/001.csv
+  - data/force_unlabeled/joint_sweep_motor11/train/002.csv
+  - data/force_unlabeled/joint_sweep_motor11/train/003.csv
+  - data/force_unlabeled/joint_sweep_motor11/train/004.csv
+  - data/force_unlabeled/joint_sweep_motor11/train/005.csv
+  - data/force_unlabeled/joint_sweep_motor11/train/006.csv
+  - data/force_unlabeled/joint_sweep_motor11/train/007.csv
+  - data/force_unlabeled/joint_sweep_motor11/train/008.csv
+  - data/force_unlabeled/joint_sweep_motor12/train/001.csv
+  - data/force_unlabeled/joint_sweep_motor12/train/002.csv
+  - data/force_unlabeled/joint_sweep_motor12/train/003.csv
+  - data/force_unlabeled/joint_sweep_motor12/train/004.csv
+  - data/force_unlabeled/joint_sweep_motor12/train/005.csv
+  - data/force_unlabeled/joint_sweep_motor12/train/006.csv
+  - data/force_unlabeled/joint_sweep_motor12/train/007.csv
+  - data/force_unlabeled/joint_sweep_motor12/train/008.csv
+  - data/force_unlabeled/joint_sweep_motor13/train/001.csv
+  - data/force_unlabeled/joint_sweep_motor13/train/002.csv
+  - data/force_unlabeled/joint_sweep_motor13/train/003.csv
+  - data/force_unlabeled/joint_sweep_motor13/train/004.csv
+  - data/force_unlabeled/joint_sweep_motor13/train/005.csv
+  - data/force_unlabeled/joint_sweep_motor13/train/006.csv
+  - data/force_unlabeled/joint_sweep_motor13/train/007.csv
+  - data/force_unlabeled/joint_sweep_motor13/train/008.csv
+  - data/force_unlabeled/joint_sweep_motor14/train/001.csv
+  - data/force_unlabeled/joint_sweep_motor14/train/002.csv
+  - data/force_unlabeled/joint_sweep_motor14/train/003.csv
+  - data/force_unlabeled/joint_sweep_motor14/train/004.csv
+  - data/force_unlabeled/joint_sweep_motor14/train/005.csv
+  - data/force_unlabeled/joint_sweep_motor14/train/006.csv
+  - data/force_unlabeled/joint_sweep_motor14/train/007.csv
+  - data/force_unlabeled/joint_sweep_motor14/train/008.csv
+
+val_datasets:
+  - data/force_unlabeled/backward_forward/validation/001.csv
+  - data/force_unlabeled/circular_ccw/validation/001.csv
+  - data/force_unlabeled/circular_cw/validation/001.csv
+  - data/force_unlabeled/go_up_and_stay_still/validation/001.csv
+  - data/force_unlabeled/joint_sweep_motor11/validation/001.csv
+  - data/force_unlabeled/joint_sweep_motor12/validation/001.csv
+  - data/force_unlabeled/joint_sweep_motor13/validation/001.csv
+  - data/force_unlabeled/joint_sweep_motor14/validation/001.csv
+
+test_datasets:
+  backward_forward: data/force_unlabeled/backward_forward/test/001.csv
+  circular_ccw: data/force_unlabeled/circular_ccw/test/001.csv
+  circular_cw: data/force_unlabeled/circular_cw/test/001.csv
+  go_up_and_stay_still: data/force_unlabeled/go_up_and_stay_still/test/001.csv
+  joint_sweep_motor11: data/force_unlabeled/joint_sweep_motor11/test/001.csv
+  joint_sweep_motor12: data/force_unlabeled/joint_sweep_motor12/test/001.csv
+  joint_sweep_motor13: data/force_unlabeled/joint_sweep_motor13/test/001.csv
+  joint_sweep_motor14: data/force_unlabeled/joint_sweep_motor14/test/001.csv

@@ -1,0 +1,10 @@
+float32[] motorsPos
+float32[] coilsTemp
+float32[] current
+float32[] motorsVel
+float32[] motorsVolts
+float32[] pwm
+float32 aperture
+float32[] force 
+float32 relative_time
+time stamp

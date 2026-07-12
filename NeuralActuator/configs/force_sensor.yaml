@@ -1,0 +1,187 @@
+# Force-sensor benchmark, trained from scratch.
+model_type: transformer
+hidden_dim: 192
+latent_dim: 96
+num_heads: 4
+num_layers: 4
+d_ff: 384
+pool_type: "mean"
+use_gated_attention: true
+dropout_rate: 0.1
+feature_dim: 36
+history_length: 8
+
+epochs: 100000
+batch_size: 32
+lr: 1e-4
+lr_schedule: cosine
+lr_warmup_epochs: 1000
+lr_decay_epochs: 30000
+grad_clip: 1.0
+weight_decay: 0.0001
+adam_b2: 0.95
+ema_decay: 0.999
+zero_init_torque_head: false
+skip_nonfinite_updates: true
+seed: 0
+
+rollout_steps: 320
+curriculum_epochs: [2000, 5000]
+curriculum_steps: [128, 256]
+data_dt: 0.017
+downsample_factor: 1
+sim_step_size: 4
+mjcf_path: robot/scene.xml
+
+use_residual_torque: false
+torque_constant: 1.3
+init_pos_noise_std: 0.15
+goal_aperture_noise_std: 0.0
+normalize_features: true
+qvel_clip: 10.0
+gripper_torque_clip: 1.5
+
+pos_loss_weight: 100.0
+gripper_loss_weight: 0.02
+force_loss_weight: 30.0
+gate_loss_weight: 1.0
+condition_loss_weight: 0.0
+force_focal_weight: 3.0
+force_huber_beta: 0.15
+gate_focal_weight: 0.0
+mask_invalid_force: false
+
+val_interval: 10
+eval_interval: 100
+eval_ema_params: true
+target_mae_threshold: 2.0
+target_gripper_threshold: 0.5
+target_force_threshold: 0.25
+target_condition_threshold: 0.0
+log_dir: "outputs/logs_force_sensor"
+
+datasets:
+  - data/force_sensor/force_x_plus/train/001.csv
+  - data/force_sensor/force_x_plus/train/002.csv
+  - data/force_sensor/force_x_plus/train/003.csv
+  - data/force_sensor/force_x_plus/train/004.csv
+  - data/force_sensor/force_x_plus/train/005.csv
+  - data/force_sensor/force_x_plus/train/006.csv
+  - data/force_sensor/force_x_plus/train/007.csv
+  - data/force_sensor/force_x_plus/train/008.csv
+  - data/force_sensor/force_x_minus/train/001.csv
+  - data/force_sensor/force_x_minus/train/002.csv
+  - data/force_sensor/force_x_minus/train/003.csv
+  - data/force_sensor/force_x_minus/train/004.csv
+  - data/force_sensor/force_x_minus/train/005.csv
+  - data/force_sensor/force_x_minus/train/006.csv
+  - data/force_sensor/force_x_minus/train/007.csv
+  - data/force_sensor/force_x_minus/train/008.csv
+  - data/force_sensor/force_y_plus/train/001.csv
+  - data/force_sensor/force_y_plus/train/002.csv
+  - data/force_sensor/force_y_plus/train/003.csv
+  - data/force_sensor/force_y_plus/train/004.csv
+  - data/force_sensor/force_y_plus/train/005.csv
+  - data/force_sensor/force_y_plus/train/006.csv
+  - data/force_sensor/force_y_plus/train/007.csv
+  - data/force_sensor/force_y_plus/train/008.csv
+  - data/force_sensor/force_y_minus/train/001.csv
+  - data/force_sensor/force_y_minus/train/002.csv
+  - data/force_sensor/force_y_minus/train/003.csv
+  - data/force_sensor/force_y_minus/train/004.csv
+  - data/force_sensor/force_y_minus/train/005.csv
+  - data/force_sensor/force_y_minus/train/006.csv
+  - data/force_sensor/force_y_minus/train/007.csv
+  - data/force_sensor/force_y_minus/train/008.csv
+  - data/force_sensor/force_z_plus/train/001.csv
+  - data/force_sensor/force_z_plus/train/002.csv
+  - data/force_sensor/force_z_plus/train/003.csv
+  - data/force_sensor/force_z_plus/train/004.csv
+  - data/force_sensor/force_z_plus/train/005.csv
+  - data/force_sensor/force_z_plus/train/006.csv
+  - data/force_sensor/force_z_plus/train/007.csv
+  - data/force_sensor/force_z_plus/train/008.csv
+  - data/force_sensor/force_z_minus/train/001.csv
+  - data/force_sensor/force_z_minus/train/002.csv
+  - data/force_sensor/force_z_minus/train/003.csv
+  - data/force_sensor/force_z_minus/train/004.csv
+  - data/force_sensor/force_z_minus/train/005.csv
+  - data/force_sensor/force_z_minus/train/006.csv
+  - data/force_sensor/force_z_minus/train/007.csv
+  - data/force_sensor/force_z_minus/train/008.csv
+  - data/force_sensor/force_x_plus_ref/train/001.csv
+  - data/force_sensor/force_x_plus_ref/train/002.csv
+  - data/force_sensor/force_x_plus_ref/train/003.csv
+  - data/force_sensor/force_x_plus_ref/train/004.csv
+  - data/force_sensor/force_x_plus_ref/train/005.csv
+  - data/force_sensor/force_x_plus_ref/train/006.csv
+  - data/force_sensor/force_x_plus_ref/train/007.csv
+  - data/force_sensor/force_x_plus_ref/train/008.csv
+  - data/force_sensor/force_x_minus_ref/train/001.csv
+  - data/force_sensor/force_x_minus_ref/train/002.csv
+  - data/force_sensor/force_x_minus_ref/train/003.csv
+  - data/force_sensor/force_x_minus_ref/train/004.csv
+  - data/force_sensor/force_x_minus_ref/train/005.csv
+  - data/force_sensor/force_x_minus_ref/train/006.csv
+  - data/force_sensor/force_x_minus_ref/train/007.csv
+  - data/force_sensor/force_x_minus_ref/train/008.csv
+  - data/force_sensor/force_y_plus_ref/train/001.csv
+  - data/force_sensor/force_y_plus_ref/train/002.csv
+  - data/force_sensor/force_y_plus_ref/train/003.csv
+  - data/force_sensor/force_y_plus_ref/train/004.csv
+  - data/force_sensor/force_y_plus_ref/train/005.csv
+  - data/force_sensor/force_y_plus_ref/train/006.csv
+  - data/force_sensor/force_y_plus_ref/train/007.csv
+  - data/force_sensor/force_y_plus_ref/train/008.csv
+  - data/force_sensor/force_y_minus_ref/train/001.csv
+  - data/force_sensor/force_y_minus_ref/train/002.csv
+  - data/force_sensor/force_y_minus_ref/train/003.csv
+  - data/force_sensor/force_y_minus_ref/train/004.csv
+  - data/force_sensor/force_y_minus_ref/train/005.csv
+  - data/force_sensor/force_y_minus_ref/train/006.csv
+  - data/force_sensor/force_y_minus_ref/train/007.csv
+  - data/force_sensor/force_y_minus_ref/train/008.csv
+  - data/force_sensor/force_z_plus_ref/train/001.csv
+  - data/force_sensor/force_z_plus_ref/train/002.csv
+  - data/force_sensor/force_z_plus_ref/train/003.csv
+  - data/force_sensor/force_z_plus_ref/train/004.csv
+  - data/force_sensor/force_z_plus_ref/train/005.csv
+  - data/force_sensor/force_z_plus_ref/train/006.csv
+  - data/force_sensor/force_z_plus_ref/train/007.csv
+  - data/force_sensor/force_z_plus_ref/train/008.csv
+  - data/force_sensor/force_z_minus_ref/train/001.csv
+  - data/force_sensor/force_z_minus_ref/train/002.csv
+  - data/force_sensor/force_z_minus_ref/train/003.csv
+  - data/force_sensor/force_z_minus_ref/train/004.csv
+  - data/force_sensor/force_z_minus_ref/train/005.csv
+  - data/force_sensor/force_z_minus_ref/train/006.csv
+  - data/force_sensor/force_z_minus_ref/train/007.csv
+  - data/force_sensor/force_z_minus_ref/train/008.csv
+
+val_datasets:
+  - data/force_sensor/force_x_plus/validation/001.csv
+  - data/force_sensor/force_x_minus/validation/001.csv
+  - data/force_sensor/force_y_plus/validation/001.csv
+  - data/force_sensor/force_y_minus/validation/001.csv
+  - data/force_sensor/force_z_plus/validation/001.csv
+  - data/force_sensor/force_z_minus/validation/001.csv
+  - data/force_sensor/force_x_plus_ref/validation/001.csv
+  - data/force_sensor/force_x_minus_ref/validation/001.csv
+  - data/force_sensor/force_y_plus_ref/validation/001.csv
+  - data/force_sensor/force_y_minus_ref/validation/001.csv
+  - data/force_sensor/force_z_plus_ref/validation/001.csv
+  - data/force_sensor/force_z_minus_ref/validation/001.csv
+
+test_datasets:
+  force_x_plus: data/force_sensor/force_x_plus/test/001.csv
+  force_x_minus: data/force_sensor/force_x_minus/test/001.csv
+  force_y_plus: data/force_sensor/force_y_plus/test/001.csv
+  force_y_minus: data/force_sensor/force_y_minus/test/001.csv
+  force_z_plus: data/force_sensor/force_z_plus/test/001.csv
+  force_z_minus: data/force_sensor/force_z_minus/test/001.csv
+  force_x_plus_ref: data/force_sensor/force_x_plus_ref/test/001.csv
+  force_x_minus_ref: data/force_sensor/force_x_minus_ref/test/001.csv
+  force_y_plus_ref: data/force_sensor/force_y_plus_ref/test/001.csv
+  force_y_minus_ref: data/force_sensor/force_y_minus_ref/test/001.csv
+  force_z_plus_ref: data/force_sensor/force_z_plus_ref/test/001.csv
+  force_z_minus_ref: data/force_sensor/force_z_minus_ref/test/001.csv
