@@ -127,3 +127,12 @@ The dataset is released under the same MIT license as the code (see
 [LICENSE](../LICENSE) at the repository root). The robot models under `robot/` and
 `robot_so101/` are third-party assets under their own Apache-2.0 licenses and are not
 part of the dataset.
+
+## Collection videos
+
+Camera recordings of the collection sessions (430 MP4s, one per released trajectory;
+the two no-load reference tasks were not recorded) are hosted with the Hugging Face
+mirror of this dataset, under `videos/`, at
+https://huggingface.co/datasets/frankzydou/NAD — they are not included in the GitHub
+repository. OMX clips are 1706x1440 at 24 fps, SO-101 clips 1280x1440 at 30 fps; the
+videos are session recordings and are not frame-synchronized to the CSVs.

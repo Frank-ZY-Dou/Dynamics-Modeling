@@ -4,6 +4,8 @@
 <a href="https://frank-zy-dou.github.io/projects/NeuralActuator/index.html"><img src="https://img.shields.io/badge/Project_Page-green" alt="Project Page"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License: MIT"></a>
 <a href="docs/dataset.md"><img src="https://img.shields.io/badge/Dataset-NAD-orange" alt="Neural Actuation Dataset"></a>
+<a href="https://huggingface.co/datasets/frankzydou/NAD"><img src="https://img.shields.io/badge/HF_Dataset-NAD-yellow" alt="Neural Actuation Dataset on Hugging Face"></a>
+<a href="https://huggingface.co/frankzydou/NeuralActuator"><img src="https://img.shields.io/badge/HF_Models-Checkpoints-yellow" alt="Pretrained checkpoints on Hugging Face"></a>
 <!-- arXiv badge goes here once the paper is on arXiv -->
 
 **Robotics: Science and Systems (RSS) 2026**
@@ -39,8 +41,22 @@ differentiable simulation, avoiding torque labels and reliable current-to-torque
 calibration on low-cost platforms.
 
 $$
-\min_{\theta}\left\|\mathrm{DiffSim}\left(f_{\theta}(\cdot)\right)-q^{\mathrm{real}}\right\|
+\theta^\star
+=
+\arg\min_\theta \sum_t
+\mathcal{L}_{\mathrm{pose}}
+\left(q_{t+1}^{\mathrm{sim}},q_{t+1}^{\mathrm{real}}\right),
+\qquad
+q_{t+1}^{\mathrm{sim}}
+=
+\pi_q\!\left[
+\mathrm{DiffSim}
+\left(s_t,\tau_\theta(H_t)\right)
+\right]
 $$
+
+where $\tau_\theta(H_t)$ is the torque model over the telemetry history window $H_t$,
+$s_t$ the simulator state, and $\pi_q$ extracts the simulated pose.
 
 ### 2. History-Dependent Nonlinear Actuator Modeling
 
@@ -56,14 +72,16 @@ supporting sensorless force perception, motor-health monitoring, and force-aware
 downstream control.
 
 $$
-M(q)\ddot{q}+C(q,\dot{q})\dot{q}+g(q)=\tau+\tau_{\mathrm{ext}},
+M(q)\ddot{q}+C(q,\dot{q})\dot{q}+g_{\mathrm{grav}}(q)
+=
+\tau+J_v(q)^{\top}f_{\mathrm{ext}},
 \qquad
-\tau_{\mathrm{ext}}=J(q)^{\top}f_{\mathrm{ext}}.
+\tau_{\mathrm{ext}}=J_v(q)^{\top}f_{\mathrm{ext}}.
 $$
 
-Here, $\tau$ is the actuator-side joint torque, $f_{\mathrm{ext}}$ is the predicted
-end-effector external force, and $\tau_{\mathrm{ext}}$ is its joint-space image through
-the manipulator Jacobian.
+Here, $\tau$ is the actuator-side joint torque, $f_{\mathrm{ext}} \in \mathbb{R}^3$ the
+predicted end-effector external force, $J_v(q)$ the translational Jacobian, and
+$\tau_{\mathrm{ext}}$ the joint-space image of $f_{\mathrm{ext}}$.
 
 This repository ships the training and evaluation code. The model is a Transformer that
 maps commanded positions, motor currents and actuator telemetry to the outputs
@@ -115,8 +133,13 @@ export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl
 ## Data and pretrained checkpoints
 
 The Neural Actuation Dataset ships with this repository under `data/` (no separate
-download). The pretrained checkpoints are a separate download from the repository's
-Releases page, see [Released weights](#released-weights). Data layout:
+download). It is also mirrored on Hugging Face at
+[frankzydou/NAD](https://huggingface.co/datasets/frankzydou/NAD), which additionally
+hosts the camera recordings of the collection sessions (430 MP4s, one per trajectory)
+and a parquet packing for the dataset viewer and `load_dataset` — the videos are only
+on Hugging Face, not in this repository. The pretrained checkpoints are a separate
+download from the repository's Releases page, see
+[Released weights](#released-weights). Data layout:
 
 ```
 data/
@@ -136,7 +159,9 @@ directly, e.g. `bash scripts/eval_force_sensor.sh checkpoints/omx_force_sensor.p
 ## Released weights
 
 The pretrained checkpoints ship separately from the code and dataset, as assets on
-this repository's Releases page. Verify the download against these md5 sums:
+this repository's Releases page and mirrored on Hugging Face at
+[frankzydou/NeuralActuator](https://huggingface.co/frankzydou/NeuralActuator). Verify
+the download against these md5 sums:
 
 | File | Benchmark | md5 |
 |---|---|---|
