@@ -31,7 +31,7 @@ differentiable simulation, avoiding torque labels and reliable current-to-torque
 calibration on low-cost platforms.
 
 $$
-\min_{\theta}\left\|\operatorname{DiffSim}\left(f_{\theta}(\cdot)\right)-q^{\mathrm{real}}\right\|
+\min_{\theta}\left\|\mathrm{DiffSim}\left(f_{\theta}(\cdot)\right)-q^{\mathrm{real}}\right\|
 $$
 
 ### 2. History-Dependent Nonlinear Actuator Modeling
