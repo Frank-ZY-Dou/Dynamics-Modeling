@@ -40,20 +40,11 @@ Learns joint torque from real pose trajectories by backpropagating through
 differentiable simulation, avoiding torque labels and reliable current-to-torque
 calibration on low-cost platforms.
 
-$$
-\theta^\star
-=
-\arg\min_\theta \sum_t
-\mathcal{L}_{\mathrm{pose}}
-\left(q_{t+1}^{\mathrm{sim}},q_{t+1}^{\mathrm{real}}\right),
+```math
+\theta^\star = \arg\min_\theta \sum_t \mathcal{L}_{\mathrm{pose}}\left(q_{t+1}^{\mathrm{sim}}, q_{t+1}^{\mathrm{real}}\right),
 \qquad
-q_{t+1}^{\mathrm{sim}}
-=
-\pi_q\!\left[
-\mathrm{DiffSim}
-\left(s_t,\tau_\theta(H_t)\right)
-\right]
-$$
+q_{t+1}^{\mathrm{sim}} = \pi_q\left[\mathrm{DiffSim}\left(s_t, \tau_\theta(H_t)\right)\right]
+```
 
 where $\tau_\theta(H_t)$ is the torque model over the telemetry history window $H_t$,
 $s_t$ the simulator state, and $\pi_q$ extracts the simulated pose.
@@ -71,13 +62,11 @@ $f_{\mathrm{ext}} \in \mathbb{R}^3$, contact gate $g$, and motor condition $c$,
 supporting sensorless force perception, motor-health monitoring, and force-aware
 downstream control.
 
-$$
-M(q)\ddot{q}+C(q,\dot{q})\dot{q}+g_{\mathrm{grav}}(q)
-=
-\tau+J_v(q)^{\top}f_{\mathrm{ext}},
+```math
+M(q)\ddot{q} + C(q,\dot{q})\dot{q} + g_{\mathrm{grav}}(q) = \tau + J_v(q)^{\top} f_{\mathrm{ext}},
 \qquad
-\tau_{\mathrm{ext}}=J_v(q)^{\top}f_{\mathrm{ext}}.
-$$
+\tau_{\mathrm{ext}} = J_v(q)^{\top} f_{\mathrm{ext}}
+```
 
 Here, $\tau$ is the actuator-side joint torque, $f_{\mathrm{ext}} \in \mathbb{R}^3$ the
 predicted end-effector external force, $J_v(q)$ the translational Jacobian, and
