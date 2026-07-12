@@ -8,7 +8,7 @@
 
 **Robotics: Science and Systems (RSS) 2026**
 
-**Finalist for the Outstanding Student Paper and Outstanding Paper Awards**
+$\color{#A31F34}{\textbf{Finalist for the Outstanding Student Paper and Outstanding Paper Awards}}$
 
 Zhiyang Dou<sup>1</sup>, John U. Onyemelukwe<sup>1*</sup>, Hangxing Zhang<sup>1*</sup>, Heng Zhang<sup>1</sup>, Minghao Guo<sup>1</sup>, Yunsheng Tian<sup>1</sup>,<br>
 Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>, Peter Yichen Chen<sup>1</sup>, Yuri Ivanov<sup>2&dagger;</sup> and Wojciech Matusik<sup>1</sup>
@@ -17,6 +17,14 @@ Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>,
 
 <sub><sup>*</sup>Research Assistant at MIT CDFG, equal contribution.&emsp;<sup>&dagger;</sup>The work of this author does not relate to their position at Amazon.</sub>
 </div>
+
+## Updates
+
+- **[July 2026]** Initial release: training and evaluation code for the OpenManipulator-X
+  and SO-101; the Neural Actuation Dataset (NAD) with 450 trajectories across 45 tasks
+  on the two platforms; ten pretrained checkpoints; both inference modes (dynamics
+  rollout and the virtual force sensor); the twin-arm teleoperation and data-collection
+  code (`teleop/`, `hardware/`); and the hardware guide with sourcing links.
 
 ## Overview
 
@@ -62,14 +70,6 @@ maps commanded positions, motor currents and actuator telemetry to the outputs
 above; the torque head is trained through a differentiable simulator (MuJoCo MJX), and
 the force and motor-condition heads use direct supervision from the force sensor and
 the condition flags.
-
-## Updates
-
-- [July 2026] Initial release: training and evaluation code for the OpenManipulator-X
-  and SO-101; the Neural Actuation Dataset (NAD) with 450 trajectories across 45 tasks
-  on the two platforms; ten pretrained checkpoints; both inference modes (dynamics
-  rollout and the virtual force sensor); the twin-arm teleoperation and data-collection
-  code (`teleop/`, `hardware/`); and the hardware guide with sourcing links.
 
 ## Contributing actuation data
 
@@ -237,13 +237,32 @@ pick-and-place task.
 The with-simulator mode rolls the learned dynamics out on a recorded trajectory: the
 left panel plays the simulated motion, the right panel the recording.
 
-| OpenManipulator-X, 500 g | OpenManipulator-X, 300 g |
-|:---:|:---:|
-| <img src="docs/media/omx_force_arrows.gif" width="280" alt="OMX 500 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"> | <img src="docs/media/omx_300g_sim.gif" width="280" alt="OMX 300 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"> |
-| `python infer_actuator.py --robot omx ...` | `python infer_actuator.py --robot omx ...` |
-| **SO-101, 500 g** | **SO-101, 300 g** |
-| <img src="docs/media/so101_pick_place_500g.gif" width="280" alt="SO-101 500 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"> | <img src="docs/media/so101_pick_place_300g.gif" width="280" alt="SO-101 300 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"> |
-| `python infer_actuator.py --robot so101 ...` | `python infer_actuator.py --robot so101 ...` |
+<table align="center">
+  <tr>
+    <th align="center">OpenManipulator-X, 500 g</th>
+    <th align="center">OpenManipulator-X, 300 g</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/omx_force_arrows.gif" width="280" alt="OMX 500 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+    <td align="center"><img src="docs/media/omx_300g_sim.gif" width="280" alt="OMX 300 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+  </tr>
+  <tr>
+    <td align="center"><code>python infer_actuator.py --robot omx ...</code></td>
+    <td align="center"><code>python infer_actuator.py --robot omx ...</code></td>
+  </tr>
+  <tr>
+    <th align="center">SO-101, 500 g</th>
+    <th align="center">SO-101, 300 g</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/so101_pick_place_500g.gif" width="280" alt="SO-101 500 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+    <td align="center"><img src="docs/media/so101_pick_place_300g.gif" width="280" alt="SO-101 300 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+  </tr>
+  <tr>
+    <td align="center"><code>python infer_actuator.py --robot so101 ...</code></td>
+    <td align="center"><code>python infer_actuator.py --robot so101 ...</code></td>
+  </tr>
+</table>
 
 Besides the batch eval scripts, `infer_actuator.py` rolls a checkpoint out on a single
 trajectory CSV and writes the per-step predictions (simulated joint positions, torque,
@@ -275,13 +294,32 @@ simulator; the two modes only differ in how the model is queried at inference ti
 In the clips below the two panels move identically, since deployment does not
 simulate motion.
 
-| OpenManipulator-X, 500 g | OpenManipulator-X, 300 g |
-|:---:|:---:|
-| <img src="docs/media/omx_500g_deploy.gif" width="280" alt="OMX 500 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"> | <img src="docs/media/omx_300g_deploy.gif" width="280" alt="OMX 300 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel)"> |
-| `python infer_actuator.py --robot omx ... --force_only` | `python infer_actuator.py --robot omx ... --force_only` |
-| **SO-101, 500 g** | **SO-101, 300 g** |
-| <img src="docs/media/so101_pick_place_500g_deploy.gif" width="280" alt="SO-101 500 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"> | <img src="docs/media/so101_pick_place_300g_deploy.gif" width="280" alt="SO-101 300 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel)"> |
-| `python infer_actuator.py --robot so101 ... --force_only` | `python infer_actuator.py --robot so101 ... --force_only` |
+<table align="center">
+  <tr>
+    <th align="center">OpenManipulator-X, 500 g</th>
+    <th align="center">OpenManipulator-X, 300 g</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/omx_500g_deploy.gif" width="280" alt="OMX 500 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
+    <td align="center"><img src="docs/media/omx_300g_deploy.gif" width="280" alt="OMX 300 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel)"></td>
+  </tr>
+  <tr>
+    <td align="center"><code>python infer_actuator.py --robot omx ... --force_only</code></td>
+    <td align="center"><code>python infer_actuator.py --robot omx ... --force_only</code></td>
+  </tr>
+  <tr>
+    <th align="center">SO-101, 500 g</th>
+    <th align="center">SO-101, 300 g</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/so101_pick_place_500g_deploy.gif" width="280" alt="SO-101 500 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
+    <td align="center"><img src="docs/media/so101_pick_place_300g_deploy.gif" width="280" alt="SO-101 300 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel)"></td>
+  </tr>
+  <tr>
+    <td align="center"><code>python infer_actuator.py --robot so101 ... --force_only</code></td>
+    <td align="center"><code>python infer_actuator.py --robot so101 ... --force_only</code></td>
+  </tr>
+</table>
 
 `--force_only` runs the deployment path on a recorded stream — the feature history is
 built from the CSV rows exactly as it would be from a live robot, and the script writes
