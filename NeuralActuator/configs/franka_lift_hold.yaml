@@ -1,0 +1,150 @@
+# Franka Panda lift-and-hold: five payloads (200-600 g), trained from scratch.
+# Validation samples the training trajectories (no held-out validation trials);
+# one trial per payload is held out for test (random split, seed=42).
+model_type: transformer
+hidden_dim: 192
+latent_dim: 96
+num_heads: 4
+num_layers: 4
+d_ff: 384
+pool_type: "mean"
+use_gated_attention: true
+dropout_rate: 0.1
+feature_dim: 52
+history_length: 8
+
+epochs: 9000
+batch_size: 16
+lr: 4e-5
+lr_schedule: cosine
+lr_warmup_epochs: 2000
+lr_decay_epochs: 6000
+grad_clip: 1.0
+weight_decay: 0.0001
+ema_decay: 0.999
+seed: 2
+
+rollout_steps: 128  # short windows sampled inside trajectories (per-trajectory masking)
+data_dt: 0.016  # 62.5 Hz
+downsample_factor: 1
+sim_step_size: 8  # physics dt = 0.002 s, the plant design timestep
+mjcf_path: robot_franka/scene.xml
+
+# Trim noisy trajectory boundaries (pre-lift setup and post-release settling)
+trim_start: 0.30
+trim_end: 0.25
+
+# Lookahead target: replace cmd_pos (step function) with pos[t+K] * scale
+lookahead_frames: 5
+lookahead_scale: 1.03
+
+use_residual_torque: false
+torque_constant: 1.0
+backbone_activation: silu
+init_pos_noise_std: 0.15
+
+pos_loss_weight: 100.0
+gripper_loss_weight: 0.0
+vel_loss_weight: 5.0
+force_loss_weight: 1.0
+gate_loss_weight: 1.0
+condition_loss_weight: 0.0
+force_focal_weight: 1.0  # force is present in every frame, focal weighting unnecessary
+force_huber_beta: 0.15
+
+# Cap total loss to prevent gradient explosion from bad batches
+loss_clamp: 500.0
+
+# Per-joint pose-loss weights: higher weight on the wrist joints (+-12 Nm limit);
+# J6 gets 2x for its high velocity range
+joint_loss_weights: [1.0, 1.0, 1.0, 1.0, 1.5, 2.0, 1.5]
+
+val_interval: 10
+eval_interval: 50
+eval_ema_params: true
+target_mae_threshold: 1.5
+target_gripper_threshold: 0.3
+target_force_threshold: 0.2
+log_dir: "outputs/logs_franka_lift_hold"
+
+# Training: 5 payloads x 6 trials
+datasets:
+  - data/franka/lift_hold/train/200_001.csv
+  - data/franka/lift_hold/train/200_002.csv
+  - data/franka/lift_hold/train/200_003.csv
+  - data/franka/lift_hold/train/200_004.csv
+  - data/franka/lift_hold/train/200_005.csv
+  - data/franka/lift_hold/train/200_007.csv
+  - data/franka/lift_hold/train/300_002.csv
+  - data/franka/lift_hold/train/300_003.csv
+  - data/franka/lift_hold/train/300_004.csv
+  - data/franka/lift_hold/train/300_005.csv
+  - data/franka/lift_hold/train/300_006.csv
+  - data/franka/lift_hold/train/300_007.csv
+  - data/franka/lift_hold/train/400_002.csv
+  - data/franka/lift_hold/train/400_003.csv
+  - data/franka/lift_hold/train/400_004.csv
+  - data/franka/lift_hold/train/400_005.csv
+  - data/franka/lift_hold/train/400_006.csv
+  - data/franka/lift_hold/train/400_007.csv
+  - data/franka/lift_hold/train/500_001.csv
+  - data/franka/lift_hold/train/500_002.csv
+  - data/franka/lift_hold/train/500_003.csv
+  - data/franka/lift_hold/train/500_004.csv
+  - data/franka/lift_hold/train/500_005.csv
+  - data/franka/lift_hold/train/500_007.csv
+  - data/franka/lift_hold/train/600_001.csv
+  - data/franka/lift_hold/train/600_002.csv
+  - data/franka/lift_hold/train/600_004.csv
+  - data/franka/lift_hold/train/600_005.csv
+  - data/franka/lift_hold/train/600_006.csv
+  - data/franka/lift_hold/train/600_007.csv
+
+# Validation: same trajectories as training (see header)
+val_datasets:
+  - data/franka/lift_hold/train/200_001.csv
+  - data/franka/lift_hold/train/200_002.csv
+  - data/franka/lift_hold/train/200_003.csv
+  - data/franka/lift_hold/train/200_004.csv
+  - data/franka/lift_hold/train/200_005.csv
+  - data/franka/lift_hold/train/200_007.csv
+  - data/franka/lift_hold/train/300_002.csv
+  - data/franka/lift_hold/train/300_003.csv
+  - data/franka/lift_hold/train/300_004.csv
+  - data/franka/lift_hold/train/300_005.csv
+  - data/franka/lift_hold/train/300_006.csv
+  - data/franka/lift_hold/train/300_007.csv
+  - data/franka/lift_hold/train/400_002.csv
+  - data/franka/lift_hold/train/400_003.csv
+  - data/franka/lift_hold/train/400_004.csv
+  - data/franka/lift_hold/train/400_005.csv
+  - data/franka/lift_hold/train/400_006.csv
+  - data/franka/lift_hold/train/400_007.csv
+  - data/franka/lift_hold/train/500_001.csv
+  - data/franka/lift_hold/train/500_002.csv
+  - data/franka/lift_hold/train/500_003.csv
+  - data/franka/lift_hold/train/500_004.csv
+  - data/franka/lift_hold/train/500_005.csv
+  - data/franka/lift_hold/train/500_007.csv
+  - data/franka/lift_hold/train/600_001.csv
+  - data/franka/lift_hold/train/600_002.csv
+  - data/franka/lift_hold/train/600_004.csv
+  - data/franka/lift_hold/train/600_005.csv
+  - data/franka/lift_hold/train/600_006.csv
+  - data/franka/lift_hold/train/600_007.csv
+
+# Test: one held-out trial per payload
+test_datasets:
+  200g: data/franka/lift_hold/test/200_006.csv
+  300g: data/franka/lift_hold/test/300_001.csv
+  400g: data/franka/lift_hold/test/400_001.csv
+  500g: data/franka/lift_hold/test/500_006.csv
+  600g: data/franka/lift_hold/test/600_003.csv
+
+# Train eval (one trial per payload from the training set)
+train_eval_datasets:
+  200g: data/franka/lift_hold/train/200_001.csv
+  300g: data/franka/lift_hold/train/300_002.csv
+  400g: data/franka/lift_hold/train/400_002.csv
+  500g: data/franka/lift_hold/train/500_001.csv
+  600g: data/franka/lift_hold/train/600_001.csv

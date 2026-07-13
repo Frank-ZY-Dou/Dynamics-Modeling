@@ -8,9 +8,12 @@ contains exactly one robot; there are no text overlays.
 
 The platform is inferred from the rollout layout: OpenManipulator-X dumps
 (evaluate_actuator.py) store gt_q with 7 columns, SO-101 dumps
-(evaluate_actuator_so101.py) with 6. Force-only dumps from infer_actuator.py
-carry no sim_q; both panels then replay the recorded motion and differ only in
-the force arrow. Encoding uses the system ffmpeg (libx264).
+(evaluate_actuator_so101.py) with 6, and Franka dumps
+(evaluate_actuator_franka.py) with 8 (7 arm joints + finger). The Franka
+prediction panel keeps the native panda colors instead of white. Force-only
+dumps from infer_actuator.py carry no sim_q; both panels then replay the
+recorded motion and differ only in the force arrow. Encoding uses the system
+ffmpeg (libx264).
 
 Usage:
     python render_rollout.py --rollout_dir outputs/force_sensor_rollouts --output_dir outputs/videos
@@ -32,16 +35,23 @@ OMX_ROBOT_XML = "open_manipulator_x.xml"
 SO101_MODEL_DIR = "robot_so101"
 SO101_SCENE_XML = "so101_torque_scene.xml"
 SO101_ROOT_BODY = "base"
+FRANKA_MODEL_DIR = "robot_franka"
+FRANKA_SCENE_XML = "scene.xml"
+FRANKA_ROBOT_XML = "panda.xml"
 
 PRED_COLOR = "1 1 1"  # model arm (left panel)
 GT_COLOR = "0 1 0"    # ground-truth arm (right panel)
 ARROW_RGBA = (1.0, 0.1, 0.1, 1.0)
 FLOOR_MARGIN = 0.005  # keep arrow tips at least 5 mm above the floor plane
+# Panda flange-to-TCP distance: anchor arrows at the grasp point between the
+# fingertips, not at the 'hand' body origin (which sits inside the gripper mesh)
+FRANKA_TCP_OFFSET = 0.1034
 
 # Standard project viewpoints, per platform
 CAMERAS = {
     'omx': {'lookat': [0.25, 0.0, 0.15], 'distance': 1.10, 'azimuth': 90.0, 'elevation': -5.2},
     'so101': {'lookat': [0.4, 0.0, 0.12], 'distance': 1.05, 'azimuth': 90.0, 'elevation': -15.0},
+    'franka': {'lookat': [0.30, 0.0, 0.40], 'distance': 1.45, 'azimuth': 90.0, 'elevation': -12.0},
 }
 
 
@@ -161,6 +171,70 @@ def build_so101_scene(color, offwidth=1920, offheight=1080):
     return mj_model
 
 
+def build_franka_scene(color, offwidth=1920, offheight=1080):
+    """Merge the Franka scene and robot files into a single-robot scene.
+
+    Same two-file merge as build_omx_scene. Actuators and the home keyframe
+    are not copied: qpos is set directly for rendering, and the keyframe's
+    ctrl values would not compile without the actuators. With
+    color='original' the panda keeps its native materials.
+    """
+    scene_root = ET.parse(os.path.join(FRANKA_MODEL_DIR, FRANKA_SCENE_XML)).getroot()
+    robot_root = ET.parse(os.path.join(FRANKA_MODEL_DIR, FRANKA_ROBOT_XML)).getroot()
+
+    # Offscreen framebuffer large enough for the requested resolution
+    visual = scene_root.find('visual')
+    if visual is None:
+        visual = ET.SubElement(scene_root, 'visual')
+    g = visual.find('global')
+    if g is None:
+        g = ET.SubElement(visual, 'global')
+    g.set('offwidth', str(offwidth))
+    g.set('offheight', str(offheight))
+
+    # Drop the include; we inject the robot elements explicitly
+    for inc in scene_root.findall('include'):
+        scene_root.remove(inc)
+
+    scene_worldbody = scene_root.find('worldbody')
+    if scene_worldbody is None:
+        scene_worldbody = ET.SubElement(scene_root, 'worldbody')
+
+    robot_asset = robot_root.find('asset')
+    if robot_asset is not None:
+        scene_asset = scene_root.find('asset')
+        if scene_asset is None:
+            scene_asset = ET.SubElement(scene_root, 'asset')
+        for child in robot_asset:
+            scene_asset.append(copy.deepcopy(child))
+    for tag in ('default', 'compiler', 'option'):
+        node = robot_root.find(tag)
+        if node is not None:
+            scene_root.insert(0, copy.deepcopy(node))
+    # The split tendon and finger coupling live at the robot root
+    for tag in ('tendon', 'equality'):
+        node = robot_root.find(tag)
+        if node is not None:
+            scene_root.append(copy.deepcopy(node))
+
+    robot_worldbody = robot_root.find('worldbody')
+    for child in robot_worldbody:
+        body = copy.deepcopy(child)
+        if color != 'original':
+            modify_robot_appearance(body, 1.0, color=color)
+        scene_worldbody.append(body)
+
+    xml_content = ET.tostring(scene_root, encoding='unicode')
+
+    cwd = os.getcwd()
+    try:
+        os.chdir(FRANKA_MODEL_DIR)
+        mj_model = mujoco.MjModel.from_xml_string(xml_content)
+    finally:
+        os.chdir(cwd)
+    return mj_model
+
+
 def load_rollout(npz_path):
     """Load a rollout dump; the gt_q width identifies the platform."""
     data = np.load(npz_path)
@@ -172,8 +246,14 @@ def load_rollout(npz_path):
     elif gt_q.shape[1] == 6:
         robot = 'so101'
         gt = gt_q
+    elif gt_q.shape[1] == 8:
+        robot = 'franka'
+        # (T, 8): 7 arm joints (rad) + finger joint (m)
+        gt = gt_q
     else:
-        raise ValueError(f'{npz_path}: unexpected gt_q width {gt_q.shape[1]} (expected 7 for OMX, 6 for SO-101)')
+        raise ValueError(
+            f'{npz_path}: unexpected gt_q width {gt_q.shape[1]} '
+            f'(expected 7 for OMX, 6 for SO-101, 8 for Franka)')
     # Force-only dumps have no simulated motion: replay the recorded one
     pred = np.asarray(data['sim_q']) if 'sim_q' in data else gt
     force_pred = np.asarray(data['force_pred']) if 'force_pred' in data else None
@@ -182,10 +262,15 @@ def load_rollout(npz_path):
 
 
 def build_panels(robot, width, height):
-    """One model/data/renderer per panel: prediction (white) and GT (green)."""
+    """One model/data/renderer per panel: prediction and GT (green).
+
+    The prediction arm is white on OMX/SO-101; the Franka keeps its native
+    panda colors.
+    """
     offwidth, offheight = max(width, 1920), max(height, 1080)
-    build = build_omx_scene if robot == 'omx' else build_so101_scene
-    models = [build(color, offwidth, offheight) for color in (PRED_COLOR, GT_COLOR)]
+    build = {'omx': build_omx_scene, 'so101': build_so101_scene, 'franka': build_franka_scene}[robot]
+    pred_color = 'original' if robot == 'franka' else PRED_COLOR
+    models = [build(color, offwidth, offheight) for color in (pred_color, GT_COLOR)]
     datas = [mujoco.MjData(m) for m in models]
     renderers = [mujoco.Renderer(m, height=height, width=width) for m in models]
     return models, datas, renderers
@@ -197,6 +282,11 @@ def set_arm_qpos(robot, mj_model, mj_data, q):
         mj_data.qpos[4] = q[4]
         if mj_model.nq >= 6:
             mj_data.qpos[5] = q[4]
+    elif robot == 'franka':
+        mj_data.qpos[:7] = q[:7]
+        # Both fingers follow the gripper column
+        mj_data.qpos[7] = q[7]
+        mj_data.qpos[8] = q[7]
     else:
         mj_data.qpos[:6] = q[:6]
 
@@ -242,10 +332,11 @@ def render_task(rollout, panels, cam_params, out_path, width, height, fps, frame
     T = min(len(pred_q), len(gt_q))
 
     # Force arrows are tail-anchored at the gripper
-    if robot == 'omx':
-        anchor_ids = [mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, 'end_effector_target') for m in models]
-    else:
+    if robot == 'so101':
         anchor_ids = [mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_SITE, 'gripperframe') for m in models]
+    else:
+        anchor_body = 'end_effector_target' if robot == 'omx' else 'hand'
+        anchor_ids = [mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, anchor_body) for m in models]
 
     cam = mujoco.MjvCamera()
     cam.lookat[:] = cam_params['lookat']
@@ -270,7 +361,13 @@ def render_task(rollout, panels, cam_params, out_path, width, height, fps, frame
                 mujoco.mj_forward(model, data)
                 renderer.update_scene(data, camera=cam)
                 if force is not None and anchor_id >= 0:
-                    anchor = data.xpos[anchor_id] if robot == 'omx' else data.site_xpos[anchor_id]
+                    if robot == 'so101':
+                        anchor = data.site_xpos[anchor_id]
+                    else:
+                        anchor = data.xpos[anchor_id]
+                        if robot == 'franka':
+                            hand_z = data.xmat[anchor_id].reshape(3, 3)[:, 2]
+                            anchor = anchor + hand_z * FRANKA_TCP_OFFSET
                     add_force_arrow(renderer.scene, anchor + arrow_offset, force[t],
                                     arrow_scale, ARROW_RGBA)
                 frames.append(renderer.render())

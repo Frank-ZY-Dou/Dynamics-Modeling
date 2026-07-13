@@ -27,8 +27,14 @@ Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>,
   on the two platforms; ten pretrained checkpoints; both inference modes (dynamics
   rollout and the virtual force sensor); the twin-arm teleoperation and data-collection
   code (`teleop/`, `hardware/`); and the hardware guide with sourcing links.
+- **[July 2026]** Franka Panda support: lift-and-hold trajectories for five payloads
+  (200–600 g) with measured joint torques, the `franka_lift_hold` checkpoint, and
+  training, evaluation and inference code for the 7-DoF arm.
 
 ## Overview
+
+<p align="center"><img src="docs/media/teaser.jpg" width="100%" alt="Real executions paired with simulated rollouts and estimated external forces"></p>
+<p align="center"><i>NeuralActuator in deployment: real executions paired with simulated rollouts, the estimated external force drawn in red. Left: pick-and-place; right: lift-and-hold; payloads 200&ndash;500 g.</i></p>
 
 A neural actuator model for low-cost servo-driven robot platforms, linking actuator
 telemetry to differentiable dynamics, sensorless force perception, and force-aware
@@ -139,8 +145,10 @@ data/
 ```
 
 Each task has 8 training, 1 validation and 1 test trajectory; force `-999` marks frames
-without force-sensor readings. Full directory layout, per-column CSV schema and unit
-conventions for both platforms are in [docs/dataset.md](docs/dataset.md).
+without force-sensor readings. The SO-101 and Franka data live under `data/so101/` and
+`data/franka/`, described in their platform sections below. Full directory layout,
+per-column CSV schema and unit conventions for all platforms are in
+[docs/dataset.md](docs/dataset.md).
 
 To evaluate the provided checkpoints without training, pass them to the eval scripts
 directly, e.g. `bash scripts/eval_force_sensor.sh checkpoints/omx_force_sensor.pkl 0`.
@@ -164,6 +172,7 @@ the download against these md5 sums:
 | `so101_weight.pkl` | SO-101 weight benchmark, paper protocol (six 300-500 g tasks) | `95e9ed8b076f4011bfd3d6dc32876363` |
 | `so101_weight_extended.pkl` | SO-101 weight benchmark, extended ten-task data | `6ab6f6ea031d04a5c50b76eabd1c2020` |
 | `so101_weight_residual.pkl` | SO-101 weight benchmark, residual parameterization | `37027625f46837fc89fc66a2acb47574` |
+| `franka_lift_hold.pkl` | Franka Panda lift-and-hold benchmark | `94d1e67fe6fd1969f660746ffd213f20` |
 
 The Table 3 checkpoint ships as both the raw and the EMA weights of the same training
 run; the results table reports the EMA variant.
@@ -200,7 +209,9 @@ the scratch `weight_all` run: `bash scripts/train_weight_all.sh` first, then
 `scripts/train_no_load_no_gripper_ft.sh` for Table 1 or `scripts/train_weight_all_ft1.sh`
 followed by `scripts/train_weight_all_ft2.sh` for Table 3. The SO-101 extended checkpoint
 chains `scripts/train_so101_extended.sh` and `scripts/train_so101_extended_ft.sh` the same
-way; each `*_ft` config names its starting checkpoint under `resume_from`.
+way, and the Franka checkpoint chains `scripts/train_franka_lift_hold.sh`,
+`scripts/train_franka_lift_hold_ft1.sh` and `scripts/train_franka_lift_hold_ft2.sh`;
+each `*_ft` config names its starting checkpoint under `resume_from`.
 
 ## Evaluation
 
@@ -237,14 +248,15 @@ condition, which uses `*_best_train.pkl`.
 The released checkpoint runs in two inference modes: rolling out the learned
 dynamics in the differentiable simulator, or estimating external force from motor
 telemetry alone with no simulator in the loop. Every clip below is a side-by-side
-pair: the left panel is the model side in white, the right panel is the recorded
-ground-truth trajectory in green. Red arrows show forces at the gripper: the arrow
-in the left panel is the model's predicted weight force, the arrow in the right
-panel is the gravitational ground truth — 4.9 N at the 500 g payload. The predicted
-force arrow scales with the true load (2.94 N at 300 g vs. 4.9 N at 500 g), tracking
-the ground-truth arrow in the right panel. Each mode below shows the
-OpenManipulator-X and the SO-101, each at 500 g and 300 g, all on the
-pick-and-place task.
+pair: the left panel is the model side (white on the OMX and SO-101, the arm's own
+colors on the Franka), the right panel is the recorded ground-truth trajectory in
+green. Red arrows show forces at the gripper: the arrow in the left panel is the
+model's predicted weight force, the arrow in the right panel is the gravitational
+ground truth — 4.9 N at the 500 g payload. The predicted force arrow scales with the
+true load (2.94 N at 300 g vs. 4.9 N at 500 g), tracking the ground-truth arrow in
+the right panel. Each mode below shows the OpenManipulator-X and the SO-101 at 500 g
+and 300 g on the pick-and-place task, and the Franka Panda at 600 g and 200 g on the
+lift-and-hold task.
 
 ### Dynamics rollout
 
@@ -276,6 +288,18 @@ left panel plays the simulated motion, the right panel the recording.
     <td align="center"><code>python infer_actuator.py --robot so101 ...</code></td>
     <td align="center"><code>python infer_actuator.py --robot so101 ...</code></td>
   </tr>
+  <tr>
+    <th align="center">Franka Panda, 600 g</th>
+    <th align="center">Franka Panda, 200 g</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/franka_lift_hold_600g.gif" width="280" alt="Franka 600 g lift-and-hold, simulator rollout: model prediction (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+    <td align="center"><img src="docs/media/franka_lift_hold_200g.gif" width="280" alt="Franka 200 g lift-and-hold, simulator rollout: model prediction (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+  </tr>
+  <tr>
+    <td align="center"><code>python infer_actuator.py --robot franka ...</code></td>
+    <td align="center"><code>python infer_actuator.py --robot franka ...</code></td>
+  </tr>
 </table>
 
 Besides the batch eval scripts, `infer_actuator.py` rolls a checkpoint out on a single
@@ -292,6 +316,11 @@ python infer_actuator.py --robot so101 --checkpoint checkpoints/so101_weight_ext
     --config configs/so101_weight.yaml \
     --csv data/so101/pick_and_place/500g/test/001.csv \
     --out outputs/so101_pick_place_500g_pred.npz
+
+python infer_actuator.py --robot franka --checkpoint checkpoints/franka_lift_hold.pkl \
+    --config configs/franka_lift_hold.yaml \
+    --csv data/franka/lift_hold/test/600_003.csv \
+    --out outputs/franka_lift_hold_600g_pred.npz
 ```
 
 The config only supplies the architecture and simulation settings, which all released
@@ -333,6 +362,18 @@ simulate motion.
     <td align="center"><code>python infer_actuator.py --robot so101 ... --force_only</code></td>
     <td align="center"><code>python infer_actuator.py --robot so101 ... --force_only</code></td>
   </tr>
+  <tr>
+    <th align="center">Franka Panda, 600 g</th>
+    <th align="center">Franka Panda, 200 g</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/franka_lift_hold_600g_deploy.gif" width="280" alt="Franka 600 g lift-and-hold, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
+    <td align="center"><img src="docs/media/franka_lift_hold_200g_deploy.gif" width="280" alt="Franka 200 g lift-and-hold, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel)"></td>
+  </tr>
+  <tr>
+    <td align="center"><code>python infer_actuator.py --robot franka ... --force_only</code></td>
+    <td align="center"><code>python infer_actuator.py --robot franka ... --force_only</code></td>
+  </tr>
 </table>
 
 `--force_only` runs the deployment path on a recorded stream — the feature history is
@@ -347,7 +388,7 @@ python infer_actuator.py --robot omx --checkpoint checkpoints/omx_weight_all_ema
 ```
 
 A forward pass takes about 2 ms per step on a plain CPU after JIT warmup (2.6 ms OMX,
-1.6 ms SO-101), well inside the ~60 Hz telemetry rate, so no GPU is
+1.6 ms SO-101, 2.5 ms Franka), well inside the ~60 Hz telemetry rate, so no GPU is
 needed at runtime.
 
 ## Results
@@ -470,6 +511,42 @@ torque-constant anchor); as on the OMX, the direct parameterization wins.
 | `so101_weight_residual` (residual variant, 6 tasks), full trajectory | 1.53 worst per-joint MAE averaged over the 6 tasks (worst single task-joint cell 2.97) | 0.38 all-task mean |
 </details>
 
+## Franka Panda
+
+The third platform is a 7-DoF Franka Panda. Unlike the two low-cost arms it reports
+measured joint torques, so the dataset carries a per-joint torque reference alongside
+the usual telemetry. The task is lift-and-hold: the arm grasps a payload (200–600 g,
+five weights), raises it and holds it still. Data ships under `data/franka/lift_hold/`
+with six training and one test trajectory per payload (~63 Hz); the 72-column CSVs
+include the measured torques `tau1–7` and the commanded torques `tau_d1–7`.
+
+```bash
+bash scripts/train_franka_lift_hold.sh 0        # from scratch
+bash scripts/train_franka_lift_hold_ft1.sh 0    # fine-tune stage 1
+bash scripts/train_franka_lift_hold_ft2.sh 0    # fine-tune stage 2
+bash scripts/eval_franka_lift_hold.sh outputs/franka_lift_hold_ft2_params_best_val.pkl 0
+```
+
+The released `franka_lift_hold.pkl` is the stage-2 output. The architecture matches
+the other platforms with `n_joints` 7 and the 52-D Franka feature layout: target
+position (a short-lookahead resampling of the recorded trajectory), measured joint
+position and velocity, motor-side position and velocity, commanded torque, gripper
+width and goal width, plus target-error channels. The robot model is
+`robot_franka/scene.xml`, the MuJoCo Menagerie Panda with its stock position
+actuators stepped at the model's 2 ms design timestep. The parallel gripper follows
+the recorded finger position directly and is not learned. The rig has no
+end-effector force sensor: force labels come from the known payload weight
+(force_z = −mg while the payload is held).
+
+<details>
+<summary>Franka lift-and-hold benchmark</summary>
+
+| | `franka_lift_hold`, full trajectory |
+|---|---|
+| Joint MAE (deg) | 1.42 worst per-joint MAE averaged over the 5 payloads (worst single payload-joint cell 1.48) |
+| Force MAE (N) | 0.41 all-payload mean (per-payload 0.34–0.47) |
+</details>
+
 ## Residual torque variant
 
 The released default predicts joint torque directly from the observation history
@@ -518,7 +595,7 @@ else is off the shelf.
 <p align="center">
   <img src="docs/media/hardware/platforms.jpg" width="600" alt="Cross-platform arms: Franka Panda and the SO-101 leader/follower pair">
 </p>
-<p align="center"><i>The paper's cross-platform arms. The Franka Panda experiments are not part of this release.</i></p>
+<p align="center"><i>The paper's cross-platform arms.</i></p>
 
 The arms are driven over U2D2 USB adapters (leader on `/dev/ttyUSB0`, follower on
 `/dev/ttyUSB1`); wiring, motor IDs, PID settings and the CSV recording format are in

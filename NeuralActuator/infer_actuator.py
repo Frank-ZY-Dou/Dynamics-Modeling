@@ -5,7 +5,7 @@ Default mode rolls out the model in MJX from the trajectory start (same protocol
 as the eval scripts) and writes per-step predictions (simulated joint positions,
 torque, force, gate) to an npz or csv file, printing per-joint MAE against
 the CSV ground truth. Force MAE is reported when the CSV carries force labels.
-Supports both platforms via --robot omx|so101.
+Supports all platforms via --robot omx|so101|franka.
 
 --force_only skips the simulator entirely: the feature history is built from the
 CSV telemetry rows themselves (as it would be from a live robot stream) and the
@@ -199,6 +199,101 @@ def _build_rollout_so101(model, mjx_model, mjx_data_single, config, norm_stats, 
     return jax.jit(rollout)
 
 
+def _build_rollout_franka(model, mjx_model, mjx_data_single, config, n_joints, finger_travel):
+    """JIT rollout for the Franka Panda (mirrors evaluate_actuator_franka, also records torque).
+
+    The gripper is position-controlled on the real robot, so its finger joints
+    replay the recorded width instead of being driven by predicted torque.
+    Features are fed to the network unnormalized, matching training.
+    """
+    data_dt = config['data_dt']
+    sim_step_size = config['sim_step_size']
+    use_residual_torque = bool(config.get('use_residual_torque', False))
+    torque_constant = float(config.get('torque_constant', 1.0))
+
+    def single_step(carry, csv_feat):
+        qpos, qvel, history, params = carry
+
+        sim_pos = qpos[:n_joints]
+        sim_vel = qvel[:n_joints]
+        gripper_normalized = qpos[7] / finger_travel
+
+        current_feat = csv_feat
+        current_feat = current_feat.at[7:14].set(sim_pos)
+        current_feat = current_feat.at[14].set(gripper_normalized)
+        current_feat = current_feat.at[22:29].set(sim_vel)
+        arm_error = current_feat[0:7] - sim_pos
+        current_feat = current_feat.at[44:51].set(arm_error)
+        gripper_error = current_feat[43] - gripper_normalized
+        current_feat = current_feat.at[51].set(gripper_error)
+
+        hist_flat = history.reshape(-1)
+        pred_tau, final_force, raw_force, gate, condition_pred, _ = model.apply(
+            params, hist_flat[None, :], current_feat[None, :],
+            None, ts=data_dt, training=False
+        )
+
+        if use_residual_torque:
+            base_torque = csv_feat[15:22] * torque_constant  # tau_d1-7 in Nm
+            tau = base_torque + pred_tau[0]
+        else:
+            tau = pred_tau[0]
+
+        mjx_d = mjx_data_single.replace(
+            qpos=qpos,
+            qvel=qvel,
+            ctrl=jnp.zeros(mjx_model.nu, dtype=jnp.float32).at[:n_joints].set(tau)
+        )
+
+        def sim_body(i, d):
+            d_new = mjx.step(mjx_model, d)
+            d_new = d_new.replace(
+                qpos=d_new.qpos.astype(jnp.float32),
+                qvel=d_new.qvel.astype(jnp.float32)
+            )
+            # The Panda gripper is a tendon-coupled actuator; cast its wrap
+            # bookkeeping back to int32 so the dtypes unify with the scan carry.
+            d_new = d_new.tree_replace({
+                '_impl.ten_wrapadr': d_new._impl.ten_wrapadr.astype(jnp.int32),
+                '_impl.ten_wrapnum': d_new._impl.ten_wrapnum.astype(jnp.int32),
+                '_impl.wrap_obj': d_new._impl.wrap_obj.astype(jnp.int32),
+            })
+            return d_new
+
+        mjx_d = jax.lax.fori_loop(0, sim_step_size, sim_body, mjx_d)
+
+        # Gripper: replay from the recorded width (position-controlled on the
+        # real robot, so it is not part of the torque rollout)
+        gripper_gt_m = csv_feat[14] * finger_travel
+        new_qpos = mjx_d.qpos.at[7].set(gripper_gt_m)
+        new_qpos = new_qpos.at[8].set(gripper_gt_m)
+        new_qpos = new_qpos.astype(jnp.float32)
+        # qvel: NaN/Inf protection + clamp (must match training)
+        new_qvel = jnp.nan_to_num(mjx_d.qvel, nan=0.0, posinf=0.0, neginf=0.0)
+        new_qvel = jnp.clip(new_qvel, -100.0, 100.0).astype(jnp.float32)
+
+        new_history = jnp.roll(history, -1, axis=0)
+        new_history = new_history.at[-1].set(current_feat)
+
+        # 8 columns: 7 arm joints (rad) + finger joint (m)
+        sim_q = jnp.concatenate([new_qpos[:n_joints], new_qpos[7:8]])
+        outputs = (sim_q, tau, final_force[0], gate[0, 0], condition_pred[0])
+        return (new_qpos, new_qvel, new_history, params), outputs
+
+    def rollout(params, init_pos, init_history, csv_feats):
+        qpos = jnp.zeros(mjx_model.nq, dtype=jnp.float32)
+        qpos = qpos.at[:n_joints].set(init_pos[:n_joints])
+        qpos = qpos.at[7].set(init_pos[7])   # finger_joint1
+        qpos = qpos.at[8].set(init_pos[7])   # finger_joint2
+        qvel = jnp.zeros(mjx_model.nv, dtype=jnp.float32)
+
+        init_carry = (qpos, qvel, init_history, params)
+        _, outputs = jax.lax.scan(single_step, init_carry, csv_feats)
+        return outputs
+
+    return jax.jit(rollout)
+
+
 def _build_force_only(model, config, norm_stats, robot):
     """Teacher-forced forward pass: every feature comes from the CSV telemetry,
     no simulator in the loop. Returns (scan_fn, step_fn); step_fn is the
@@ -230,6 +325,15 @@ def _build_force_only(model, config, norm_stats, robot):
                 tau_limit = jnp.array([5.0, 5.0, 5.0, 5.0, float(gripper_torque_clip)])
                 tau = jnp.clip(tau, -tau_limit, tau_limit)
             return tau
+    elif robot == 'franka':
+        use_residual_torque = bool(config.get('use_residual_torque', False))
+        torque_constant = float(config.get('torque_constant', 1.0))
+
+        def postprocess_tau(pred_tau, csv_feat):
+            if use_residual_torque:
+                base_torque = csv_feat[15:22] * torque_constant  # tau_d1-7 in Nm
+                return base_torque + pred_tau
+            return pred_tau
     else:
         torque_clip = float(config.get('torque_clip', 3.0))
 
@@ -262,7 +366,8 @@ def _build_force_only(model, config, norm_stats, robot):
 
 def main():
     parser = argparse.ArgumentParser(description='Roll out a trained Neural Actuator checkpoint on one trajectory CSV')
-    parser.add_argument('--robot', type=str, default='omx', choices=['omx', 'so101'], help='Target platform')
+    parser.add_argument('--robot', type=str, default='omx', choices=['omx', 'so101', 'franka'],
+                        help='Target platform')
     parser.add_argument('--checkpoint', type=str, required=True, help='Path to trained checkpoint (.pkl)')
     parser.add_argument('--config', type=str, required=True, help='Path to config YAML')
     parser.add_argument('--csv', type=str, required=True, help='Trajectory CSV to roll out')
@@ -283,6 +388,10 @@ def main():
         import evaluate_actuator as ev
         n_joints = 5
         default_mjcf = 'robot/scene.xml'
+    elif args.robot == 'franka':
+        import evaluate_actuator_franka as ev
+        n_joints = ev.N_JOINTS
+        default_mjcf = 'robot_franka/scene.xml'
     else:
         import evaluate_actuator_so101 as ev
         n_joints = ev.N_JOINTS
@@ -290,7 +399,12 @@ def main():
 
     # Load model
     print(f"Loading model from {args.checkpoint}...")
-    model, params, history_length, feature_dim, norm_stats = ev.load_model(args.checkpoint, config)
+    if args.robot == 'franka':
+        # Franka checkpoints do not carry feature normalization stats
+        model, params, history_length, feature_dim = ev.load_model(args.checkpoint, config)
+        norm_stats = None
+    else:
+        model, params, history_length, feature_dim, norm_stats = ev.load_model(args.checkpoint, config)
     if norm_stats is not None:
         print("  Checkpoint carries feature normalization stats, applying at network input")
 
@@ -299,7 +413,17 @@ def main():
     if not args.force_only:
         mjcf_path = config.get('mjcf_path', default_mjcf)
         print(f"Loading MuJoCo model from {mjcf_path}...")
-        mj_model = mujoco.MjModel.from_xml_path(mjcf_path)
+        if args.robot == 'franka':
+            # chdir so the MJCF finds its mesh assets (same as the eval script)
+            abs_mjcf_path = os.path.abspath(mjcf_path)
+            cwd = os.getcwd()
+            try:
+                os.chdir(os.path.dirname(abs_mjcf_path))
+                mj_model = mujoco.MjModel.from_xml_path(os.path.basename(abs_mjcf_path))
+            finally:
+                os.chdir(cwd)
+        else:
+            mj_model = mujoco.MjModel.from_xml_path(mjcf_path)
 
         data_dt = config['data_dt']
         sim_step_size = config['sim_step_size']
@@ -316,6 +440,8 @@ def main():
     # Load trajectory
     if args.robot == 'omx':
         data = ev.load_csv_data(args.csv, float(config.get('current_lowpass_alpha', 0.0)))
+    elif args.robot == 'franka':
+        data = ev.load_csv_data(args.csv, config)  # applies trim and lookahead targets
     else:
         data = ev.load_csv_data(args.csv, config.get('current_source', 'load'),
                                 float(config.get('current_lowpass_alpha', 0.0)))
@@ -332,6 +458,13 @@ def main():
                 data['currents'][i], data['velocities'][i], data['volts'][i], data['temps'][i],
                 data['goal_aperture'][i])
         init_pos = np.concatenate([data['positions'][0, :4], [data['aperture'][0]]]).astype(np.float32)
+    elif args.robot == 'franka':
+        for i in range(n_steps):
+            csv_feats[i] = ev.build_features(
+                data['cmd_positions'][i], data['positions'][i], data['gripper_width'][i],
+                data['tau_d'][i], data['velocities'][i], data['motor_pos'][i], data['motor_vel'][i])
+        init_pos = np.concatenate([data['positions'][0],
+                                   [data['gripper_width'][0] * ev.FINGER_TRAVEL]]).astype(np.float32)
     else:
         for i in range(n_steps):
             csv_feats[i] = ev.build_features(
@@ -371,6 +504,9 @@ def main():
 
         if args.robot == 'omx':
             rollout_fn = _build_rollout_omx(model, mjx_model, mjx_data_single, config, norm_stats)
+        elif args.robot == 'franka':
+            rollout_fn = _build_rollout_franka(model, mjx_model, mjx_data_single, config,
+                                               n_joints, ev.FINGER_TRAVEL)
         else:
             rollout_fn = _build_rollout_so101(model, mjx_model, mjx_data_single, config, norm_stats,
                                               n_joints, ev.VEL_COUNTS_PER_RAD)
@@ -397,6 +533,12 @@ def main():
         gt_grip = data['aperture'][1:n_samples]
         gt_q = np.concatenate([data['positions'][1:n_samples],
                                gt_grip[:, None], gt_grip[:, None]], axis=1)
+    elif args.robot == 'franka':
+        # 8 columns: 7 arm joints (rad) + finger joint (m)
+        gt_q = np.column_stack([
+            data['positions'][1:n_samples],
+            data['gripper_width'][1:n_samples] * ev.FINGER_TRAVEL,
+        ]).astype(np.float32)
     else:
         gt_q = data['positions'][1:n_samples].astype(np.float32)
 
@@ -408,6 +550,11 @@ def main():
             mae_joints = np.mean(np.abs(np.rad2deg(sim_q[:, :4] - gt_arm)), axis=0)
             mae_grip = np.mean(np.abs((sim_q[:, 4] - gt_grip) * 1000.0))
             joint_str = " ".join([f"J{j+1}={mae_joints[j]:.2f}°" for j in range(4)])
+            print(f"  {joint_str} Grip={mae_grip:.2f}mm")
+        elif args.robot == 'franka':
+            mae_joints = np.mean(np.abs(np.rad2deg(sim_q[:, :n_joints] - gt_q[:, :n_joints])), axis=0)
+            mae_grip = np.mean(np.abs((sim_q[:, 7] - gt_q[:, 7]) * 1000.0))
+            joint_str = " ".join([f"J{j+1}={mae_joints[j]:.2f}°" for j in range(n_joints)])
             print(f"  {joint_str} Grip={mae_grip:.2f}mm")
         else:
             mae_joints = np.mean(np.abs(np.rad2deg(sim_q - gt_q)), axis=0)
@@ -440,6 +587,14 @@ def main():
             for j in range(4):
                 cols[f'gt_pos{j+1}'] = gt_arm[:, j]
             cols['gt_grip'] = gt_grip
+        elif args.robot == 'franka':
+            if sim_q is not None:
+                for j in range(n_joints):
+                    cols[f'sim_pos{j+1}'] = sim_q[:, j]
+                cols['sim_grip'] = sim_q[:, 7]
+            for j in range(n_joints):
+                cols[f'gt_pos{j+1}'] = gt_q[:, j]
+            cols['gt_grip'] = gt_q[:, 7]
         else:
             if sim_q is not None:
                 for j in range(n_joints):
