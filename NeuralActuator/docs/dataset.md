@@ -159,11 +159,12 @@ for the whole recording — the object is held throughout — while `force_x` an
 are `-999` (no reading) throughout and are unused; the loaders map `-999` to 0 N.
 
 The training features use `pos`, `gripper_width`, `tau_d`, `vel`, `motor_pos` and
-`motor_vel`, plus a lookahead target derived from `pos` (the recorded `cmd_pos` is a
-step function, so `pos[t+5] * 1.03` replaces it as the target-position channel).
-The measured torques `tau1`-`tau7` provide a per-joint torque reference for work that
-needs one; the released pipelines do not consume them. `vel_d`, `cmd_pos`, `tau_ext`,
-`torque_ext_*` and `lifting` are likewise recorded but unused.
+`motor_vel`, plus a commanded target-pose channel. The model is command-conditioned:
+at run time an external source (controller, teleoperation, or IK) supplies this target;
+the recorded `cmd_pos` holds only sparse waypoint setpoints, so offline it is proxied by
+a short-horizon reference off the recorded trajectory, `pos[t+5] * 1.03`. The measured
+torques `tau1`-`tau7`, `vel_d`, `cmd_pos`, `tau_ext`, `torque_ext_*` and `lifting` are
+recorded but unused by the released pipelines.
 
 Split: 7 trials were recorded per payload (200/300/400/500/600 g) and one trial per
 payload is held out for test (random split, seed=42: `200_006`, `300_001`, `400_001`,

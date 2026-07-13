@@ -326,8 +326,21 @@ def open_video_writer(out_path, width, height, fps):
     return subprocess.Popen(cmd, stdin=subprocess.PIPE)
 
 
-def render_task(rollout, panels, cam_params, out_path, width, height, fps, frame_skip, arrow_scale):
+def render_task(rollout, panels, cam_params, out_path, width, height, fps, frame_skip,
+                arrow_scale, force_axis='xyz'):
     robot, pred_q, gt_q, force_pred, force_gt = rollout
+    # On the payload/lift benchmarks the external load is purely vertical, so only the
+    # z component of the force is a supervised, physically meaningful quantity; drawing
+    # the unsupervised x/y outputs would tilt the arrow off vertical. force_axis='z'
+    # keeps only the vertical component so the arrow reflects the estimated load.
+    if force_axis == 'z':
+        def _project(f):
+            if f is None:
+                return None
+            g = np.zeros_like(f)
+            g[:, 2] = f[:, 2]
+            return g
+        force_pred, force_gt = _project(force_pred), _project(force_gt)
     models, datas, renderers = panels
     T = min(len(pred_q), len(gt_q))
 
@@ -392,6 +405,9 @@ def main():
     parser.add_argument('--cam_azimuth', type=float, default=None)
     parser.add_argument('--cam_elevation', type=float, default=None)
     parser.add_argument('--arrow_scale', type=float, default=0.022, help='Arrow length per Newton (m)')
+    parser.add_argument('--force_axis', type=str, default='xyz', choices=['xyz', 'z'],
+                        help="'z' draws only the vertical force component (payload/lift tasks, "
+                             "where the load is vertical); 'xyz' draws the full vector")
     args = parser.parse_args()
 
     npz_files = sorted(glob.glob(os.path.join(args.rollout_dir, '*_rollout.npz')))
@@ -420,7 +436,8 @@ def main():
         out_path = os.path.join(args.output_dir, f'{task}.mp4')
         print(f'{task}...', end=' ', flush=True)
         render_task(rollout, panel_cache[robot], cam_params, out_path,
-                    args.width, args.height, args.fps, args.frame_skip, args.arrow_scale)
+                    args.width, args.height, args.fps, args.frame_skip, args.arrow_scale,
+                    args.force_axis)
         print(f'-> {out_path}')
 
 

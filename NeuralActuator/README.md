@@ -47,7 +47,7 @@ Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>,
   rollout and the virtual force sensor); the twin-arm teleoperation and data-collection
   code (`teleop/`, `hardware/`); and the hardware guide with sourcing links.
 - **[July 2026]** Franka Panda support: lift-and-hold trajectories for five payloads
-  (200–600 g) with measured joint torques, the `franka_lift_hold` checkpoint, and
+  (200–600 g) with external-force estimation, the `franka_lift_hold` checkpoint, and
   training, evaluation and inference code for the 7-DoF arm.
 
 ## Overview
@@ -118,7 +118,7 @@ Actuation datasets currently available:
 |---|---|---|
 | ROBOTIS OpenManipulator-X | Dynamixel XM430-W350 | `data/` (NAD, 35 tasks) |
 | SO-101 (LeRobot) | Feetech STS3215 | `data/so101/` (10 task-payload combinations) |
-| Franka Emika Panda | Integrated joint actuators with torque sensing | `data/franka/` (lift-and-hold, 5 payloads) |
+| Franka Emika Panda | Integrated 7-DoF joint actuators | `data/franka/` (lift-and-hold, 5 payloads) |
 
 ## Getting started
 
@@ -262,13 +262,13 @@ dynamics in the differentiable simulator, or estimating external force from moto
 telemetry alone with no simulator in the loop. Every clip below is a side-by-side
 pair: the left panel is the model side (white on the OMX and SO-101, the arm's own
 colors on the Franka), the right panel is the recorded ground-truth trajectory in
-green. Red arrows show forces at the gripper: the arrow in the left panel is the
-model's predicted weight force, the arrow in the right panel is the gravitational
-ground truth — 4.9 N at the 500 g payload. The predicted force arrow scales with the
-true load (2.94 N at 300 g vs. 4.9 N at 500 g), tracking the ground-truth arrow in
-the right panel. Each mode below shows the OpenManipulator-X and the SO-101 at 500 g
-and 300 g on the pick-and-place task, and the Franka Panda at 600 g and 200 g on the
-lift-and-hold task.
+green. Red arrows show the external force at the gripper: the arrow in the left panel is
+the model's predicted force, the arrow in the right panel is the ground truth. On these
+payload tasks the external load is vertical, so the arrow shows the estimated vertical
+force — 4.9 N at the 500 g payload. The predicted force arrow scales with the true load
+(2.94 N at 300 g vs. 4.9 N at 500 g), tracking the ground-truth arrow in the right panel.
+Each mode below shows the OpenManipulator-X and the SO-101 at 500 g and 300 g on the
+pick-and-place task, and the Franka Panda at 600 g and 200 g on the lift-and-hold task.
 
 ### Dynamics rollout
 
@@ -527,12 +527,13 @@ torque-constant anchor); as on the OMX, the direct parameterization wins.
 
 ### Franka Panda
 
-The third platform is a 7-DoF Franka Panda. Unlike the two low-cost arms it reports
-measured joint torques, so the dataset carries a per-joint torque reference alongside
-the usual telemetry. The task is lift-and-hold: the arm grasps a payload (200–600 g,
-five weights), raises it and holds it still. Data ships under `data/franka/lift_hold/`
-with six training and one test trajectory per payload (~63 Hz); the 72-column CSVs
-include the measured torques `tau1–7` and the commanded torques `tau_d1–7`.
+The third platform is a 7-DoF Franka Panda, which extends the pipeline to a higher-DoF
+arm and demonstrates external-force estimation from payload loading. The task is
+lift-and-hold: the arm grasps a payload (200–600 g, five weights), raises it and holds
+it still, and the model estimates the resulting end-effector force. Data ships under
+`data/franka/lift_hold/` with six training and one test trajectory per payload (~63 Hz);
+the 72-column CSVs carry the same telemetry as the other platforms plus the commanded
+torques `tau_d1–7` used as an input feature.
 
 ```bash
 bash scripts/train_franka_lift_hold.sh 0        # from scratch
