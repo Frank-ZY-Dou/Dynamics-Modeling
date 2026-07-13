@@ -50,7 +50,7 @@ FRANKA_TCP_OFFSET = 0.1034
 # Standard project viewpoints, per platform
 CAMERAS = {
     'omx': {'lookat': [0.25, 0.0, 0.15], 'distance': 1.10, 'azimuth': 90.0, 'elevation': -5.2},
-    'so101': {'lookat': [0.4, 0.0, 0.12], 'distance': 1.05, 'azimuth': 90.0, 'elevation': -15.0},
+    'so101': {'lookat': [0.18, 0.0, 0.12], 'distance': 1.05, 'azimuth': 90.0, 'elevation': -15.0},
     'franka': {'lookat': [0.30, 0.0, 0.40], 'distance': 1.45, 'azimuth': 90.0, 'elevation': -12.0},
 }
 
