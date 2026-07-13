@@ -34,10 +34,10 @@ Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>,
 - [Additional platforms and variants](#additional-platforms-and-variants)
   - [SO-101 (LeRobot arm)](#so-101-lerobot-arm) · [Franka Panda](#franka-panda) · [Residual torque variant](#residual-torque-variant)
 - [Hardware and Data Collection](#hardware-and-data-collection)
-- [License](#license)
-- [Acknowledgements](#acknowledgements)
 - [Future work](#future-work)
 - [Citation](#citation)
+- [Acknowledgements](#acknowledgements)
+- [License](#license)
 
 ## 📢 Updates
 
@@ -617,21 +617,6 @@ The arms are driven over U2D2 USB adapters (leader on `/dev/ttyUSB0`, follower o
 used during collection: `hardware/force_sensoring/` streams the 6-axis F/T sensor and
 `hardware/force_gauge_reader.py` reads the ZP-500N over serial.
 
-## License
-
-This repository is released under the MIT License; see [LICENSE](LICENSE). The robot
-models under `robot/` and `robot_so101/` are third-party assets with their own
-Apache-2.0 licenses, listed under [Acknowledgements](#acknowledgements).
-
-## Acknowledgements
-
-- `robot/`: OpenManipulator-X model from [ROBOTIS' mujoco menagerie](https://github.com/ROBOTIS-GIT/robotis_mujoco_menagerie)
-  (Apache-2.0, see `robot/LICENSE`), with the position actuators replaced by torque
-  actuators and joint ranges widened to cover the recorded trajectories.
-- `robot_so101/`: SO-101 model from [TheRobotStudio's SO-ARM100](https://github.com/TheRobotStudio/SO-ARM100)
-  (Apache-2.0, see `robot_so101/LICENSE`), with the same torque-actuator conversion;
-  see `robot_so101/README.md`.
-
 ## Future work
 
 - **Synthetic-to-Real Actuator Pretraining** — Leverage large-scale synthetic actuator
@@ -652,3 +637,21 @@ Apache-2.0 licenses, listed under [Acknowledgements](#acknowledgements).
   year      = {2026}
 }
 ```
+
+## Acknowledgements
+
+- `robot/`: OpenManipulator-X model from [ROBOTIS' mujoco menagerie](https://github.com/ROBOTIS-GIT/robotis_mujoco_menagerie)
+  (Apache-2.0, see `robot/LICENSE`), with the position actuators replaced by torque
+  actuators and joint ranges widened to cover the recorded trajectories.
+- `robot_so101/`: SO-101 model from [TheRobotStudio's SO-ARM100](https://github.com/TheRobotStudio/SO-ARM100)
+  (Apache-2.0, see `robot_so101/LICENSE`), with the same torque-actuator conversion;
+  see `robot_so101/README.md`.
+- `robot_franka/`: Franka Panda model from [MuJoCo Menagerie](https://github.com/google-deepmind/mujoco_menagerie)
+  (Apache-2.0, see `robot_franka/LICENSE`), used with its upstream position actuators;
+  see `robot_franka/README.md`.
+
+## License
+
+This repository is released under the MIT License; see [LICENSE](LICENSE). The robot
+models under `robot/`, `robot_so101/` and `robot_franka/` are third-party assets with
+their own Apache-2.0 licenses, listed under [Acknowledgements](#acknowledgements).
