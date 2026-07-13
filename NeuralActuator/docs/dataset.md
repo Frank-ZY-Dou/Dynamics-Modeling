@@ -17,7 +17,8 @@ trajectory as the training files; the on-disk split is used as-is by all configs
 The Franka subset instead ships 6 training trials and 1 test trial per payload
 (see the Franka section below).
 
-The collection hardware is listed in the [Hardware](../README.md#hardware) section of
+The collection hardware is listed in the
+[Hardware and Data Collection](../README.md#hardware-and-data-collection) section of
 the main README; the recording pipeline (teleop rig, motor IDs, PID settings, force
 sensor tare) is documented in [teleop/README.md](../teleop/README.md).
 

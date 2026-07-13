@@ -20,6 +20,25 @@ Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>,
 <sub><sup>*</sup>Research Assistant at MIT CDFG, equal contribution.&emsp;<sup>&dagger;</sup>The work of this author does not relate to their position at Amazon.</sub>
 </div>
 
+## Table of Contents
+
+- [📢 Updates](#-updates)
+- [Overview](#overview)
+- [📣 Contributing actuation data](#-contributing-actuation-data)
+- [Getting started](#getting-started)
+  - [Setup](#setup) · [Data and pretrained checkpoints](#data-and-pretrained-checkpoints) · [Released weights](#released-weights)
+- [Training (OpenManipulator-X)](#training-openmanipulator-x)
+- [Evaluation (OpenManipulator-X)](#evaluation-openmanipulator-x)
+- [Inference](#inference)
+- [Results (OpenManipulator-X)](#results-openmanipulator-x)
+- [Additional platforms and variants](#additional-platforms-and-variants)
+  - [SO-101 (LeRobot arm)](#so-101-lerobot-arm) · [Franka Panda](#franka-panda) · [Residual torque variant](#residual-torque-variant)
+- [Hardware and Data Collection](#hardware-and-data-collection)
+- [License](#license)
+- [Acknowledgements](#acknowledgements)
+- [Future work](#future-work)
+- [Citation](#citation)
+
 ## 📢 Updates
 
 - **[July 2026]** Initial release: training and evaluation code for the OpenManipulator-X
@@ -101,7 +120,9 @@ Actuation datasets currently available:
 | SO-101 (LeRobot) | Feetech STS3215 | `data/so101/` (10 task-payload combinations) |
 | Franka Emika Panda | Integrated joint actuators with torque sensing | `data/franka/` (lift-and-hold, 5 payloads) |
 
-## Setup
+## Getting started
+
+### Setup
 
 ```bash
 conda create -n neural_actuator python=3.10 -y
@@ -116,7 +137,7 @@ Headless servers need EGL for MJX and rendering:
 export MUJOCO_GL=egl PYOPENGL_PLATFORM=egl
 ```
 
-## Data and pretrained checkpoints
+### Data and pretrained checkpoints
 
 The Neural Actuation Dataset ships with this repository under `data/` (no separate
 download). It is also mirrored on Hugging Face at
@@ -144,7 +165,7 @@ per-column CSV schema and unit conventions for all platforms are in
 To evaluate the provided checkpoints without training, pass them to the eval scripts
 directly, e.g. `bash scripts/eval_force_sensor.sh checkpoints/omx_force_sensor.pkl 0`.
 
-## Released weights
+### Released weights
 
 The pretrained checkpoints ship separately from the code and dataset, as assets on
 this repository's Releases page and mirrored on Hugging Face at
@@ -168,7 +189,7 @@ the download against these md5 sums:
 The Table 3 checkpoint ships as both the raw and the EMA weights of the same training
 run; the results table reports the EMA variant.
 
-## Training
+## Training (OpenManipulator-X)
 
 One config per benchmark, one GPU per run:
 
@@ -204,7 +225,7 @@ way, and the Franka checkpoint chains `scripts/train_franka_lift_hold.sh`,
 `scripts/train_franka_lift_hold_ft1.sh` and `scripts/train_franka_lift_hold_ft2.sh`;
 each `*_ft` config names its starting checkpoint under `resume_from`.
 
-## Evaluation
+## Evaluation (OpenManipulator-X)
 
 ```bash
 bash scripts/eval_force_sensor.sh outputs/force_sensor_params_best_val.pkl 0
@@ -382,7 +403,7 @@ A forward pass takes about 2 ms per step on a plain CPU after JIT warmup (2.6 ms
 1.6 ms SO-101, 2.5 ms Franka), well inside the ~60 Hz telemetry rate, so no GPU is
 needed at runtime.
 
-## Results
+## Results (OpenManipulator-X)
 
 All numbers are evaluations of the released checkpoints on the NAD test split (joint
 MAE in degrees, gripper MAE in mm, force MAE in N; "full" = the whole test
@@ -448,7 +469,9 @@ Baselines are the threshold, SVM and random-forest detectors from
 | AUC-ROC | 0.45 | 0.62 | 0.72 | 1.000 |
 </details>
 
-## SO-101 (LeRobot arm)
+## Additional platforms and variants
+
+### SO-101 (LeRobot arm)
 
 The pipeline also runs on a second platform, the 6-DoF SO-101 arm (Feetech STS3215
 servos, LeRobot ecosystem). Its data ships in the same bundle under `data/so101/`:
@@ -502,7 +525,7 @@ torque-constant anchor); as on the OMX, the direct parameterization wins.
 | `so101_weight_residual` (residual variant, 6 tasks), full trajectory | 1.53 worst per-joint MAE averaged over the 6 tasks (worst single task-joint cell 2.97) | 0.38 all-task mean |
 </details>
 
-## Franka Panda
+### Franka Panda
 
 The third platform is a 7-DoF Franka Panda. Unlike the two low-cost arms it reports
 measured joint torques, so the dataset carries a per-joint torque reference alongside
@@ -538,7 +561,7 @@ end-effector force sensor: force labels come from the known payload weight
 | Force MAE (N) | 0.41 all-payload mean (per-payload 0.34–0.47) |
 </details>
 
-## Residual torque variant
+### Residual torque variant
 
 The released default predicts joint torque directly from the observation history
 $\mathbf{o}_{t-H:t}$:
@@ -563,7 +586,7 @@ accuracy. Released results for both parameterizations:
 | OMX no-gripper tasks, full (average / worst per-joint MAE, deg) | 0.30 / 0.39 | 0.49 / 0.64 |
 | SO-101 paper protocol, 6 tasks, full (worst per-joint MAE, deg / force MAE all-task mean, N) | 1.52 / 0.22 | 1.53 / 0.38 |
 
-## Hardware
+## Hardware and Data Collection
 
 All numbers in this repository come from data collected on the OMX and SO-101 setups
 below. The 6-axis
