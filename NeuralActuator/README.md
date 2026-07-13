@@ -542,13 +542,26 @@ bash scripts/eval_franka_lift_hold.sh outputs/franka_lift_hold_ft2_params_best_v
 ```
 
 The released `franka_lift_hold.pkl` is the stage-2 output. The architecture matches
-the other platforms with `n_joints` 7 and the 52-D Franka feature layout: target
-position (a short-lookahead resampling of the recorded trajectory), measured joint
-position and velocity, motor-side position and velocity, commanded torque, gripper
-width and goal width, plus target-error channels. The robot model is
-`robot_franka/scene.xml`, the MuJoCo Menagerie Panda with its stock position
-actuators stepped at the model's 2 ms design timestep. The parallel gripper follows
-the recorded finger position directly and is not learned. The rig has no
+the other platforms with `n_joints` 7 and the 52-D Franka feature layout: the target
+(commanded) pose, measured joint position and velocity, motor-side position and
+velocity, commanded torque, gripper width and goal width, plus target-error channels.
+
+As on the OpenManipulator-X and SO-101, the model is conditioned on a target pose that
+an external source provides at run time — an upstream controller, a teleoperator on a
+second arm, or an IK solver — so this target is available before the actuator acts. On
+the low-cost arms the target is the recorded leader command (`goal_pos`). The Franka
+trajectories were not logged with a matching dense command stream (`cmd_pos` holds only
+the sparse waypoint setpoints), so for offline training and evaluation we stand in for
+the commanded pose with a short-horizon reference read off the recorded trajectory,
+`pos[t+K]` with `K=5`. A stiff position-controlled arm tracks its command closely, so
+the achieved pose a few frames ahead is a good proxy for the command that produced it;
+the `×1.03` gain compensates for the small steady-state tracking lag between command and
+achieved pose. `lookahead_frames` and `lookahead_scale` in the config control `K` and
+the gain.
+
+The robot model is `robot_franka/scene.xml`, the MuJoCo Menagerie Panda with its stock
+position actuators stepped at the model's 2 ms design timestep. The parallel gripper
+follows the recorded finger position directly and is not learned. The rig has no
 end-effector force sensor: force labels come from the known payload weight
 (force_z = −mg while the payload is held).
 

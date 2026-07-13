@@ -50,7 +50,7 @@ def load_dataset(csv_paths, mj_model, downsample_factor=1, return_boundaries=Fal
     Franka version: 52D feature vector (7 arm joints + gripper channels)
     """
     # 52D Feature Vector (Franka version):
-    # 0-6:   lookahead_pos1-7 (pos[t+K] * scale, smooth target replacing cmd_pos)
+    # 0-6:   target_pos1-7 (commanded pose, see NOTE; pos[t+K] * scale)
     # 7-13:  pos1-7 (current joint positions, from simulation during rollout)
     # 14:    gripper_width (normalized 0-1)
     # 15-21: tau_d1-7 (commanded torque, Nm)
@@ -58,11 +58,15 @@ def load_dataset(csv_paths, mj_model, downsample_factor=1, return_boundaries=Fal
     # 29-35: motor_pos1-7 (motor-side positions)
     # 36-42: motor_vel1-7 (motor-side velocities)
     # 43:    goal_gripper (= gripper_width, no independent goal)
-    # 44-50: arm_error1-7 = lookahead_pos - pos
+    # 44-50: arm_error1-7 = target_pos - pos
     # 51:    gripper_error = goal_gripper - gripper_width
     #
-    # NOTE: cmd_pos in the CSVs is a step function (2-3 setpoints), not a smooth
-    # trajectory, so lookahead_pos = pos[t+K] * scale replaces it as the target.
+    # NOTE: the model is command-conditioned. At run time an external source
+    # (controller, teleoperation, or IK) supplies the target pose before the
+    # actuator acts. The recorded cmd_pos holds only sparse waypoint setpoints, so
+    # offline we proxy the command with a short-horizon reference off the achieved
+    # trajectory, pos[t+K] * scale. Stiff position tracking makes the near-future
+    # achieved pose a good stand-in; the scale compensates for the tracking lag.
     lookahead_frames = int(cfg.get('lookahead_frames', 5)) if cfg else 5
     lookahead_scale = float(cfg.get('lookahead_scale', 1.03)) if cfg else 1.03
 

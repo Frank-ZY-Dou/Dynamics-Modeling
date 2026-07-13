@@ -118,9 +118,13 @@ def load_csv_data(csv_path, cfg=None):
     pos_cols = [f'pos{i}' for i in range(1, 8)]
     positions = df[pos_cols].values  # (N, 7)
 
-    # Lookahead target positions: pos[t+K] * scale. The recorded cmd_pos is a
-    # step function (a few setpoints), so the smooth lookahead replaces it as
-    # the target-position channel.
+    # Target (commanded) pose channel. The model is command-conditioned: at run
+    # time an external source (controller, teleoperation, or IK) supplies this
+    # target before the actuator acts. The recorded cmd_pos holds only sparse
+    # waypoint setpoints, so offline we proxy the command with a short-horizon
+    # reference off the achieved trajectory, pos[t+K] * scale. Stiff position
+    # tracking makes the near-future achieved pose a good stand-in for the command;
+    # the scale compensates for the small command-to-achieved tracking lag.
     lookahead_frames = int(cfg.get('lookahead_frames', 5)) if cfg else 5
     lookahead_scale = float(cfg.get('lookahead_scale', 1.03)) if cfg else 1.03
     n_rows = len(df)
