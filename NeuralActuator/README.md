@@ -20,7 +20,7 @@ Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>,
 <sub><sup>*</sup>Research Assistant at MIT CDFG, equal contribution.&emsp;<sup>&dagger;</sup>The work of this author does not relate to their position at Amazon.</sub>
 </div>
 
-## Updates
+## 📢 Updates
 
 - **[July 2026]** Initial release: training and evaluation code for the OpenManipulator-X
   and SO-101; the Neural Actuation Dataset (NAD) with 450 trajectories across 45 tasks
@@ -84,7 +84,7 @@ above; the torque head is trained through a differentiable simulator (MuJoCo MJX
 the force and motor-condition heads use direct supervision from the force sensor and
 the condition flags.
 
-## Contributing actuation data
+## 📣 Contributing actuation data
 
 Nothing in the model is specific to the two arms above: any arm that logs commanded
 positions and basic motor telemetry can be modeled, from hobby servos to industrial
@@ -99,16 +99,7 @@ Actuation datasets currently available:
 |---|---|---|
 | ROBOTIS OpenManipulator-X | Dynamixel XM430-W350 | `data/` (NAD, 35 tasks) |
 | SO-101 (LeRobot) | Feetech STS3215 | `data/so101/` (10 task-payload combinations) |
-
-## Future work
-
-- **Synthetic-to-Real Actuator Pretraining** — Leverage large-scale synthetic actuator
-  data for pretraining, followed by real-world fine-tuning to reduce costly hardware
-  data collection.
-- **Cross-Morphology Actuation Learning** — Extend NeuralActuator toward different
-  robot morphologies and actuator families for more generalizable actuation modeling.
-- **Scalable Whole-Body Force Perception** — Move beyond single-arm end-effector force
-  estimation toward multi-joint and whole-body force-aware robot control.
+| Franka Emika Panda | Integrated joint actuators with torque sensing | `data/franka/` (lift-and-hold, 5 payloads) |
 
 ## Setup
 
@@ -617,6 +608,16 @@ Apache-2.0 licenses, listed under [Acknowledgements](#acknowledgements).
 - `robot_so101/`: SO-101 model from [TheRobotStudio's SO-ARM100](https://github.com/TheRobotStudio/SO-ARM100)
   (Apache-2.0, see `robot_so101/LICENSE`), with the same torque-actuator conversion;
   see `robot_so101/README.md`.
+
+## Future work
+
+- **Synthetic-to-Real Actuator Pretraining** — Leverage large-scale synthetic actuator
+  data for pretraining, followed by real-world fine-tuning to reduce costly hardware
+  data collection.
+- **Cross-Morphology Actuation Learning** — Extend NeuralActuator toward different
+  robot morphologies and actuator families for more generalizable actuation modeling.
+- **Scalable Whole-Body Force Perception** — Move beyond single-arm end-effector force
+  estimation toward multi-joint and whole-body force-aware robot control.
 
 ## Citation
 
