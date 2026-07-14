@@ -531,6 +531,17 @@ def main():
 
     mjx_model = mjx.put_model(mj_model)
 
+    # Optionally apply the predicted external force at the grasp point during the rollout,
+    # so the payload load enters the dynamics through the force head instead of being
+    # absorbed by the torque head. The grasp point is the 'gripperframe' site, offset from
+    # the gripper body COM; xfrc_applied acts at the COM, so the wrench is placed at the
+    # site by adding the moment (site - COM) x f (see the injection below).
+    apply_external_force = bool(train_config.get('apply_external_force', False))
+    grasp_site_id = int(mujoco.mj_name2id(mj_model, mujoco.mjtObj.mjOBJ_SITE, 'gripperframe'))
+    grasp_body_id = int(mj_model.site_bodyid[grasp_site_id])
+    if apply_external_force:
+        print(f"External force applied at SO-101 grasp point (site 'gripperframe', body id={grasp_body_id})")
+
     # 3. Load Data (on-disk train/validation/test split, used as-is)
     if 'task_dirs' in train_config:
         print("Resolving task directories (on-disk train/validation/test split)...")
@@ -929,6 +940,15 @@ def main():
             ctrl = ctrl.at[:N_JOINTS].set(tau_clamped)
 
             mjx_data = mjx_data.replace(ctrl=ctrl)
+
+            # Apply the predicted external force at the grasp point (the 'gripperframe' site).
+            # xfrc_applied acts at the gripper body COM, so we add the moment (site - COM) x f
+            # to shift the force to the site; MJX carries the per-joint moment from there.
+            if apply_external_force:
+                r_world = mjx_data.site_xpos[grasp_site_id] - mjx_data.xipos[grasp_body_id]
+                xfrc = mjx_data.xfrc_applied.at[grasp_body_id, :3].set(f_pred)
+                xfrc = xfrc.at[grasp_body_id, 3:6].set(jnp.cross(r_world, f_pred))
+                mjx_data = mjx_data.replace(xfrc_applied=xfrc)
 
             # Step Simulation (Multi-step)
             def sim_loop_body(i, d):

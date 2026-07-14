@@ -42,7 +42,8 @@ Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>,
 ## 📢 Updates
 
 - **[July 2026]** Initial release: training and evaluation code for the OpenManipulator-X
-  and SO-101; the Neural Actuation Dataset (NAD) with 450 trajectories across 45 tasks
+  and SO-101; the Neural Actuation Dataset (NAD), 450 task assignments (430 distinct
+  trajectories) across 45 tasks
   on the two platforms; ten pretrained checkpoints; both inference modes (dynamics
   rollout and the virtual force sensor); the twin-arm teleoperation and data-collection
   code (`teleop/`, `hardware/`); and the hardware guide with sourcing links.
@@ -53,17 +54,19 @@ Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>,
 ## Overview
 
 <p align="center"><img src="docs/media/teaser.jpg" width="100%" alt="Real executions paired with simulated rollouts and estimated external forces"></p>
-<p align="center"><i>NeuralActuator in deployment: real executions paired with simulated rollouts, the estimated external force drawn in red. Left: pick-and-place; right: lift-and-hold; payloads 200&ndash;500 g.</i></p>
+<p align="center"><i>NeuralActuator in deployment: real executions paired with simulated rollouts, the estimated external force drawn in red. Left: pick-and-place (200&ndash;500 g); right: lift-and-hold (200&ndash;400 g).</i></p>
 
 A neural actuator model for low-cost servo-driven robot platforms, linking actuator
 telemetry to differentiable dynamics, sensorless force perception, and force-aware
-sim-to-real control.
+real-robot control.
 
 ### 1. Torque-Label-Free Differentiable Actuator Learning
 
-Learns joint torque from real pose trajectories by backpropagating through
-differentiable simulation, avoiding torque labels and reliable current-to-torque
-calibration on low-cost platforms.
+Learns a simulator-equivalent torque surrogate from pose trajectories by backpropagating
+through differentiable simulation, without torque labels or current-to-torque calibration.
+Absent an explicit payload/contact model, the surrogate absorbs external loads and dynamics
+mismatch and is not the identified actuator torque. Only this head is trained from pose;
+the force, gate and joint-condition heads use direct labels.
 
 ```math
 \theta^\star = \arg\min_\theta \sum_t \mathcal{L}_{\mathrm{pose}}\left(q_{t+1}^{\mathrm{sim}}, q_{t+1}^{\mathrm{real}}\right),
@@ -71,7 +74,7 @@ calibration on low-cost platforms.
 q_{t+1}^{\mathrm{sim}} = \pi_q\left[\mathrm{DiffSim}\left(s_t, \tau_\theta(H_t)\right)\right]
 ```
 
-where $\tau_\theta(H_t)$ is the torque model over the telemetry history window $H_t$,
+where $\tau_\theta(H_t)$ is the torque-surrogate model over the telemetry history window $H_t$,
 $s_t$ the simulator state, and $\pi_q$ extracts the simulated pose.
 
 ### 2. History-Dependent Nonlinear Actuator Modeling
@@ -82,10 +85,10 @@ saturation, hysteresis, and thermal drift.
 
 ### 3. Unified Actuation and Proprioceptive Force Perception
 
-Jointly predicts actuator torque $\tau$, the 3-axis end-effector external force
-$f_{\mathrm{ext}} \in \mathbb{R}^3$, contact gate $g$, and motor condition $c$,
-supporting sensorless force perception, motor-health monitoring, and force-aware
-downstream control.
+Jointly predicts a torque surrogate $\tau$, the 3-axis end-effector external force
+$f_{\mathrm{ext}} \in \mathbb{R}^3$, contact gate $g$, and a Joint-3 operating-condition
+flag $c$ (unrestricted vs. mechanically restricted), supporting sensorless force
+perception, joint-condition detection, and force-aware downstream control.
 
 ```math
 M(q)\ddot{q} + C(q,\dot{q})\dot{q} + g_{\mathrm{grav}}(q) = \tau + J_v(q)^{\top} f_{\mathrm{ext}},
@@ -93,9 +96,9 @@ M(q)\ddot{q} + C(q,\dot{q})\dot{q} + g_{\mathrm{grav}}(q) = \tau + J_v(q)^{\top}
 \tau_{\mathrm{ext}} = J_v(q)^{\top} f_{\mathrm{ext}}
 ```
 
-Here, $\tau$ is the actuator-side joint torque, $f_{\mathrm{ext}} \in \mathbb{R}^3$ the
-predicted end-effector external force, $J_v(q)$ the translational Jacobian, and
-$\tau_{\mathrm{ext}}$ the joint-space image of $f_{\mathrm{ext}}$.
+Here, $\tau$ is the simulator-equivalent generalized joint effort (torque surrogate),
+$f_{\mathrm{ext}} \in \mathbb{R}^3$ the predicted end-effector external force, $J_v(q)$ the
+translational Jacobian, and $\tau_{\mathrm{ext}}$ the joint-space image of $f_{\mathrm{ext}}$.
 
 This repository ships the training and evaluation code. The model is a Transformer that
 maps commanded positions, motor currents and actuator telemetry to the outputs
@@ -121,12 +124,10 @@ for definitions and results.
 
 ## 📣 Contributing actuation data
 
-Nothing in the model is specific to the two arms above: any arm that logs commanded
-positions and basic motor telemetry can be modeled, from hobby servos to industrial
-gearboxes, and every actuator family the model sees makes it better. To contribute,
-record trajectories in the CSV format described in [docs/dataset.md](docs/dataset.md)
-and open an issue or pull request. We will help wire new robots into the configs and
-credit contributed datasets in this README.
+The model is not tied to a specific arm: it consumes commanded positions, motor currents,
+robot state and actuator telemetry, so any arm logging these signals fits the same pipeline. To contribute, record trajectories in the CSV format described in
+[docs/dataset.md](docs/dataset.md) and open an issue or pull request. We will help wire new
+robots into the configs and credit contributed datasets in this README.
 
 Actuation datasets currently available:
 
@@ -169,7 +170,7 @@ data/
   force_unlabeled/<task>/{train,validation,test}/*.csv     # free motion (10 tasks)
   force_sensor/<direction>/{train,validation,test}/*.csv   # +-X/Y/Z pushes and matched no-contact refs (12)
   weight/<task>/{train,validation,test}/*.csv              # 200-500 g payloads + 2 no-load refs (9)
-  motor_condition/<task>/{train,validation,test}/*.csv     # normal vs degraded joint 3 (4)
+  motor_condition/<task>/{train,validation,test}/*.csv     # joint 3 unrestricted vs mechanically restricted (4)
 ```
 
 Each task has 8 training, 1 validation and 1 test trajectory; force `-999` marks frames
@@ -356,9 +357,10 @@ weights stored in the checkpoint instead of the raw parameters.
 
 ### Virtual force sensor
 
-The deployment use case is external-force estimation from motor telemetry alone: at
-runtime the network needs nothing but the streaming servo readings, and the simulator
-is only used for training and for the pose-rollout evaluation above. This is the same
+The deployment use case is external-force estimation without a runtime force sensor: the
+network consumes only the streaming servo signals (commanded positions, motor currents,
+robot state, actuator telemetry); the simulator is used only for training and the
+pose-rollout evaluation above. This is the same
 released checkpoint in both cases — training always runs through the differentiable
 simulator; the two modes only differ in how the model is queried at inference time.
 In the clips below the two panels move identically, since deployment does not
@@ -420,10 +422,10 @@ needed at runtime.
 
 ## Results (OpenManipulator-X)
 
-All numbers are evaluations of the released checkpoints on the NAD test split (joint
-MAE in degrees, gripper MAE in mm, force MAE in N; "full" = the whole test
-trajectory). Regenerate with the eval scripts. Note: the released checkpoints perform
-better than the numbers reported in the paper.
+All numbers evaluate the released checkpoints on the NAD test split (joint MAE in degrees,
+single-finger slide-coordinate "Grip" MAE in mm, force MAE in N; "full" = whole test
+trajectory). These are release results, not replacements for the paper tables, and exceed
+the paper's reported numbers. Regenerate with the eval scripts.
 
 <details>
 <summary>Table 1: no-load simulation accuracy</summary>
@@ -473,8 +475,9 @@ The row averages all nine weight tasks, including the two no-load reference task
 <details>
 <summary>Table 4: motor condition detection</summary>
 
-Baselines are the threshold, SVM and random-forest detectors from
-`eval_motor_condition_baselines.py`.
+Binary classification of Joint 3's operating condition (unrestricted vs. mechanically
+restricted), not motor-damage diagnosis or general motor-health monitoring. Baselines are
+the threshold, SVM and random-forest detectors from `eval_motor_condition_baselines.py`.
 
 | Metric | Threshold | SVM | RF | Released |
 |---|---|---|---|---|
@@ -584,15 +587,18 @@ end-effector force sensor: force labels come from the known payload weight
 <details>
 <summary>Franka lift-and-hold benchmark</summary>
 
+A future-state-conditioned **offline** benchmark for external-force estimation, not a
+torque or online-dynamics validation. Only $f_z$ is supervised (known payload weight); the
+lateral references are zero, so only the $f_z$ column carries signal.
+
 | | `franka_lift_hold`, full trajectory |
 |---|---|
-| Joint MAE (deg) | 1.42 worst per-joint MAE averaged over the 5 payloads (worst single payload-joint cell 1.48) |
-| Force MAE (N) | 0.41 all-payload mean (per-payload 0.34–0.47) |
+| Force MAE (N) | 0.41 all-payload mean (per-payload 0.34&ndash;0.47) |
 </details>
 
 ### Residual torque variant
 
-The released default predicts joint torque directly from the observation history
+The released default predicts the torque surrogate directly from the observation history
 $\mathbf{o}_{t-H:t}$:
 
 $$\boldsymbol{\tau}_t = \boldsymbol{\tau}_{\text{net}}(\mathbf{o}_{t-H:t})$$
@@ -617,6 +623,10 @@ accuracy. Released results for both parameterizations:
 
 ### Implicit vs. explicit force coupling with differentiable simulation
 
+> **Release extension (not in the paper).** The paper and all released checkpoints use
+> implicit coupling. Explicit coupling is an optional experiment added here, disabled by
+> default; the numbers below are release results.
+
 The unified head predicts an end-effector force $f_{\mathrm{ext}}$ alongside torque. How
 that predicted force is coupled back into the differentiable rollout defines two variants of
 the rigid-body identity $M\ddot{q} + C\dot{q} + g_{\mathrm{grav}} = \tau + J_v^{\top} f_{\mathrm{ext}}$:
@@ -629,8 +639,10 @@ the rigid-body identity $M\ddot{q} + C\dot{q} + g_{\mathrm{grav}} = \tau + J_v^{
   external force, so both sides of the identity are present and the loop is physically
   closed; the same $f_{\mathrm{ext}}$ is still supervised by the force sensor.
 
-On the OMX combined weight benchmark (pick-and-place and lift-and-hold, 0&ndash;500 g), a
-3-seed from-scratch A/B gives:
+On the OMX combined weight benchmark &mdash; pick-and-place (0 / 200 / 300 / 400 / 500 g)
+and lift-and-hold (0 / 200 / 300 / 400 g) &mdash; a 3-seed from-scratch A/B gives (worst
+per-joint MAE is the worst single task&times;joint cell across all these tasks; force MAE is
+the all-task mean):
 
 | | Implicit (default) | Explicit |
 |---|---|---|
