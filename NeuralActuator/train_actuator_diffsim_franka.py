@@ -506,6 +506,14 @@ def main():
 
     mjx_model = mjx.put_model(mj_model)
 
+    # Optionally apply the predicted external force as a real Cartesian force on the
+    # end-effector during the rollout, so the payload load enters the dynamics through
+    # the force head instead of being absorbed by the torque head.
+    apply_external_force = bool(train_config.get('apply_external_force', False))
+    franka_hand_id = int(mujoco.mj_name2id(mj_model, mujoco.mjtObj.mjOBJ_BODY, 'hand'))
+    if apply_external_force:
+        print(f"External force applied on end-effector body 'hand' (id={franka_hand_id})")
+
     # 3. Load Data
     csv_paths = train_config['datasets']
     val_csv_paths = train_config.get('val_datasets', [])
@@ -844,6 +852,12 @@ def main():
             ctrl = jnp.zeros(mjx_model.nu).at[:N_JOINTS].set(tau_clamped)
 
             mjx_data = mjx_data.replace(ctrl=ctrl)
+
+            # Apply the predicted external force on the end-effector so the interaction
+            # load acts through the dynamics (world-frame Cartesian force, no moment).
+            if apply_external_force:
+                xfrc = mjx_data.xfrc_applied.at[franka_hand_id, :3].set(f_pred)
+                mjx_data = mjx_data.replace(xfrc_applied=xfrc)
 
             # Step Simulation (Multi-step)
             def sim_loop_body(i, d):

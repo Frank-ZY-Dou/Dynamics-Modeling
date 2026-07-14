@@ -595,7 +595,15 @@ def main():
     mj_model.opt.disableflags |= mujoco.mjtDisableBit.mjDSBL_CONTACT
     
     mjx_model = mjx.put_model(mj_model)
-    
+
+    # Optionally apply the predicted external force as a real Cartesian force at the
+    # grasp point (end_effector_target) during the rollout, so the interaction load
+    # enters the dynamics through the force head instead of being absorbed by torque.
+    apply_external_force = bool(train_config.get('apply_external_force', False))
+    ee_target_id = int(mujoco.mj_name2id(mj_model, mujoco.mjtObj.mjOBJ_BODY, 'end_effector_target'))
+    if apply_external_force:
+        print(f"External force applied at grasp point 'end_effector_target' (id={ee_target_id})")
+
     # 3. Load Data
     csv_paths = []
     if args.csv:
@@ -1238,9 +1246,16 @@ def main():
             tau_clamped = jnp.clip(tau, -tau_limit, tau_limit)
             ctrl = jnp.zeros(mjx_model.nu)
             ctrl = ctrl.at[:5].set(tau_clamped)
-            
+
             mjx_data = mjx_data.replace(ctrl=ctrl)
-            
+
+            # Apply the predicted external force at the grasp point so the interaction
+            # load acts through the dynamics (world-frame Cartesian force; MJX carries
+            # the moment about each joint from the application point).
+            if apply_external_force:
+                xfrc = mjx_data.xfrc_applied.at[ee_target_id, :3].set(f_pred)
+                mjx_data = mjx_data.replace(xfrc_applied=xfrc)
+
             # Step Simulation (Multi-step)
             def sim_loop_body(i, d):
                 return mjx.step(mjx_model, d)

@@ -1,116 +1,37 @@
-# OMX twin-arm teleoperation
+# Teleoperation and data collection
 
-Leader-follower teleoperation and data recording for two ROBOTIS OpenManipulator-X
-arms. This is the hardware-side collection code for the Neural Actuation Dataset
-(NAD): a human moves the torque-off leader arm, the follower mirrors it, and the
-follower's motor telemetry is logged to CSV / published over ROS.
+Leader–follower teleoperation and data-recording code used to collect the Neural
+Actuation Dataset (NAD). A human moves the torque-off **leader** arm, the **follower**
+mirrors it, and the follower's motor telemetry is logged to CSV alongside synchronized
+video. The same two-phase workflow is used on both platforms: teleoperate freely, then
+press ENTER to start a synchronized CSV + video recording.
 
-## Hardware
+| Platform | Servos | Code | Guide |
+|---|---|---|---|
+| **OpenManipulator-X** (ROS 1) | 5× Dynamixel XM430-W350 | [`omx/`](omx/) | [omx/README.md](omx/README.md) |
+| **SO-101** (LeRobot) | 6× Feetech STS3215 | [`so101/`](so101/) | [so101/README.md](so101/README.md) |
 
-- 2x ROBOTIS OpenManipulator-X (leader + follower)
-- 5x Dynamixel XM430-W350 per arm, Protocol 2.0 @ 1 Mbps
-- Motor IDs: 11 (base), 12 (shoulder), 13 (elbow), 14 (wrist), 15 (gripper)
-- Leader U2D2 on `/dev/ttyUSB0`, follower on `/dev/ttyUSB1`
-- Optional: 6-axis force/torque sensor on `/dev/ttyACM0` (115200 8N1, ASCII frames
-  `< fx fy fz mx my mz >` in mN, converted to N after tare)
-- Optional: single-axis force gauge, 2400 bps ASCII (`finger_control/force_reader_class.py`)
-- Optional: USB camera on `/dev/video1` + `ffmpeg` for synchronized video
+Both produce CSVs in the same layout, so the SO-101 recordings drop straight into the
+NAD schema in [docs/dataset.md](../docs/dataset.md).
 
-## Setup (ROS 1 Noetic)
+## OpenManipulator-X (`omx/`)
 
-The code expects to live in a catkin package named `soft_hand_control`
-(imports are `from soft_hand_control.msg import ...`):
+ROS 1 (Noetic) leader/follower over Dynamixel SDK: `dxl_arm.py` is the per-arm
+publisher/recorder, `finger_control/` reads the gripper force gauge, and `msg/` holds
+the custom ROS messages. Optional 6-axis force/torque sensor and USB camera. See
+[omx/README.md](omx/README.md) for the catkin package layout, wiring, and motor IDs.
 
-- `dxl_arm.py` and `finger_control/` go under the package's `script/`
-- `msg/*.msg` go under the package's `msg/` with `message_generation` enabled
+## SO-101 (`so101/`)
 
-Build with `catkin_make`, then `source devel/setup.bash`. Python dependencies:
-`dynamixel-sdk`, `pyserial`, `numpy`, `matplotlib`. `roscore` must be running;
-the script registers node `arm_control_node` at import time.
+LeRobot-based leader/follower over the Feetech serial bus: `record_teleop_data.py` is
+the recorder, with post-processing scripts for force labelling (`label_force_z.py`,
+`lift_and_hold_set_force_z.py`, `add_force_columns.py`), unit conversion
+(`convert_pos_to_rad.py`), dataset splitting (`split_dataset.py`) and stats
+(`dataset_stats.py`). Requires a LeRobot install with the SO-101 leader/follower
+classes. See [so101/README.md](so101/README.md).
 
-## Publisher (single arm)
+## Hardware sourcing
 
-```bash
-python3 dxl_arm.py            # arm on /dev/ttyUSB0, motors disabled (free-drive)
-python3 dxl_arm.py --enabled  # keep motors torqued on
-python3 dxl_arm.py --usb1     # arm on /dev/ttyUSB1
-```
-
-Press Enter at the prompt after the motors are disabled. The node then publishes
-`soft_hand_control/MotorMonitorNoLength` on `/dxl_arm/monitor` at 100 Hz (nominal;
-bounded by the Dynamixel bulk read in practice). Message fields: `motorsPos`,
-`current`, `motorsVel`, `coilsTemp`, `pwm`, `motorsVolts`, `aperture`, `force`,
-`relative_time`.
-
-## Twin teleop with NAD CSV recording
-
-```bash
-python3 dxl_arm.py --twin-csv               # CSV + synchronized video (qhd)
-python3 dxl_arm.py --twin-csv --no-video
-python3 dxl_arm.py --twin-csv --res=1080p   # 4k | qhd | 1080p | 720p
-```
-
-Runs `twin_motion()`: leader (ttyUSB0) is torque-off and moved by hand, follower
-(ttyUSB1) mirrors it at 100 Hz in extended position mode (mode 4); the gripper is
-mirrored with a -0.35 rad calibration offset. An interactive menu selects the
-trajectory category; the CSV is auto-numbered as
-`dataset/trajectory_data/<category>/NNN.csv` and video as
-`dataset/video_data/<category>/NNN.mp4` (trimmed so video t=0 matches CSV row 0).
-Press Enter to start recording, Enter again to stop (`x` also disables the follower
-motors). Categories 3-5 auto-connect the 6-axis force sensor (5 s tare, keep it
-unloaded) and log `force_x/y/z`.
-
-Before logging, `record_data()` writes `PID_CONFIG` to the follower motors
-(Kp=800 on all joints; Kd=1000/800/500/300/0 for base/shoulder/elbow/wrist/gripper).
-Temperature guard: warning at 55 C, auto-disable at 60 C.
-
-## Real-time teleop publisher
-
-```bash
-python3 dxl_arm.py --twin-publish
-```
-
-Runs `twin_motion_publish()`: follower mirrors the leader and publishes its
-`MotorMonitorNoLength` to `/dxl_arm/monitor` at 62.5 Hz (matches the simulation
-step of 0.016 s). No CSV is written.
-
-## CSV format (NAD)
-
-44 columns:
-
-```
-timestamp,
-pos1-5, aperture,
-goal_pos1-5, goal_aperture,
-current1-5, vel1-5, temp1-5, pwm1-5, volts1-5,
-force_x, force_y, force_z,
-force_gripper_x, force_gripper_y, force_gripper_z
-```
-
-- `pos` rad, `vel` rad/s, `current` mA, `temp` C, `volts` V; `timestamp` is seconds
-  since recording start
-- `goal_posN`: leader position command sent to the follower
-- `aperture`: gripper opening width computed from `pos5`
-- `goal_aperture`: gripper opening width computed from `goal_pos5`
-- `force_x/y/z`: 6-axis sensor reading in N, mapped as `force_x = -sensor_y`,
-  `force_y = -sensor_x`, `force_z = -sensor_z`; `-999` means no reading
-- `force_gripper_x/y/z`: payload weight label if set, else 0
-
-## Force gauge (single-axis)
-
-`ForceGaugeReader` in `finger_control/force_reader_class.py` reads a 2400 bps ASCII
-gauge (default port `/dev/ttyUSB1`, override with `--port`). `force_gauge_run()` in
-`dxl_arm.py` runs collection with the gauge polled in a background thread; the scalar
-reading is projected along `force_vector` into the `force_x/y/z` columns.
-
-## Files
-
-```
-dxl_arm.py                            # DXL_ARM class + publish/twin entry points
-finger_control/finger_control.py      # FingerControlDXL: low-level Dynamixel I/O
-finger_control/hand_control.py        # HandControlDXL: multi-motor group reads
-finger_control/force_reader_class.py  # ForceGaugeReader: serial force gauge
-msg/MotorMonitorNoLength.msg          # published on /dxl_arm/monitor
-msg/MotorMonitor.msg                  # internal motor status container
-msg/FingerMeasure.msg, msg/MotorPosTraj.msg, msg/MotorPosCmd.msg
-```
+The component list with purchase links is in the
+[Hardware and Data Collection](../README.md#hardware-and-data-collection) section of the
+main README.

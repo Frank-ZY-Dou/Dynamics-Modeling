@@ -2,11 +2,11 @@
 <h1>NeuralActuator: Neural Actuation Modeling for Robot Dynamics and External Force Perception</h1>
 
 <a href="https://frank-zy-dou.github.io/projects/NeuralActuator/index.html"><img src="https://img.shields.io/badge/Project_Page-green" alt="Project Page"></a>
+<a href="https://arxiv.org/abs/2607.11734"><img src="https://img.shields.io/badge/arXiv-2607.11734-b31b1b" alt="arXiv"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License: MIT"></a>
 <a href="docs/dataset.md"><img src="https://img.shields.io/badge/Dataset-NAD-orange" alt="Neural Actuation Dataset"></a>
 <a href="https://huggingface.co/datasets/frankzydou/NAD"><img src="https://img.shields.io/badge/HF_Dataset-NAD-yellow" alt="Neural Actuation Dataset on Hugging Face"></a>
 <a href="https://huggingface.co/frankzydou/NeuralActuator"><img src="https://img.shields.io/badge/HF_Models-Checkpoints-yellow" alt="Pretrained checkpoints on Hugging Face"></a>
-<!-- arXiv badge goes here once the paper is on arXiv -->
 
 **Robotics: Science and Systems (RSS) 2026**
 
@@ -32,7 +32,7 @@ Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>,
 - [Inference](#inference)
 - [Results (OpenManipulator-X)](#results-openmanipulator-x)
 - [Additional platforms and variants](#additional-platforms-and-variants)
-  - [SO-101 (LeRobot arm)](#so-101-lerobot-arm) · [Franka Panda](#franka-panda) · [Residual torque variant](#residual-torque-variant)
+  - [SO-101 (LeRobot arm)](#so-101-lerobot-arm) · [Franka Panda](#franka-panda) · [Residual torque variant](#residual-torque-variant) · [Implicit vs. explicit force coupling with differentiable simulation](#implicit-vs-explicit-force-coupling-with-differentiable-simulation)
 - [Hardware and Data Collection](#hardware-and-data-collection)
 - [Future work](#future-work)
 - [Citation](#citation)
@@ -103,6 +103,22 @@ above; the torque head is trained through a differentiable simulator (MuJoCo MJX
 the force and motor-condition heads use direct supervision from the force sensor and
 the condition flags.
 
+The predicted $f_{\mathrm{ext}}$ is supervised directly by the force sensor; how it is
+coupled back into the differentiable rollout defines two settings we study:
+
+- **Implicit** (released default): the simulator is driven by the predicted torque alone,
+  so $f_{\mathrm{ext}}$ is supervised but never acts on the simulated body and the network
+  absorbs the interaction load into $\tau$.
+- **Explicit**: the same $f_{\mathrm{ext}}$ is additionally applied at the end effector as
+  a real external force (joint-space image $J_v(q)^{\top} f_{\mathrm{ext}}$) before each
+  simulation step, so it shapes the next state and, through the simulator, receives
+  gradient from the position-tracking objective as well &mdash; closing the identity above
+  inside the simulator.
+
+We release the implicit coupling as the default; see
+[Implicit vs. explicit force coupling with differentiable simulation](#implicit-vs-explicit-force-coupling-with-differentiable-simulation)
+for definitions and results.
+
 ## 📣 Contributing actuation data
 
 Nothing in the model is specific to the two arms above: any arm that logs commanded
@@ -169,22 +185,21 @@ directly, e.g. `bash scripts/eval_force_sensor.sh checkpoints/omx_force_sensor.p
 
 The pretrained checkpoints ship separately from the code and dataset, as assets on
 this repository's Releases page and mirrored on Hugging Face at
-[frankzydou/NeuralActuator](https://huggingface.co/frankzydou/NeuralActuator). Verify
-the download against these md5 sums:
+[frankzydou/NeuralActuator](https://huggingface.co/frankzydou/NeuralActuator):
 
-| File | Benchmark | md5 |
-|---|---|---|
-| `omx_no_load_with_gripper.pkl` | Table 1, with-gripper tasks | `8233a0ba1b9629b2b7dd5b2a81a2e536` |
-| `omx_no_load_no_gripper.pkl` | Table 1, no-gripper tasks | `548929e3b54680a467b27aef48983d70` |
-| `omx_force_sensor.pkl` | Table 2, force sensor | `486b4a7681d379825643d3f2eab3d659` |
-| `omx_weight_all_ema.pkl` | Table 3, all nine weight tasks (EMA weights, reported above) | `c463eaabf653884158f51201097ea00c` |
-| `omx_weight_all.pkl` | Table 3, all nine weight tasks (raw weights of the same run) | `60ecebb84c3e8d1b94d651e96ff355fc` |
-| `omx_pick_place.pkl` | Table 3, pick-and-place subset | `8d9834930126459c906c3cf756e39859` |
-| `omx_motor_condition.pkl` | Table 4, motor condition | `e15721cc63fe56bbfaf89d2eb1b0314d` |
-| `so101_weight.pkl` | SO-101 weight benchmark, paper protocol (six 300-500 g tasks) | `95e9ed8b076f4011bfd3d6dc32876363` |
-| `so101_weight_extended.pkl` | SO-101 weight benchmark, extended ten-task data | `6ab6f6ea031d04a5c50b76eabd1c2020` |
-| `so101_weight_residual.pkl` | SO-101 weight benchmark, residual parameterization | `37027625f46837fc89fc66a2acb47574` |
-| `franka_lift_hold.pkl` | Franka Panda lift-and-hold benchmark | `94d1e67fe6fd1969f660746ffd213f20` |
+| File | Benchmark |
+|---|---|
+| `omx_no_load_with_gripper.pkl` | Table 1, with-gripper tasks |
+| `omx_no_load_no_gripper.pkl` | Table 1, no-gripper tasks |
+| `omx_force_sensor.pkl` | Table 2, force sensor |
+| `omx_weight_all_ema.pkl` | Table 3, all nine weight tasks (EMA weights, reported above) |
+| `omx_weight_all.pkl` | Table 3, all nine weight tasks (raw weights of the same run) |
+| `omx_pick_place.pkl` | Table 3, pick-and-place subset |
+| `omx_motor_condition.pkl` | Table 4, motor condition |
+| `so101_weight.pkl` | SO-101 weight benchmark, paper protocol (six 300-500 g tasks) |
+| `so101_weight_extended.pkl` | SO-101 weight benchmark, extended ten-task data |
+| `so101_weight_residual.pkl` | SO-101 weight benchmark, residual parameterization |
+| `franka_lift_hold.pkl` | Franka Panda lift-and-hold benchmark |
 
 The Table 3 checkpoint ships as both the raw and the EMA weights of the same training
 run; the results table reports the EMA variant.
@@ -600,13 +615,39 @@ accuracy. Released results for both parameterizations:
 | OMX no-gripper tasks, full (average / worst per-joint MAE, deg) | 0.30 / 0.39 | 0.49 / 0.64 |
 | SO-101 paper protocol, 6 tasks, full (worst per-joint MAE, deg / force MAE all-task mean, N) | 1.52 / 0.22 | 1.53 / 0.38 |
 
+### Implicit vs. explicit force coupling with differentiable simulation
+
+The unified head predicts an end-effector force $f_{\mathrm{ext}}$ alongside torque. How
+that predicted force is coupled back into the differentiable rollout defines two variants of
+the rigid-body identity $M\ddot{q} + C\dot{q} + g_{\mathrm{grav}} = \tau + J_v^{\top} f_{\mathrm{ext}}$:
+
+- **Implicit (released default).** The rollout is driven by the predicted torque alone
+  ($J_v^{\top} f_{\mathrm{ext}}$ omitted). The network absorbs the interaction load into
+  $\tau$; $f_{\mathrm{ext}}$ is still predicted and supervised by the force sensor, but it
+  does not act on the simulated body.
+- **Explicit.** The predicted $f_{\mathrm{ext}}$ is applied at the end effector as a real
+  external force, so both sides of the identity are present and the loop is physically
+  closed; the same $f_{\mathrm{ext}}$ is still supervised by the force sensor.
+
+On the OMX combined weight benchmark (pick-and-place and lift-and-hold, 0&ndash;500 g), a
+3-seed from-scratch A/B gives:
+
+| | Implicit (default) | Explicit |
+|---|---|---|
+| Worst per-joint MAE, deg (3-seed mean, range) | 1.5 (1.45&ndash;1.73) | 2.7 (2.60&ndash;2.96) |
+| End-effector force MAE, N (3-seed mean) | 0.06 | 0.09 |
+
+Closing the loop is slightly worse on both metrics: feeding the predicted force back
+during training adds a coupled load the torque head must simultaneously counteract, and the
+gap is largest at the shoulder joint (J2, +0.6&deg; averaged over seeds), which bears the
+largest share of the vertical payload moment. We therefore release the implicit coupling as
+the default.
+
 ## Hardware and Data Collection
 
 All numbers in this repository come from data collected on the OMX and SO-101 setups
-below. The 6-axis
-force/torque sensor used for force ground truth and the joint-torque sensor used for
-torque validation are internal lab equipment and are not publicly available; everything
-else is off the shelf.
+below. The 6-axis force/torque sensor used for force ground truth is internal lab
+equipment and is not publicly available; everything else is off the shelf.
 
 <p align="center">
   <img src="docs/media/hardware/nad_hardware.jpg" width="720" alt="NAD collection hardware: twin OpenManipulator-X leader/follower arms with force sensor and camera; the 6-axis force/torque sensor; the force gauge on its stand; the 100-500 g payload set">
@@ -618,17 +659,27 @@ else is off the shelf.
 | SO-101 arm (LeRobot, Feetech STS3215), leader + follower | [TheRobotStudio/SO-ARM100](https://github.com/TheRobotStudio/SO-ARM100) (BOM, sourcing, kits) |
 | Digital force gauge, BAOSHISHAN ZP-500N (RS232 output) | [amazon.com](https://www.amazon.com/BAOSHISHAN-Interface-Measuring-Instruments-Destructive/dp/B07VSDF1CX) |
 | Payload set, standard calibration weights, 100-500 g | [amazon.com](https://www.amazon.com/dp/B000URHLLO) |
-| 6-axis F/T sensor, joint-torque sensor | internal equipment, not publicly available |
+| 6-axis F/T sensor | internal equipment, not publicly available |
 
 <p align="center">
   <img src="docs/media/hardware/platforms.jpg" width="600" alt="Cross-platform arms: Franka Panda and the SO-101 leader/follower pair">
 </p>
 <p align="center"><i>The paper's cross-platform arms.</i></p>
 
-The arms are driven over U2D2 USB adapters (leader on `/dev/ttyUSB0`, follower on
-`/dev/ttyUSB1`); wiring, motor IDs, PID settings and the CSV recording format are in
-[teleop/README.md](teleop/README.md). `hardware/` holds the stand-alone sensor readers
-used during collection: `hardware/force_sensoring/` streams the 6-axis F/T sensor and
+### Teleoperation and data collection
+
+Leader–follower teleoperation and data-recording code ships for **both** arms under
+[`teleop/`](teleop/) — teleoperate the torque-off leader by hand, the follower mirrors
+it, and its motor telemetry is logged to CSV with synchronized video. Per-platform
+wiring, motor IDs, ports, and the recording workflow:
+
+| Platform | Servos | Code | Guide |
+|---|---|---|---|
+| OpenManipulator-X (ROS 1) | 5× Dynamixel XM430-W350 | [`teleop/omx/`](teleop/omx/) | [teleop/omx/README.md](teleop/omx/README.md) |
+| SO-101 (LeRobot) | 6× Feetech STS3215 | [`teleop/so101/`](teleop/so101/) | [teleop/so101/README.md](teleop/so101/README.md) |
+
+`hardware/` holds the stand-alone sensor readers used during collection:
+`hardware/force_sensoring/` streams the 6-axis F/T sensor and
 `hardware/force_gauge_reader.py` reads the ZP-500N over serial.
 
 ## Future work
