@@ -41,15 +41,14 @@ Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>,
 
 ## 📢 Updates
 
-- **[July 2026]** Initial release: training and evaluation code for the OpenManipulator-X
-  and SO-101; the Neural Actuation Dataset (NAD), 450 task assignments (430 distinct
-  trajectories) across 45 tasks
-  on the two platforms; ten pretrained checkpoints; both inference modes (dynamics
-  rollout and the virtual force sensor); the twin-arm teleoperation and data-collection
-  code (`teleop/`, `hardware/`); and the hardware guide with sourcing links.
-- **[July 2026]** Franka Panda support: lift-and-hold trajectories for five payloads
-  (200–600 g) with external-force estimation, the `franka_lift_hold` checkpoint, and
-  training, evaluation and inference code for the 7-DoF arm.
+- **[July 2026]** Initial release: training, evaluation and inference code for the
+  OpenManipulator-X, SO-101 and Franka Panda; the Neural Actuation Dataset (NAD), 450 task
+  assignments (430 distinct trajectories) across 45 tasks on the OpenManipulator-X and
+  SO-101, plus Franka lift-and-hold trajectories for five payloads (200&ndash;600 g) with
+  external-force estimation; eleven pretrained checkpoints; both inference modes (dynamics
+  rollout and the virtual force sensor); leader&ndash;follower teleoperation and
+  data-collection code for both the OpenManipulator-X and SO-101 (`teleop/`, `hardware/`);
+  and the hardware guide with sourcing links.
 
 ## Overview
 
@@ -109,7 +108,7 @@ the condition flags.
 The predicted $f_{\mathrm{ext}}$ is supervised directly by the force sensor; how it is
 coupled back into the differentiable rollout defines two settings we study:
 
-- **Implicit** (released default): the simulator is driven by the predicted torque alone,
+- **Implicit** (default): the simulator is driven by the predicted torque alone,
   so $f_{\mathrm{ext}}$ is supervised but never acts on the simulated body and the network
   absorbs the interaction load into $\tau$.
 - **Explicit**: the same $f_{\mathrm{ext}}$ is additionally applied at the end effector as
@@ -118,7 +117,7 @@ coupled back into the differentiable rollout defines two settings we study:
   gradient from the position-tracking objective as well &mdash; closing the identity above
   inside the simulator.
 
-We release the implicit coupling as the default; see
+In this paper, we use implicit coupling; see
 [Implicit vs. explicit force coupling with differentiable simulation](#implicit-vs-explicit-force-coupling-with-differentiable-simulation)
 for definitions and results.
 
@@ -598,7 +597,7 @@ lateral references are zero, so only the $f_z$ column carries signal.
 
 ### Residual torque variant
 
-The released default predicts the torque surrogate directly from the observation history
+The default predicts the torque surrogate directly from the observation history
 $\mathbf{o}_{t-H:t}$:
 
 $$\boldsymbol{\tau}_t = \boldsymbol{\tau}_{\text{net}}(\mathbf{o}_{t-H:t})$$
@@ -609,12 +608,12 @@ current-torque baseline:
 
 $$\boldsymbol{\tau}_t = K_t \mathbf{i}_t + \boldsymbol{\tau}_{\text{net}}(\mathbf{o}_{t-H:t}),\qquad K_t = 1.3\ \text{N·m/A (XM430 datasheet)}$$
 
-We release the direct parameterization as the default. The linear baseline is exactly
+We use the direct parameterization as the default. The linear baseline is exactly
 the inductive bias the paper argues breaks down on low-cost servos; predicting torque
 directly removes that prior and the dependence on a hand-calibrated $K_t$. In our
 experiments the residual variant stabilizes the first few hundred epochs (the baseline
 supplies gravity compensation from the start) and converges to comparable tracking
-accuracy. Released results for both parameterizations:
+accuracy. Results for both parameterizations:
 
 | | Direct (default) | Residual |
 |---|---|---|
@@ -623,15 +622,12 @@ accuracy. Released results for both parameterizations:
 
 ### Implicit vs. explicit force coupling with differentiable simulation
 
-> **Release extension (not in the paper).** The paper and all released checkpoints use
-> implicit coupling. Explicit coupling is an optional experiment added here, disabled by
-> default; the numbers below are release results.
-
 The unified head predicts an end-effector force $f_{\mathrm{ext}}$ alongside torque. How
-that predicted force is coupled back into the differentiable rollout defines two variants of
-the rigid-body identity $M\ddot{q} + C\dot{q} + g_{\mathrm{grav}} = \tau + J_v^{\top} f_{\mathrm{ext}}$:
+that predicted force is coupled back into the differentiable rollout is a design choice we
+ablate, and it sets two variants of the rigid-body identity
+$M\ddot{q} + C\dot{q} + g_{\mathrm{grav}} = \tau + J_v^{\top} f_{\mathrm{ext}}$:
 
-- **Implicit (released default).** The rollout is driven by the predicted torque alone
+- **Implicit (default).** The rollout is driven by the predicted torque alone
   ($J_v^{\top} f_{\mathrm{ext}}$ omitted). The network absorbs the interaction load into
   $\tau$; $f_{\mathrm{ext}}$ is still predicted and supervised by the force sensor, but it
   does not act on the simulated body.
@@ -652,8 +648,7 @@ the all-task mean):
 Closing the loop is slightly worse on both metrics: feeding the predicted force back
 during training adds a coupled load the torque head must simultaneously counteract, and the
 gap is largest at the shoulder joint (J2, +0.6&deg; averaged over seeds), which bears the
-largest share of the vertical payload moment. We therefore release the implicit coupling as
-the default.
+largest share of the vertical payload moment. In this paper, we use implicit coupling.
 
 ## Hardware and Data Collection
 

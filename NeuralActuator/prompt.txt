@@ -1,3 +1,9 @@
 
 # 2026-07-14 08:07:04 SO-101 implicit/explicit A/B (from-scratch, gripperframe site injection)
 CUDA_VISIBLE_DEVICES=6 python train_actuator_diffsim_so101.py --train_config /data/Frank/codes/MIT_Neural_Actuator_RSS26/public_paper_codes/exp_evidence/retrain2/configs/so101_scratch_expl.yaml --seed 0 --log_dir /data/Frank/codes/MIT_Neural_Actuator_RSS26/public_paper_codes/exp_evidence/retrain2/logs/so101_scratch_expl --model_out /data/Frank/codes/MIT_Neural_Actuator_RSS26/public_paper_codes/exp_evidence/retrain2/models/so101_scratch_expl.pkl
+
+# 2026-07-14 13:39:58 SO-101 explicit warm-start from implicit (so101_weight.pkl), fine-tune 20k/decay12k
+CUDA_VISIBLE_DEVICES=6 python train_actuator_diffsim_so101.py --train_config /data/Frank/codes/MIT_Neural_Actuator_RSS26/public_paper_codes/exp_evidence/retrain2/configs/so101_ft_expl.yaml --pretrained_path /data/Frank/codes/MIT_Neural_Actuator_RSS26/public_paper_codes/release_weights/so101_weight.pkl --seed 0 --log_dir /data/Frank/codes/MIT_Neural_Actuator_RSS26/public_paper_codes/exp_evidence/retrain2/logs/so101_ft_expl --model_out /data/Frank/codes/MIT_Neural_Actuator_RSS26/public_paper_codes/exp_evidence/retrain2/models/so101_ft_expl.pkl
+
+# 2026-07-14 13:57:14 SO-101 from-scratch A/B, 60k/decay40k (reverted from warm-start; double-counting)
+CUDA_VISIBLE_DEVICES=6 python train_actuator_diffsim_so101.py --train_config /data/Frank/codes/MIT_Neural_Actuator_RSS26/public_paper_codes/exp_evidence/retrain2/configs/so101_scratch_expl.yaml --seed 0 --log_dir /data/Frank/codes/MIT_Neural_Actuator_RSS26/public_paper_codes/exp_evidence/retrain2/logs/so101_scratch_expl --model_out /data/Frank/codes/MIT_Neural_Actuator_RSS26/public_paper_codes/exp_evidence/retrain2/models/so101_scratch_expl.pkl
