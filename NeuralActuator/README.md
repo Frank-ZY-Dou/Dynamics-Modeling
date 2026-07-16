@@ -10,7 +10,7 @@
 
 **Robotics: Science and Systems (RSS) 2026**
 
-<!-- <img src="https://img.shields.io/badge/Finalist_for_the_Outstanding_Student_Paper_and_Outstanding_Paper_Awards-A31F34" alt="Finalist for the Outstanding Student Paper and Outstanding Paper Awards"> -->
+<img src="https://img.shields.io/badge/🏆_Outstanding_Systems_Paper_Award-RSS_2026-B8860B" alt="Outstanding Systems Paper Award, RSS 2026">
 
 Zhiyang Dou<sup>1</sup>, John U. Onyemelukwe<sup>1*</sup>, Hangxing Zhang<sup>1*</sup>, Heng Zhang<sup>1</sup>, Minghao Guo<sup>1</sup>, Yunsheng Tian<sup>1</sup>,<br>
 Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>, Peter Yichen Chen<sup>1</sup>, Yuri Ivanov<sup>2&dagger;</sup> and Wojciech Matusik<sup>1</sup>
@@ -41,6 +41,7 @@ Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>,
 
 ## 📢 Updates
 
+- **[July 2026]** 🏆 NeuralActuator received the **Outstanding Systems Paper Award** at RSS 2026.
 - **[July 2026]** Initial release: training, evaluation and inference code for the
   OpenManipulator-X, SO-101 and Franka Panda; the Neural Actuation Dataset (NAD), 450 task
   assignments (430 distinct trajectories) across 45 tasks on the OpenManipulator-X and
@@ -635,6 +636,22 @@ $M\ddot{q} + C\dot{q} + g_{\mathrm{grav}} = \tau + J_v^{\top} f_{\mathrm{ext}}$:
   external force, so both sides of the identity are present and the loop is physically
   closed; the same $f_{\mathrm{ext}}$ is still supervised by the force sensor.
 
+What does explicit coupling mean inside the simulator? The predicted force is applied in the
+differentiable rollout at the grasp point. The clips below apply a known external force
+(left: none; middle: a downward load; right: an upward load, red arrow) on both arms, and
+the end effector moves as expected &mdash; a check that the injection acts correctly:
+
+<table align="center">
+  <tr>
+    <th align="center">OpenManipulator-X</th>
+    <th align="center">SO-101</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/extforce_omx.gif" width="390" alt="OMX: predicted external force injected at the grasp point in the differentiable simulator; no force (static), downward load (arm sags), upward load (arm rises)"></td>
+    <td align="center"><img src="docs/media/extforce_so101.gif" width="390" alt="SO-101: predicted external force injected at the grasp point in the differentiable simulator; no force (static), downward load (arm sags), upward load (arm rises)"></td>
+  </tr>
+</table>
+
 On the OMX combined weight benchmark &mdash; pick-and-place (0 / 200 / 300 / 400 / 500 g)
 and lift-and-hold (0 / 200 / 300 / 400 g) &mdash; a 3-seed from-scratch A/B gives (worst
 per-joint MAE is the worst single task&times;joint cell across all these tasks; force MAE is
@@ -642,13 +659,28 @@ the all-task mean):
 
 | | Implicit (default) | Explicit |
 |---|---|---|
-| Worst per-joint MAE, deg (3-seed mean, range) | 1.5 (1.45&ndash;1.73) | 2.7 (2.60&ndash;2.96) |
-| End-effector force MAE, N (3-seed mean) | 0.06 | 0.09 |
+| Worst per-joint MAE, deg (3-seed mean, range) | 0.88 (0.84&ndash;0.90) | 1.33 (1.00&ndash;1.53) |
+| End-effector force MAE, N (3-seed mean) | 0.06 | 0.08 |
 
 Closing the loop is slightly worse on both metrics: feeding the predicted force back
 during training adds a coupled load the torque head must simultaneously counteract, and the
-gap is largest at the shoulder joint (J2, +0.6&deg; averaged over seeds), which bears the
-largest share of the vertical payload moment. In this paper, we use implicit coupling.
+gap is largest at the shoulder joint (J2, +0.3&deg; averaged over seeds), which bears the
+largest share of the vertical payload moment.
+
+The same comparison on the SO-101 six-payload benchmark &mdash; implicit is the released
+`so101_weight`, explicit a matched from-scratch run (identical protocol, `apply_external_force`
+on), 3 seeds &mdash; shows a much larger gap:
+
+| | Implicit (`so101_weight`) | Explicit (3-seed) |
+|---|---|---|
+| Worst per-joint MAE, deg | 2.50 | 6.9 (6.35&ndash;7.34) |
+| End-effector force MAE, N | 0.22 | 0.33 |
+
+Here the degradation concentrates in the lift-and-hold tasks' shoulder joint and scales with
+payload (J2 reaches ~20&deg; at 500 g): during a sustained hold, the injected end-effector
+force and the torque head's residual leave a large uncompensated shoulder moment that the
+explicit run never resolves, and it also trains less stably. The effect is small on the OMX
+and pronounced on SO-101's sustained-load tasks, so we use implicit coupling in this paper.
 
 ## Hardware and Data Collection
 
