@@ -10,7 +10,7 @@
 
 **Robotics: Science and Systems (RSS) 2026**
 
-<img src="https://img.shields.io/badge/🏆_Outstanding_Systems_Paper_Award-RSS_2026-B8860B" alt="Outstanding Systems Paper Award, RSS 2026">
+<img src="https://img.shields.io/badge/🏆_Outstanding_Systems_Paper_Award-RSS_2026-A31F34" alt="Outstanding Systems Paper Award, RSS 2026">
 
 Zhiyang Dou<sup>1</sup>, John U. Onyemelukwe<sup>1*</sup>, Hangxing Zhang<sup>1*</sup>, Heng Zhang<sup>1</sup>, Minghao Guo<sup>1</sup>, Yunsheng Tian<sup>1</sup>,<br>
 Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>, Peter Yichen Chen<sup>1</sup>, Yuri Ivanov<sup>2&dagger;</sup> and Wojciech Matusik<sup>1</sup>
