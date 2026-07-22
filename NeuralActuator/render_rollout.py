@@ -292,19 +292,15 @@ def set_arm_qpos(robot, mj_model, mj_data, q):
 
 
 def add_force_arrow(scene, anchor, force, scale, rgba):
-    """Tail-anchored force arrow; drawn length clamped above the floor."""
+    """Tail-anchored force arrow at the grasp point, pointing along the force.
+    Length is force * scale with no floor clamp, so the drawn length always
+    reflects the estimated force."""
     mag = float(np.linalg.norm(force))
     if mag < 0.05 or scene.ngeom >= scene.maxgeom:
         return
     origin = np.asarray(anchor, dtype=np.float64)
     vec = np.asarray(force, dtype=np.float64) * scale
     tip = origin + vec
-    if tip[2] < FLOOR_MARGIN and vec[2] < 0:
-        frac = min(max((origin[2] - FLOOR_MARGIN) / (-vec[2]), 0.0), 1.0)
-        vec = vec * frac
-        tip = origin + vec
-        if float(np.linalg.norm(vec)) < 0.01:
-            return
     g = scene.geoms[scene.ngeom]
     mujoco.mjv_initGeom(g, mujoco.mjtGeom.mjGEOM_ARROW,
                         np.zeros(3), np.zeros(3), np.zeros(9),

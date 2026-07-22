@@ -732,7 +732,9 @@ Besides MuJoCo MJX, the trainer can backpropagate through Newton, a rigid-body p
 engine built on NVIDIA Warp, using its Featherstone solver. Network, data, losses and
 protocol are unchanged, so the simulator swap is a controlled ablation. There is a
 PyTorch-native interface and a JAX binding that trains the released Flax model unchanged.
-The code is under `newton/`.
+The code is under `newton/`. Both inference modes are shown, matching the OMX section above.
+
+**Dynamics rollout.**
 
 <table align="center">
   <tr>
@@ -749,6 +751,26 @@ The code is under `newton/`.
     <td align="center"><code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></td>
     <td align="center"><code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></td>
     <td align="center"><code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></td>
+  </tr>
+</table>
+
+**Virtual force sensor.**
+
+<table align="center">
+  <tr>
+    <th align="center">OpenManipulator-X, 300 g</th>
+    <th align="center">OpenManipulator-X, 400 g</th>
+    <th align="center">OpenManipulator-X, 500 g</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/newton_omx_300g_deploy.gif" width="240" alt="OMX 300 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
+    <td align="center"><img src="docs/media/newton_omx_400g_deploy.gif" width="240" alt="OMX 400 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
+    <td align="center"><img src="docs/media/newton_omx_500g_deploy.gif" width="240" alt="OMX 500 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
+  </tr>
+  <tr>
+    <td align="center"><code>python torch_native/newton_rollout.py --force_only ... ; python torch_native/newton_viewer_render.py ...</code></td>
+    <td align="center"><code>python torch_native/newton_rollout.py --force_only ... ; python torch_native/newton_viewer_render.py ...</code></td>
+    <td align="center"><code>python torch_native/newton_rollout.py --force_only ... ; python torch_native/newton_viewer_render.py ...</code></td>
   </tr>
 </table>
 
