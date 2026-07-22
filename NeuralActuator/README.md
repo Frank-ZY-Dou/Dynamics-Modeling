@@ -734,7 +734,23 @@ protocol are unchanged, so the simulator swap is a controlled ablation. There is
 PyTorch-native interface and a JAX binding that trains the released Flax model unchanged.
 The code is under `newton/`.
 
-<p align="center"><img src="docs/media/newton_omx_500g.gif" width="720" alt="OMX 500 g pick-and-place rendered in the Newton viewer: the model prediction (white, left) is advanced by the Newton simulator, next to the recorded ground truth (green, right); the red arrow is the estimated weight force at the gripper"></p>
+<table align="center">
+  <tr>
+    <th align="center">OpenManipulator-X, 300 g</th>
+    <th align="center">OpenManipulator-X, 400 g</th>
+    <th align="center">OpenManipulator-X, 500 g</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/newton_omx_300g.gif" width="240" alt="OMX 300 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+    <td align="center"><img src="docs/media/newton_omx_400g.gif" width="240" alt="OMX 400 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+    <td align="center"><img src="docs/media/newton_omx_500g.gif" width="240" alt="OMX 500 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+  </tr>
+  <tr>
+    <td align="center"><code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></td>
+    <td align="center"><code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></td>
+    <td align="center"><code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></td>
+  </tr>
+</table>
 
 #### Simulation interface
 
