@@ -1,0 +1,11 @@
+<mujoco>
+  <include file="omx_newton.xml"/>
+  <visual><headlight ambient="0.4 0.4 0.4" diffuse="0.8 0.8 0.8"/></visual>
+  <asset><texture type="2d" name="grid" builtin="checker" width="256" height="256"
+     rgb1="0.2 0.3 0.4" rgb2="0.3 0.4 0.5"/>
+    <material name="grid" texture="grid" texrepeat="6 6" reflectance="0.1"/></asset>
+  <worldbody>
+    <light pos="0.5 -0.5 1.2" dir="-0.3 0.3 -1"/>
+    <geom name="floor" type="plane" size="2 2 0.05" material="grid" contype="0" conaffinity="0"/>
+  </worldbody>
+</mujoco>
