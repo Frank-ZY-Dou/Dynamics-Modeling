@@ -31,10 +31,10 @@ Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>,
 - [Evaluation (OpenManipulator-X)](#evaluation-openmanipulator-x)
 - [Inference](#inference)
 - [Results (OpenManipulator-X)](#results-openmanipulator-x)
-- [Additional robotic platforms and variants](#additional-robotic-platforms-and-variants)
-  - [SO-101 (LeRobot arm)](#so-101-lerobot-arm) · [Franka Panda](#franka-panda) · [Residual torque variant](#residual-torque-variant) · [Implicit vs. explicit force coupling with differentiable simulation](#implicit-vs-explicit-force-coupling-with-differentiable-simulation)
 - [Additional differentiable simulation backends](#additional-differentiable-simulation-backends)
   - [Newton (Warp)](#newton-warp)
+- [Additional robotic platforms and variants](#additional-robotic-platforms-and-variants)
+  - [SO-101 (LeRobot arm)](#so-101-lerobot-arm) · [Franka Panda](#franka-panda) · [Residual torque variant](#residual-torque-variant) · [Implicit vs. explicit force coupling with differentiable simulation](#implicit-vs-explicit-force-coupling-with-differentiable-simulation)
 - [Hardware and Data Collection](#hardware-and-data-collection)
 - [Discussion: differentiable simulation and contact](#discussion-differentiable-simulation-and-contact)
 - [Future work](#future-work)
@@ -490,6 +490,124 @@ the threshold, SVM and random-forest detectors from `eval_motor_condition_baseli
 | AUC-ROC | 0.45 | 0.62 | 0.72 | 1.000 |
 </details>
 
+## Additional differentiable simulation backends
+
+### Newton (Warp)
+
+Besides MuJoCo MJX, the trainer can backpropagate through Newton, a rigid-body physics
+engine built on NVIDIA Warp, using its Featherstone solver. Network, data, losses and
+protocol are unchanged, so the simulator swap is a controlled ablation. There is a
+PyTorch-native interface and a JAX binding that trains the released Flax model unchanged.
+The code is under `newton/`. Both inference modes are shown, matching the OMX section above.
+
+**Dynamics rollout.**
+
+<table align="center">
+  <tr>
+    <th align="center">OpenManipulator-X, 300 g</th>
+    <th align="center">OpenManipulator-X, 400 g</th>
+    <th align="center">OpenManipulator-X, 500 g</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/newton_omx_300g.gif" width="240" alt="OMX 300 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+    <td align="center"><img src="docs/media/newton_omx_400g.gif" width="240" alt="OMX 400 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+    <td align="center"><img src="docs/media/newton_omx_500g.gif" width="240" alt="OMX 500 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+  </tr>
+  <tr>
+    <td align="center"><code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></td>
+    <td align="center"><code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></td>
+    <td align="center"><code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></td>
+  </tr>
+</table>
+
+**Virtual force sensor.**
+
+<table align="center">
+  <tr>
+    <th align="center">OpenManipulator-X, 300 g</th>
+    <th align="center">OpenManipulator-X, 400 g</th>
+    <th align="center">OpenManipulator-X, 500 g</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/newton_omx_300g_deploy.gif" width="240" alt="OMX 300 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
+    <td align="center"><img src="docs/media/newton_omx_400g_deploy.gif" width="240" alt="OMX 400 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
+    <td align="center"><img src="docs/media/newton_omx_500g_deploy.gif" width="240" alt="OMX 500 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
+  </tr>
+  <tr>
+    <td align="center"><code>python torch_native/newton_rollout.py --force_only ... ; python torch_native/newton_viewer_render.py ...</code></td>
+    <td align="center"><code>python torch_native/newton_rollout.py --force_only ... ; python torch_native/newton_viewer_render.py ...</code></td>
+    <td align="center"><code>python torch_native/newton_rollout.py --force_only ... ; python torch_native/newton_viewer_render.py ...</code></td>
+  </tr>
+</table>
+
+#### Simulation interface
+
+The robot model, integration rate (four substeps per control step) and contact-free
+setting match the MJX pipeline (see *Discussion: differentiable simulation and contact*).
+Predicted torques enter the solver directly as generalized forces. The two-finger
+equality constraint is reproduced by driving each slider with `F/2` and reading the mean
+coordinate, matching the MJX gripper to 0.044 mm. The measured end-effector force enters
+as `tau_ext = J^T f` through a differentiable forward-kinematics chain, with the solver
+running force-free.
+
+#### Gradients
+
+Each control step is one differentiable operation (`torch.autograd.Function`, or
+`jax.custom_vjp` in the JAX binding). The backward pass re-executes the step under a Warp
+tape, so simulator memory is independent of rollout length; the PyTorch interface also
+replays both passes as captured CUDA graphs. The test suite checks gradients against a
+float64 MJX reference (cosine similarity above 0.9999), finite differences, and the two
+interfaces against each other.
+
+#### Runtime
+
+One training step (forward and backward through network and simulator) on an A100 at
+batch size 16, 128-step rollouts:
+
+| Simulator | Interface | Step time |
+|---|---|---|
+| MuJoCo MJX | JAX | 8 ms |
+| Newton | JAX | 22 ms |
+| Newton | PyTorch | 24 ms |
+
+Runtime is overhead-bound at this problem size; most of Newton's extra time is the
+backward pass's adjoint kernels, shared by both interfaces.
+
+#### Usage
+
+```bash
+cd newton
+
+# train (PyTorch interface)
+python torch_native/train_newton_torch.py --config configs/omx_newton.yaml \
+    --log_json outputs/newton_run/train_log.jsonl
+
+# evaluate: convert to the released Flax format, then score with the standard script
+python torch_native/export_flax.py --ckpt <ckpt>.pt --out <ckpt>_flax.pkl --use_ema
+python ../evaluate_actuator.py --model_path <ckpt>_flax.pkl \
+    --config ../configs/weight_all.yaml --output <results>.json
+
+# JAX binding (trains the released Flax model unchanged)
+python train_newton_implicit.py --config configs/omx_newton.yaml --backend newton
+```
+
+Checkpoints carry optimizer and RNG state, so `--resume` continues an interrupted run.
+
+#### Results
+
+Scored by `evaluate_actuator.py` on the nine weight-benchmark tasks (EMA weights, 600-step
+window; three seeds, range in brackets).
+
+| Coupling | J1 | J2 | J3 | J4 | Arm mean (deg) | Grip (mm) |
+|---|---|---|---|---|---|---|
+| Implicit | 0.65 | 0.69 | 0.70 | 0.61 | 0.66 [0.62-0.69] | 0.14 |
+| Explicit | 0.83 | 1.34 | 1.34 | 0.77 | 1.07 [0.87-1.23] | 0.22 |
+
+At a matched budget, implicit coupling beats explicit by about 1.6x in arm error. MJX
+shows the same ordering and a similar gap (0.88 vs 1.33 deg, 1.5x; see *Implicit vs.
+explicit force coupling with differentiable simulation*), so the comparison holds across
+simulators.
+
 ## Additional robotic platforms and variants
 
 ### SO-101 (LeRobot arm)
@@ -723,124 +841,6 @@ wiring, motor IDs, ports, and the recording workflow:
 `hardware/` holds the stand-alone sensor readers used during collection:
 `hardware/force_sensoring/` streams the 6-axis F/T sensor and
 `hardware/force_gauge_reader.py` reads the ZP-500N over serial.
-
-## Additional differentiable simulation backends
-
-### Newton (Warp)
-
-Besides MuJoCo MJX, the trainer can backpropagate through Newton, a rigid-body physics
-engine built on NVIDIA Warp, using its Featherstone solver. Network, data, losses and
-protocol are unchanged, so the simulator swap is a controlled ablation. There is a
-PyTorch-native interface and a JAX binding that trains the released Flax model unchanged.
-The code is under `newton/`. Both inference modes are shown, matching the OMX section above.
-
-**Dynamics rollout.**
-
-<table align="center">
-  <tr>
-    <th align="center">OpenManipulator-X, 300 g</th>
-    <th align="center">OpenManipulator-X, 400 g</th>
-    <th align="center">OpenManipulator-X, 500 g</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/media/newton_omx_300g.gif" width="240" alt="OMX 300 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-    <td align="center"><img src="docs/media/newton_omx_400g.gif" width="240" alt="OMX 400 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-    <td align="center"><img src="docs/media/newton_omx_500g.gif" width="240" alt="OMX 500 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-  </tr>
-  <tr>
-    <td align="center"><code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></td>
-    <td align="center"><code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></td>
-    <td align="center"><code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></td>
-  </tr>
-</table>
-
-**Virtual force sensor.**
-
-<table align="center">
-  <tr>
-    <th align="center">OpenManipulator-X, 300 g</th>
-    <th align="center">OpenManipulator-X, 400 g</th>
-    <th align="center">OpenManipulator-X, 500 g</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/media/newton_omx_300g_deploy.gif" width="240" alt="OMX 300 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
-    <td align="center"><img src="docs/media/newton_omx_400g_deploy.gif" width="240" alt="OMX 400 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
-    <td align="center"><img src="docs/media/newton_omx_500g_deploy.gif" width="240" alt="OMX 500 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
-  </tr>
-  <tr>
-    <td align="center"><code>python torch_native/newton_rollout.py --force_only ... ; python torch_native/newton_viewer_render.py ...</code></td>
-    <td align="center"><code>python torch_native/newton_rollout.py --force_only ... ; python torch_native/newton_viewer_render.py ...</code></td>
-    <td align="center"><code>python torch_native/newton_rollout.py --force_only ... ; python torch_native/newton_viewer_render.py ...</code></td>
-  </tr>
-</table>
-
-#### Simulation interface
-
-The robot model, integration rate (four substeps per control step) and contact-free
-setting match the MJX pipeline (see *Discussion: differentiable simulation and contact*).
-Predicted torques enter the solver directly as generalized forces. The two-finger
-equality constraint is reproduced by driving each slider with `F/2` and reading the mean
-coordinate, matching the MJX gripper to 0.044 mm. The measured end-effector force enters
-as `tau_ext = J^T f` through a differentiable forward-kinematics chain, with the solver
-running force-free.
-
-#### Gradients
-
-Each control step is one differentiable operation (`torch.autograd.Function`, or
-`jax.custom_vjp` in the JAX binding). The backward pass re-executes the step under a Warp
-tape, so simulator memory is independent of rollout length; the PyTorch interface also
-replays both passes as captured CUDA graphs. The test suite checks gradients against a
-float64 MJX reference (cosine similarity above 0.9999), finite differences, and the two
-interfaces against each other.
-
-#### Runtime
-
-One training step (forward and backward through network and simulator) on an A100 at
-batch size 16, 128-step rollouts:
-
-| Simulator | Interface | Step time |
-|---|---|---|
-| MuJoCo MJX | JAX | 8 ms |
-| Newton | JAX | 22 ms |
-| Newton | PyTorch | 24 ms |
-
-Runtime is overhead-bound at this problem size; most of Newton's extra time is the
-backward pass's adjoint kernels, shared by both interfaces.
-
-#### Usage
-
-```bash
-cd newton
-
-# train (PyTorch interface)
-python torch_native/train_newton_torch.py --config configs/omx_newton.yaml \
-    --log_json outputs/newton_run/train_log.jsonl
-
-# evaluate: convert to the released Flax format, then score with the standard script
-python torch_native/export_flax.py --ckpt <ckpt>.pt --out <ckpt>_flax.pkl --use_ema
-python ../evaluate_actuator.py --model_path <ckpt>_flax.pkl \
-    --config ../configs/weight_all.yaml --output <results>.json
-
-# JAX binding (trains the released Flax model unchanged)
-python train_newton_implicit.py --config configs/omx_newton.yaml --backend newton
-```
-
-Checkpoints carry optimizer and RNG state, so `--resume` continues an interrupted run.
-
-#### Results
-
-Scored by `evaluate_actuator.py` on the nine weight-benchmark tasks (EMA weights, 600-step
-window; three seeds, range in brackets).
-
-| Coupling | J1 | J2 | J3 | J4 | Arm mean (deg) | Grip (mm) |
-|---|---|---|---|---|---|---|
-| Implicit | 0.65 | 0.69 | 0.70 | 0.61 | 0.66 [0.62-0.69] | 0.14 |
-| Explicit | 0.83 | 1.34 | 1.34 | 0.77 | 1.07 [0.87-1.23] | 0.22 |
-
-At a matched budget, implicit coupling beats explicit by about 1.6x in arm error. MJX
-shows the same ordering and a similar gap (0.88 vs 1.33 deg, 1.5x; see *Implicit vs.
-explicit force coupling with differentiable simulation*), so the comparison holds across
-simulators.
 
 ## Discussion: differentiable simulation and contact
 
