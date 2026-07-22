@@ -734,6 +734,8 @@ protocol are unchanged, so the simulator swap is a controlled ablation. There is
 PyTorch-native interface and a JAX binding that trains the released Flax model unchanged.
 The code is under `newton/`.
 
+<p align="center"><img src="docs/media/newton_omx_500g.gif" width="720" alt="OMX 500 g pick-and-place rendered in the Newton viewer: the model prediction (white, left) is advanced by the Newton simulator, next to the recorded ground truth (green, right); the red arrow is the estimated weight force at the gripper"></p>
+
 #### Simulation interface
 
 The robot model, integration rate (four substeps per control step) and contact-free

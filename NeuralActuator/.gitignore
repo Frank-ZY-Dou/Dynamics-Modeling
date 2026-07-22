@@ -4,3 +4,5 @@ outputs/
 *.pkl
 *.npz
 .DS_Store
+prompt.txt
+prompt.txt
