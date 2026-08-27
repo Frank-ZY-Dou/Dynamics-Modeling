@@ -109,7 +109,40 @@ the paper are 42, 123 and 456; `--dataset hy3d` uses the bundled
 generated-mesh pool, and `--dataset thingi` streams meshes through the
 `thingi10k` package on first use.
 
-The GPU solver requires an NVIDIA GPU and `warp-lang`:
+### CPU solver at more sizes
+
+```bash
+python examples/run_kubric.py --N 100  --seed 42
+python examples/run_kubric.py --N 500  --seed 42
+python examples/run_kubric.py --N 1000 --seed 42
+```
+
+| N | init pen. | final pen. | RMSD | solve |
+|---|---|---|---|---|
+| 40 | 30 | 0 | 0.0379 | 0.27 s |
+| 100 | 80 | 0 | 0.0333 | 0.62 s |
+| 500 | 371 | 0 | 0.0344 | 4.5 s |
+| 1000 | 759 | 0 | 0.0348 | 13.1 s |
+
+### GPU solver
+
+Requires an NVIDIA GPU and `warp-lang`; the first call in a process pays
+a one-time kernel-compilation and allocation cost, included in the times
+below.
+
+```bash
+python examples/run_kubric.py --N 40   --seed 42 --solver gpu
+python examples/run_kubric.py --N 1000 --seed 42 --solver gpu
+```
+
+| N | init pen. | final pen. | RMSD | total |
+|---|---|---|---|---|
+| 40 | 30 | 0 | 0.0372 | 6.4 s |
+| 100 | 80 | 0 | 0.0347 | 6.7 s |
+| 500 | 371 | 0 | 0.0343 | 9.6 s |
+| 1000 | 759 | 0 | 0.0341 | 15.7 s |
+
+The GPU pipeline is also callable directly:
 
 ```python
 from s4r_gpu.s4r_gpu_native import solve_s4r_gpu
