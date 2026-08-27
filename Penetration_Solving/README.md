@@ -17,6 +17,11 @@ Yuan Liu<sup>5</sup>, Junfeng Yao<sup>2</sup>, Xiaohu Guo<sup>6</sup>, Wenping W
 <sub><sup>*</sup>Equal contribution.&emsp;<sup>&dagger;</sup>Corresponding author.</sub>
 
 <img src="assets/teaser.png" alt="S4R teaser" width="100%">
+<p align="left"><sub><b>S4R resolves severe rigid-body interpenetrations at scale and produces
+simulation-ready scenes.</b> <b>Left:</b> progressive scaling of 1,000 Kubric assets arranged to
+spell &ldquo;SIGGRAPH ASIA,&rdquo; from an interpenetrating initialization to a penetration-free
+configuration. <b>Right:</b> S4R efficiently converts cluttered 3D assets into simulation-ready
+scenes for downstream robot policy training.</sub></p>
 </div>
 
 ## Overview
