@@ -109,6 +109,9 @@ the paper are 42, 123 and 456; `--dataset hy3d` uses the bundled
 generated-mesh pool, and `--dataset thingi` streams meshes through the
 `thingi10k` package on first use.
 
+All timings below were measured on an Intel Xeon E5-2680 v4 CPU
+(2.40 GHz) and an NVIDIA GeForce RTX 2080 Ti GPU.
+
 ### CPU solver at more sizes
 
 ```bash
@@ -124,6 +127,7 @@ python examples/run_kubric.py --N 1000 --seed 42
 | 500 | 371 | 0 | 0.0344 | 4.5 s |
 | 1000 | 759 | 0 | 0.0348 | 13.1 s |
 | 2000 | 1587 | 0 | 0.0371 | 32.5 s |
+| 3000 | 2423 | 0 | 0.0372 | 66.3 s |
 
 ### GPU solver
 
@@ -143,6 +147,7 @@ python examples/run_kubric.py --N 1000 --seed 42 --solver gpu
 | 500 | 371 | 0 | 0.0343 | 9.6 s |
 | 1000 | 759 | 0 | 0.0341 | 15.7 s |
 | 2000 | 1587 | 0 | 0.0354 | 34.6 s |
+| 3000 | 2423 | 0 | 0.0359 | 65.8 s |
 
 The GPU pipeline is also callable directly:
 
