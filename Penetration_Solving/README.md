@@ -91,7 +91,7 @@ Penetration_Solving/
 │   ├── generate_hy3d_scene.py
 │   └── generate_thingi10k_scene.py
 ├── data/
-│   ├── kubric_pool/         41 watertight household meshes (19 MB)
+│   ├── kubric_pool/         40 watertight household meshes (19 MB)
 │   └── hy3d_processed/      300 generated volume meshes, decimated to ≤1500 faces (175 MB)
 ├── examples/            end-to-end demos (run_kubric.py, run_upright.py)
 └── requirements.txt
@@ -99,10 +99,17 @@ Penetration_Solving/
 
 ## Getting started
 
+Install the core (CPU) dependencies and run the demo:
+
 ```bash
 pip install -r requirements.txt
 python examples/run_kubric.py --N 40 --seed 42
 ```
+
+`requirements.txt` installs only the core CPU stack. The optional extras
+(`warp-lang` for the GPU solver, `thingi10k` for `--dataset thingi`) are
+**not** pulled in by the line above; install them separately as shown
+below.
 
 Expected output on the bundled Kubric pool:
 
@@ -180,7 +187,7 @@ the JSON holds the poses of every stage (`init`, `s30`, `s60`, `s90`,
 
 ## Data
 
-- `data/kubric_pool/` — the 41-mesh household-object pool used by the
+- `data/kubric_pool/` — the 40-mesh household-object pool used by the
   Kubric benchmarks. Meshes originate from Google Scanned Objects
   (CC-BY 4.0); attribution to the original dataset applies.
 - `data/hy3d_processed/` — 300 watertight volume meshes generated with
@@ -189,9 +196,9 @@ the JSON holds the poses of every stage (`init`, `s30`, `s60`, `s90`,
   and collision geometry). The generator is governed by the Tencent
   Hunyuan3D Community License; the generated meshes are distributed here
   for research use.
-- Thingi10K scenes download on demand via the `thingi10k` package;
-  per-model licenses are preserved by upstream and nothing is
-  redistributed here.
+- Thingi10K scenes download on demand via the `thingi10k` package
+  (`pip install thingi10k`); per-model licenses are preserved by upstream
+  and nothing is redistributed here.
 
 ## Citation
 
