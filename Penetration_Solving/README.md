@@ -15,6 +15,13 @@ Yuan Liu<sup>5</sup>, Junfeng Yao<sup>2</sup>, Xiaohu Guo<sup>6</sup>, Wenping W
 <sup>5</sup>The Hong Kong University of Science and Technology&emsp;<sup>6</sup>The University of Texas at Dallas&emsp;<sup>7</sup>Texas A&amp;M University
 
 <sub><sup>*</sup>Equal contribution.&emsp;<sup>&dagger;</sup>Corresponding author.</sub>
+
+<img src="assets/teaser.png" alt="S4R teaser" width="100%">
+<p align="left"><sub><b>S4R resolves severe rigid-body interpenetrations at scale and produces
+simulation-ready scenes.</b> <b>Left:</b> progressive scaling of 1,000 Kubric assets arranged to
+spell &ldquo;SIGGRAPH ASIA,&rdquo; from an interpenetrating initialization to a penetration-free
+configuration. <b>Right:</b> S4R efficiently converts cluttered 3D assets into simulation-ready
+scenes for downstream robot policy training.</sub></p>
 </div>
 
 ## Overview
@@ -86,7 +93,7 @@ Penetration_Solving/
 ├── data/
 │   ├── kubric_pool/         40 watertight household meshes (19 MB)
 │   └── hy3d_processed/      300 generated volume meshes, decimated to ≤1500 faces (175 MB)
-├── examples/run_kubric.py   end-to-end demo
+├── examples/            end-to-end demos (run_kubric.py, run_upright.py)
 └── requirements.txt
 ```
 
@@ -116,12 +123,67 @@ the paper are 42, 123 and 456; `--dataset hy3d` uses the bundled
 generated-mesh pool, and `--dataset thingi` streams meshes through the
 `thingi10k` package on first use.
 
-The GPU solver requires an NVIDIA GPU and `warp-lang`
-(`pip install "warp-lang>=1.5"`):
+All timings below were measured on an Intel Xeon E5-2680 v4 CPU
+(2.40 GHz) and an NVIDIA GeForce RTX 2080 Ti GPU.
+
+### CPU solver at more sizes
+
+```bash
+python examples/run_kubric.py --N 100  --seed 42
+python examples/run_kubric.py --N 500  --seed 42
+python examples/run_kubric.py --N 1000 --seed 42
+```
+
+| N | init pen. | final pen. | RMSD | solve |
+|---|---|---|---|---|
+| 40 | 30 | 0 | 0.0379 | 0.27 s |
+| 100 | 80 | 0 | 0.0333 | 0.62 s |
+| 500 | 371 | 0 | 0.0344 | 4.5 s |
+| 1000 | 759 | 0 | 0.0348 | 13.1 s |
+| 2000 | 1587 | 0 | 0.0371 | 32.5 s |
+| 3000 | 2423 | 0 | 0.0372 | 66.3 s |
+
+### GPU solver
+
+Requires an NVIDIA GPU and `warp-lang`; the first call in a process pays
+a one-time kernel-compilation and allocation cost, included in the times
+below.
+
+```bash
+python examples/run_kubric.py --N 40   --seed 42 --solver gpu
+python examples/run_kubric.py --N 1000 --seed 42 --solver gpu
+```
+
+| N | init pen. | final pen. | RMSD | total |
+|---|---|---|---|---|
+| 40 | 30 | 0 | 0.0372 | 6.4 s |
+| 100 | 80 | 0 | 0.0347 | 6.7 s |
+| 500 | 371 | 0 | 0.0343 | 9.6 s |
+| 1000 | 759 | 0 | 0.0341 | 15.7 s |
+| 2000 | 1587 | 0 | 0.0354 | 34.6 s |
+| 3000 | 2423 | 0 | 0.0359 | 65.8 s |
+
+The GPU pipeline is also callable directly:
 
 ```python
 from s4r_gpu.s4r_gpu_native import solve_s4r_gpu
 ```
+
+### Upright-on-plane repair with rotation
+
+The tabletop variant keeps every object standing on a common support
+plane: roll/pitch tilt is driven to zero along the scale path while each
+step optimizes in-plane translation and yaw. Snapshots at 30/60/90%
+inflation and the final state are written to a JSON file.
+
+```bash
+python examples/run_upright.py --output upright_seed42.json  --N 12 --seed 42  --min-init-pen 8
+python examples/run_upright.py --output upright_seed123.json --N 12 --seed 123 --min-init-pen 8
+```
+
+Both runs end with `final pen=0` and all objects upright on the plane;
+the JSON holds the poses of every stage (`init`, `s30`, `s60`, `s90`,
+`final`) for rendering.
 
 ## Data
 

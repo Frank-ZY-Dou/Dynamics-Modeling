@@ -1896,6 +1896,12 @@ if __name__ == "__main__":
                         help='Enable rotation DOFs (6-DOF QP + SO(3) optimization, slower)')
     parser.add_argument('--dual', action='store_true', help='Use dual QP formulation')
     parser.add_argument('--verbose', '-v', action='store_true')
+    parser.add_argument('--dump-trajectory', type=str, default=None,
+                        help='If set, write a per-scale-step trajectory JSON for external '
+                             'viewer. May be a full path or a bare scene name (resolved under '
+                             'vis/video/public/trajectories/<name>.json). Only the first seed is dumped.')
+    parser.add_argument('--dump-every', type=int, default=1,
+                        help='Capture every Nth scale step when --dump-trajectory is set.')
     args = parser.parse_args()
 
     from make_scene import make_scene
