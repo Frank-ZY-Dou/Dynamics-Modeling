@@ -1,28 +1,28 @@
 {
-  "id": "hy3d_3c266158b706256b",
-  "kwargs": {
-    "bounds": [
-      [
-        -0.48207715051423483,
-        -0.9851619997956755,
-        -0.7350400771969382
-      ],
-      [
-        0.48207715051423483,
-        0.9851619997956755,
-        0.7350400771969382
-      ]
-    ]
-  },
-  "normalize_factor": 0.050753074124225354,
-  "num_vertices": 644,
-  "num_faces": 1500,
-  "concavity": 0.11863114069274339,
-  "watertight": false,
-  "winding_consistent": true,
-  "is_volume": false,
-  "source_ply": "3c266158b706256b25b19e7a880b9507.ply",
-  "split": "train",
-  "num_faces_original": 5000,
-  "decimated_from": "/mnt/data/Frank/codes/MIT_Collision_Resolving/downloaded_S4R/hy3d_processed/hy3d_227_3c266158b706256b/collision_geometry.obj"
+ "id": "hy3d_3c266158b706256b",
+ "kwargs": {
+  "bounds": [
+   [
+    -0.48207715051423483,
+    -0.9851619997956755,
+    -0.7350400771969382
+   ],
+   [
+    0.48207715051423483,
+    0.9851619997956755,
+    0.7350400771969382
+   ]
+  ]
+ },
+ "normalize_factor": 0.050753074124225354,
+ "num_vertices": 644,
+ "num_faces": 1500,
+ "concavity": 0.11863114069274339,
+ "watertight": false,
+ "winding_consistent": true,
+ "is_volume": false,
+ "source_ply": "3c266158b706256b25b19e7a880b9507.ply",
+ "split": "train",
+ "num_faces_original": 5000,
+ "decimated_from": "hy3d_227_3c266158b706256b/collision_geometry.obj"
 }

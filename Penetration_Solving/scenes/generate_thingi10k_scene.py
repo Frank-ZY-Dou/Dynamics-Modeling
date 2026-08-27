@@ -1,7 +1,7 @@
 """Generate scenes from Thingi10K for the S4R-QP cross-dataset benchmark.
 
 Filters for closed, manifold, non-self-intersecting meshes with 500-5000
-vertices (matching HOP-Net's mesh-complexity band). The same generator
+vertices (matching the Kubric pool's mesh-complexity band). The same generator
 API as generate_kubric_scene: returns MeshObject list.
 """
 from __future__ import annotations

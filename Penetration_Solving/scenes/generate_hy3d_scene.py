@@ -9,7 +9,7 @@ HY3D mesh directories share the Kubric pool layout
 num_faces instead of nr_vertices as the decimation budget; some packaged
 meshes slipped past the ≤5000-face cap.
 We re-filter here by num_faces to keep narrowphase cost bounded and match
-HOP-Net/Thingi10K complexity (≤ 5000 faces ≈ ≤ 2500 verts).
+Kubric/Thingi10K complexity (≤ 5000 faces ≈ ≤ 2500 verts).
 """
 from __future__ import annotations
 import os

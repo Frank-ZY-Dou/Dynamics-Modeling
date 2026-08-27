@@ -1,4 +1,4 @@
-"""Triangle-mesh collision oracle for non-convex HOP-Net objects.
+"""Triangle-mesh collision oracle for non-convex Kubric objects.
 
 Default pair-signed-distance backend is FCL (both during the solve loop in
 MeshOracle and in the end-of-run evaluator evaluate_world_collision_meshes).
@@ -62,7 +62,7 @@ def _load_json_relaxed(path: Path) -> dict:
 def _load_Kubric_object_cached(obj_dir_str: str, target_size: float) -> dict:
     """Memoised mesh loader keyed on (path, target_size).
 
-    HOP-Net pool has ~41 unique meshes; at N=30000 scenes each is sampled
+    Kubric pool has ~41 unique meshes; at N=30000 scenes each is sampled
     ~730× on average. Without the cache we'd hit the disk + run trimesh's
     OBJ parser that many times — ≈4 min of pre-roll wall at N=30000.
     Returned dicts are READ-ONLY by convention (the numpy arrays inside
@@ -572,7 +572,7 @@ def scan_eligible_objects(
     kubric_dir: str | Path,
     max_verts: int = 5000,
 ) -> List[Path]:
-    """Scan HOP-Net directory and return sorted list of eligible object dirs."""
+    """Scan Kubric directory and return sorted list of eligible object dirs."""
     kubric_dir = Path(kubric_dir)
     eligible: List[Path] = []
 
@@ -605,7 +605,7 @@ def generate_kubric_scene(
     max_verts: int = 5000,
     allow_repeat: bool = True,
 ) -> List[MeshObject]:
-    """Generate a scene of randomly placed HOP-Net objects.
+    """Generate a scene of randomly placed Kubric objects.
 
     Returns List[MeshObject] with random positions and rotations.
     Same seed + call order can be replicated in run_s4r_Kubric.py.
@@ -615,7 +615,7 @@ def generate_kubric_scene(
     """
     eligible = scan_eligible_objects(kubric_dir, max_verts)
     if len(eligible) == 0:
-        raise ValueError("No eligible HOP-Net objects found.")
+        raise ValueError("No eligible Kubric objects found.")
 
     rng = np.random.RandomState(seed)
     replace = allow_repeat and (n_objects > len(eligible))
