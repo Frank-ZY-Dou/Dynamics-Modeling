@@ -86,7 +86,7 @@ Penetration_Solving/
 ├── data/
 │   ├── kubric_pool/         41 watertight household meshes (19 MB)
 │   └── hy3d_processed/      300 generated volume meshes, decimated to ≤1500 faces (175 MB)
-├── examples/run_kubric.py   end-to-end demo
+├── examples/            end-to-end demos (run_kubric.py, run_upright.py)
 └── requirements.txt
 ```
 
@@ -123,6 +123,7 @@ python examples/run_kubric.py --N 1000 --seed 42
 | 100 | 80 | 0 | 0.0333 | 0.62 s |
 | 500 | 371 | 0 | 0.0344 | 4.5 s |
 | 1000 | 759 | 0 | 0.0348 | 13.1 s |
+| 2000 | 1587 | 0 | 0.0371 | 32.5 s |
 
 ### GPU solver
 
@@ -141,12 +142,29 @@ python examples/run_kubric.py --N 1000 --seed 42 --solver gpu
 | 100 | 80 | 0 | 0.0347 | 6.7 s |
 | 500 | 371 | 0 | 0.0343 | 9.6 s |
 | 1000 | 759 | 0 | 0.0341 | 15.7 s |
+| 2000 | 1587 | 0 | 0.0354 | 34.6 s |
 
 The GPU pipeline is also callable directly:
 
 ```python
 from s4r_gpu.s4r_gpu_native import solve_s4r_gpu
 ```
+
+### Upright-on-plane repair with rotation
+
+The tabletop variant keeps every object standing on a common support
+plane: roll/pitch tilt is driven to zero along the scale path while each
+step optimizes in-plane translation and yaw. Snapshots at 30/60/90%
+inflation and the final state are written to a JSON file.
+
+```bash
+python examples/run_upright.py --output upright_seed42.json  --N 12 --seed 42  --min-init-pen 8
+python examples/run_upright.py --output upright_seed123.json --N 12 --seed 123 --min-init-pen 8
+```
+
+Both runs end with `final pen=0` and all objects upright on the plane;
+the JSON holds the poses of every stage (`init`, `s30`, `s60`, `s90`,
+`final`) for rendering.
 
 ## Data
 

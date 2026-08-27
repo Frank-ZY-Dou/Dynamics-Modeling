@@ -1899,7 +1899,7 @@ if __name__ == "__main__":
                         help='Max concavity ratio for --concave mode')
     parser.add_argument('--verbose', '-v', action='store_true')
     parser.add_argument('--dump-trajectory', type=str, default=None,
-                        help='If set, write a per-scale-step trajectory JSON for the Remotion '
+                        help='If set, write a per-scale-step trajectory JSON for external '
                              'viewer. May be a full path or a bare scene name (resolved under '
                              'vis/video/public/trajectories/<name>.json). Only the first seed is dumped.')
     parser.add_argument('--dump-every', type=int, default=1,
