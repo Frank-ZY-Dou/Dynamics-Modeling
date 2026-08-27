@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "BlueBlack_Nintendo_3DSXL",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.07822148069097744,
+                -0.06662406069741225,
+                -0.022235841122592446
+            ],
+            [
+                0.07837751930902256,
+                0.06703793930258775,
+                0.07041915887740756
+            ]
+        ],
+        "mass": 0.0002819490926389253,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "None",
+        "description": "Blue/Black Nintendo 3DS?XL\nThe Nintendo 3DS XL system combines next-generation portable gaming with eye-popping 3D\nvisuals?without the need for special glasses. Take 3D photos, connect to friends, other players, or wireless hotspots with the wireless StreetPass? and SpotPass? communication modes. From games to photos and beyond, Nintendo 3DS XL is the ultimate 3D entertainment system. It comes bundled with a 4GB SD card, making it perfect for downloading content from the Nintendo eShop.\n\nThe Nintendo 3DS XL system plays all Nintendo DS games. Nintendo DS games will not appear in 3D.",
+        "nr_faces": 5932,
+        "nr_vertices": 3100,
+        "surface_area": 0.06082552731493379,
+        "volume": 0.0002819490926389253
+    }
+}

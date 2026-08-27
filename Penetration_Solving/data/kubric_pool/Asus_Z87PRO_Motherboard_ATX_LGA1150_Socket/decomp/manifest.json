@@ -1,0 +1,17 @@
+{
+  "source_obj": "Asus_Z87PRO_Motherboard_ATX_LGA1150_Socket/collision_geometry.obj",
+  "n_pieces": 1,
+  "decompose_time_sec": 0.07123422622680664,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 64,
+      "n_faces": 124
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "source_obj": "Nescafe_Memento_Latte_Caramel_8_08_oz_23_g_packets_64_oz_184_g/collision_geometry.obj",
+  "n_pieces": 1,
+  "decompose_time_sec": 0.06823134422302246,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 64,
+      "n_faces": 124
+    }
+  ]
+}

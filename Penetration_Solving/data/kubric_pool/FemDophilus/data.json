@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "FemDophilus",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.0290304204299725,
+                -0.02944823944534854,
+                -0.05681633922171186
+            ],
+            [
+                0.028951579570027502,
+                0.029768760554651462,
+                0.057765660778288146
+            ]
+        ],
+        "mass": 0.0003616578542501588,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Fem-Dophilus\nFem-dophilus contains two patented and clinically documented probiotic strains, Lactobacillus rhamnosus, GR-1  and Lactobacillus reuteri, RC-14, discovered and developed by Dr. Gregor  Reid and Dr. Andrew Bruce at  Urex Biotech. Over 20 years of research supports the oral use of GR-1 and RC-14 to colonize and protect the vaginal tract.* Clinical trials have shown that GR-1 and RC-14: Help to maintain or restore healthy vaginal  flora that are important in maintaining  vaginal health.* Support the health of the urinary tract.* Fem-dophilus is manufactured under pharmaceutical GMP conditions insuring potency and consistency. The probiotic strains in fem-dophilus are in a proprietary polysaccharide matrix, which protects the bacteria from stomach acid and enhances probiotic bacteria survival to the lower intestine.* *These statements have not been evaluated by the Food and Drug Administration. This product is not intended to diagnose, treat, cure, or prevent any disease.",
+        "nr_faces": 3272,
+        "nr_vertices": 1785,
+        "surface_area": 0.03087824989391996,
+        "volume": 0.0003616578542501588
+    }
+}

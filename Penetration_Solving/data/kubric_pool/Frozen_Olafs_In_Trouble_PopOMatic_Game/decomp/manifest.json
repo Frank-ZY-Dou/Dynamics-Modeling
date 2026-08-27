@@ -1,0 +1,17 @@
+{
+  "source_obj": "Frozen_Olafs_In_Trouble_PopOMatic_Game/collision_geometry.obj",
+  "n_pieces": 1,
+  "decompose_time_sec": 0.08150601387023926,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 64,
+      "n_faces": 124
+    }
+  ]
+}

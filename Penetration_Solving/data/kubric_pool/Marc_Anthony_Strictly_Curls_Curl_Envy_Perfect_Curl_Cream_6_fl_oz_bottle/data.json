@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Marc_Anthony_Strictly_Curls_Curl_Envy_Perfect_Curl_Cream_6_fl_oz_bottle",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.042400455109873135,
+                -0.028147538905083633,
+                -0.11155986870187472
+            ],
+            [
+                0.04170254489012687,
+                0.02785346109491637,
+                0.11190413129812526
+            ]
+        ],
+        "mass": 0.0009183787029902349,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Marc Anthony Strictly Curls Curl Envy Perfect Curl Cream - 6 fl oz bottle",
+        "nr_faces": 4828,
+        "nr_vertices": 2515,
+        "surface_area": 0.06406720431639285,
+        "volume": 0.0009183787029902349
+    }
+}

@@ -1,0 +1,23 @@
+{
+  "source_obj": "Bifidus_Balance_FOS/collision_geometry.obj",
+  "n_pieces": 2,
+  "decompose_time_sec": 11.160399198532104,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 1604,
+      "n_faces": 3204
+    },
+    {
+      "id": 1,
+      "obj": "part_001.obj",
+      "n_verts": 3209,
+      "n_faces": 6414
+    }
+  ]
+}

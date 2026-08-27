@@ -1,0 +1,107 @@
+{
+  "source_obj": "Ecoforms_Plant_Container_Quadra_Turquoise_QP12/collision_geometry.obj",
+  "n_pieces": 16,
+  "decompose_time_sec": 55.34444332122803,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 424,
+      "n_faces": 844
+    },
+    {
+      "id": 1,
+      "obj": "part_001.obj",
+      "n_verts": 99,
+      "n_faces": 194
+    },
+    {
+      "id": 2,
+      "obj": "part_002.obj",
+      "n_verts": 508,
+      "n_faces": 1012
+    },
+    {
+      "id": 3,
+      "obj": "part_003.obj",
+      "n_verts": 440,
+      "n_faces": 876
+    },
+    {
+      "id": 4,
+      "obj": "part_004.obj",
+      "n_verts": 481,
+      "n_faces": 958
+    },
+    {
+      "id": 5,
+      "obj": "part_005.obj",
+      "n_verts": 130,
+      "n_faces": 256
+    },
+    {
+      "id": 6,
+      "obj": "part_006.obj",
+      "n_verts": 208,
+      "n_faces": 412
+    },
+    {
+      "id": 7,
+      "obj": "part_007.obj",
+      "n_verts": 111,
+      "n_faces": 218
+    },
+    {
+      "id": 8,
+      "obj": "part_008.obj",
+      "n_verts": 377,
+      "n_faces": 750
+    },
+    {
+      "id": 9,
+      "obj": "part_009.obj",
+      "n_verts": 212,
+      "n_faces": 420
+    },
+    {
+      "id": 10,
+      "obj": "part_010.obj",
+      "n_verts": 215,
+      "n_faces": 426
+    },
+    {
+      "id": 11,
+      "obj": "part_011.obj",
+      "n_verts": 250,
+      "n_faces": 496
+    },
+    {
+      "id": 12,
+      "obj": "part_012.obj",
+      "n_verts": 184,
+      "n_faces": 364
+    },
+    {
+      "id": 13,
+      "obj": "part_013.obj",
+      "n_verts": 376,
+      "n_faces": 748
+    },
+    {
+      "id": 14,
+      "obj": "part_014.obj",
+      "n_verts": 193,
+      "n_faces": 382
+    },
+    {
+      "id": 15,
+      "obj": "part_015.obj",
+      "n_verts": 219,
+      "n_faces": 434
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Nescafe_Memento_Latte_Caramel_8_08_oz_23_g_packets_64_oz_184_g",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.04631695800895645,
+                -0.03201273579595887,
+                -0.08033823038192413
+            ],
+            [
+                0.04554804199104355,
+                0.03202226420404113,
+                0.08030376961807587
+            ]
+        ],
+        "mass": 0.0008823516108587967,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Nescafe Memento Latte, Caramel - 8 - 0.8 oz (23 g) packets [6.4 oz (184 g)]\nSpecialty coffee beverage. Good food, good life. Good Question: How can I get coffeehouse quality foam that lasts until the final sip? Good to Know: By using real nonfat milk infused with airy bubbles NesCafe Memento brings you the frothy, foamy goodness you love. Natural source of antioxidants. 269 mg of antioxidants per serving. Product of Mexico.",
+        "nr_faces": 3992,
+        "nr_vertices": 2109,
+        "surface_area": 0.057424150384485714,
+        "volume": 0.0008823516108587967
+    }
+}

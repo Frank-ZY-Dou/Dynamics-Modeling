@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Tetris_Link_Game",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.16187011695543446,
+                -0.04622083513978695,
+                -0.13365190335282112
+            ],
+            [
+                0.16121388304456552,
+                0.04539016486021305,
+                0.13341609664717885
+            ]
+        ],
+        "mass": 0.00700370506381038,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Board Games",
+        "description": "Tetris Link Game",
+        "nr_faces": 3192,
+        "nr_vertices": 1744,
+        "surface_area": 0.25950525104752276,
+        "volume": 0.00700370506381038
+    }
+}

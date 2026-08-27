@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Quercetin_500",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.040550011227372396,
+                -0.0402881377165262,
+                -0.0665702733418895
+            ],
+            [
+                0.040420988772627606,
+                0.0401038622834738,
+                0.07757672665811048
+            ]
+        ],
+        "mass": 0.0006387812007745929,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Bottles and Cans and Cups",
+        "description": "Quercetin 500",
+        "nr_faces": 7850,
+        "nr_vertices": 4021,
+        "surface_area": 0.04170984890875663,
+        "volume": 0.0006387812007745929
+    }
+}

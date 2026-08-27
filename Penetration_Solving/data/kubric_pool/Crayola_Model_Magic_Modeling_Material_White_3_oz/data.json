@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Crayola_Model_Magic_Modeling_Material_White_3_oz",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.06300240411814048,
+                -0.027003151988857922,
+                -0.09455254753993585
+            ],
+            [
+                0.0646085958818595,
+                0.025603848011142075,
+                0.12294845246006417
+            ]
+        ],
+        "mass": 0.00105777431498294,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Crayola Model Magic Modeling Material, White - 3 oz",
+        "nr_faces": 2756,
+        "nr_vertices": 1528,
+        "surface_area": 0.07942387819664261,
+        "volume": 0.00105777431498294
+    }
+}

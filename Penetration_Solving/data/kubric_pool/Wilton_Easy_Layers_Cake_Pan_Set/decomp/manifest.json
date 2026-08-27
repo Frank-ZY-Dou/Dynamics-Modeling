@@ -1,0 +1,101 @@
+{
+  "source_obj": "Wilton_Easy_Layers_Cake_Pan_Set/collision_geometry.obj",
+  "n_pieces": 15,
+  "decompose_time_sec": 31.98479175567627,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 564,
+      "n_faces": 1124
+    },
+    {
+      "id": 1,
+      "obj": "part_001.obj",
+      "n_verts": 1009,
+      "n_faces": 2014
+    },
+    {
+      "id": 2,
+      "obj": "part_002.obj",
+      "n_verts": 56,
+      "n_faces": 108
+    },
+    {
+      "id": 3,
+      "obj": "part_003.obj",
+      "n_verts": 1169,
+      "n_faces": 2334
+    },
+    {
+      "id": 4,
+      "obj": "part_004.obj",
+      "n_verts": 94,
+      "n_faces": 184
+    },
+    {
+      "id": 5,
+      "obj": "part_005.obj",
+      "n_verts": 152,
+      "n_faces": 300
+    },
+    {
+      "id": 6,
+      "obj": "part_006.obj",
+      "n_verts": 150,
+      "n_faces": 296
+    },
+    {
+      "id": 7,
+      "obj": "part_007.obj",
+      "n_verts": 40,
+      "n_faces": 76
+    },
+    {
+      "id": 8,
+      "obj": "part_008.obj",
+      "n_verts": 191,
+      "n_faces": 378
+    },
+    {
+      "id": 9,
+      "obj": "part_009.obj",
+      "n_verts": 210,
+      "n_faces": 416
+    },
+    {
+      "id": 10,
+      "obj": "part_010.obj",
+      "n_verts": 321,
+      "n_faces": 638
+    },
+    {
+      "id": 11,
+      "obj": "part_011.obj",
+      "n_verts": 198,
+      "n_faces": 392
+    },
+    {
+      "id": 12,
+      "obj": "part_012.obj",
+      "n_verts": 15,
+      "n_faces": 26
+    },
+    {
+      "id": 13,
+      "obj": "part_013.obj",
+      "n_verts": 223,
+      "n_faces": 442
+    },
+    {
+      "id": 14,
+      "obj": "part_014.obj",
+      "n_verts": 21,
+      "n_faces": 38
+    }
+  ]
+}

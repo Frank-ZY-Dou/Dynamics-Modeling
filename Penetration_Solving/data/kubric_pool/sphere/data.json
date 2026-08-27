@@ -1,0 +1,28 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "sphere",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.5,
+                -0.5,
+                -0.5
+            ],
+            [
+                0.5,
+                0.5,
+                0.5
+            ]
+        ],
+        "mass": 0.5225,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "nr_faces": 5120,
+        "nr_vertices": 2562,
+        "surface_area": 3.1378,
+        "volume": 0.5225
+    }
+}

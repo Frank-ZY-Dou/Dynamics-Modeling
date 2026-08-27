@@ -1,0 +1,23 @@
+{
+  "source_obj": "Tune_Belt_Sport_Armband_For_Samsung_Galaxy_S3/collision_geometry.obj",
+  "n_pieces": 2,
+  "decompose_time_sec": 0.8197221755981445,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 75,
+      "n_faces": 146
+    },
+    {
+      "id": 1,
+      "obj": "part_001.obj",
+      "n_verts": 68,
+      "n_faces": 132
+    }
+  ]
+}

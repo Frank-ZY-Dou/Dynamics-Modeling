@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Tune_Belt_Sport_Armband_For_Samsung_Galaxy_S3",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.0657090036818429,
+                -0.02296168943374524,
+                -0.0974130223880914
+            ],
+            [
+                0.0655759963181571,
+                0.02277631056625476,
+                0.12312097761190861
+            ]
+        ],
+        "mass": 0.00098479247261784,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Tune Belt Sport Armband For Samsung Galaxy S3",
+        "nr_faces": 2850,
+        "nr_vertices": 1571,
+        "surface_area": 0.07858919433492345,
+        "volume": 0.00098479247261784
+    }
+}

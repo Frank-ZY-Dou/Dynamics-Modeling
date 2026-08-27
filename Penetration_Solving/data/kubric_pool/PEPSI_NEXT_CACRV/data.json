@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "PEPSI_NEXT_CACRV",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.20150900463938606,
+                -0.06850396032390253,
+                -0.06465800551409577
+            ],
+            [
+                0.20133999536061395,
+                0.06813703967609748,
+                0.06459699448590424
+            ]
+        ],
+        "mass": 0.006673908692576823,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "PEPSI NEXT (CA+CRV)",
+        "nr_faces": 2388,
+        "nr_vertices": 1305,
+        "surface_area": 0.23152282759011472,
+        "volume": 0.006673908692576823
+    }
+}

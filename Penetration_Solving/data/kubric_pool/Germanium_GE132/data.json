@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Germanium_GE132",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.021949940471390327,
+                -0.022036743768970274,
+                -0.035462399598311156
+            ],
+            [
+                0.021964059528609674,
+                0.021898256231029724,
+                0.04191360040168885
+            ]
+        ],
+        "mass": 9.901122248334867e-05,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Bottles and Cans and Cups",
+        "description": "Germanium GE-132",
+        "nr_faces": 9102,
+        "nr_vertices": 4687,
+        "surface_area": 0.012582135741532649,
+        "volume": 9.901122248334867e-05
+    }
+}

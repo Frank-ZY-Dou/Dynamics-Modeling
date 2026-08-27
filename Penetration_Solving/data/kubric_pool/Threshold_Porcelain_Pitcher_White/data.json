@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Threshold_Porcelain_Pitcher_White",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.0888007035467065,
+                -0.08442920487554564,
+                -0.12980393378714164
+            ],
+            [
+                0.1500812964532935,
+                0.08436979512445436,
+                0.14864206621285836
+            ]
+        ],
+        "mass": 0.002110606354240598,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "None",
+        "description": "Threshold Porcelain Pitcher, White",
+        "nr_faces": 9344,
+        "nr_vertices": 4973,
+        "surface_area": 0.24938549616567818,
+        "volume": 0.002110606354240598
+    }
+}

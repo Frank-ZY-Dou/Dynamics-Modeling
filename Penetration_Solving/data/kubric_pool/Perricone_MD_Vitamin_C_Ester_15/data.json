@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Perricone_MD_Vitamin_C_Ester_15",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.04040107050722139,
+                -0.03183525485003063,
+                -0.06524260458438558
+            ],
+            [
+                0.040673929492778614,
+                0.03169874514996937,
+                0.06510539541561443
+            ]
+        ],
+        "mass": 0.0006394643437332647,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Perricone MD Vitamin C Ester 15\nAn anti-aging treatment to address sun damage, loss of firmness, wrinkles, and boost collagen production.",
+        "nr_faces": 1776,
+        "nr_vertices": 998,
+        "surface_area": 0.04517845775935379,
+        "volume": 0.0006394643437332647
+    }
+}

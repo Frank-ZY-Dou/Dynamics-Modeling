@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Chef_Style_Round_Cake_Pan_9_inch_pan",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.11996029177379422,
+                -0.12155378508259175,
+                -0.012228976703130364
+            ],
+            [
+                0.12590070822620578,
+                0.12444621491740826,
+                0.032943023296869635
+            ]
+        ],
+        "mass": 0.00013249079939078835,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "None",
+        "description": "Chef Style Round Cake Pan - 9 inch pan",
+        "nr_faces": 4436,
+        "nr_vertices": 2336,
+        "surface_area": 0.14090820589299208,
+        "volume": 0.00013249079939078835
+    }
+}

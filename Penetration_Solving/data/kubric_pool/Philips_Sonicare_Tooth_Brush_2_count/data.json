@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Philips_Sonicare_Tooth_Brush_2_count",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.08806046453707715,
+                -0.05174089194396521,
+                -0.12074859742037977
+            ],
+            [
+                0.08785953546292286,
+                0.05226210805603479,
+                0.12086240257962022
+            ]
+        ],
+        "mass": 0.004095569336245056,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Philips Sonicare Tooth Brush - 2 count",
+        "nr_faces": 2180,
+        "nr_vertices": 1194,
+        "surface_area": 0.15918739023050227,
+        "volume": 0.004095569336245056
+    }
+}

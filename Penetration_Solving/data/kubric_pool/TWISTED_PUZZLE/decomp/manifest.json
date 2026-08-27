@@ -1,0 +1,53 @@
+{
+  "source_obj": "TWISTED_PUZZLE/collision_geometry.obj",
+  "n_pieces": 7,
+  "decompose_time_sec": 33.75823402404785,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 762,
+      "n_faces": 1520
+    },
+    {
+      "id": 1,
+      "obj": "part_001.obj",
+      "n_verts": 879,
+      "n_faces": 1754
+    },
+    {
+      "id": 2,
+      "obj": "part_002.obj",
+      "n_verts": 212,
+      "n_faces": 420
+    },
+    {
+      "id": 3,
+      "obj": "part_003.obj",
+      "n_verts": 409,
+      "n_faces": 814
+    },
+    {
+      "id": 4,
+      "obj": "part_004.obj",
+      "n_verts": 433,
+      "n_faces": 862
+    },
+    {
+      "id": 5,
+      "obj": "part_005.obj",
+      "n_verts": 164,
+      "n_faces": 324
+    },
+    {
+      "id": 6,
+      "obj": "part_006.obj",
+      "n_verts": 525,
+      "n_faces": 1046
+    }
+  ]
+}

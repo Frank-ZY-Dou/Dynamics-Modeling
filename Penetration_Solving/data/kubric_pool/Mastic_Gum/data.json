@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Mastic_Gum",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.027215284036615925,
+                -0.027147438828243005,
+                -0.04431016892341639
+            ],
+            [
+                0.027145715963384075,
+                0.026924561171756994,
+                0.05295383107658361
+            ]
+        ],
+        "mass": 0.0001911196362475258,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Bottles and Cans and Cups",
+        "description": "Mastic Gum",
+        "nr_faces": 7782,
+        "nr_vertices": 4010,
+        "surface_area": 0.01910075105479444,
+        "volume": 0.0001911196362475258
+    }
+}

@@ -1,0 +1,35 @@
+{
+  "source_obj": "BlackBlack_Nintendo_3DSXL/collision_geometry.obj",
+  "n_pieces": 4,
+  "decompose_time_sec": 19.964362621307373,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 1637,
+      "n_faces": 3270
+    },
+    {
+      "id": 1,
+      "obj": "part_001.obj",
+      "n_verts": 2000,
+      "n_faces": 3996
+    },
+    {
+      "id": 2,
+      "obj": "part_002.obj",
+      "n_verts": 397,
+      "n_faces": 790
+    },
+    {
+      "id": 3,
+      "obj": "part_003.obj",
+      "n_verts": 679,
+      "n_faces": 1354
+    }
+  ]
+}

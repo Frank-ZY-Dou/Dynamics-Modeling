@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Ecoforms_Quadra_Saucer_SQ1_Avocado",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.043257079821558124,
+                -0.04391122555665266,
+                -0.00835266938797578
+            ],
+            [
+                0.04382592017844188,
+                0.04304677444334734,
+                0.012496330612024221
+            ]
+        ],
+        "mass": 2.89656662409525e-05,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "None",
+        "description": "Ecoforms Quadra Saucer, SQ1, Avocado",
+        "nr_faces": 4762,
+        "nr_vertices": 2475,
+        "surface_area": 0.020699793977228466,
+        "volume": 2.89656662409525e-05
+    }
+}

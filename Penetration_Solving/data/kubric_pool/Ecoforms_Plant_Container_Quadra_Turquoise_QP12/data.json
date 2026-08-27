@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Ecoforms_Plant_Container_Quadra_Turquoise_QP12",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.09790652322437056,
+                -0.09806463599768692,
+                -0.14139223230512912
+            ],
+            [
+                0.10189547677562945,
+                0.10162936400231308,
+                0.14130176769487085
+            ]
+        ],
+        "mass": 0.0006280828236533923,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "None",
+        "description": "Ecoforms Plant Container, Quadra, Turquoise, QP12",
+        "nr_faces": 5032,
+        "nr_vertices": 2821,
+        "surface_area": 0.4150295465477283,
+        "volume": 0.0006280828236533923
+    }
+}

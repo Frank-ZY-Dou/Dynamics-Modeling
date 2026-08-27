@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Samsung_CLTC406S_Toner_Cartridge_Cyan_1pack",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.19370571991314386,
+                -0.04205225697836125,
+                -0.0923439508939489
+            ],
+            [
+                0.19485128008685612,
+                0.04183074302163875,
+                0.0922190491060511
+            ]
+        ],
+        "mass": 0.005471364468225608,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Samsung CLT-C406S Toner Cartridge, Cyan - 1-pack",
+        "nr_faces": 2066,
+        "nr_vertices": 1114,
+        "surface_area": 0.22571001913987326,
+        "volume": 0.005471364468225608
+    }
+}

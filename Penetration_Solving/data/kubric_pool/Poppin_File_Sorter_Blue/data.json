@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Poppin_File_Sorter_Blue",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.12540166601906377,
+                -0.08651235899102758,
+                -0.018018541534829038
+            ],
+            [
+                0.1249233339809362,
+                0.08718864100897242,
+                0.13555245846517097
+            ]
+        ],
+        "mass": 0.0007330209180376958,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Poppin File Sorter, Blue",
+        "nr_faces": 6188,
+        "nr_vertices": 3487,
+        "surface_area": 0.13606617132137672,
+        "volume": 0.0007330209180376958
+    }
+}

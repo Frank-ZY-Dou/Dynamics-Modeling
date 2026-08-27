@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Wilton_Easy_Layers_Cake_Pan_Set",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.10447545602516584,
+                -0.025610687411425834,
+                -0.08821282291159241
+            ],
+            [
+                0.08754554397483416,
+                0.024614312588574168,
+                0.08863317708840761
+            ]
+        ],
+        "mass": 0.0012411892574555996,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Wilton Easy Layers Cake Pan Set",
+        "nr_faces": 6328,
+        "nr_vertices": 3475,
+        "surface_area": 0.10458035388098488,
+        "volume": 0.0012411892574555996
+    }
+}

@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Room_Essentials_Mug_White_Yellow",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.05692388751175071,
+                -0.05260732489741204,
+                -0.054220136137226246
+            ],
+            [
+                0.07991411248824928,
+                0.04958367510258797,
+                0.05057386386277375
+            ]
+        ],
+        "mass": 0.000172398945725301,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "None",
+        "description": "Room Essentials Mug, White/ Yellow",
+        "nr_faces": 8454,
+        "nr_vertices": 4441,
+        "surface_area": 0.06384872109715506,
+        "volume": 0.000172398945725301
+    }
+}

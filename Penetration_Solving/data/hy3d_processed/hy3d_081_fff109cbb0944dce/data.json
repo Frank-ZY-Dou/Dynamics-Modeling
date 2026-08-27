@@ -1,0 +1,27 @@
+{
+  "id": "hy3d_fff109cbb0944dce",
+  "kwargs": {
+    "bounds": [
+      [
+        -0.833967793375094,
+        -0.5525338696813951,
+        -0.9721211908025287
+      ],
+      [
+        0.833967793375094,
+        0.5525338696813951,
+        0.9721211908025287
+      ]
+    ]
+  },
+  "normalize_factor": 0.05143391633991932,
+  "num_vertices": 12088,
+  "num_faces": 24326,
+  "concavity": 0.46091548456541886,
+  "watertight": false,
+  "winding_consistent": true,
+  "is_volume": false,
+  "source_ply": "fff109cbb0944dce9976790b83a8ddfd.ply",
+  "num_faces_original": 28780,
+  "decimated_from": "/mnt/data/Frank/codes/MIT_Collision_Resolving/downloaded_S4R/hy3d_processed/hy3d_081_fff109cbb0944dce/collision_geometry.obj"
+}

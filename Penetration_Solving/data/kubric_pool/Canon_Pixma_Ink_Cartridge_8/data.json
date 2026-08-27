@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Canon_Pixma_Ink_Cartridge_8",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.014749518116880004,
+                -0.04623216102561468,
+                -0.032708772011415914
+            ],
+            [
+                0.012338481883119996,
+                0.045501838974385325,
+                0.08189422798858409
+            ]
+        ],
+        "mass": 0.00013621243087647017,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Canon Pixma Ink Cartridge, 8",
+        "nr_faces": 5612,
+        "nr_vertices": 2986,
+        "surface_area": 0.025375835186025417,
+        "volume": 0.00013621243087647017
+    }
+}

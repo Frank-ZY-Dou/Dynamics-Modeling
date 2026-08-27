@@ -1,0 +1,53 @@
+{
+  "source_obj": "Thomas_Friends_Wooden_Railway_Ascending_Track_Riser_Pack/collision_geometry.obj",
+  "n_pieces": 7,
+  "decompose_time_sec": 8.767247915267944,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 317,
+      "n_faces": 630
+    },
+    {
+      "id": 1,
+      "obj": "part_001.obj",
+      "n_verts": 465,
+      "n_faces": 926
+    },
+    {
+      "id": 2,
+      "obj": "part_002.obj",
+      "n_verts": 340,
+      "n_faces": 676
+    },
+    {
+      "id": 3,
+      "obj": "part_003.obj",
+      "n_verts": 436,
+      "n_faces": 868
+    },
+    {
+      "id": 4,
+      "obj": "part_004.obj",
+      "n_verts": 262,
+      "n_faces": 520
+    },
+    {
+      "id": 5,
+      "obj": "part_005.obj",
+      "n_verts": 195,
+      "n_faces": 386
+    },
+    {
+      "id": 6,
+      "obj": "part_006.obj",
+      "n_verts": 368,
+      "n_faces": 732
+    }
+  ]
+}

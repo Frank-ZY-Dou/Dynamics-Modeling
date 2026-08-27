@@ -1,0 +1,23 @@
+{
+  "source_obj": "Crayola_Model_Magic_Modeling_Material_White_3_oz/collision_geometry.obj",
+  "n_pieces": 2,
+  "decompose_time_sec": 7.461129903793335,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 316,
+      "n_faces": 628
+    },
+    {
+      "id": 1,
+      "obj": "part_001.obj",
+      "n_verts": 2178,
+      "n_faces": 4352
+    }
+  ]
+}

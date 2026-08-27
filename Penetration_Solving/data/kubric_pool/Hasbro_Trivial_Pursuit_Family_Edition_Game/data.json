@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Hasbro_Trivial_Pursuit_Family_Edition_Game",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.10263104448687267,
+                -0.031691650414377444,
+                -0.135056476228599
+            ],
+            [
+                0.10198895551312734,
+                0.03191234958562256,
+                0.135985523771401
+            ]
+        ],
+        "mass": 0.003249005593352382,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Board Games",
+        "description": "Hasbro Trivial Pursuit Family Edition Game",
+        "nr_faces": 4712,
+        "nr_vertices": 2423,
+        "surface_area": 0.1626896361684049,
+        "volume": 0.003249005593352382
+    }
+}

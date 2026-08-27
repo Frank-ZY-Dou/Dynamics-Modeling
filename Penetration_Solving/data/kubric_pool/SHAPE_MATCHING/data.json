@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "SHAPE_MATCHING",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.09672212806544916,
+                -0.08966357701744132,
+                -0.012771325517616245
+            ],
+            [
+                0.15737887193455083,
+                0.09965042298255868,
+                0.021245674482383757
+            ]
+        ],
+        "mass": 0.00040715049749643435,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Toys",
+        "description": "SHAPE MATCHING\nSet included 8 different puzzles blocks with two-sided curved base. Matching the corresponding halves and places the complete shape on the board. Good for differentiating colors, shapes, and forms.  Curved base for easy flip over.",
+        "nr_faces": 5048,
+        "nr_vertices": 2781,
+        "surface_area": 0.09055253618512538,
+        "volume": 0.00040715049749643435
+    }
+}

@@ -1,0 +1,9 @@
+numpy>=1.24
+scipy>=1.10
+trimesh>=4.0
+python-fcl>=0.7
+osqp>=0.6
+# GPU solver (s4r_gpu/) only:
+warp-lang>=1.5
+# Thingi10K scenes only:
+thingi10k

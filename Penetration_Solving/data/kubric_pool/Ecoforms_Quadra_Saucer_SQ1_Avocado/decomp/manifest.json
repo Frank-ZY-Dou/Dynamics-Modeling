@@ -1,0 +1,107 @@
+{
+  "source_obj": "Ecoforms_Quadra_Saucer_SQ1_Avocado/collision_geometry.obj",
+  "n_pieces": 16,
+  "decompose_time_sec": 27.521726369857788,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 115,
+      "n_faces": 226
+    },
+    {
+      "id": 1,
+      "obj": "part_001.obj",
+      "n_verts": 474,
+      "n_faces": 944
+    },
+    {
+      "id": 2,
+      "obj": "part_002.obj",
+      "n_verts": 381,
+      "n_faces": 758
+    },
+    {
+      "id": 3,
+      "obj": "part_003.obj",
+      "n_verts": 462,
+      "n_faces": 920
+    },
+    {
+      "id": 4,
+      "obj": "part_004.obj",
+      "n_verts": 148,
+      "n_faces": 292
+    },
+    {
+      "id": 5,
+      "obj": "part_005.obj",
+      "n_verts": 67,
+      "n_faces": 130
+    },
+    {
+      "id": 6,
+      "obj": "part_006.obj",
+      "n_verts": 86,
+      "n_faces": 168
+    },
+    {
+      "id": 7,
+      "obj": "part_007.obj",
+      "n_verts": 405,
+      "n_faces": 806
+    },
+    {
+      "id": 8,
+      "obj": "part_008.obj",
+      "n_verts": 364,
+      "n_faces": 724
+    },
+    {
+      "id": 9,
+      "obj": "part_009.obj",
+      "n_verts": 281,
+      "n_faces": 558
+    },
+    {
+      "id": 10,
+      "obj": "part_010.obj",
+      "n_verts": 169,
+      "n_faces": 334
+    },
+    {
+      "id": 11,
+      "obj": "part_011.obj",
+      "n_verts": 421,
+      "n_faces": 838
+    },
+    {
+      "id": 12,
+      "obj": "part_012.obj",
+      "n_verts": 92,
+      "n_faces": 180
+    },
+    {
+      "id": 13,
+      "obj": "part_013.obj",
+      "n_verts": 201,
+      "n_faces": 398
+    },
+    {
+      "id": 14,
+      "obj": "part_014.obj",
+      "n_verts": 209,
+      "n_faces": 414
+    },
+    {
+      "id": 15,
+      "obj": "part_015.obj",
+      "n_verts": 353,
+      "n_faces": 702
+    }
+  ]
+}

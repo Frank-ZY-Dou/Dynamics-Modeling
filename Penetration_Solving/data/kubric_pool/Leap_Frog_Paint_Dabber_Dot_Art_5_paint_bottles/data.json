@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Leap_Frog_Paint_Dabber_Dot_Art_5_paint_bottles",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.11698007394224641,
+                -0.02858417876152468,
+                -0.11544860033897664
+            ],
+            [
+                0.11873692605775359,
+                0.028597821238475322,
+                0.11734739966102335
+            ]
+        ],
+        "mass": 0.0023422297076494012,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Leap Frog Paint Dabber Dot Art - 5 paint bottles",
+        "nr_faces": 1764,
+        "nr_vertices": 972,
+        "surface_area": 0.14592876297240936,
+        "volume": 0.0023422297076494012
+    }
+}

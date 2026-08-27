@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Just_For_Men_Shampoo_In_Haircolor_Darkest_Brown_50",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.038834907311167156,
+                -0.02383522871482438,
+                -0.0782255615353718
+            ],
+            [
+                0.03876609268883284,
+                0.023689771285175618,
+                0.07853343846462821
+            ]
+        ],
+        "mass": 0.0005423441161801588,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Just For Men Shampoo In Haircolor Darkest Brown 50",
+        "nr_faces": 3382,
+        "nr_vertices": 1783,
+        "surface_area": 0.043586261781956126,
+        "volume": 0.0005423441161801588
+    }
+}

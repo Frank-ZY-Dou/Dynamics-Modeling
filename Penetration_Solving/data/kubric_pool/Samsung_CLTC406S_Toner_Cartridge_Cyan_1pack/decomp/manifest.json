@@ -1,0 +1,17 @@
+{
+  "source_obj": "Samsung_CLTC406S_Toner_Cartridge_Cyan_1pack/collision_geometry.obj",
+  "n_pieces": 1,
+  "decompose_time_sec": 0.06596112251281738,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 64,
+      "n_faces": 124
+    }
+  ]
+}

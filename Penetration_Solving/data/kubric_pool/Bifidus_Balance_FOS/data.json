@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Bifidus_Balance_FOS",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.02700933182761905,
+                -0.026745054334392653,
+                -0.04401459361143099
+            ],
+            [
+                0.02696666817238095,
+                0.026459945665607346,
+                0.05245240638856901
+            ]
+        ],
+        "mass": 0.0001869846235503495,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Bottles and Cans and Cups",
+        "description": "Bifidus Balance + FOS",
+        "nr_faces": 9344,
+        "nr_vertices": 4818,
+        "surface_area": 0.018693044279915087,
+        "volume": 0.0001869846235503495
+    }
+}

@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Razer_Kraken_71_Chroma_headset_Full_size_Black",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.111356302925563,
+                -0.06057069810386643,
+                -0.1199446354122964
+            ],
+            [
+                0.11377069707443699,
+                0.059374301896133574,
+                0.1386213645877036
+            ]
+        ],
+        "mass": 0.00601732914410971,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Headphones",
+        "description": "Razer Kraken 7.1 Chroma - headset - Full size - Black\nGet the complete 7.1 surround sound gaming experience with the Razer Kraken 7.1 Chroma USB gaming headset. This headset adopts the comfortable form factor of the Razer Kraken Pro, tested by numerous professional gamers to determine the optimal ergonomics for extended gaming sessions. - Advanced 7.1 virtual surround sound engine - True-to-life positional audio. The Razer Kraken 7.1 Chroma comes equipped with an advanced 7.1 virtual surround sound engine that immerses you deeper into the game. The engine is capable of ultra-low latency audio processing and modulates the audio source to simulate a 360 surround sound experience that is usually achievable only by incorporating more than one positional driver in each ear cup.",
+        "nr_faces": 8206,
+        "nr_vertices": 4371,
+        "surface_area": 0.20825033373237478,
+        "volume": 0.00601732914410971
+    }
+}

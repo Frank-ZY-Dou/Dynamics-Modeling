@@ -1,0 +1,23 @@
+{
+  "source_obj": "Leap_Frog_Paint_Dabber_Dot_Art_5_paint_bottles/collision_geometry.obj",
+  "n_pieces": 2,
+  "decompose_time_sec": 8.286226034164429,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 1015,
+      "n_faces": 2026
+    },
+    {
+      "id": 1,
+      "obj": "part_001.obj",
+      "n_verts": 1072,
+      "n_faces": 2140
+    }
+  ]
+}

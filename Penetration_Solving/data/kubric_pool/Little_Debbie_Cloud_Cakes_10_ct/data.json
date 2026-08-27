@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Little_Debbie_Cloud_Cakes_10_ct",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.12118424046578184,
+                -0.04074732339666935,
+                -0.06888160240390528
+            ],
+            [
+                0.12139575953421816,
+                0.04075667660333065,
+                0.07061939759609472
+            ]
+        ],
+        "mass": 0.0025475884081161315,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Little Debbie Cloud Cakes 10 ct",
+        "nr_faces": 2544,
+        "nr_vertices": 1393,
+        "surface_area": 0.1209194941086568,
+        "volume": 0.0025475884081161315
+    }
+}

@@ -1,0 +1,29 @@
+{
+  "source_obj": "BlueBlack_Nintendo_3DSXL/collision_geometry.obj",
+  "n_pieces": 3,
+  "decompose_time_sec": 19.10049033164978,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 1866,
+      "n_faces": 3728
+    },
+    {
+      "id": 1,
+      "obj": "part_001.obj",
+      "n_verts": 1687,
+      "n_faces": 3370
+    },
+    {
+      "id": 2,
+      "obj": "part_002.obj",
+      "n_verts": 257,
+      "n_faces": 510
+    }
+  ]
+}

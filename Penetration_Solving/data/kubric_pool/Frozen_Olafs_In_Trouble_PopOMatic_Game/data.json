@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Frozen_Olafs_In_Trouble_PopOMatic_Game",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.13640536296960726,
+                -0.029674537222510775,
+                -0.13583316754284686
+            ],
+            [
+                0.13695463703039273,
+                0.029617462777489226,
+                0.13619183245715316
+            ]
+        ],
+        "mass": 0.004021191238257624,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Board Games",
+        "description": "Frozen Olaf's In Trouble Pop-O-Matic Game",
+        "nr_faces": 1428,
+        "nr_vertices": 780,
+        "surface_area": 0.1985368647688938,
+        "volume": 0.004021191238257624
+    }
+}

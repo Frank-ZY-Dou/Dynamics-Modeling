@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Mist_Wipe_Warmer",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.13203421654099282,
+                -0.061566564818172125,
+                -0.11652492332670897
+            ],
+            [
+                0.1321567834590072,
+                0.06616843518182788,
+                0.11659107667329102
+            ]
+        ],
+        "mass": 0.007099560941139414,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "None",
+        "description": "Mist Wipe Warmer",
+        "nr_faces": 3308,
+        "nr_vertices": 2021,
+        "surface_area": 0.2313508744835512,
+        "volume": 0.007099560941139414
+    }
+}

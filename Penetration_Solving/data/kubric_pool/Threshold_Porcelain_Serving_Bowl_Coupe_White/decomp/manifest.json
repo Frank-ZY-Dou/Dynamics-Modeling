@@ -1,0 +1,107 @@
+{
+  "source_obj": "Threshold_Porcelain_Serving_Bowl_Coupe_White/collision_geometry.obj",
+  "n_pieces": 16,
+  "decompose_time_sec": 43.65051603317261,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 558,
+      "n_faces": 1112
+    },
+    {
+      "id": 1,
+      "obj": "part_001.obj",
+      "n_verts": 1119,
+      "n_faces": 2234
+    },
+    {
+      "id": 2,
+      "obj": "part_002.obj",
+      "n_verts": 750,
+      "n_faces": 1496
+    },
+    {
+      "id": 3,
+      "obj": "part_003.obj",
+      "n_verts": 716,
+      "n_faces": 1428
+    },
+    {
+      "id": 4,
+      "obj": "part_004.obj",
+      "n_verts": 228,
+      "n_faces": 452
+    },
+    {
+      "id": 5,
+      "obj": "part_005.obj",
+      "n_verts": 586,
+      "n_faces": 1168
+    },
+    {
+      "id": 6,
+      "obj": "part_006.obj",
+      "n_verts": 792,
+      "n_faces": 1580
+    },
+    {
+      "id": 7,
+      "obj": "part_007.obj",
+      "n_verts": 626,
+      "n_faces": 1248
+    },
+    {
+      "id": 8,
+      "obj": "part_008.obj",
+      "n_verts": 314,
+      "n_faces": 624
+    },
+    {
+      "id": 9,
+      "obj": "part_009.obj",
+      "n_verts": 822,
+      "n_faces": 1640
+    },
+    {
+      "id": 10,
+      "obj": "part_010.obj",
+      "n_verts": 385,
+      "n_faces": 766
+    },
+    {
+      "id": 11,
+      "obj": "part_011.obj",
+      "n_verts": 381,
+      "n_faces": 758
+    },
+    {
+      "id": 12,
+      "obj": "part_012.obj",
+      "n_verts": 474,
+      "n_faces": 944
+    },
+    {
+      "id": 13,
+      "obj": "part_013.obj",
+      "n_verts": 474,
+      "n_faces": 944
+    },
+    {
+      "id": 14,
+      "obj": "part_014.obj",
+      "n_verts": 490,
+      "n_faces": 976
+    },
+    {
+      "id": 15,
+      "obj": "part_015.obj",
+      "n_verts": 618,
+      "n_faces": 1232
+    }
+  ]
+}

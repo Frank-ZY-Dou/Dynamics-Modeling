@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Threshold_Porcelain_Serving_Bowl_Coupe_White",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.10402170932157073,
+                -0.1040885537799009,
+                -0.029553262272527945
+            ],
+            [
+                0.10421229067842927,
+                0.1052524462200991,
+                0.03932973772747206
+            ]
+        ],
+        "mass": 0.00032534837395442113,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "None",
+        "description": "Threshold Porcelain Serving Bowl, Coupe, White",
+        "nr_faces": 5946,
+        "nr_vertices": 3063,
+        "surface_area": 0.10941430909257428,
+        "volume": 0.00032534837395442113
+    }
+}

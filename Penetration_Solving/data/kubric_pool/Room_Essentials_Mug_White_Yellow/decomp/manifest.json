@@ -1,0 +1,107 @@
+{
+  "source_obj": "Room_Essentials_Mug_White_Yellow/collision_geometry.obj",
+  "n_pieces": 16,
+  "decompose_time_sec": 50.24677658081055,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 1185,
+      "n_faces": 2366
+    },
+    {
+      "id": 1,
+      "obj": "part_001.obj",
+      "n_verts": 870,
+      "n_faces": 1736
+    },
+    {
+      "id": 2,
+      "obj": "part_002.obj",
+      "n_verts": 821,
+      "n_faces": 1638
+    },
+    {
+      "id": 3,
+      "obj": "part_003.obj",
+      "n_verts": 506,
+      "n_faces": 1008
+    },
+    {
+      "id": 4,
+      "obj": "part_004.obj",
+      "n_verts": 122,
+      "n_faces": 240
+    },
+    {
+      "id": 5,
+      "obj": "part_005.obj",
+      "n_verts": 182,
+      "n_faces": 360
+    },
+    {
+      "id": 6,
+      "obj": "part_006.obj",
+      "n_verts": 94,
+      "n_faces": 184
+    },
+    {
+      "id": 7,
+      "obj": "part_007.obj",
+      "n_verts": 369,
+      "n_faces": 734
+    },
+    {
+      "id": 8,
+      "obj": "part_008.obj",
+      "n_verts": 822,
+      "n_faces": 1640
+    },
+    {
+      "id": 9,
+      "obj": "part_009.obj",
+      "n_verts": 236,
+      "n_faces": 468
+    },
+    {
+      "id": 10,
+      "obj": "part_010.obj",
+      "n_verts": 387,
+      "n_faces": 770
+    },
+    {
+      "id": 11,
+      "obj": "part_011.obj",
+      "n_verts": 562,
+      "n_faces": 1120
+    },
+    {
+      "id": 12,
+      "obj": "part_012.obj",
+      "n_verts": 205,
+      "n_faces": 406
+    },
+    {
+      "id": 13,
+      "obj": "part_013.obj",
+      "n_verts": 150,
+      "n_faces": 296
+    },
+    {
+      "id": 14,
+      "obj": "part_014.obj",
+      "n_verts": 507,
+      "n_faces": 1010
+    },
+    {
+      "id": 15,
+      "obj": "part_015.obj",
+      "n_verts": 789,
+      "n_faces": 1574
+    }
+  ]
+}

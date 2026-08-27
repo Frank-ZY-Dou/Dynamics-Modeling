@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Thomas_Friends_Wooden_Railway_Ascending_Track_Riser_Pack",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.20864717795449458,
+                -0.028648219690907147,
+                -0.06653113508894183
+            ],
+            [
+                0.21666982204550542,
+                0.029236780309092856,
+                0.07643386491105816
+            ]
+        ],
+        "mass": 0.0006314480908400804,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Toys",
+        "description": "Thomas & Friends Wooden Railway, Ascending Track & Riser Pack",
+        "nr_faces": 6272,
+        "nr_vertices": 3612,
+        "surface_area": 0.09754146800232852,
+        "volume": 0.0006314480908400804
+    }
+}

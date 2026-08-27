@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Asus_Z87PRO_Motherboard_ATX_LGA1150_Socket",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.1666611998528079,
+                -0.040210918914219206,
+                -0.1344712886781508
+            ],
+            [
+                0.16750380014719213,
+                0.041842081085780795,
+                0.13487671132184917
+            ]
+        ],
+        "mass": 0.00637911942018083,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "None",
+        "description": "Asus Z87-PRO Motherboard ATX LGA1150 Socket",
+        "nr_faces": 3592,
+        "nr_vertices": 1970,
+        "surface_area": 0.25331547909746854,
+        "volume": 0.00637911942018083
+    }
+}

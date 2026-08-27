@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Perricone_MD_AcylGlutathione_Deep_Crease_Serum",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.0391820268286267,
+                -0.028244676640605874,
+                -0.05301649466376159
+            ],
+            [
+                0.039318973171373305,
+                0.028381323359394126,
+                0.05275250533623841
+            ]
+        ],
+        "mass": 0.0004430729393189246,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Perricone MD Acyl-Glutathione Deep Crease Serum\nA targeted treatment for the appearance of expression lines and creases. With patent-pending Acyl-Glutathione.",
+        "nr_faces": 9406,
+        "nr_vertices": 4922,
+        "surface_area": 0.03499218375567425,
+        "volume": 0.0004430729393189246
+    }
+}

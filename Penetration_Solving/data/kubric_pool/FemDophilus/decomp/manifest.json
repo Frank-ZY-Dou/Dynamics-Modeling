@@ -1,0 +1,17 @@
+{
+  "source_obj": "FemDophilus/collision_geometry.obj",
+  "n_pieces": 1,
+  "decompose_time_sec": 0.07782793045043945,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 64,
+      "n_faces": 124
+    }
+  ]
+}

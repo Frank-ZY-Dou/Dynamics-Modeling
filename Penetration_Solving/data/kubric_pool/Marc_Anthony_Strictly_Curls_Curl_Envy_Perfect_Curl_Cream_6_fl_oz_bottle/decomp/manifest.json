@@ -1,0 +1,17 @@
+{
+  "source_obj": "Marc_Anthony_Strictly_Curls_Curl_Envy_Perfect_Curl_Cream_6_fl_oz_bottle/collision_geometry.obj",
+  "n_pieces": 1,
+  "decompose_time_sec": 0.043428897857666016,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 64,
+      "n_faces": 124
+    }
+  ]
+}

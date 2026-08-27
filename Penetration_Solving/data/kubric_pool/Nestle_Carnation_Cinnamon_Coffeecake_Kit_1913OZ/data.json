@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Nestle_Carnation_Cinnamon_Coffeecake_Kit_1913OZ",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.07505644971143964,
+                -0.03550503961426584,
+                -0.09715532117730748
+            ],
+            [
+                0.07469355028856035,
+                0.03577096038573416,
+                0.09793467882269252
+            ]
+        ],
+        "mass": 0.0019705380956440777,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Nestle Carnation Cinnamon Coffeecake Kit 19.13OZ",
+        "nr_faces": 2068,
+        "nr_vertices": 1141,
+        "surface_area": 0.10120449379457389,
+        "volume": 0.0019705380956440777
+    }
+}

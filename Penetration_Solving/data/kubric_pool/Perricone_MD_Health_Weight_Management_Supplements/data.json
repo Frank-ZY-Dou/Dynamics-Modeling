@@ -1,0 +1,30 @@
+{
+    "asset_type": "FileBasedObject",
+    "id": "Perricone_MD_Health_Weight_Management_Supplements",
+    "kwargs": {
+        "bounds": [
+            [
+                -0.08632882041512438,
+                -0.06695783679949718,
+                -0.08975128643296679
+            ],
+            [
+                0.08660517958487562,
+                0.06604416320050281,
+                0.09109671356703322
+            ]
+        ],
+        "mass": 0.003884697386992729,
+        "render_filename": "{asset_dir}/visual_geometry.obj",
+        "simulation_filename": "{asset_dir}/object.urdf"
+    },
+    "license": "CC BY-SA 4.0",
+    "metadata": {
+        "category": "Consumer Goods",
+        "description": "Perricone MD Health & Weight Management Supplements\nA dietary supplement designed to promote healthy weight loss and maintenance.",
+        "nr_faces": 2272,
+        "nr_vertices": 1208,
+        "surface_area": 0.14646588189927878,
+        "volume": 0.003884697386992729
+    }
+}

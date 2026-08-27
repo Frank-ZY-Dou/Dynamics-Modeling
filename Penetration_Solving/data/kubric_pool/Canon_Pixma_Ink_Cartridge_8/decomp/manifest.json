@@ -1,0 +1,47 @@
+{
+  "source_obj": "Canon_Pixma_Ink_Cartridge_8/collision_geometry.obj",
+  "n_pieces": 6,
+  "decompose_time_sec": 16.071725130081177,
+  "params": {
+    "threshold": 0.05,
+    "max_ch": 16
+  },
+  "pieces": [
+    {
+      "id": 0,
+      "obj": "part_000.obj",
+      "n_verts": 1970,
+      "n_faces": 3936
+    },
+    {
+      "id": 1,
+      "obj": "part_001.obj",
+      "n_verts": 346,
+      "n_faces": 688
+    },
+    {
+      "id": 2,
+      "obj": "part_002.obj",
+      "n_verts": 157,
+      "n_faces": 310
+    },
+    {
+      "id": 3,
+      "obj": "part_003.obj",
+      "n_verts": 317,
+      "n_faces": 630
+    },
+    {
+      "id": 4,
+      "obj": "part_004.obj",
+      "n_verts": 205,
+      "n_faces": 406
+    },
+    {
+      "id": 5,
+      "obj": "part_005.obj",
+      "n_verts": 327,
+      "n_faces": 650
+    }
+  ]
+}
