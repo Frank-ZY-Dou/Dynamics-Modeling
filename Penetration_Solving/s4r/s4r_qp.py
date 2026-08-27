@@ -254,20 +254,17 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
 
     def _init_warp_oracle():
         if _warp_oracle[0] is None:
-            # Warp oracle selection (priority: V3 > V2 > V1):
-            #   S4R_USE_V3_ORACLE=1 → template-shared, FCL-free
-            #   S4R_USE_V2_ORACLE=1 → per-body wp.Mesh, FCL-free
-            #   else                → V1 (vertex + CPU FCL refine)
-            if _os.environ.get("S4R_USE_V3_ORACLE", "0") == "1":
-                from collision_detection_module.warp_pair_contact_v3 import (
-                    S4RWarpContactOracleV3 as S4RWarpContactOracle,
-                )
-            elif _os.environ.get("S4R_USE_V2_ORACLE", "0") == "1":
-                from collision_detection_module.warp_pair_contact_v2 import (
-                    S4RWarpContactOracleV2 as S4RWarpContactOracle,
-                )
-            else:
-                from collision_detection_module.warp_pair_contact import S4RWarpContactOracle
+            # The released Warp GPU oracle lives in ``s4r_gpu/``. Add that
+            # directory to the path and import the template-shared V3 oracle
+            # (the only Warp oracle shipped; requires an NVIDIA GPU +
+            # ``warp-lang``). The import is deferred to here so the default
+            # CPU backends never pay the ``warp`` import cost.
+            _gpu_dir = _os.path.join(_os.path.dirname(_HERE), "s4r_gpu")
+            if _gpu_dir not in sys.path:
+                sys.path.insert(0, _gpu_dir)
+            from warp_pair_contact_v3 import (
+                S4RWarpContactOracleV3 as S4RWarpContactOracle,
+            )
             # Build a thin shim so the oracle has the .normalize_factor,
             # .collision_verts_model and .collision_faces it expects.
             class _ObjShim:
@@ -1868,19 +1865,24 @@ def solve_s4r_qp_step_translation_only(N, active, ds, d_hat, centers,
 
 
 if __name__ == "__main__":
-    import sys, os, argparse
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import argparse
 
-    parser = argparse.ArgumentParser(description="S4R-QP: Progressive Scaling + QP Solver")
-    parser.add_argument('--n-objects', type=int, default=40, help='Number of objects')
-    parser.add_argument('--seed', type=int, nargs='+', default=[42, 123, 456, 789, 1024, 2048, 3333],
-                        help='Random seed(s)')
-    parser.add_argument('--spawn-xz', type=float, default=0.15, help='Spawn range XZ')
-    parser.add_argument('--spawn-y', type=float, default=0.35, help='Spawn range Y')
-    parser.add_argument('--target-size', type=float, default=0.1,
-                        help='Per-body target size (max-extent target after normalization)')
-    parser.add_argument('--max-verts', type=int, default=5000,
-                        help='Cap on per-body vertex count during eligibility scan')
+    # The canonical scene generators live in ../scenes (kubric/hy3d/thingi).
+    # Add both this package and ../scenes to the path so this module is
+    # runnable directly, e.g.:
+    #   python s4r/s4r_qp.py --dataset kubric --n-objects 40 --seed 42
+    sys.path.insert(0, _HERE)
+    sys.path.insert(0, _os.path.join(_os.path.dirname(_HERE), "scenes"))
+
+    parser = argparse.ArgumentParser(
+        description="S4R-QP: Progressive Scaling + QP Solver")
+    parser.add_argument('--dataset', choices=['kubric', 'hy3d', 'thingi'],
+                        default='kubric',
+                        help='Benchmark mesh pool (see ../data and the README)')
+    parser.add_argument('--n-objects', '--N', dest='n_objects', type=int,
+                        default=40, help='Number of objects')
+    parser.add_argument('--seed', type=int, nargs='+', default=[42, 123, 456],
+                        help='Random seed(s); the paper benchmark seeds are 42, 123, 456')
     parser.add_argument('--d-hat', type=float, default=0.02, help='Safety distance')
     parser.add_argument('--ds-max', type=float, default=0.05, help='Max scale step')
     parser.add_argument('--contact-backend', choices=['trimesh', 'fcl', 'fcl_prebuilt', 'warp'],
@@ -1893,61 +1895,20 @@ if __name__ == "__main__":
     parser.add_argument('--rotation', action='store_true',
                         help='Enable rotation DOFs (6-DOF QP + SO(3) optimization, slower)')
     parser.add_argument('--dual', action='store_true', help='Use dual QP formulation')
-    parser.add_argument('--concave', action='store_true',
-                        help='Use concave objects (bowls, pans) instead of the mixed pool')
-    parser.add_argument('--max-concavity', type=float, default=0.5,
-                        help='Max concavity ratio for --concave mode')
     parser.add_argument('--verbose', '-v', action='store_true')
-    parser.add_argument('--dump-trajectory', type=str, default=None,
-                        help='If set, write a per-scale-step trajectory JSON for the Remotion '
-                             'viewer. May be a full path or a bare scene name (resolved under '
-                             'vis/video/public/trajectories/<name>.json). Only the first seed is dumped.')
-    parser.add_argument('--dump-every', type=int, default=1,
-                        help='Capture every Nth scale step when --dump-trajectory is set.')
     args = parser.parse_args()
 
-    KUBRIC_POOL_DIR = os.path.join(os.path.dirname(__file__), '..', 'Resources',
-                              'InputMesh', 'Kubric_objects')
-
-    if args.concave:
-        from run_concave_experiment import generate_concave_scene
-        scene_type = f"concave(sr={args.spawn_xz}, max_ratio={args.max_concavity})"
-    else:
-        from mesh_collision import generate_kubric_scene
-        scene_type = f"mixed(N={args.n_objects}, sr_xz={args.spawn_xz})"
+    from make_scene import make_scene
 
     rot_str = "6DOF" if args.rotation else "3DOF"
     dual_str = "+dual" if args.dual else ""
-    print(f"=== S4R-QP {rot_str}{dual_str} M={args.M} | {scene_type} ===")
+    print(f"=== S4R-QP {rot_str}{dual_str} M={args.M} | "
+          f"{args.dataset}(N={args.n_objects}) ===")
     print(f"{'seed':<7} {'pen':>4} {'RMSD':>8} {'time':>7} {'scale':>6}")
     print("-" * 38)
 
-    for seed_idx, seed in enumerate(args.seed):
-        if args.concave:
-            objects = generate_concave_scene(
-                args.n_objects, args.spawn_xz, args.spawn_y, seed,
-                max_concavity_ratio=args.max_concavity)
-        else:
-            objects = generate_kubric_scene(
-                n_objects=args.n_objects, target_size=args.target_size,
-                spawn_range_xz=args.spawn_xz, spawn_range_y=args.spawn_y,
-                seed=seed, kubric_dir=KUBRIC_POOL_DIR, max_verts=args.max_verts)
-
-        # Trajectory dumper — only for the first seed so a sweep over seeds
-        # doesn't stomp the JSON each iteration.
-        traj_dumper = None
-        if args.dump_trajectory and seed_idx == 0:
-            from trajectory_dump import TrajectoryDumper, default_trajectory_path
-            _dp = args.dump_trajectory
-            traj_path = _dp if (os.sep in _dp or _dp.endswith('.json')) \
-                else default_trajectory_path(_dp)
-            traj_dumper = TrajectoryDumper(
-                traj_path,
-                scene_name=f'mesh_Kubric_{args.n_objects}',
-                solver='s4r-qp',
-                fps_hint=30,
-            )
-
+    for seed in args.seed:
+        objects, _sxz, _sy = make_scene(args.dataset, args.n_objects, seed, 1.0)
         r = solve_s4r_qp(
             objects, d_hat=args.d_hat, ds_max=args.ds_max,
             max_steps=args.max_steps, verbose=args.verbose,
@@ -1955,8 +1916,7 @@ if __name__ == "__main__":
             contact_sparsity=True, adaptive_ds=True,
             use_dual=args.dual,
             revalidate_interval=args.M,
-            contact_backend=args.contact_backend,
-            trajectory_dumper=traj_dumper,
-            dump_every=args.dump_every)
+            contact_backend=args.contact_backend)
 
-        print(f"{seed:<7} {r['pen']:>4} {r['rmsd']:>8.4f} {r['time']:>6.1f}s {r['scale']:>6.4f}")
+        print(f"{seed:<7} {r['pen']:>4} {r['rmsd']:>8.4f} "
+              f"{r['time']:>6.2f}s {r['scale']:>6.4f}")

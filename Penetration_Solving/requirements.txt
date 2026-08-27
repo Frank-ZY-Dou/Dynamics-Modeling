@@ -1,9 +1,15 @@
+# ── Core: CPU solver, shared mesh evaluator, and Kubric/HY3D scenes ──
+# This is everything the documented quick-start needs:
+#   pip install -r requirements.txt
+#   python examples/run_kubric.py --N 40 --seed 42
 numpy>=1.24
 scipy>=1.10
 trimesh>=4.0
 python-fcl>=0.7
 osqp>=0.6
-# GPU solver (s4r_gpu/) only:
-warp-lang>=1.5
-# Thingi10K scenes only:
-thingi10k
+
+# ── Optional extras (NOT installed by the line above) ──
+# GPU-native solver (s4r_gpu/, requires an NVIDIA GPU):
+#   pip install "warp-lang>=1.5"
+# Thingi10K streaming scenes (--dataset thingi):
+#   pip install thingi10k
