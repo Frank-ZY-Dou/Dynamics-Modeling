@@ -686,10 +686,21 @@ force around 1e-3 relative, state channels around 1e-4), and the forward stays w
 4e-6 rad of plain MuJoCo in float64 over 320-step rollouts on this model, the closest of
 the three backends.
 
-#### Runtime
+#### Runtime and backend characteristics
 
-One control step (eight substeps) on an A100 at batch size 256 with CUDA graphs:
-6 ms forward, 30 ms forward and backward.
+One training step is a forward and backward pass through network and simulator on an
+A100 at batch size 16 with 128-step rollouts, as in the Newton table above. The last
+column is the maximum arm-joint deviation from a plain-MuJoCo float64 reference over
+320-step torque-driven rollouts on the OMX model (contact-free, within joint limits).
+MJX and MuJoCo Warp implement MuJoCo's model semantics, so close agreement with that
+reference is expected of them; Newton is an independent engine with its own contact and
+limit models, and matching MuJoCo is not one of its design goals.
+
+| Simulator | Interface | Training step | Deviation from MuJoCo float64 |
+|---|---|---|---|
+| MuJoCo MJX (float32) | JAX | 8 ms | 3.7e-3 rad |
+| Newton | JAX / PyTorch | 22 / 24 ms | 1.7e-2 rad |
+| MuJoCo Warp (float32) | PyTorch | 17 ms | 4.2e-6 rad |
 
 #### Usage
 
