@@ -30,7 +30,9 @@ import mujoco
 from public_import import load_dataset, sample_valid_indices, validate_mujoco_joint_limits
 from backends.base import GRIPPER_MIN, GRIPPER_MAX, ROBOT_XML
 from torch_native.model_torch import TransformerActuatorTorch, load_flax_params
-from torch_native.newton_backend_torch import NewtonBackendTorch
+# engine backends import lazily in main(): the newton and mujoco-warp
+# simulators pin different warp-lang versions, so the unused one must never
+# be imported
 
 
 def smooth_l1(x: torch.Tensor) -> torch.Tensor:
@@ -172,6 +174,9 @@ def main():
     ap.add_argument("--flax_init", action="store_true",
                     help="initialize from the flax init at the same seed (parity runs)")
     ap.add_argument("--device", default="cuda")
+    ap.add_argument("--engine", default="newton", choices=["newton", "mjwarp"],
+                    help="simulation engine: newton (default) or mjwarp "
+                         "(differentiable MuJoCo Warp; see mjwarp/requirements.txt)")
     ap.add_argument("--resume", default=None,
                     help="checkpoint .pt to resume from"
                          "schedule/rng states for an exact continuation")
@@ -198,7 +203,17 @@ def main():
 
     xml = os.path.join(os.path.dirname(__file__), "..", ROBOT_XML)
     mj_model = mujoco.MjModel.from_xml_path(os.path.abspath(xml))
-    result = load_dataset(cfg["datasets"], mj_model, int(cfg.get("downsample_factor", 1)),
+    # dataset paths in the released configs are repository-root relative, and
+    # this trainer is documented to run from newton/; resolve against the
+    # repository root whenever a relative path does not exist from the current
+    # directory, and fail loudly on anything still missing
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    resolved = [p if os.path.isabs(p) or os.path.exists(p)
+                else os.path.join(repo_root, p) for p in cfg["datasets"]]
+    missing = [p for p in resolved if not os.path.exists(p)]
+    if missing:
+        raise FileNotFoundError(f"{len(missing)} dataset files not found, first: {missing[0]}")
+    result = load_dataset(resolved, mj_model, int(cfg.get("downsample_factor", 1)),
                           return_boundaries=True, cfg=cfg)
     data_values, q_traj, v_traj, gt_pos, gt_force, force_valid, boundaries = result
     data_values = np.asarray(data_values); q_traj = np.asarray(q_traj)
@@ -248,8 +263,14 @@ def main():
     n_par = sum(p.numel() for p in model.parameters())
     print(f"model params: {n_par:,}")
 
-    be = NewtonBackendTorch(B, data_dt, int(cfg["sim_step_size"]), device=str(dev))
-    print(f"backend: newton_torch | coupling: {'EXPLICIT' if hp['explicit'] else 'implicit'}")
+    if args.engine == "mjwarp":
+        sys.path.insert(0, os.path.abspath(os.path.join(
+            os.path.dirname(__file__), "..", "..", "mjwarp")))
+        from mjwarp_backend_torch import MJWarpBackendTorch as EngineBackend
+    else:
+        from torch_native.newton_backend_torch import NewtonBackendTorch as EngineBackend
+    be = EngineBackend(B, data_dt, int(cfg["sim_step_size"]), device=str(dev))
+    print(f"backend: {be.name} | coupling: {'EXPLICIT' if hp['explicit'] else 'implicit'}")
 
     lr = float(cfg["lr"])
     warm = min(max(int(cfg.get("lr_warmup_epochs", 0)), 1), max(epochs // 2, 1))
@@ -367,7 +388,7 @@ def main():
                        j_deg=[round(float(x), 3) for x in pj[:4] * 180 / np.pi],
                        grip_mm=round(float(pj[4] * 1000), 3),
                        sec=round(time.time() - t0, 1))
-            print(f"[newton_torch] ep {ep}: loss={rec['loss']:.4f} arm={rec['arm']:.5f} "
+            print(f"[{be.name}] ep {ep}: loss={rec['loss']:.4f} arm={rec['arm']:.5f} "
                   f"grip={rec['grip']:.4f} force={rec['force']:.4f} gate={rec['gate']:.4f} "
                   f"J(deg)={rec['j_deg']} grip={rec['grip_mm']}mm  [{rec['sec']}s]")
             if logf:

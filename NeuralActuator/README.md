@@ -32,7 +32,7 @@ Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>,
 - [Inference](#inference)
 - [Results (OpenManipulator-X)](#results-openmanipulator-x)
 - [Additional differentiable simulation backends](#additional-differentiable-simulation-backends)
-  - [Newton (Warp)](#newton-warp)
+  - [Newton (Warp)](#newton-warp) · [MuJoCo Warp](#mujoco-warp)
 - [Additional robotic platforms and variants](#additional-robotic-platforms-and-variants)
   - [SO-101 (LeRobot arm)](#so-101-lerobot-arm) · [Franka Panda](#franka-panda) · [Residual torque variant](#residual-torque-variant) · [Implicit vs. explicit force coupling with differentiable simulation](#implicit-vs-explicit-force-coupling-with-differentiable-simulation)
 - [Hardware and Data Collection](#hardware-and-data-collection)
@@ -607,6 +607,132 @@ At a matched budget, implicit coupling beats explicit by about 1.6x in arm error
 shows the same ordering and a similar gap (0.88 vs 1.33 deg, 1.5x; see *Implicit vs.
 explicit force coupling with differentiable simulation*), so the comparison holds across
 simulators.
+
+### MuJoCo Warp
+
+A third backend backpropagates through MuJoCo Warp (MJWarp), the GPU implementation of
+MuJoCo, extended with an analytic adjoint. The adjoint is the work of the
+[differentiable MuJoCo Warp](https://etaoxing.com/reports/diff_mjw/diff_mjw.html) project
+by [etaoxing](https://github.com/etaoxing/mujoco_warp) (Apache-2.0), which derives the
+backward pass from the implicit function theorem at the solver's stationary point rather
+than by unrolling solver iterations; we gratefully build on that fork, pinned in
+`mjwarp/requirements.txt`. Network, data, losses and protocol are again unchanged, and
+training runs through the same PyTorch trainer as the Newton backend via
+`--engine mjwarp`. The code is under `mjwarp/`. Both inference modes are shown, matching
+the OMX section above.
+
+**Dynamics rollout.**
+
+<table align="center">
+  <tr>
+    <th align="center">OpenManipulator-X, 300 g</th>
+    <th align="center">OpenManipulator-X, 400 g</th>
+    <th align="center">OpenManipulator-X, 500 g</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/mjwarp_omx_300g.gif" width="240" alt="OMX 300 g pick-and-place, MuJoCo Warp simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+    <td align="center"><img src="docs/media/mjwarp_omx_400g.gif" width="240" alt="OMX 400 g pick-and-place, MuJoCo Warp simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+    <td align="center"><img src="docs/media/mjwarp_omx_500g.gif" width="240" alt="OMX 500 g pick-and-place, MuJoCo Warp simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+  </tr>
+  <tr>
+    <td align="center"><code>python mjwarp/rollout_mjwarp.py ... ; python mjwarp/render_mjwarp.py ...</code></td>
+    <td align="center"><code>python mjwarp/rollout_mjwarp.py ... ; python mjwarp/render_mjwarp.py ...</code></td>
+    <td align="center"><code>python mjwarp/rollout_mjwarp.py ... ; python mjwarp/render_mjwarp.py ...</code></td>
+  </tr>
+</table>
+
+**Virtual force sensor.**
+
+<table align="center">
+  <tr>
+    <th align="center">OpenManipulator-X, 300 g</th>
+    <th align="center">OpenManipulator-X, 400 g</th>
+    <th align="center">OpenManipulator-X, 500 g</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/mjwarp_omx_300g_deploy.gif" width="240" alt="OMX 300 g pick-and-place, MuJoCo Warp force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
+    <td align="center"><img src="docs/media/mjwarp_omx_400g_deploy.gif" width="240" alt="OMX 400 g pick-and-place, MuJoCo Warp force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
+    <td align="center"><img src="docs/media/mjwarp_omx_500g_deploy.gif" width="240" alt="OMX 500 g pick-and-place, MuJoCo Warp force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
+  </tr>
+  <tr>
+    <td align="center"><code>python mjwarp/rollout_mjwarp.py --force_only ... ; python mjwarp/render_mjwarp.py ...</code></td>
+    <td align="center"><code>python mjwarp/rollout_mjwarp.py --force_only ... ; python mjwarp/render_mjwarp.py ...</code></td>
+    <td align="center"><code>python mjwarp/rollout_mjwarp.py --force_only ... ; python mjwarp/render_mjwarp.py ...</code></td>
+  </tr>
+</table>
+
+#### Simulation interface
+
+MJWarp runs the same MJCF model as the MJX pipeline, so the robot description, the
+integration rate and the contact-free setting carry over without translation, and the
+two-finger equality constraint is handled natively by the constraint solver. Two
+deliberate differences from the MJX trainer's solver settings: the Newton solver runs to
+convergence instead of the trainer's single-iteration shortcut, because the analytic
+adjoint assumes a converged stationary point (with one iteration the backward would
+describe a different map than the forward computes); and control torques are clamped to
+the actuator range on the PyTorch side before entering the simulator, so autograd applies
+the exact clamp gradient where the simulator's internal clamp is invisible to the
+adjoint. The measured end-effector force enters as `tau_ext = J^T f` through the same
+differentiable forward-kinematics chain as the Newton backend, since the simulator
+exposes no adjoint for applied external forces.
+
+#### Gradients
+
+Each control step is one differentiable operation whose backward re-executes the substep
+chain under a Warp tape and reads the analytic adjoints; simulator memory is independent
+of rollout length, and both passes replay as captured CUDA graphs that match eager
+execution bitwise. Finite-difference checks pass on all input channels (control and
+force around 1e-3 relative, state channels around 1e-4), and the forward stays within
+4e-6 rad of plain MuJoCo in float64 over 320-step rollouts on this model, the closest of
+the three backends.
+
+#### Runtime
+
+One control step (eight substeps) on an A100 at batch size 256 with CUDA graphs:
+6 ms forward, 30 ms forward and backward.
+
+#### Usage
+
+```bash
+# install the pinned differentiable MJWarp fork (see mjwarp/requirements.txt)
+pip install "mujoco-warp @ git+https://github.com/etaoxing/mujoco_warp@02d09b139fdf091e1e859d7f41c47a8f71d30574"
+
+cd newton
+
+# train with the shared PyTorch trainer, engine swapped
+python torch_native/train_newton_torch.py --config ../mjwarp/configs/train_mjwarp_omx.yaml \
+    --flax_init --engine mjwarp --log_json outputs/mjwarp_run/train_log.jsonl
+
+# evaluate: convert to the released Flax format, then score with the standard script
+python torch_native/export_flax.py --ckpt <ckpt>.pt --out <ckpt>_flax.pkl --use_ema
+python ../evaluate_actuator.py --model_path <ckpt>_flax.pkl \
+    --config ../configs/weight_all.yaml --output <results>.json
+
+# render a rollout (dynamics, or --force_only for the virtual force sensor)
+python ../mjwarp/rollout_mjwarp.py --ckpt <ckpt>.pt \
+    --csv ../data/weight/pick_place_object_500g/validation/001.csv --out rollout.npz
+python ../mjwarp/render_mjwarp.py --npz rollout.npz --out rollout.mp4
+```
+
+#### Results
+
+Scored by `evaluate_actuator.py` on the nine weight-benchmark tasks (EMA weights,
+600-step window; three seeds, range in brackets). These runs use a shorter training
+budget than the Newton table above: each implicit and explicit pair is compared at the
+explicit line's stop epoch (8,000 to 8,750 epochs), and the implicit rows are also
+reported at their own stop epochs (10,250 to 11,750 epochs).
+
+| Coupling | J1 | J2 | J3 | J4 | Arm mean (deg) | Grip (mm) |
+|---|---|---|---|---|---|---|
+| Implicit (matched budget) | 1.81 | 1.99 | 1.78 | 1.39 | 1.74 [1.53-1.85] | 0.24 |
+| Explicit (matched budget) | 2.17 | 3.50 | 3.32 | 1.86 | 2.71 [2.41-2.93] | 0.39 |
+| Implicit (full budget) | 1.36 | 1.62 | 1.38 | 1.05 | 1.35 [1.24-1.44] | 0.19 |
+
+At a matched budget, implicit coupling beats explicit by about 1.6x in arm error, the
+same ordering and gap as MJX (1.5x) and Newton (1.6x): the comparison holds across all
+three simulators. Training curves under MJWarp track the Newton runs closely at equal
+epochs (2.44 vs 2.44 deg at epoch 5,000 on the first seed), consistent with the two
+backends simulating the same physics.
 
 ## Additional robotic platforms and variants
 
