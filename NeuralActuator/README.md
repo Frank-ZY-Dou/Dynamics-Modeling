@@ -561,17 +561,9 @@ interfaces against each other.
 
 #### Runtime
 
-One training step (forward and backward through network and simulator) on an A100 at
-batch size 16, 128-step rollouts:
-
-| Simulator | Interface | Step time |
-|---|---|---|
-| MuJoCo MJX | JAX | 8 ms |
-| Newton | JAX | 22 ms |
-| Newton | PyTorch | 24 ms |
-
-Runtime is overhead-bound at this problem size; most of Newton's extra time is the
-backward pass's adjoint kernels, shared by both interfaces.
+Runtime is overhead-bound at this problem size; most of Newton's extra time relative to
+MJX is the backward pass's adjoint kernels, shared by both interfaces. Step times for
+all backends are gathered in the comparison table under *MuJoCo Warp* below.
 
 #### Usage
 
@@ -682,9 +674,7 @@ Each control step is one differentiable operation whose backward re-executes the
 chain under a Warp tape and reads the analytic adjoints; simulator memory is independent
 of rollout length, and both passes replay as captured CUDA graphs that match eager
 execution bitwise. Finite-difference checks pass on all input channels (control and
-force around 1e-3 relative, state channels around 1e-4), and the forward stays within
-4e-6 rad of plain MuJoCo in float64 over 320-step rollouts on this model, the closest of
-the three backends.
+force around 1e-3 relative, state channels around 1e-4).
 
 #### Runtime and backend characteristics
 
