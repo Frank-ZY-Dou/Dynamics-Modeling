@@ -673,13 +673,14 @@ exposes no adjoint for applied external forces.
 Each control step is one differentiable operation whose backward re-executes the substep
 chain under a Warp tape and reads the analytic adjoints; simulator memory is independent
 of rollout length, and both passes replay as captured CUDA graphs that match eager
-execution bitwise. Finite-difference checks pass on all input channels (control and
-force around 1e-3 relative, state channels around 1e-4).
+execution bitwise. Analytic gradients agree with central finite
+differences on every input channel (control, external force, and state), with relative
+errors below 2e-3 and typically below 1e-3.
 
 #### Runtime and backend characteristics
 
 One training step is a forward and backward pass through network and simulator on an
-A100 at batch size 16 with 128-step rollouts, as in the Newton table above. The last
+A100 at batch size 16 with 128-step rollouts, the same protocol for all rows. The last
 column is the maximum arm-joint deviation from a plain-MuJoCo float64 reference over
 320-step torque-driven rollouts on the OMX model (contact-free, within joint limits).
 MJX and MuJoCo Warp implement MuJoCo's model semantics, so close agreement with that
