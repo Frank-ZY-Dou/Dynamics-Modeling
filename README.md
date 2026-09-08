@@ -15,8 +15,3 @@ This repo contains research code for:
   is made differentiable: the discrete adjoint through frictional contact for rigid, articulated, soft and rod
   bodies, a PyTorch bridge for policy and parameter learning, and manipulation demos solved by gradient
   descent through contact.
-
-<p align="center">
-<img src="https://github.com/Frank-ZY-Dou/differentiable-superdex/raw/main/superdex_physics/examples/media/robot_push_policy.gif" width="42%" alt="A feedback policy pushes a cube">&emsp;
-<img src="https://github.com/Frank-ZY-Dou/differentiable-superdex/raw/main/superdex_physics/examples/media/robot_wuji2_grasp.gif" width="42%" alt="A Wuji Hand 2 carries a cube">
-</p>
