@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+results/
+*.egg-info/
+# tracked evidence: result tables and the persisted layouts (videos/frames stay untracked)
+!results/
+results/*
+!results/*.json
+!results/layouts/
+!results/layouts/*.json
+
+# never commit credentials
+.env
+.env.*
+*.key
+*.pem

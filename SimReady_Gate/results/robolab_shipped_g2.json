@@ -1,0 +1,1096 @@
+[
+ {
+  "scene": "bagel_plate_banana_bowl.usda",
+  "n_free": 5,
+  "pen_strict": 4,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 4,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.23219471747706194,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 4.9
+ },
+ {
+  "scene": "banana_bowl.usda",
+  "n_free": 2,
+  "pen_strict": 2,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 2,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.10882545760689671,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.5
+ },
+ {
+  "scene": "banana_crate.usda",
+  "n_free": 1,
+  "pen_strict": 1,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 1,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.11999065450905844,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.3
+ },
+ {
+  "scene": "bananas_5_grey_bin.usda",
+  "n_free": 5,
+  "pen_strict": 4,
+  "pen_obj_obj": 1,
+  "pen_obj_fixture": 3,
+  "max_pen_obj_obj_mm": 0.24749846522564845,
+  "max_pen_obj_fixture_mm": 0.7736777619615012,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "banana_02",
+   "banana_04"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 2.6
+ },
+ {
+  "scene": "bananas_5_in_crate.usda",
+  "n_free": 5,
+  "pen_strict": 4,
+  "pen_obj_obj": 2,
+  "pen_obj_fixture": 2,
+  "max_pen_obj_obj_mm": 0.1612083520756702,
+  "max_pen_obj_fixture_mm": 0.1788344237751982,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "banana_01"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 2.7
+ },
+ {
+  "scene": "base_empty.usda",
+  "n_free": 0,
+  "pen_strict": 0,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 0,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.0,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.2
+ },
+ {
+  "scene": "bin_condiments.usda",
+  "n_free": 11,
+  "pen_strict": 10,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 10,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.6544947092157125,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 3.6
+ },
+ {
+  "scene": "bin_mug_mustard_marker_bowl.usda",
+  "n_free": 4,
+  "pen_strict": 4,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 4,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.2691614837459586,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.6
+ },
+ {
+  "scene": "bin_mug_mustard_marker_bowl_spoon_mayo_soup.usda",
+  "n_free": 7,
+  "pen_strict": 6,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 6,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.2697202470290597,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "alphabet_soup_can"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 2.9
+ },
+ {
+  "scene": "blue.usda",
+  "n_free": 3,
+  "pen_strict": 1,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 1,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.48985495096966203,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.4
+ },
+ {
+  "scene": "bottles_crate.usda",
+  "n_free": 3,
+  "pen_strict": 2,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 2,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.1332026685833959,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "salad_dressing_bottle"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 2.3
+ },
+ {
+  "scene": "bowl_5_table.usda",
+  "n_free": 5,
+  "pen_strict": 5,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 5,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.07741963490848214,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.7
+ },
+ {
+  "scene": "bowls_2.usda",
+  "n_free": 2,
+  "pen_strict": 0,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 0,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.0,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "bowl_1",
+   "bowl_2"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 0.2
+ },
+ {
+  "scene": "bowls_2_table.usda",
+  "n_free": 2,
+  "pen_strict": 2,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 2,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.07718121632938058,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.4
+ },
+ {
+  "scene": "bowls_5.usda",
+  "n_free": 5,
+  "pen_strict": 0,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 0,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.0,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "bowl_center",
+   "bowl_1",
+   "bowl_2",
+   "bowl_3",
+   "bowl_4"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 0.4
+ },
+ {
+  "scene": "breakfast_table.usda",
+  "n_free": 19,
+  "pen_strict": 18,
+  "pen_obj_obj": 10,
+  "pen_obj_fixture": 8,
+  "max_pen_obj_obj_mm": 1.7596148356809893,
+  "max_pen_obj_fixture_mm": 0.4036650143726672,
+  "obj_obj_ge_1mm": 1,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 8.3
+ },
+ {
+  "scene": "butter_on_top_of_raisin_box.usda",
+  "n_free": 2,
+  "pen_strict": 1,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 1,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.059301278553580694,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.4
+ },
+ {
+  "scene": "butter_raisin_box.usda",
+  "n_free": 2,
+  "pen_strict": 2,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 2,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.04912516457202323,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.3
+ },
+ {
+  "scene": "butter_raisin_box_grey_bin.usda",
+  "n_free": 2,
+  "pen_strict": 2,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 2,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.05032103277979871,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.2
+ },
+ {
+  "scene": "cartons_in_crate.usda",
+  "n_free": 8,
+  "pen_strict": 2,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 2,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 2.2986600993201574,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "alphabet_soup_can",
+   "orange_juice_carton",
+   "mayonnaise_bottle",
+   "ketchup_bottle"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 2.8
+ },
+ {
+  "scene": "cartons_in_vertical_crate.usda",
+  "n_free": 8,
+  "pen_strict": 1,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 1,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.780035441929644,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "alphabet_soup_can",
+   "orange_juice_carton",
+   "container_a01",
+   "mayonnaise_bottle",
+   "ketchup_bottle"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 2.9
+ },
+ {
+  "scene": "cartons_on_box.usda",
+  "n_free": 8,
+  "pen_strict": 1,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 1,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.780035441929644,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "alphabet_soup_can",
+   "orange_juice_carton",
+   "mayonnaise_bottle",
+   "ketchup_bottle",
+   "cubebox_a02"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 2.8
+ },
+ {
+  "scene": "cleaning_products.usda",
+  "n_free": 7,
+  "pen_strict": 1,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 1,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.815841089934155,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "plasticpail_a02",
+   "whitepackerbottle_a03"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 2.8
+ },
+ {
+  "scene": "clutter_fruit_bottle_bluebin.usda",
+  "n_free": 17,
+  "pen_strict": 7,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 7,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 2.045903194631715,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "avocado01",
+   "crabbypenholder",
+   "serving_bowl",
+   "utilityjug_a03"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 9.1
+ },
+ {
+  "scene": "clutter_shelf.usda",
+  "n_free": 16,
+  "pen_strict": 6,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 6,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 2.045903194631715,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "avocado01",
+   "crabbypenholder",
+   "serving_bowl",
+   "utilityjug_a03",
+   "heavydutysteelshelving_a01"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 9.7
+ },
+ {
+  "scene": "colored_blocks.usda",
+  "n_free": 4,
+  "pen_strict": 3,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 3,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.2064651809633236,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.1
+ },
+ {
+  "scene": "conditionals_test_scene.usda",
+  "n_free": 16,
+  "pen_strict": 15,
+  "pen_obj_obj": 10,
+  "pen_obj_fixture": 5,
+  "max_pen_obj_obj_mm": 0.8273673377529045,
+  "max_pen_obj_fixture_mm": 1.0873432759808814,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "mug",
+   "mug_01",
+   "banana_in_bin",
+   "bowl_2",
+   "bowl_3",
+   "bowl_4"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 4.4
+ },
+ {
+  "scene": "cooking_table.usda",
+  "n_free": 15,
+  "pen_strict": 13,
+  "pen_obj_obj": 9,
+  "pen_obj_fixture": 4,
+  "max_pen_obj_obj_mm": 3.126720636139224,
+  "max_pen_obj_fixture_mm": 0.12156366624158088,
+  "obj_obj_ge_1mm": 2,
+  "floating": [
+   "redonion",
+   "wooden_spoons",
+   "tomato_sauce_can",
+   "pink_spaghetti_spoon"
+  ],
+  "contained": [
+   [
+    "spoon_1",
+    "clay_plates"
+   ]
+  ],
+  "dropped": [],
+  "t": 8.7
+ },
+ {
+  "scene": "cutlery_shelf.usda",
+  "n_free": 7,
+  "pen_strict": 0,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 0,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.0,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "spatula_05",
+   "spoon_big",
+   "spoon_small",
+   "fork_big",
+   "fork_small"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 15.3
+ },
+ {
+  "scene": "food_packing.usda",
+  "n_free": 9,
+  "pen_strict": 8,
+  "pen_obj_obj": 1,
+  "pen_obj_fixture": 7,
+  "max_pen_obj_obj_mm": 0.18557014463342625,
+  "max_pen_obj_fixture_mm": 0.7789880178995096,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 3.1
+ },
+ {
+  "scene": "food_packing_dense.usda",
+  "n_free": 8,
+  "pen_strict": 8,
+  "pen_obj_obj": 2,
+  "pen_obj_fixture": 6,
+  "max_pen_obj_obj_mm": 0.4197345062243816,
+  "max_pen_obj_fixture_mm": 0.42788151806605335,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 3.0
+ },
+ {
+  "scene": "foodpacking_1bin_1box_1can.usda",
+  "n_free": 4,
+  "pen_strict": 4,
+  "pen_obj_obj": 1,
+  "pen_obj_fixture": 3,
+  "max_pen_obj_obj_mm": 0.4197345062243816,
+  "max_pen_obj_fixture_mm": 0.9161506911400802,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.5
+ },
+ {
+  "scene": "foodpacking_1bin_2box_2can.usda",
+  "n_free": 6,
+  "pen_strict": 6,
+  "pen_obj_obj": 1,
+  "pen_obj_fixture": 5,
+  "max_pen_obj_obj_mm": 0.4197345062243816,
+  "max_pen_obj_fixture_mm": 0.9161506911400802,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.9
+ },
+ {
+  "scene": "foodpacking_1bin_3box_3can.usda",
+  "n_free": 8,
+  "pen_strict": 8,
+  "pen_obj_obj": 2,
+  "pen_obj_fixture": 6,
+  "max_pen_obj_obj_mm": 0.4197345062243816,
+  "max_pen_obj_fixture_mm": 0.42788151806605335,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 3.2
+ },
+ {
+  "scene": "front_of_shelf.usda",
+  "n_free": 9,
+  "pen_strict": 5,
+  "pen_obj_obj": 5,
+  "pen_obj_fixture": 0,
+  "max_pen_obj_obj_mm": 0.08101627793724586,
+  "max_pen_obj_fixture_mm": 0.0,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [
+   [
+    "spoon_big",
+    "sm_rack_m01"
+   ],
+   [
+    "spoon_small",
+    "sm_rack_m01"
+   ],
+   [
+    "fork_small",
+    "sm_rack_m01"
+   ]
+  ],
+  "dropped": [],
+  "t": 9.9
+ },
+ {
+  "scene": "fruits_in_basket.usda",
+  "n_free": 16,
+  "pen_strict": 15,
+  "pen_obj_obj": 11,
+  "pen_obj_fixture": 4,
+  "max_pen_obj_obj_mm": 3.006551061067675,
+  "max_pen_obj_fixture_mm": 0.4841142488363065,
+  "obj_obj_ge_1mm": 2,
+  "floating": [
+   "lemon_01",
+   "lemon_02",
+   "wooden_spoons"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 9.2
+ },
+ {
+  "scene": "fruits_out_of_basket.usda",
+  "n_free": 15,
+  "pen_strict": 12,
+  "pen_obj_obj": 3,
+  "pen_obj_fixture": 9,
+  "max_pen_obj_obj_mm": 3.014360477918032,
+  "max_pen_obj_fixture_mm": 1.7825962027862852,
+  "obj_obj_ge_1mm": 1,
+  "floating": [
+   "wooden_spoons"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 8.8
+ },
+ {
+  "scene": "fruits_out_of_basket_2oranges.usda",
+  "n_free": 17,
+  "pen_strict": 13,
+  "pen_obj_obj": 4,
+  "pen_obj_fixture": 9,
+  "max_pen_obj_obj_mm": 3.014360477918032,
+  "max_pen_obj_fixture_mm": 1.7825962027842208,
+  "obj_obj_ge_1mm": 2,
+  "floating": [
+   "orange_01",
+   "wooden_spoons",
+   "spatula",
+   "orange_03"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 9.1
+ },
+ {
+  "scene": "green.usda",
+  "n_free": 3,
+  "pen_strict": 0,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 0,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.0,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.6
+ },
+ {
+  "scene": "ladle_pot.usda",
+  "n_free": 13,
+  "pen_strict": 17,
+  "pen_obj_obj": 11,
+  "pen_obj_fixture": 6,
+  "max_pen_obj_obj_mm": 0.6952605026664532,
+  "max_pen_obj_fixture_mm": 0.2644391578687406,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "anza_medium"
+  ],
+  "contained": [
+   [
+    "fork_small",
+    "plate_small"
+   ]
+  ],
+  "dropped": [],
+  "t": 4.8
+ },
+ {
+  "scene": "mug_banana_ketchup_bowl_rubiks3_bin.usda",
+  "n_free": 7,
+  "pen_strict": 7,
+  "pen_obj_obj": 2,
+  "pen_obj_fixture": 5,
+  "max_pen_obj_obj_mm": 0.2561802711489314,
+  "max_pen_obj_fixture_mm": 0.1399253217889973,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 3.4
+ },
+ {
+  "scene": "mugs2_bananas2_ketchup_rubiks3_bin.usda",
+  "n_free": 9,
+  "pen_strict": 8,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 8,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.24418223860388222,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "rubiks_cube_middle"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 3.9
+ },
+ {
+  "scene": "mugs4_measuringcup_drill_bowl.usda",
+  "n_free": 7,
+  "pen_strict": 6,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 6,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.37229739190691724,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 3.5
+ },
+ {
+  "scene": "mugs4_measuringcup_drill_bowl_v2.usda",
+  "n_free": 7,
+  "pen_strict": 6,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 6,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.513415778801908,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "measuring_cup"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 3.6
+ },
+ {
+  "scene": "mugs_on_shelf.usda",
+  "n_free": 5,
+  "pen_strict": 1,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 1,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.07976097986106545,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 8.9
+ },
+ {
+  "scene": "mustard_raisin_box.usda",
+  "n_free": 2,
+  "pen_strict": 2,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 2,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.04954599582029581,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.5
+ },
+ {
+  "scene": "objects_around_table.usda",
+  "n_free": 8,
+  "pen_strict": 3,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 3,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.37331214005628666,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "bowl",
+   "banana",
+   "alphabet_soup_can"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 3.2
+ },
+ {
+  "scene": "rubiks_cube_2_bowl.usda",
+  "n_free": 3,
+  "pen_strict": 3,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 3,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.14454216614148696,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.9
+ },
+ {
+  "scene": "rubiks_cube_3.usda",
+  "n_free": 3,
+  "pen_strict": 3,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 3,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.3795163610579404,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.8
+ },
+ {
+  "scene": "rubiks_cube_banana_bowl.usda",
+  "n_free": 3,
+  "pen_strict": 3,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 3,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.1466563019984768,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.5
+ },
+ {
+  "scene": "rubiks_cube_banana_bowl_mug_bin.usda",
+  "n_free": 4,
+  "pen_strict": 4,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 4,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.11876857823573533,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.8
+ },
+ {
+  "scene": "rubiks_cube_bowl.usda",
+  "n_free": 2,
+  "pen_strict": 2,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 2,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.13280353813396872,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.4
+ },
+ {
+  "scene": "shelf2_with_condiments.usda",
+  "n_free": 4,
+  "pen_strict": 1,
+  "pen_obj_obj": 1,
+  "pen_obj_fixture": 0,
+  "max_pen_obj_obj_mm": 0.02733013121958283,
+  "max_pen_obj_fixture_mm": 0.0,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 13.5
+ },
+ {
+  "scene": "shelf2_without_condiments.usda",
+  "n_free": 4,
+  "pen_strict": 2,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 2,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.24006889868033454,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 13.8
+ },
+ {
+  "scene": "shelf_mugs_jug_bowl.usda",
+  "n_free": 5,
+  "pen_strict": 2,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 2,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.0797758810222593,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 9.2
+ },
+ {
+  "scene": "shelf_with_cleaning_products.usda",
+  "n_free": 8,
+  "pen_strict": 1,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 1,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.815841089934155,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "plasticpail_a02",
+   "whitepackerbottle_a03"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 4.5
+ },
+ {
+  "scene": "shelf_with_cleaning_products2.usda",
+  "n_free": 8,
+  "pen_strict": 1,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 1,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.815841089934155,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "plasticpail_a02",
+   "whitepackerbottle_a03"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 4.6
+ },
+ {
+  "scene": "spam_mug.usda",
+  "n_free": 2,
+  "pen_strict": 2,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 2,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.14083871042557677,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.4
+ },
+ {
+  "scene": "test_plate_banana_rubiks_cube.usda",
+  "n_free": 10,
+  "pen_strict": 7,
+  "pen_obj_obj": 2,
+  "pen_obj_fixture": 5,
+  "max_pen_obj_obj_mm": 1.4610050162106036,
+  "max_pen_obj_fixture_mm": 0.27803904968184795,
+  "obj_obj_ge_1mm": 2,
+  "floating": [
+   "banana",
+   "banana_hanging_off_01",
+   "yogurt_cup",
+   "rubiks_cube",
+   "dry_erase_marker"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 4.6
+ },
+ {
+  "scene": "tools_container.usda",
+  "n_free": 6,
+  "pen_strict": 5,
+  "pen_obj_obj": 1,
+  "pen_obj_fixture": 4,
+  "max_pen_obj_obj_mm": 0.5377388336119671,
+  "max_pen_obj_fixture_mm": 0.3831441545957062,
+  "obj_obj_ge_1mm": 0,
+  "floating": [
+   "right_bin"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 3.5
+ },
+ {
+  "scene": "tools_picking.usda",
+  "n_free": 11,
+  "pen_strict": 8,
+  "pen_obj_obj": 8,
+  "pen_obj_fixture": 0,
+  "max_pen_obj_obj_mm": 2.474031204377752,
+  "max_pen_obj_fixture_mm": 0.0,
+  "obj_obj_ge_1mm": 2,
+  "floating": [
+   "cordless_drill",
+   "spring_clamp",
+   "clamp_01",
+   "wood_hammer"
+  ],
+  "contained": [
+   [
+    "clamp_01",
+    "center_bin"
+   ]
+  ],
+  "dropped": [],
+  "t": 3.9
+ },
+ {
+  "scene": "tools_sorting.usda",
+  "n_free": 10,
+  "pen_strict": 9,
+  "pen_obj_obj": 3,
+  "pen_obj_fixture": 6,
+  "max_pen_obj_obj_mm": 0.6225059611057182,
+  "max_pen_obj_fixture_mm": 0.5130973320387131,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 3.8
+ },
+ {
+  "scene": "toys_cleanup.usda",
+  "n_free": 10,
+  "pen_strict": 10,
+  "pen_obj_obj": 1,
+  "pen_obj_fixture": 9,
+  "max_pen_obj_obj_mm": 2.0205507376439558,
+  "max_pen_obj_fixture_mm": 0.7514893087776195,
+  "obj_obj_ge_1mm": 1,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 6.3
+ },
+ {
+  "scene": "two_bin.usda",
+  "n_free": 1,
+  "pen_strict": 1,
+  "pen_obj_obj": 0,
+  "pen_obj_fixture": 1,
+  "max_pen_obj_obj_mm": 0.0,
+  "max_pen_obj_fixture_mm": 0.2404186701775446,
+  "obj_obj_ge_1mm": 0,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 2.6
+ },
+ {
+  "scene": "wire_shelf_mugs_plate_spatula.usda",
+  "n_free": 8,
+  "pen_strict": 4,
+  "pen_obj_obj": 2,
+  "pen_obj_fixture": 2,
+  "max_pen_obj_obj_mm": 1.2355232481462142,
+  "max_pen_obj_fixture_mm": 0.10734191569317618,
+  "obj_obj_ge_1mm": 1,
+  "floating": [],
+  "contained": [],
+  "dropped": [],
+  "t": 3.9
+ },
+ {
+  "scene": "workdesk.usda",
+  "n_free": 14,
+  "pen_strict": 12,
+  "pen_obj_obj": 1,
+  "pen_obj_fixture": 11,
+  "max_pen_obj_obj_mm": 1.392848589880341,
+  "max_pen_obj_fixture_mm": 1.033087433840377,
+  "obj_obj_ge_1mm": 1,
+  "floating": [
+   "marker",
+   "spoon_big"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 5.7
+ },
+ {
+  "scene": "workdesk_bin.usda",
+  "n_free": 12,
+  "pen_strict": 12,
+  "pen_obj_obj": 3,
+  "pen_obj_fixture": 9,
+  "max_pen_obj_obj_mm": 1.192046932931623,
+  "max_pen_obj_fixture_mm": 0.360094865180835,
+  "obj_obj_ge_1mm": 1,
+  "floating": [
+   "keyboard"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 5.3
+ },
+ {
+  "scene": "workdesk_snacks.usda",
+  "n_free": 13,
+  "pen_strict": 12,
+  "pen_obj_obj": 3,
+  "pen_obj_fixture": 9,
+  "max_pen_obj_obj_mm": 9.863142421009552,
+  "max_pen_obj_fixture_mm": 0.32834511409779443,
+  "obj_obj_ge_1mm": 2,
+  "floating": [
+   "spoon_big"
+  ],
+  "contained": [],
+  "dropped": [],
+  "t": 6.9
+ }
+]

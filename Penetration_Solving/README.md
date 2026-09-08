@@ -24,6 +24,24 @@ configuration. <b>Right:</b> S4R efficiently converts cluttered 3D assets into s
 scenes for downstream robot policy training.</sub></p>
 </div>
 
+## 📢 Updates
+
+* [September 2026] **SimReady Gate** — an agentic, language-driven layer on top of S4R that turns generated RoboLab and RoboCasa scenes into certified simulation-ready ones: a request becomes a typed constraint program, S4R repairs under it in scale-space, a probed mesh-level evaluator and a MuJoCo settle decide, and a certificate with provenance is written. Measured on RoboLab's 68 shipped scenes, on layouts from RoboLab's own placement solver, and on RoboCasa's counter regions with RoboCasa's own placement test. A separate project in this repository: [`../SimReady_Gate/`](../SimReady_Gate/).
+* [September 2026] Timing tables extended to N = 2000 and 3000 on both the CPU and the GPU solver, with the hardware noted.
+* [August 2026] Initial release: the CPU solver (progressive scaling, contact QP, SOI events, frozen-witness cache, tail refinement), the GPU-native solver on NVIDIA Warp, the benchmark scene generators with fixed seeds, the bundled Kubric pool and the processed HY3D meshes, and end-to-end examples.
+
+## Table of Contents
+
+* [📢 Updates](#-updates)
+* [Overview](#overview)
+* [SimReady Gate](#simready-gate)
+* [Layout](#layout)
+* [Getting started](#getting-started)
+   * [Setup](#setup) · [CPU solver at more sizes](#cpu-solver-at-more-sizes) · [GPU solver](#gpu-solver) · [Upright-on-plane repair with rotation](#upright-on-plane-repair-with-rotation)
+* [Data](#data)
+* [Citation](#citation)
+* [License](#license)
+
 ## Overview
 
 Penetration-free configurations are a prerequisite for physical
@@ -72,6 +90,14 @@ plays the optimization.
 </tr>
 </table>
 
+## SimReady Gate
+
+[SimReady Gate](../SimReady_Gate/) is a separate project in this repository built on S4R: a
+language model writes a typed constraint program for a generated scene, S4R repairs the scene
+under it in scale-space, and a probed mesh-level evaluator plus a MuJoCo settle certify the
+result. It reads RoboLab (USD) and RoboCasa (MJCF) scenes directly and comes with the measured
+diagnostics on their assets. See [`../SimReady_Gate/README.md`](../SimReady_Gate/README.md).
+
 ## Layout
 
 ```
@@ -98,6 +124,8 @@ Penetration_Solving/
 ```
 
 ## Getting started
+
+### Setup
 
 Install the core (CPU) dependencies and run the demo:
 

@@ -1,0 +1,108 @@
+{
+ "ok": false,
+ "msg": "Failed to resolve collisions within iteration limit",
+ "objects": [
+  {
+   "name": "cheez_it",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/ycb/cheez_it.usd",
+   "x": 0.4319885060191154,
+   "y": -0.26801149398088453,
+   "z": 0.1087429929971695,
+   "yaw": 142.1529456420825,
+   "dims": [
+    0.07173000276088715,
+    0.1639770120382309,
+    0.213485985994339
+   ]
+  },
+  {
+   "name": "dumbbell",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/dumbbell.usd",
+   "x": 0.6598778963088989,
+   "y": -0.2569517400178051,
+   "z": 0.039217948585748674,
+   "yaw": 169.24758813207546,
+   "dims": [
+    0.0835055261850357,
+    0.18024420738220215,
+    0.07443589717149734
+   ]
+  },
+  {
+   "name": "spatula_06",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/vomp/spatula_06/spatula_06.usd",
+   "x": 0.5232833307710077,
+   "y": 0.001902330381373954,
+   "z": 0.0057130615673959256,
+   "yaw": 138.04640101258124,
+   "dims": [
+    0.2749020606279373,
+    0.0772191658616066,
+    0.007426123134791851
+   ]
+  },
+  {
+   "name": "glasses",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/glasses.usd",
+   "x": 0.6680802265182137,
+   "y": 0.2680802265182137,
+   "z": 0.024941473405808226,
+   "yaw": 37.03080912963776,
+   "dims": [
+    0.146884985268116,
+    0.1638395469635725,
+    0.045882946811616455
+   ]
+  },
+  {
+   "name": "milkjug_a02",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/vomp/milkjug_a02/milkjug_a02.usd",
+   "x": 0.40466188490390775,
+   "y": 0.2953381150960922,
+   "z": 0.11039024931192398,
+   "yaw": 198.65385328797316,
+   "dims": [
+    0.10932376980781555,
+    0.10932376980781555,
+    0.21678049862384796
+   ]
+  },
+  {
+   "name": "birdhouse",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/birdhouse.usd",
+   "x": 0.316812546749416,
+   "y": 0.375169412208219,
+   "z": 0.11839371514320376,
+   "yaw": 115.5590068944591,
+   "dims": [
+    0.17997225373983383,
+    0.18079967796802526,
+    0.23278743028640753
+   ]
+  }
+ ],
+ "relations": [
+  [
+   "dumbbell",
+   "milkjug_a02",
+   "back-of",
+   0.18703080260188065
+  ],
+  [
+   "dumbbell",
+   "spatula_06",
+   "front-of",
+   0.13630990087882905
+  ]
+ ],
+ "margin": 0.05,
+ "table_bounds": [
+  0.25,
+  0.85,
+  -0.45,
+  0.45
+ ],
+ "base_scene": "/mnt/data/Frank/codes/ext/RoboLab/assets/scenes/base_empty.usda",
+ "seed": 0,
+ "n": 6
+}

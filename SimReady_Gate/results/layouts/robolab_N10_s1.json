@@ -1,0 +1,160 @@
+{
+ "ok": false,
+ "msg": "Failed to resolve collisions within iteration limit",
+ "objects": [
+  {
+   "name": "popcorn_box",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/popcorn_box.usd",
+   "x": 0.6867540031671524,
+   "y": -0.2867540031671524,
+   "z": 0.044488500475883486,
+   "yaw": 182.96911352422404,
+   "dims": [
+    0.03825239837169647,
+    0.1264919936656952,
+    0.08497700095176697
+   ]
+  },
+  {
+   "name": "spaghetti",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/spaghetti.usd",
+   "x": 0.48433762533704366,
+   "y": -0.01742214945511272,
+   "z": 0.026918399751186373,
+   "yaw": 186.7902753110047,
+   "dims": [
+    0.028492599725723267,
+    0.2498805969953537,
+    0.04983679950237274
+   ]
+  },
+  {
+   "name": "utilityjug_a03",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/vomp/utilityjug_a03/utilityjug_a03.usd",
+   "x": 0.6642627455294132,
+   "y": 0.2642627455294132,
+   "z": 0.16983553838729848,
+   "yaw": 38.65150906287383,
+   "dims": [
+    0.17125481367111206,
+    0.17147450894117355,
+    0.33567107677459695
+   ]
+  },
+  {
+   "name": "remote_control",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/remote_control.usd",
+   "x": 0.367792628146708,
+   "y": -0.33220737185329197,
+   "z": 0.08415494453907013,
+   "yaw": 103.93841977401956,
+   "dims": [
+    0.03558525629341602,
+    0.025243834592402023,
+    0.16430988907814026
+   ]
+  },
+  {
+   "name": "banana",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/ycb/banana.usd",
+   "x": 0.7182394619048587,
+   "y": 0.27778182999131606,
+   "z": 0.020334999680519106,
+   "yaw": 100.19478175567383,
+   "dims": [
+    0.10888800024986267,
+    0.17841200530529022,
+    0.03666999936103821
+   ]
+  },
+  {
+   "name": "hammer_5",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/handal/hammer_5.usd",
+   "x": 0.3704422085560647,
+   "y": 0.18460645561643735,
+   "z": 0.019208401113748587,
+   "yaw": 205.22399774979405,
+   "dims": [
+    0.3366542160511017,
+    0.12673179805278778,
+    0.03441680222749718
+   ]
+  },
+  {
+   "name": "lunchbag",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/objaverse/lunchbag.usd",
+   "x": 0.4076898649179425,
+   "y": 0.1677944533705616,
+   "z": 0.07449999791383743,
+   "yaw": 292.6781893389505,
+   "dims": [
+    0.09948918968439104,
+    0.05247273296117783,
+    0.14499999582767487
+   ]
+  },
+  {
+   "name": "mayonnaise_bottle",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/mayonnaise_bottle.usd",
+   "x": 0.3809760637098083,
+   "y": 0.5345139909709837,
+   "z": 0.07595119965076447,
+   "yaw": 220.66131338201336,
+   "dims": [
+    0.04103099927306175,
+    0.06454139947891235,
+    0.14790239930152893
+   ]
+  },
+  {
+   "name": "milkjug_a01",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/vomp/milkjug_a01/milkjug_a01.usd",
+   "x": 0.7251596823732004,
+   "y": 0.15974630632365422,
+   "z": 0.08818395030498505,
+   "yaw": 154.01254773323598,
+   "dims": [
+    0.07683209329843521,
+    0.07662000507116318,
+    0.1723679006099701
+   ]
+  },
+  {
+   "name": "measuring_cups",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/handal/measuring_cups.usd",
+   "x": 0.5498736490396002,
+   "y": 0.13778620325494562,
+   "z": 0.020945500254631058,
+   "yaw": 55.2018520510468,
+   "dims": [
+    0.1674111932516098,
+    0.08278939872980118,
+    0.03789100050926212
+   ]
+  }
+ ],
+ "relations": [
+  [
+   "hammer_5",
+   "lunchbag",
+   "left-of",
+   0.09557235306975927
+  ],
+  [
+   "popcorn_box",
+   "measuring_cups",
+   "front-of",
+   0.1245360681146562
+  ]
+ ],
+ "margin": 0.05,
+ "table_bounds": [
+  0.25,
+  0.85,
+  -0.45,
+  0.45
+ ],
+ "base_scene": "/mnt/data/Frank/codes/ext/RoboLab/assets/scenes/base_empty.usda",
+ "seed": 1,
+ "n": 10
+}

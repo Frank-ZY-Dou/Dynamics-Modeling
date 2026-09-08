@@ -1,0 +1,81 @@
+{
+ "source": {
+  "pile": {
+   "n": 20,
+   "seed": 2,
+   "radius": 0.13,
+   "objects": [
+    "pineapple_slices_can",
+    "bbq_sauce_bottle",
+    "raisin_box",
+    "tomato_sauce_can",
+    "ladle",
+    "lime01",
+    "orange_02",
+    "bowl",
+    "remote_control",
+    "pitcher",
+    "lemon_02",
+    "spoon_big",
+    "whitepackerbottle_a02",
+    "whitepackerbottle_a01",
+    "plasticjerrican_a01",
+    "hammer_8",
+    "peas_and_carrots",
+    "spatula_17",
+    "bin_b02",
+    "orange_01"
+   ]
+  }
+ },
+ "n_free": 20,
+ "pen_raw": 80,
+ "max_pen_raw_mm": 15.20577600166273,
+ "pen_raw_obj_obj": 80,
+ "pen_rep": 0,
+ "rmsd": 0.3278160630477374,
+ "steps": 40,
+ "repair_s": 28.53206968307495,
+ "fails": [],
+ "off_support": [],
+ "route_s": 0.0,
+ "g5": {
+  "raw": {
+   "hull": {
+    "vmax": 4.900897852061171,
+    "dmax": 2.2232969754760386,
+    "left": [
+     "pineapple_slices_can",
+     "bbq_sauce_bottle",
+     "tomato_sauce_can",
+     "ladle",
+     "lime01",
+     "orange_02",
+     "pitcher",
+     "whitepackerbottle_a02",
+     "bin_b02",
+     "orange_01"
+    ]
+   },
+   "coacd": {
+    "vmax": 3.7672703950749926,
+    "dmax": 0.8879731119717583,
+    "left": [
+     "orange_02"
+    ]
+   }
+  },
+  "rep": {
+   "hull": {
+    "vmax": 0.8552680046241165,
+    "dmax": 0.12281200538345032,
+    "left": []
+   },
+   "coacd": {
+    "vmax": 0.8393060156979364,
+    "dmax": 0.11941115594401754,
+    "left": []
+   }
+  }
+ }
+}

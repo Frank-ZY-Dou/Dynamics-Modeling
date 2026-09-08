@@ -1,0 +1,984 @@
+{
+ "ok": false,
+ "scene": "results/videos/pile_n20/layout.json",
+ "program": "results/videos/pile_n20/program_round1.json",
+ "pen_before": 81,
+ "pen_after": 0,
+ "min_score_after": 0.0,
+ "contained_after": [],
+ "floating_after": [],
+ "rmsd_xy": 0.33272861440653756,
+ "steps": 34,
+ "time_s": 24.44,
+ "predicates": [
+  [
+   "on_support(pineapple_slices_can,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(bbq_sauce_bottle,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(raisin_box,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(tomato_sauce_can,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(ladle,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(lime01,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(orange_02,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(bowl,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(remote_control,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(pitcher,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(lemon_02,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(spoon_big,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(whitepackerbottle_a02,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(whitepackerbottle_a01,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(plasticjerrican_a01,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(hammer_8,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(peas_and_carrots,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(spatula_17,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(bin_b02,table)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(orange_01,table)",
+   true,
+   0.0
+  ],
+  [
+   "upright(pineapple_slices_can)",
+   true,
+   0.0
+  ],
+  [
+   "upright(bbq_sauce_bottle)",
+   true,
+   0.0
+  ],
+  [
+   "upright(raisin_box)",
+   true,
+   0.0
+  ],
+  [
+   "upright(tomato_sauce_can)",
+   true,
+   0.0
+  ],
+  [
+   "upright(ladle)",
+   true,
+   0.0
+  ],
+  [
+   "upright(lime01)",
+   true,
+   0.0
+  ],
+  [
+   "upright(orange_02)",
+   true,
+   0.0
+  ],
+  [
+   "upright(bowl)",
+   true,
+   0.0
+  ],
+  [
+   "upright(remote_control)",
+   true,
+   0.0
+  ],
+  [
+   "upright(pitcher)",
+   true,
+   0.0
+  ],
+  [
+   "upright(lemon_02)",
+   true,
+   0.0
+  ],
+  [
+   "upright(spoon_big)",
+   true,
+   0.0
+  ],
+  [
+   "upright(whitepackerbottle_a02)",
+   true,
+   0.0
+  ],
+  [
+   "upright(whitepackerbottle_a01)",
+   true,
+   0.0
+  ],
+  [
+   "upright(plasticjerrican_a01)",
+   true,
+   0.0
+  ],
+  [
+   "upright(hammer_8)",
+   true,
+   0.0
+  ],
+  [
+   "upright(peas_and_carrots)",
+   true,
+   0.0
+  ],
+  [
+   "upright(spatula_17)",
+   true,
+   0.0
+  ],
+  [
+   "upright(bin_b02)",
+   true,
+   0.0
+  ],
+  [
+   "upright(orange_01)",
+   true,
+   0.0
+  ],
+  [
+   "within(pineapple_slices_can,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(bbq_sauce_bottle,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(raisin_box,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(tomato_sauce_can,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(ladle,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(lime01,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(orange_02,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(bowl,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(remote_control,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(pitcher,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(lemon_02,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(spoon_big,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(whitepackerbottle_a02,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(whitepackerbottle_a01,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(plasticjerrican_a01,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(hammer_8,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(peas_and_carrots,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(spatula_17,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(bin_b02,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "within(orange_01,table.top)",
+   true,
+   0.0
+  ],
+  [
+   "place(pitcher)",
+   true,
+   0.00014062500000000533
+  ],
+  [
+   "place(bowl)",
+   true,
+   0.012678679346677445
+  ],
+  [
+   "place(ladle)",
+   true,
+   0.005215595186006002
+  ],
+  [
+   "place(spoon_big)",
+   true,
+   0.00014062553077683634
+  ],
+  [
+   "place(orange_02)",
+   true,
+   0.0
+  ],
+  [
+   "place(orange_01)",
+   true,
+   0.0
+  ],
+  [
+   "place(lime01)",
+   true,
+   0.0
+  ],
+  [
+   "place(lemon_02)",
+   true,
+   0.0
+  ],
+  [
+   "place(pineapple_slices_can)",
+   true,
+   0.0
+  ],
+  [
+   "place(tomato_sauce_can)",
+   true,
+   0.0
+  ],
+  [
+   "place(peas_and_carrots)",
+   true,
+   0.0
+  ],
+  [
+   "place(bbq_sauce_bottle)",
+   true,
+   0.0
+  ],
+  [
+   "place(whitepackerbottle_a01)",
+   true,
+   0.0
+  ],
+  [
+   "place(whitepackerbottle_a02)",
+   true,
+   0.0
+  ],
+  [
+   "place(plasticjerrican_a01)",
+   true,
+   0.008415248853788053
+  ],
+  [
+   "place(hammer_8)",
+   false,
+   0.07286654276525655
+  ],
+  [
+   "place(bin_b02)",
+   true,
+   0.037288344164202805
+  ],
+  [
+   "place(remote_control)",
+   true,
+   0.0
+  ],
+  [
+   "place(spatula_17)",
+   true,
+   0.0020765493340130954
+  ],
+  [
+   "place(raisin_box)",
+   true,
+   0.0
+  ],
+  [
+   "in_front_of(bowl,pitcher,gap=0.12)",
+   true,
+   0.07348013505322021
+  ],
+  [
+   "near(ladle,bowl,r=0.22)",
+   true,
+   0.21599677063694264
+  ],
+  [
+   "near(spoon_big,bowl,r=0.22)",
+   true,
+   0.14949901795583045
+  ],
+  [
+   "near(lime01,orange_02,r=0.12)",
+   true,
+   0.09999999999999996
+  ],
+  [
+   "near(lemon_02,orange_02,r=0.12)",
+   true,
+   0.09999999999999998
+  ],
+  [
+   "near(orange_01,orange_02,r=0.12)",
+   true,
+   0.10198039027185567
+  ],
+  [
+   "left_of(orange_02,bowl,gap=0.18)",
+   true,
+   0.14921172934874594
+  ],
+  [
+   "in_front_of(pineapple_slices_can,bowl,gap=0.12)",
+   true,
+   0.06666048994677987
+  ],
+  [
+   "in_front_of(tomato_sauce_can,bowl,gap=0.12)",
+   true,
+   0.06666048994677987
+  ],
+  [
+   "in_front_of(peas_and_carrots,bowl,gap=0.12)",
+   true,
+   0.06666048994677987
+  ],
+  [
+   "in_front_of(bbq_sauce_bottle,bowl,gap=0.12)",
+   true,
+   0.06666048994677987
+  ],
+  [
+   "in_front_of(whitepackerbottle_a01,bowl,gap=0.12)",
+   true,
+   0.06666048994677987
+  ],
+  [
+   "in_front_of(whitepackerbottle_a02,bowl,gap=0.12)",
+   true,
+   0.06666048994677987
+  ],
+  [
+   "in_front_of(plasticjerrican_a01,bowl,gap=0.12)",
+   true,
+   0.028530948877507956
+  ],
+  [
+   "right_of(hammer_8,bowl,gap=0.22)",
+   true,
+   0.11794993850431598
+  ],
+  [
+   "right_of(bin_b02,bowl,gap=0.25)",
+   true,
+   0.14350964654166437
+  ],
+  [
+   "right_of(remote_control,bowl,gap=0.22)",
+   true,
+   0.19078827065125412
+  ],
+  [
+   "right_of(spatula_17,bowl,gap=0.12)",
+   true,
+   0.040313679028720684
+  ]
+ ],
+ "failed_predicates": [
+  "place(hammer_8)"
+ ],
+ "notes": [
+  "RoboLab frame: the robot at -x looks along +x; 'in front of X' means larger x than X and 'left of X' means larger y. So the far edge of the table ('the back') is larger x: the back row is in_front_of the bowl.",
+  "targets were chosen from the table rectangle x[0.20, 0.90] y[-0.50, 0.50] and the listed object sizes; the continuation resolves any residual overlap"
+ ],
+ "dropped_children": [],
+ "provenance": {
+  "scene": {
+   "path": "results/videos/pile_n20/layout.json",
+   "sha256": "64cb30b8227d28bc"
+  },
+  "program": {
+   "path": "results/videos/pile_n20/program_round1.json",
+   "sha256": "59164b727a365627",
+   "dsl": "program\n  no_penetration(*, margin=0.01)\n  fixed(table)\n  fixed(franka_table)\n  fixed(GroundPlane)\n  on_support(*, table)\n  upright(*)\n  within(*, table.top, inset=0.02)\n  place(pitcher, x=0.42, y=0.0)\n  place(bowl, x=0.62, y=0.0)\n  place(ladle, x=0.6, y=-0.2, yaw=90)\n  place(spoon_big, x=0.62, y=0.16, yaw=90)\n  place(orange_02, x=0.48, y=0.34)\n  place(orange_01, x=0.58, y=0.36)\n  place(lime01, x=0.4, y=0.4)\n  place(lemon_02, x=0.48, y=0.44)\n  place(pineapple_slices_can, x=0.8, y=0.42)\n  place(tomato_sauce_can, x=0.8, y=0.31)\n  place(peas_and_carrots, x=0.8, y=0.2)\n  place(bbq_sauce_bottle, x=0.8, y=0.09)\n  place(whitepackerbottle_a01, x=0.8, y=-0.02)\n  place(whitepackerbottle_a02, x=0.8, y=-0.12)\n  place(plasticjerrican_a01, x=0.77, y=-0.3)\n  place(hammer_8, x=0.4, y=-0.4)\n  place(bin_b02, x=0.62, y=-0.42)\n  place(remote_control, x=0.28, y=-0.4)\n  place(spatula_17, x=0.3, y=-0.15, yaw=90)\n  place(raisin_box, x=0.3, y=0.2)\n  in_front_of(bowl, pitcher, gap=0.12)\n  near(ladle, bowl, r=0.22)\n  near(spoon_big, bowl, r=0.22)\n  near(lime01, orange_02, r=0.12)\n  near(lemon_02, orange_02, r=0.12)\n  near(orange_01, orange_02, r=0.12)\n  left_of(orange_02, bowl, gap=0.18)\n  in_front_of(pineapple_slices_can, bowl, gap=0.12)\n  in_front_of(tomato_sauce_can, bowl, gap=0.12)\n  in_front_of(peas_and_carrots, bowl, gap=0.12)\n  in_front_of(bbq_sauce_bottle, bowl, gap=0.12)\n  in_front_of(whitepackerbottle_a01, bowl, gap=0.12)\n  in_front_of(whitepackerbottle_a02, bowl, gap=0.12)\n  in_front_of(plasticjerrican_a01, bowl, gap=0.12)\n  right_of(hammer_8, bowl, gap=0.22)\n  right_of(bin_b02, bowl, gap=0.25)\n  right_of(remote_control, bowl, gap=0.22)\n  right_of(spatula_17, bowl, gap=0.12)\n  minimize displacement(*)\ngate\n  G5: v_max <= 1.0, dx <= 0.15",
+   "json": {
+    "statements": [
+     {
+      "op": "no_penetration",
+      "margin": 0.01,
+      "reason": "nothing interpenetrating, keep 1 cm clearance"
+     },
+     {
+      "op": "fixed",
+      "a": "table"
+     },
+     {
+      "op": "fixed",
+      "a": "franka_table"
+     },
+     {
+      "op": "fixed",
+      "a": "GroundPlane"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table",
+      "reason": "everything on the table"
+     },
+     {
+      "op": "upright",
+      "a": "*",
+      "reason": "everything upright"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02,
+      "reason": "at least 2 cm from the edge"
+     },
+     {
+      "op": "place",
+      "a": "pitcher",
+      "x": 0.42,
+      "y": 0.0,
+      "reason": "pitcher in the middle, the bowl goes in front of it"
+     },
+     {
+      "op": "place",
+      "a": "bowl",
+      "x": 0.62,
+      "y": 0.0,
+      "reason": "bowl in front (+x) of the pitcher"
+     },
+     {
+      "op": "place",
+      "a": "ladle",
+      "x": 0.6,
+      "y": -0.2,
+      "yaw": 90,
+      "reason": "ladle beside the bowl, turned along the table"
+     },
+     {
+      "op": "place",
+      "a": "spoon_big",
+      "x": 0.62,
+      "y": 0.16,
+      "yaw": 90,
+      "reason": "big spoon on the other side of the bowl"
+     },
+     {
+      "op": "place",
+      "a": "orange_02",
+      "x": 0.48,
+      "y": 0.34,
+      "reason": "fruit group on the left (+y)"
+     },
+     {
+      "op": "place",
+      "a": "orange_01",
+      "x": 0.58,
+      "y": 0.36,
+      "reason": "fruit group"
+     },
+     {
+      "op": "place",
+      "a": "lime01",
+      "x": 0.4,
+      "y": 0.4,
+      "reason": "fruit group"
+     },
+     {
+      "op": "place",
+      "a": "lemon_02",
+      "x": 0.48,
+      "y": 0.44,
+      "reason": "fruit group"
+     },
+     {
+      "op": "place",
+      "a": "pineapple_slices_can",
+      "x": 0.8,
+      "y": 0.42,
+      "reason": "cans and bottles in a row at the back (+x)"
+     },
+     {
+      "op": "place",
+      "a": "tomato_sauce_can",
+      "x": 0.8,
+      "y": 0.31,
+      "reason": "back row"
+     },
+     {
+      "op": "place",
+      "a": "peas_and_carrots",
+      "x": 0.8,
+      "y": 0.2,
+      "reason": "back row"
+     },
+     {
+      "op": "place",
+      "a": "bbq_sauce_bottle",
+      "x": 0.8,
+      "y": 0.09,
+      "reason": "back row"
+     },
+     {
+      "op": "place",
+      "a": "whitepackerbottle_a01",
+      "x": 0.8,
+      "y": -0.02,
+      "reason": "back row"
+     },
+     {
+      "op": "place",
+      "a": "whitepackerbottle_a02",
+      "x": 0.8,
+      "y": -0.12,
+      "reason": "back row"
+     },
+     {
+      "op": "place",
+      "a": "plasticjerrican_a01",
+      "x": 0.77,
+      "y": -0.3,
+      "reason": "the jerrican ends the back row"
+     },
+     {
+      "op": "place",
+      "a": "hammer_8",
+      "x": 0.4,
+      "y": -0.4,
+      "reason": "hammer out of the way on the right (-y)"
+     },
+     {
+      "op": "place",
+      "a": "bin_b02",
+      "x": 0.62,
+      "y": -0.42,
+      "reason": "bin on the right"
+     },
+     {
+      "op": "place",
+      "a": "remote_control",
+      "x": 0.28,
+      "y": -0.4,
+      "reason": "remote on the right"
+     },
+     {
+      "op": "place",
+      "a": "spatula_17",
+      "x": 0.3,
+      "y": -0.15,
+      "yaw": 90,
+      "reason": "spatula on the right, along the table"
+     },
+     {
+      "op": "place",
+      "a": "raisin_box",
+      "x": 0.3,
+      "y": 0.2,
+      "reason": "not mentioned: keep it near where it was, out of the working area"
+     },
+     {
+      "op": "in_front_of",
+      "a": "bowl",
+      "b": "pitcher",
+      "gap": 0.12,
+      "reason": "checkable form of 'bowl in front of the pitcher'"
+     },
+     {
+      "op": "near",
+      "a": "ladle",
+      "b": "bowl",
+      "r": 0.22,
+      "reason": "within reach of the bowl"
+     },
+     {
+      "op": "near",
+      "a": "spoon_big",
+      "b": "bowl",
+      "r": 0.22,
+      "reason": "within reach of the bowl"
+     },
+     {
+      "op": "near",
+      "a": "lime01",
+      "b": "orange_02",
+      "r": 0.12
+     },
+     {
+      "op": "near",
+      "a": "lemon_02",
+      "b": "orange_02",
+      "r": 0.12
+     },
+     {
+      "op": "near",
+      "a": "orange_01",
+      "b": "orange_02",
+      "r": 0.12
+     },
+     {
+      "op": "left_of",
+      "a": "orange_02",
+      "b": "bowl",
+      "gap": 0.18,
+      "reason": "fruit on the left"
+     },
+     {
+      "op": "in_front_of",
+      "a": "pineapple_slices_can",
+      "b": "bowl",
+      "gap": 0.12,
+      "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
+     },
+     {
+      "op": "in_front_of",
+      "a": "tomato_sauce_can",
+      "b": "bowl",
+      "gap": 0.12,
+      "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
+     },
+     {
+      "op": "in_front_of",
+      "a": "peas_and_carrots",
+      "b": "bowl",
+      "gap": 0.12,
+      "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
+     },
+     {
+      "op": "in_front_of",
+      "a": "bbq_sauce_bottle",
+      "b": "bowl",
+      "gap": 0.12,
+      "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
+     },
+     {
+      "op": "in_front_of",
+      "a": "whitepackerbottle_a01",
+      "b": "bowl",
+      "gap": 0.12,
+      "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
+     },
+     {
+      "op": "in_front_of",
+      "a": "whitepackerbottle_a02",
+      "b": "bowl",
+      "gap": 0.12,
+      "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
+     },
+     {
+      "op": "in_front_of",
+      "a": "plasticjerrican_a01",
+      "b": "bowl",
+      "gap": 0.12,
+      "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
+     },
+     {
+      "op": "right_of",
+      "a": "hammer_8",
+      "b": "bowl",
+      "gap": 0.22
+     },
+     {
+      "op": "right_of",
+      "a": "bin_b02",
+      "b": "bowl",
+      "gap": 0.25
+     },
+     {
+      "op": "right_of",
+      "a": "remote_control",
+      "b": "bowl",
+      "gap": 0.22
+     },
+     {
+      "op": "right_of",
+      "a": "spatula_17",
+      "b": "bowl",
+      "gap": 0.12
+     },
+     {
+      "op": "minimize",
+      "reason": "do not move anything further than necessary"
+     }
+    ],
+    "gate": {
+     "settle_v_max": 1.0,
+     "settle_dx": 0.15
+    },
+    "assumptions": [
+     "RoboLab frame: the robot at -x looks along +x; 'in front of X' means larger x than X and 'left of X' means larger y. So the far edge of the table ('the back') is larger x: the back row is in_front_of the bowl.",
+     "targets were chosen from the table rectangle x[0.20, 0.90] y[-0.50, 0.50] and the listed object sizes; the continuation resolves any residual overlap"
+    ]
+   }
+  },
+  "params": {
+   "s_min": 0.3,
+   "ds_max": 0.05,
+   "tail_iters": 30,
+   "proxy_faces": 2000
+  },
+  "tolerances": {
+   "pen_eps": 1e-06,
+   "touch_eps": 5e-05,
+   "predicate_tol": 0.002,
+   "verify_gap_tol": 0.002,
+   "verify_sink_tol": 0.001,
+   "defaults": {
+    "margin": 0.005,
+    "inset": 0.02,
+    "gap": 0.05
+   }
+  },
+  "software": {
+   "git": "6bc8510daf75",
+   "python": "3.13.11",
+   "numpy": "2.4.0",
+   "trimesh": "4.11.5",
+   "fcl": "0.7.0.11",
+   "osqp": "1.1.1",
+   "mujoco": "3.10.0",
+   "pxr": null
+  },
+  "time": "2026-09-08T19:05:42"
+ },
+ "written": "results/videos/pile_n20/agent_round1_repaired.json",
+ "g5": {
+  "scene": "results/videos/pile_n20/agent_round1_repaired.json",
+  "seconds": 2.0,
+  "supports": {
+   "table": 4.004687026437637e-09
+  },
+  "max_hover_m": 0.0,
+  "free_fall_bound_m_s": 0.0,
+  "hull": {
+   "peak_speed": 0.893,
+   "peak_disp": 0.0949,
+   "left_support": [],
+   "per_body_peak_speed": {
+    "pineapple_slices_can": 0.032,
+    "bbq_sauce_bottle": 0.048,
+    "raisin_box": 0.06,
+    "tomato_sauce_can": 0.027,
+    "ladle": 0.372,
+    "lime01": 0.099,
+    "orange_02": 0.114,
+    "bowl": 0.027,
+    "remote_control": 0.893,
+    "pitcher": 0.02,
+    "lemon_02": 0.046,
+    "spoon_big": 0.121,
+    "whitepackerbottle_a02": 0.006,
+    "whitepackerbottle_a01": 0.011,
+    "plasticjerrican_a01": 0.005,
+    "hammer_8": 0.103,
+    "peas_and_carrots": 0.058,
+    "spatula_17": 0.126,
+    "bin_b02": 0.028,
+    "orange_01": 0.168
+   },
+   "final_disp": {
+    "pineapple_slices_can": 0.0004,
+    "bbq_sauce_bottle": 0.0012,
+    "raisin_box": 0.0009,
+    "tomato_sauce_can": 0.0003,
+    "ladle": 0.0192,
+    "lime01": 0.0099,
+    "orange_02": 0.014,
+    "bowl": 0.0002,
+    "remote_control": 0.0875,
+    "pitcher": 0.0003,
+    "lemon_02": 0.0016,
+    "spoon_big": 0.0042,
+    "whitepackerbottle_a02": 0.0002,
+    "whitepackerbottle_a01": 0.0001,
+    "plasticjerrican_a01": 0.0001,
+    "hammer_8": 0.0029,
+    "peas_and_carrots": 0.0007,
+    "spatula_17": 0.0026,
+    "bin_b02": 0.0001,
+    "orange_01": 0.0322
+   },
+   "faster_than_free_fall": true,
+   "pass": true
+  },
+  "coacd": {
+   "peak_speed": 0.991,
+   "peak_disp": 0.11,
+   "left_support": [],
+   "per_body_peak_speed": {
+    "pineapple_slices_can": 0.005,
+    "bbq_sauce_bottle": 0.05,
+    "raisin_box": 0.013,
+    "tomato_sauce_can": 0.006,
+    "ladle": 0.317,
+    "lime01": 0.02,
+    "orange_02": 0.048,
+    "bowl": 0.013,
+    "remote_control": 0.991,
+    "pitcher": 0.017,
+    "lemon_02": 0.046,
+    "spoon_big": 0.01,
+    "whitepackerbottle_a02": 0.007,
+    "whitepackerbottle_a01": 0.006,
+    "plasticjerrican_a01": 0.022,
+    "hammer_8": 0.006,
+    "peas_and_carrots": 0.03,
+    "spatula_17": 0.025,
+    "bin_b02": 0.017,
+    "orange_01": 0.156
+   },
+   "final_disp": {
+    "pineapple_slices_can": 0.0002,
+    "bbq_sauce_bottle": 0.0013,
+    "raisin_box": 0.0008,
+    "tomato_sauce_can": 0.0003,
+    "ladle": 0.0177,
+    "lime01": 0.0006,
+    "orange_02": 0.0028,
+    "bowl": 0.0007,
+    "remote_control": 0.102,
+    "pitcher": 0.0007,
+    "lemon_02": 0.0016,
+    "spoon_big": 0.0006,
+    "whitepackerbottle_a02": 0.0004,
+    "whitepackerbottle_a01": 0.0003,
+    "plasticjerrican_a01": 0.0011,
+    "hammer_8": 0.0007,
+    "peas_and_carrots": 0.0003,
+    "spatula_17": 0.0011,
+    "bin_b02": 0.0009,
+    "orange_01": 0.0312
+   },
+   "faster_than_free_fall": true,
+   "pass": true
+  },
+  "pass": true,
+  "thresholds": {
+   "v_max": 1.0,
+   "d_max": 0.15,
+   "source": "program gate"
+  }
+ }
+}

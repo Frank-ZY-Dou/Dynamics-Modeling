@@ -1,0 +1,134 @@
+{
+ "ok": false,
+ "msg": "Failed to resolve collisions within iteration limit",
+ "objects": [
+  {
+   "name": "cheez_it",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/ycb/cheez_it.usd",
+   "x": 0.4319885060191154,
+   "y": -0.26801149398088453,
+   "z": 0.1087429929971695,
+   "yaw": 142.1529456420825,
+   "dims": [
+    0.07173000276088715,
+    0.1639770120382309,
+    0.213485985994339
+   ]
+  },
+  {
+   "name": "dumbbell",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/dumbbell.usd",
+   "x": 0.44190131215603545,
+   "y": -0.055621408477631605,
+   "z": 0.039217948585748674,
+   "yaw": 169.24758813207546,
+   "dims": [
+    0.0835055261850357,
+    0.18024420738220215,
+    0.07443589717149734
+   ]
+  },
+  {
+   "name": "spatula_06",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/vomp/spatula_06/spatula_06.usd",
+   "x": 0.6125489696860313,
+   "y": 0.21254896968603135,
+   "z": 0.0057130615673959256,
+   "yaw": 138.04640101258124,
+   "dims": [
+    0.2749020606279373,
+    0.0772191658616066,
+    0.007426123134791851
+   ]
+  },
+  {
+   "name": "glasses",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/glasses.usd",
+   "x": 0.6745849185763623,
+   "y": 0.3027617522208337,
+   "z": 0.024941473405808226,
+   "yaw": 37.03080912963776,
+   "dims": [
+    0.146884985268116,
+    0.1638395469635725,
+    0.045882946811616455
+   ]
+  },
+  {
+   "name": "milkjug_a02",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/vomp/milkjug_a02/milkjug_a02.usd",
+   "x": 0.5307140068209673,
+   "y": 0.2953381150960922,
+   "z": 0.11039024931192398,
+   "yaw": 198.65385328797316,
+   "dims": [
+    0.10932376980781555,
+    0.10932376980781555,
+    0.21678049862384796
+   ]
+  },
+  {
+   "name": "birdhouse",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/birdhouse.usd",
+   "x": 0.316812546749416,
+   "y": 0.375169412208219,
+   "z": 0.11839371514320376,
+   "yaw": 115.5590068944591,
+   "dims": [
+    0.17997225373983383,
+    0.18079967796802526,
+    0.23278743028640753
+   ]
+  },
+  {
+   "name": "pomegranate01",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/fruits_veggies/pomegranate.usd",
+   "x": 0.4076771218329668,
+   "y": 0.2923228781670332,
+   "z": 0.05947828212042805,
+   "yaw": 35.013573742742594,
+   "dims": [
+    0.1142711341381073,
+    0.11535424366593361,
+    0.1149565642408561
+   ]
+  },
+  {
+   "name": "orange_01",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/fruits_veggies/orange1.usd",
+   "x": 0.713769905269146,
+   "y": -0.11561635620286816,
+   "z": 0.04360518318167306,
+   "yaw": 193.32810769528066,
+   "dims": [
+    0.0724581852555275,
+    0.07246018946170807,
+    0.08321036636334611
+   ]
+  }
+ ],
+ "relations": [
+  [
+   "dumbbell",
+   "birdhouse",
+   "back-of",
+   0.18093681557427194
+  ],
+  [
+   "pomegranate01",
+   "birdhouse",
+   "right-of",
+   0.18176098751866815
+  ]
+ ],
+ "margin": 0.05,
+ "table_bounds": [
+  0.25,
+  0.85,
+  -0.45,
+  0.45
+ ],
+ "base_scene": "/mnt/data/Frank/codes/ext/RoboLab/assets/scenes/base_empty.usda",
+ "seed": 0,
+ "n": 8
+}

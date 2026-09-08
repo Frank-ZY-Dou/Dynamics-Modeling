@@ -1,0 +1,82 @@
+{
+ "ok": true,
+ "msg": "All spatial constraints resolved successfully",
+ "objects": [
+  {
+   "name": "pineapple_slices_can",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/pineapple_slices_can.usd",
+   "x": 0.4805225505208251,
+   "y": -0.13275737539952265,
+   "z": 0.030811300173401834,
+   "yaw": 337.0492955087555,
+   "dims": [
+    0.06959940493106842,
+    0.06567500531673431,
+    0.057622600346803665
+   ]
+  },
+  {
+   "name": "bbq_sauce_bottle",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/bbq_sauce_bottle.usd",
+   "x": 0.5499757507546358,
+   "y": -0.3065059767013398,
+   "z": 0.0761644948720932,
+   "yaw": 76.59625324375936,
+   "dims": [
+    0.04347919672727585,
+    0.06463219970464706,
+    0.1483289897441864
+   ]
+  },
+  {
+   "name": "raisin_box",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/raisin_box.usd",
+   "x": 0.30006179373472824,
+   "y": -0.0806233843973794,
+   "z": 0.06358769875764847,
+   "yaw": 63.04189821647968,
+   "dims": [
+    0.0397518016397953,
+    0.0858749970793724,
+    0.12317539751529694
+   ]
+  },
+  {
+   "name": "tomato_sauce_can",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/tomato_sauce_can.usd",
+   "x": 0.5574295814904869,
+   "y": 0.3039922790751207,
+   "z": 0.04342340272665024,
+   "yaw": 282.5250905556439,
+   "dims": [
+    0.070198193192482,
+    0.06646980345249176,
+    0.08284680545330048
+   ]
+  }
+ ],
+ "relations": [
+  [
+   "bbq_sauce_bottle",
+   "pineapple_slices_can",
+   "right-of",
+   0.08316609789386108
+  ],
+  [
+   "raisin_box",
+   "pineapple_slices_can",
+   "left-of",
+   0.09742524270612127
+  ]
+ ],
+ "margin": 0.05,
+ "table_bounds": [
+  0.25,
+  0.85,
+  -0.45,
+  0.45
+ ],
+ "base_scene": "/mnt/data/Frank/codes/ext/RoboLab/assets/scenes/base_empty.usda",
+ "seed": 2,
+ "n": 4
+}

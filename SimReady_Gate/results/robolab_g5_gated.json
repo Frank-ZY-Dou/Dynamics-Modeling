@@ -1,0 +1,36 @@
+[
+ {
+  "n": 6,
+  "seed": 1,
+  "culprits": [
+   "remote_control"
+  ],
+  "pen": 0,
+  "repair_s": 5.7,
+  "fails": [],
+  "hull_vmax": 0.4687327100920724,
+  "hull_dmax": 0.08786862834010957,
+  "hull_left": [],
+  "coacd_vmax": 0.46479318782991474,
+  "coacd_dmax": 0.08617228070083263,
+  "coacd_left": []
+ },
+ {
+  "n": 10,
+  "seed": 0,
+  "culprits": [
+   "orange_01"
+  ],
+  "pen": 0,
+  "repair_s": 16.1,
+  "fails": [
+   "within(glasses,table.top)"
+  ],
+  "hull_vmax": 0.35510008653451525,
+  "hull_dmax": 0.021468416683810405,
+  "hull_left": [],
+  "coacd_vmax": 0.2593544165371621,
+  "coacd_dmax": 0.014925519785038715,
+  "coacd_left": []
+ }
+]

@@ -1,0 +1,82 @@
+{
+ "ok": true,
+ "msg": "All spatial constraints resolved successfully",
+ "objects": [
+  {
+   "name": "popcorn_box",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/popcorn_box.usd",
+   "x": 0.7367540031671523,
+   "y": -0.09849690225382597,
+   "z": 0.044488500475883486,
+   "yaw": 182.96911352422404,
+   "dims": [
+    0.03825239837169647,
+    0.1264919936656952,
+    0.08497700095176697
+   ]
+  },
+  {
+   "name": "spaghetti",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/spaghetti.usd",
+   "x": 0.5038655777054498,
+   "y": -0.2750597015023232,
+   "z": 0.026918399751186373,
+   "yaw": 186.7902753110047,
+   "dims": [
+    0.028492599725723267,
+    0.2498805969953537,
+    0.04983679950237274
+   ]
+  },
+  {
+   "name": "utilityjug_a03",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/vomp/utilityjug_a03/utilityjug_a03.usd",
+   "x": 0.40491281693706815,
+   "y": 0.0784398602237428,
+   "z": 0.16983553838729848,
+   "yaw": 38.65150906287383,
+   "dims": [
+    0.17125481367111206,
+    0.17147450894117355,
+    0.33567107677459695
+   ]
+  },
+  {
+   "name": "remote_control",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/remote_control.usd",
+   "x": 0.317792628146708,
+   "y": -0.10621507646673788,
+   "z": 0.08415494453907013,
+   "yaw": 103.93841977401956,
+   "dims": [
+    0.03558525629341602,
+    0.025243834592402023,
+    0.16430988907814026
+   ]
+  }
+ ],
+ "relations": [
+  [
+   "remote_control",
+   "utilityjug_a03",
+   "right-of",
+   0.11339826058522462
+  ],
+  [
+   "remote_control",
+   "spaghetti",
+   "back-of",
+   0.14840799924993137
+  ]
+ ],
+ "margin": 0.05,
+ "table_bounds": [
+  0.25,
+  0.85,
+  -0.45,
+  0.45
+ ],
+ "base_scene": "/mnt/data/Frank/codes/ext/RoboLab/assets/scenes/base_empty.usda",
+ "seed": 1,
+ "n": 4
+}

@@ -1,0 +1,108 @@
+{
+ "ok": true,
+ "msg": "All spatial constraints resolved successfully",
+ "objects": [
+  {
+   "name": "pineapple_slices_can",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/pineapple_slices_can.usd",
+   "x": 0.3347997024655342,
+   "y": -0.031807654347268476,
+   "z": 0.030811300173401834,
+   "yaw": 337.0492955087555,
+   "dims": [
+    0.06959940493106842,
+    0.06567500531673431,
+    0.057622600346803665
+   ]
+  },
+  {
+   "name": "bbq_sauce_bottle",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/bbq_sauce_bottle.usd",
+   "x": 0.5930607404296467,
+   "y": 0.25321819158547587,
+   "z": 0.0761644948720932,
+   "yaw": 76.59625324375936,
+   "dims": [
+    0.04347919672727585,
+    0.06463219970464706,
+    0.1483289897441864
+   ]
+  },
+  {
+   "name": "raisin_box",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/raisin_box.usd",
+   "x": 0.30006179373472824,
+   "y": 0.1896399693433563,
+   "z": 0.06358769875764847,
+   "yaw": 63.04189821647968,
+   "dims": [
+    0.0397518016397953,
+    0.0858749970793724,
+    0.12317539751529694
+   ]
+  },
+  {
+   "name": "tomato_sauce_can",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/tomato_sauce_can.usd",
+   "x": 0.4232898640922354,
+   "y": 0.3326052522911188,
+   "z": 0.04342340272665024,
+   "yaw": 282.5250905556439,
+   "dims": [
+    0.070198193192482,
+    0.06646980345249176,
+    0.08284680545330048
+   ]
+  },
+  {
+   "name": "ladle",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/handal/ladle.usd",
+   "x": 0.555749504639638,
+   "y": -0.24003089368343355,
+   "z": 0.03312940117716793,
+   "yaw": 9.498293681583206,
+   "dims": [
+    0.31993821263313293,
+    0.07793059945106506,
+    0.062258802354335854
+   ]
+  },
+  {
+   "name": "lime01",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/fruits_veggies/lime.usd",
+   "x": 0.7622465018182992,
+   "y": -0.0239791307245378,
+   "z": 0.03201785032392945,
+   "yaw": 52.27572811836382,
+   "dims": [
+    0.07550699636340141,
+    0.06133793666958809,
+    0.0600357006478589
+   ]
+  }
+ ],
+ "relations": [
+  [
+   "tomato_sauce_can",
+   "raisin_box",
+   "front-of",
+   0.18441750720428018
+  ],
+  [
+   "raisin_box",
+   "tomato_sauce_can",
+   "right-of",
+   0.1143523097317644
+  ]
+ ],
+ "margin": 0.05,
+ "table_bounds": [
+  0.25,
+  0.85,
+  -0.45,
+  0.45
+ ],
+ "base_scene": "/mnt/data/Frank/codes/ext/RoboLab/assets/scenes/base_empty.usda",
+ "seed": 2,
+ "n": 6
+}

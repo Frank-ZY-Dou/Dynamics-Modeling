@@ -1,0 +1,496 @@
+[
+ {
+  "n": 4,
+  "seed": 0,
+  "solver_ok": true,
+  "solver_msg": "All spatial constraints resolved successfully",
+  "objects": [
+   "cheez_it",
+   "dumbbell",
+   "spatula_06",
+   "glasses"
+  ],
+  "raw": {
+   "pen": 1,
+   "pen_obj_obj": 0,
+   "hover_m": [
+    0.002,
+    0.002,
+    0.002,
+    -0.0055
+   ]
+  },
+  "raw_seated": {
+   "pen": 0,
+   "pen_obj_obj": 0
+  },
+  "repaired": {
+   "pen": 0,
+   "pen_obj_obj": 0,
+   "min_signed": 0.0,
+   "rmsd_xy": 0.031308825319970604,
+   "steps": 20,
+   "time_s": 4.240408658981323,
+   "preds_fail": []
+  }
+ },
+ {
+  "n": 4,
+  "seed": 1,
+  "solver_ok": true,
+  "solver_msg": "All spatial constraints resolved successfully",
+  "objects": [
+   "popcorn_box",
+   "spaghetti",
+   "utilityjug_a03",
+   "remote_control"
+  ],
+  "raw": {
+   "pen": 0,
+   "pen_obj_obj": 0,
+   "hover_m": [
+    0.002,
+    0.002,
+    0.1698,
+    0.0023
+   ]
+  },
+  "raw_seated": {
+   "pen": 0,
+   "pen_obj_obj": 0
+  },
+  "repaired": {
+   "pen": 0,
+   "pen_obj_obj": 0,
+   "min_signed": 0.0,
+   "rmsd_xy": 0.0,
+   "steps": 20,
+   "time_s": 3.650818347930908,
+   "preds_fail": []
+  }
+ },
+ {
+  "n": 4,
+  "seed": 2,
+  "solver_ok": true,
+  "solver_msg": "All spatial constraints resolved successfully",
+  "objects": [
+   "pineapple_slices_can",
+   "bbq_sauce_bottle",
+   "raisin_box",
+   "tomato_sauce_can"
+  ],
+  "raw": {
+   "pen": 0,
+   "pen_obj_obj": 0,
+   "hover_m": [
+    0.002,
+    0.0761,
+    0.002,
+    0.002
+   ]
+  },
+  "raw_seated": {
+   "pen": 0,
+   "pen_obj_obj": 0
+  },
+  "repaired": {
+   "pen": 0,
+   "pen_obj_obj": 0,
+   "min_signed": 0.0,
+   "rmsd_xy": 0.015862529603580585,
+   "steps": 20,
+   "time_s": 4.123149871826172,
+   "preds_fail": []
+  }
+ },
+ {
+  "n": 6,
+  "seed": 0,
+  "solver_ok": false,
+  "solver_msg": "Failed to resolve collisions within iteration limit",
+  "objects": [
+   "cheez_it",
+   "dumbbell",
+   "spatula_06",
+   "glasses",
+   "milkjug_a02",
+   "birdhouse"
+  ],
+  "raw": {
+   "pen": 2,
+   "pen_obj_obj": 1,
+   "hover_m": [
+    0.002,
+    0.002,
+    0.002,
+    -0.0055,
+    0.1104,
+    0.1183
+   ]
+  },
+  "raw_seated": {
+   "pen": 1,
+   "pen_obj_obj": 1
+  },
+  "repaired": {
+   "pen": 0,
+   "pen_obj_obj": 0,
+   "min_signed": 0.0,
+   "rmsd_xy": 0.16483979728400971,
+   "steps": 20,
+   "time_s": 10.019335985183716,
+   "preds_fail": []
+  }
+ },
+ {
+  "n": 6,
+  "seed": 1,
+  "solver_ok": false,
+  "solver_msg": "Failed to resolve collisions within iteration limit",
+  "objects": [
+   "popcorn_box",
+   "spaghetti",
+   "utilityjug_a03",
+   "remote_control",
+   "banana",
+   "hammer_5"
+  ],
+  "raw": {
+   "pen": 1,
+   "pen_obj_obj": 1,
+   "hover_m": [
+    0.002,
+    0.002,
+    0.1698,
+    0.0023,
+    0.002,
+    0.002
+   ]
+  },
+  "raw_seated": {
+   "pen": 2,
+   "pen_obj_obj": 2
+  },
+  "repaired": {
+   "pen": 0,
+   "pen_obj_obj": 0,
+   "min_signed": 0.0,
+   "rmsd_xy": 0.03249615030262521,
+   "steps": 20,
+   "time_s": 4.4650208950042725,
+   "preds_fail": []
+  }
+ },
+ {
+  "n": 6,
+  "seed": 2,
+  "solver_ok": true,
+  "solver_msg": "All spatial constraints resolved successfully",
+  "objects": [
+   "pineapple_slices_can",
+   "bbq_sauce_bottle",
+   "raisin_box",
+   "tomato_sauce_can",
+   "ladle",
+   "lime01"
+  ],
+  "raw": {
+   "pen": 0,
+   "pen_obj_obj": 0,
+   "hover_m": [
+    0.002,
+    0.0761,
+    0.002,
+    0.002,
+    0.002,
+    0.0318
+   ]
+  },
+  "raw_seated": {
+   "pen": 0,
+   "pen_obj_obj": 0
+  },
+  "repaired": {
+   "pen": 0,
+   "pen_obj_obj": 0,
+   "min_signed": 0.0,
+   "rmsd_xy": 0.017543344969133103,
+   "steps": 20,
+   "time_s": 4.341919660568237,
+   "preds_fail": []
+  }
+ },
+ {
+  "n": 8,
+  "seed": 0,
+  "solver_ok": false,
+  "solver_msg": "Failed to resolve collisions within iteration limit",
+  "objects": [
+   "cheez_it",
+   "dumbbell",
+   "spatula_06",
+   "glasses",
+   "milkjug_a02",
+   "birdhouse",
+   "pomegranate01",
+   "orange_01"
+  ],
+  "raw": {
+   "pen": 2,
+   "pen_obj_obj": 1,
+   "hover_m": [
+    0.002,
+    0.002,
+    0.002,
+    -0.0055,
+    0.1104,
+    0.1183,
+    0.0593,
+    0.0437
+   ]
+  },
+  "raw_seated": {
+   "pen": 3,
+   "pen_obj_obj": 3
+  },
+  "repaired": {
+   "pen": 0,
+   "pen_obj_obj": 0,
+   "min_signed": 0.0,
+   "rmsd_xy": 0.09131495223815089,
+   "steps": 20,
+   "time_s": 10.607097387313843,
+   "preds_fail": []
+  }
+ },
+ {
+  "n": 8,
+  "seed": 1,
+  "solver_ok": false,
+  "solver_msg": "Failed to resolve collisions within iteration limit",
+  "objects": [
+   "popcorn_box",
+   "spaghetti",
+   "utilityjug_a03",
+   "remote_control",
+   "banana",
+   "hammer_5",
+   "lunchbag",
+   "mayonnaise_bottle"
+  ],
+  "raw": {
+   "pen": 1,
+   "pen_obj_obj": 1,
+   "hover_m": [
+    0.002,
+    0.002,
+    0.1698,
+    0.0023,
+    0.002,
+    0.002,
+    0.002,
+    0.002
+   ]
+  },
+  "raw_seated": {
+   "pen": 2,
+   "pen_obj_obj": 2
+  },
+  "repaired": {
+   "pen": 0,
+   "pen_obj_obj": 0,
+   "min_signed": 0.0,
+   "rmsd_xy": 0.07875456157084605,
+   "steps": 20,
+   "time_s": 5.749310731887817,
+   "preds_fail": []
+  }
+ },
+ {
+  "n": 8,
+  "seed": 2,
+  "solver_ok": true,
+  "solver_msg": "All spatial constraints resolved successfully",
+  "objects": [
+   "pineapple_slices_can",
+   "bbq_sauce_bottle",
+   "raisin_box",
+   "tomato_sauce_can",
+   "ladle",
+   "lime01",
+   "orange_02",
+   "bowl"
+  ],
+  "raw": {
+   "pen": 0,
+   "pen_obj_obj": 0,
+   "hover_m": [
+    0.002,
+    0.0761,
+    0.002,
+    0.002,
+    0.002,
+    0.0318,
+    0.0387,
+    0.002
+   ]
+  },
+  "raw_seated": {
+   "pen": 0,
+   "pen_obj_obj": 0
+  },
+  "repaired": {
+   "pen": 0,
+   "pen_obj_obj": 0,
+   "min_signed": 0.0,
+   "rmsd_xy": 0.03115819530659411,
+   "steps": 20,
+   "time_s": 5.171816825866699,
+   "preds_fail": []
+  }
+ },
+ {
+  "n": 10,
+  "seed": 0,
+  "solver_ok": false,
+  "solver_msg": "Failed to resolve collisions within iteration limit",
+  "objects": [
+   "cheez_it",
+   "dumbbell",
+   "spatula_06",
+   "glasses",
+   "milkjug_a02",
+   "birdhouse",
+   "pomegranate01",
+   "orange_01",
+   "bin_b01",
+   "spatula_18"
+  ],
+  "raw": {
+   "pen": 3,
+   "pen_obj_obj": 2,
+   "hover_m": [
+    0.002,
+    0.002,
+    0.002,
+    -0.0055,
+    0.1104,
+    0.1183,
+    0.0593,
+    0.0437,
+    0.0269,
+    0.002
+   ]
+  },
+  "raw_seated": {
+   "pen": 7,
+   "pen_obj_obj": 7
+  },
+  "repaired": {
+   "pen": 0,
+   "pen_obj_obj": 0,
+   "min_signed": 0.0,
+   "rmsd_xy": 0.048841342292673354,
+   "steps": 20,
+   "time_s": 16.51964831352234,
+   "preds_fail": []
+  }
+ },
+ {
+  "n": 10,
+  "seed": 1,
+  "solver_ok": false,
+  "solver_msg": "Failed to resolve collisions within iteration limit",
+  "objects": [
+   "popcorn_box",
+   "spaghetti",
+   "utilityjug_a03",
+   "remote_control",
+   "banana",
+   "hammer_5",
+   "lunchbag",
+   "mayonnaise_bottle",
+   "milkjug_a01",
+   "measuring_cups"
+  ],
+  "raw": {
+   "pen": 1,
+   "pen_obj_obj": 1,
+   "hover_m": [
+    0.002,
+    0.002,
+    0.1698,
+    0.0023,
+    0.002,
+    0.002,
+    0.002,
+    0.002,
+    0.0882,
+    0.002
+   ]
+  },
+  "raw_seated": {
+   "pen": 2,
+   "pen_obj_obj": 2
+  },
+  "repaired": {
+   "pen": 0,
+   "pen_obj_obj": 0,
+   "min_signed": 0.0,
+   "rmsd_xy": 0.039998007464618866,
+   "steps": 22,
+   "time_s": 6.950228214263916,
+   "preds_fail": [
+    "within(mayonnaise_bottle,table.top)"
+   ]
+  }
+ },
+ {
+  "n": 10,
+  "seed": 2,
+  "solver_ok": false,
+  "solver_msg": "Failed to resolve collisions within iteration limit",
+  "objects": [
+   "pineapple_slices_can",
+   "bbq_sauce_bottle",
+   "raisin_box",
+   "tomato_sauce_can",
+   "ladle",
+   "lime01",
+   "orange_02",
+   "bowl",
+   "remote_control",
+   "pitcher"
+  ],
+  "raw": {
+   "pen": 8,
+   "pen_obj_obj": 7,
+   "hover_m": [
+    0.002,
+    0.0761,
+    0.002,
+    0.002,
+    0.002,
+    0.0318,
+    0.0387,
+    0.002,
+    0.0023,
+    -0.0356
+   ]
+  },
+  "raw_seated": {
+   "pen": 7,
+   "pen_obj_obj": 7
+  },
+  "repaired": {
+   "pen": 0,
+   "pen_obj_obj": 0,
+   "min_signed": 0.0,
+   "rmsd_xy": 0.061741294752971757,
+   "steps": 20,
+   "time_s": 5.879706859588623,
+   "preds_fail": []
+  }
+ }
+]

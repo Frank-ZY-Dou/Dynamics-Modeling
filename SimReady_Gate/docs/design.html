@@ -1,0 +1,296 @@
+<title>SimReady Gate</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --ink:#16202B; --muted:#5B6977; --line:#D6DDE5;
+  --accent:#2A5D9F; --accent-soft:#E3ECF7; --repair:#B85C1A; --repair-soft:#F8E9DC;
+  --pass:#1F8A5B; --fail:#B93A2B; --code-bg:#EEF2F6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F151C; --surface:#161E27; --ink:#E6EBF0; --muted:#98A5B2; --line:#2A3641;
+    --accent:#7DB0E6; --accent-soft:#1B2C40; --repair:#E8944F; --repair-soft:#3A2A1C;
+    --pass:#52C48F; --fail:#E76B58; --code-bg:#1C2631;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#161E27; --ink:#E6EBF0; --muted:#98A5B2; --line:#2A3641;
+  --accent:#7DB0E6; --accent-soft:#1B2C40; --repair:#E8944F; --repair-soft:#3A2A1C;
+  --pass:#52C48F; --fail:#E76B58; --code-bg:#1C2631;
+}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;font-size:15.5px;line-height:1.6;margin:0}
+.page{max-width:76ch;margin:0 auto;padding:40px 22px 80px}
+h1,h2,h3{font-family:"Bricolage Grotesque","IBM Plex Sans",sans-serif;text-wrap:balance;line-height:1.12;margin:0}
+h1{font-size:2.5rem;font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.45rem;font-weight:700;margin-top:2.6rem;padding-top:1.2rem;border-top:1px solid var(--line)}
+h3{font-size:1.05rem;font-weight:700;margin-top:1.4rem}
+p{margin:.7rem 0}
+.eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:1.12rem;color:var(--ink);margin-top:.9rem}
+.meta{display:flex;flex-wrap:wrap;gap:.6rem 1.4rem;margin-top:1rem;font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--muted)}
+figure{margin:1.4rem 0;padding:0}
+figure svg{max-width:100%;height:auto;display:block;color:var(--ink)}
+figcaption{font-size:.86rem;color:var(--muted);margin-top:.5rem;max-width:68ch}
+.svgwrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:1rem 0}
+th,td{text-align:left;vertical-align:top;padding:.55rem .6rem;border-bottom:1px solid var(--line)}
+th{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.tblwrap{overflow-x:auto}
+td.gate{font-family:"IBM Plex Mono",monospace;font-weight:500;white-space:nowrap}
+.g2,.g3,.g5{background:var(--accent-soft)}
+tr.repair td{background:var(--repair-soft)}
+code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.86em;background:var(--code-bg);padding:.08em .35em;border-radius:3px}
+pre{font-family:"IBM Plex Mono",monospace;font-size:.82rem;background:var(--code-bg);padding:.9rem 1rem;border-radius:6px;overflow-x:auto;line-height:1.5}
+ul,ol{padding-left:1.3rem}li{margin:.3rem 0}
+.callout{border-left:3px solid var(--accent);background:var(--surface);padding:.7rem 1rem;margin:1rem 0;border-radius:0 6px 6px 0}
+.callout.warn{border-left-color:var(--fail)}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:.35rem 1.2rem;font-size:.92rem;margin:.8rem 0}
+.kv dt{font-family:"IBM Plex Mono",monospace;color:var(--muted);font-size:.8rem;padding-top:.15rem}
+.kv dd{margin:0}
+.pill{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:.72rem;padding:.08em .5em;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.pill.pass{color:var(--pass);border-color:var(--pass)}.pill.fail{color:var(--fail);border-color:var(--fail)}.pill.rep{color:var(--repair);border-color:var(--repair)}
+.num{font-variant-numeric:tabular-nums}
+a{color:var(--accent)}
+</style>
+<div class="page">
+<div class="eyebrow">Design note · private draft</div>
+<h1>SimReady Gate</h1>
+<p class="lede">An agentic, verifier-in-the-loop layer that makes language-generated scenes penetration-free and simulation-ready. A small domain-specific language is the spine: text becomes a typed program of bodies, constraints and objectives, which compiles to S4R's repair QP, to the verification predicates, and to the simulator export. RoboLab (USD, Isaac Lab) and RoboCasa (MJCF, MuJoCo) are the first two asset worlds.</p>
+<div class="meta"><span>targets: NVLabs/RoboLab (USD, Isaac Lab) · robocasa (MJCF, MuJoCo/robosuite)</span><span>spine: scene + constraint DSL, text2function</span><span>repair: S4R upright-on-plane variant</span><span>referee: shared mesh-level evaluator (FCL)</span><span>2026-09-07 · results added 2026-09-08</span></div>
+
+<h2>1. What the two asset worlds do today, and where they break</h2><h3>RoboLab</h3>
+<p>The <code>/robolab-scenegen</code> skill turns a sentence into placement predicates (<code>place-on-base</code>, <code>left-of</code>, <code>place-on</code>, <code>place-in</code>, <code>random-rot</code>), solves them, writes a <code>.usda</code>, and then runs <code>settle_scenes.py</code>. Reading the solver sources, none of the three layers ever looks at a mesh:</p>
+<ul>
+<li><strong>SpatialSolver is a 2D disc test.</strong> Each object is a circle of radius <code>max(w,d)/2 + margin</code>; a pair collides when the centre distance is below the radius sum. Orientation is ignored, so <code>random-rot</code> on an elongated object is unchecked. The margin starts at 5 cm and drops to 1.2 cm for 18+ objects, then is relaxed ×1.25, ×1.5, ×2.0 when the solver fails.</li>
+<li><strong>PhysicalSolver is dimension-based.</strong> Stacking sets <code>z = support_top + h/2 + 1 mm</code>; containment is an ellipse test on bounding-box dims. A bowl or mug that "contains" an object by dims can still intersect it at the mesh, which is exactly the nested-cavity regime where repair is hardest.</li>
+<li><strong>Settling is used as the repair.</strong> <code>settle_scenes.py</code> runs a fixed 300 steps (~5 s), has no velocity threshold, and keeps whatever rests at the end, including objects that fell or still interpenetrate.</li>
+</ul>
+<h3>RoboCasa</h3>
+<p>RoboCasa composes 2,500+ kitchen scenes from fixtures and 3,200+ objects (Objaverse and AI-generated, as MJCF models with mesh geoms) on robosuite/MuJoCo. Objects are placed by robosuite's <code>UniformRandomSampler</code>, whose validity test is a <strong>bounding cylinder</strong>: a candidate is rejected when the XY centre distance is below the sum of the two <code>horizontal_radius</code> values and the z-extents overlap; after 5,000 rejected samples it raises <code>RandomizationError("Cannot place all objects")</code>. There is no mesh-level check and no settle. (Its validity test for MJCF objects is a separating-axis test on the rotated <code>reg_bbox</code> boxes plus a corner-in-region test; the cylinder is only the fallback for other object types.) Measured on its AI-generated objects with RoboCasa's own test (Section 10), the box test is conservative rather than leaky: its accepted layouts do not interpenetrate, and its only cost is capacity in tight regions (a 0.3 m square at ten or more objects), where a mesh-aware repair still places every object; it never checks whether an object is stable once placed.</p>
+<div class="callout warn"><strong>Why settling cannot be the repair.</strong> Stepping a physics engine from a deeply interpenetrating state produces violent contact impulses. In the S4R engine-initialization study (App. A.15), raw overlapping layouts reached peak body speeds of 7.8 m/s in MuJoCo, 12.5 m/s in PyBullet and 230.6 m/s in Isaac Gym (PhysX); the same layouts after S4R stayed at rest. A settled RoboLab scene therefore either exploded quietly or carries residual penetration that corrupts <code>object_on_top</code>, <code>object_inside</code> and <code>object_upright</code> at episode reset.</div>
+
+<h2>2. Principles</h2>
+<ol>
+<li><strong>Verifier in the loop.</strong> No language model ever decides whether geometry is feasible. Every physical claim passes a deterministic gate; the agent orchestrates, routes failures and holds the semantic intent.</li>
+<li><strong>Repair is a tool, not a prayer.</strong> S4R resolves overlaps with minimal displacement; settling only confirms that a certified state stays at rest in the target simulator.</li>
+<li><strong>Preserve intent.</strong> After repair, the task predicates are re-evaluated; the agent re-plans only when a relation actually broke.</li>
+<li><strong>Certificate and provenance.</strong> A scene enters the benchmark with a manifest: asset hashes, proxy parameters, penetration count, minimum gap, settle statistics, repair displacement, tool versions. Benchmarks live or die on reproducibility.</li>
+</ol>
+
+<h2>3. The DSL is the spine</h2>
+<p>The intent a person expresses in words ("a mug upright on the counter, inside the tray, at least 2 cm from the edge, left of the bowl") is exactly the information the repair QP, the verifier and the exporter all need, and today each of them re-derives it separately. The DSL makes it one typed program with three layers:</p>
+<dl class="kv">
+<dt>scene</dt><dd>bodies with a mesh source (USD payload, MJCF mesh, GLB), pose, <code>fixed</code> or free, collision-proxy spec, mass and friction, semantic tags (<code>container</code>, <code>support</code>, up axis). Importers from <code>.usda</code> and MJCF; exporters back.</dd>
+<dt>program</dt><dd>constraints and objectives over bodies. Each statement has a compile target in the per-step S4R QP <em>and</em> an evaluator predicate, so what the QP enforces and what the gate checks are the same object.</dd>
+<dt>gate spec</dt><dd>which gates run, thresholds (minimum gap, settle speed and displacement), budgets, and the certificate fields.</dd>
+</dl>
+<p><strong>text2function</strong> is the agent's only creative act: natural language → a program in this DSL, produced under a JSON schema, type-checked against the scene (every body exists, containers are tagged as such), with defaults recorded when the text is silent. The compiler is deterministic. Ambiguity is resolved by asking or by a logged default, never by the model guessing at geometry.</p>
+<pre>scene kitchen_counter
+  fixed   counter   : support, up=+z, mesh=fixtures/counter.xml
+  fixed   tray      : container, mesh=objs/tray/model.xml
+  body    mug       : mesh=objs/mug/model.xml
+  body    bowl      : mesh=objs/bowl/model.xml
+
+program
+  no_penetration(*, margin=0.02)          # contact rows, generated by detection
+  on_support(mug, counter)  upright(mug)  # support-plane equality + roll/pitch homotopy
+  on_support(bowl, counter) upright(bowl)
+  inside(mug, tray)                       # half-spaces of the tray cavity
+  left_of(mug, bowl, axis=y, gap>=0.05)   # linear row in Δp
+  within(*, counter.top, inset=0.02)      # table bounds, 2 cm from the edge
+  minimize displacement(*)                # S4R's minimum-norm objective
+  prefer(bowl, pose=intent, w=0.1)        # soft proximal to the described layout
+
+gate
+  G2: min_gap >= 1e-3   G5: v_max <= 0.05, dx <= 0.01
+  certify: hashes, seeds, versions</pre>
+<div class="tblwrap"><table>
+<thead><tr><th>statement</th><th>per-step QP (S4R)</th><th>evaluator check</th><th>export</th></tr></thead>
+<tbody>
+<tr><td><code>no_penetration</code></td><td>frozen-witness contact rows, one-sided closure model</td><td>pen = 0, min gap</td><td>—</td></tr>
+<tr><td><code>on_support</code> + <code>upright</code></td><td>support-plane equality, yaw-only rotation, tilt homotopy (S4R App. A.11)</td><td><code>object_on_top</code>, <code>object_upright</code></td><td>pose written back</td></tr>
+<tr><td><code>inside</code> / <code>within</code></td><td>half-spaces of a convex inner region (cavity or surface inset)</td><td><code>object_inside</code>, bounds</td><td>—</td></tr>
+<tr><td><code>left_of</code>, <code>near</code>, <code>min_distance</code></td><td>linear rows in Δp; distance bounds linearized per step</td><td>spatial predicates</td><td>—</td></tr>
+<tr><td><code>fixed</code></td><td>DOFs removed</td><td>—</td><td>static body in USD / MJCF</td></tr>
+<tr><td><code>minimize displacement</code>, <code>prefer</code></td><td>quadratic objective terms</td><td>RMSD to intent reported</td><td>—</td></tr>
+</tbody></table></div>
+<p>Because the program is data, the certificate can include it: a scene is admitted together with the exact constraints it was verified against. That is the property a benchmark needs and a screenshot cannot give.</p>
+
+<h2>4. Pipeline: today versus gated</h2>
+<figure>
+<div class="svgwrap">
+<svg viewBox="0 0 1040 330" role="img" aria-label="Two rows. Today: language to predicates to a 2D solver to a USD file to a 300-step settle that acts as repair and feeds the benchmark. Gated: the same front end, then a mesh-level verification gate, an S4R repair step, predicate re-check, a measured settle that only certifies, and a certificate before the benchmark, with failure loops back to the predicates.">
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker>
+<marker id="ahf" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#B93A2B"/></marker>
+<marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#B85C1A"/></marker>
+</defs>
+<g font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor">
+<text x="14" y="24" font-size="11" letter-spacing="1.5">TODAY</text>
+<rect x="14" y="36" width="100" height="44" rx="4" fill="none" stroke="currentColor"/><text x="64" y="55" text-anchor="middle">language</text><text x="64" y="70" text-anchor="middle" font-size="10">description</text>
+<line x1="114" y1="58" x2="150" y2="58" stroke="currentColor" marker-end="url(#ah)"/>
+<rect x="152" y="36" width="104" height="44" rx="4" fill="none" stroke="currentColor"/><text x="204" y="55" text-anchor="middle">predicates</text><text x="204" y="70" text-anchor="middle" font-size="10">left-of, place-in</text>
+<line x1="256" y1="58" x2="292" y2="58" stroke="currentColor" marker-end="url(#ah)"/>
+<rect x="294" y="36" width="126" height="44" rx="4" fill="none" stroke="currentColor"/><text x="357" y="55" text-anchor="middle">2D disc solver</text><text x="357" y="70" text-anchor="middle" font-size="10">dims + margin</text>
+<line x1="420" y1="58" x2="456" y2="58" stroke="currentColor" marker-end="url(#ah)"/>
+<rect x="458" y="36" width="90" height="44" rx="4" fill="none" stroke="currentColor"/><text x="503" y="55" text-anchor="middle">.usda</text><text x="503" y="70" text-anchor="middle" font-size="10">z = h/2 + 2 mm</text>
+<line x1="548" y1="58" x2="584" y2="58" stroke="#B93A2B" marker-end="url(#ahf)"/><text x="566" y="50" text-anchor="middle" font-size="10" fill="#B93A2B">overlaps in</text>
+<rect x="586" y="36" width="150" height="44" rx="4" fill="none" stroke="#B93A2B" stroke-width="1.5"/><text x="661" y="55" text-anchor="middle" fill="#B93A2B">settle = repair</text><text x="661" y="70" text-anchor="middle" font-size="10" fill="#B93A2B">300 steps, no threshold</text>
+<line x1="736" y1="58" x2="772" y2="58" stroke="currentColor" marker-end="url(#ah)"/><text x="754" y="50" text-anchor="middle" font-size="10">ejected or</text><text x="754" y="86" text-anchor="middle" font-size="10">still overlapping</text>
+<rect x="774" y="36" width="110" height="44" rx="4" fill="none" stroke="currentColor"/><text x="829" y="55" text-anchor="middle">benchmark</text><text x="829" y="70" text-anchor="middle" font-size="10">tasks, resets</text>
+
+<text x="14" y="140" font-size="11" letter-spacing="1.5">GATED</text>
+<rect x="14" y="152" width="100" height="44" rx="4" fill="none" stroke="currentColor"/><text x="64" y="171" text-anchor="middle">language</text><text x="64" y="186" text-anchor="middle" font-size="10">description</text>
+<line x1="114" y1="174" x2="150" y2="174" stroke="currentColor" marker-end="url(#ah)"/>
+<rect x="152" y="152" width="104" height="44" rx="4" fill="none" stroke="currentColor"/><text x="204" y="171" text-anchor="middle">DSL program</text><text x="204" y="186" text-anchor="middle" font-size="10">text2function · G1</text>
+<line x1="256" y1="174" x2="292" y2="174" stroke="currentColor" marker-end="url(#ah)"/>
+<rect x="294" y="152" width="126" height="44" rx="4" fill="none" stroke="#2A5D9F" stroke-width="1.5"/><text x="357" y="171" text-anchor="middle" fill="#2A5D9F">G2 verify</text><text x="357" y="186" text-anchor="middle" font-size="10" fill="#2A5D9F">mesh + proxy, pen=0?</text>
+<line x1="420" y1="174" x2="456" y2="174" stroke="#B85C1A" marker-end="url(#ahr)"/><text x="438" y="166" text-anchor="middle" font-size="10" fill="#B85C1A">fail</text>
+<rect x="458" y="152" width="120" height="44" rx="4" fill="none" stroke="#B85C1A" stroke-width="1.5"/><text x="518" y="171" text-anchor="middle" fill="#B85C1A">G3 S4R repair</text><text x="518" y="186" text-anchor="middle" font-size="10" fill="#B85C1A">upright, min-norm</text>
+<line x1="578" y1="174" x2="614" y2="174" stroke="currentColor" marker-end="url(#ah)"/>
+<rect x="616" y="152" width="110" height="44" rx="4" fill="none" stroke="currentColor"/><text x="671" y="171" text-anchor="middle">G4 predicates</text><text x="671" y="186" text-anchor="middle" font-size="10">intent intact?</text>
+<line x1="726" y1="174" x2="762" y2="174" stroke="currentColor" marker-end="url(#ah)"/>
+<rect x="764" y="152" width="120" height="44" rx="4" fill="none" stroke="#2A5D9F" stroke-width="1.5"/><text x="824" y="171" text-anchor="middle" fill="#2A5D9F">G5 settle</text><text x="824" y="186" text-anchor="middle" font-size="10" fill="#2A5D9F">certify: v_max, Δx</text>
+<line x1="884" y1="174" x2="920" y2="174" stroke="currentColor" marker-end="url(#ah)"/>
+<rect x="922" y="152" width="104" height="44" rx="4" fill="none" stroke="currentColor"/><text x="974" y="171" text-anchor="middle">benchmark</text><text x="974" y="186" text-anchor="middle" font-size="10">+ certificate</text>
+<path d="M357 196 L357 232 L204 232 L204 196" fill="none" stroke="currentColor" stroke-dasharray="4 3" marker-end="url(#ah)"/><text x="280" y="246" text-anchor="middle" font-size="10">G2 pass skips G3 · infeasible packing: agent shrinks intent</text>
+<path d="M671 196 L671 262 L204 262 L204 198" fill="none" stroke="currentColor" stroke-dasharray="4 3" marker-end="url(#ah)"/><text x="438" y="276" text-anchor="middle" font-size="10">relation broken: agent adjusts predicate coordinates</text>
+<path d="M824 196 L824 292 L204 292 L204 198" fill="none" stroke="currentColor" stroke-dasharray="4 3" marker-end="url(#ah)"/><text x="514" y="306" text-anchor="middle" font-size="10">moved during settle: unstable stack or bad mass → asset or layout fix</text>
+</g>
+</svg>
+</div>
+<figcaption>The difference is one edge: today the settle step receives overlapping geometry and is expected to fix it; in the gated pipeline overlaps are removed by S4R first, and settling only measures whether the certified state stays put. Dashed arrows are the agent's re-planning routes.</figcaption>
+</figure>
+
+<h2>5. The gates</h2>
+<div class="tblwrap"><table>
+<thead><tr><th>Gate</th><th>Checks</th><th>Tool</th><th>On failure</th></tr></thead>
+<tbody>
+<tr><td class="gate">G0 asset admission</td><td>watertight / manifold / self-intersection; real-world scale sanity; PhysX <code>convexDecomposition</code> proxy versus visual mesh (Hausdorff distance, volume ratio, cavity preserved for containers); mass and friction plausibility; canonical up axis</td><td>trimesh + FCL, CoACD/V-HACD replica of the PhysX proxy</td><td>agent: repair (remesh, re-decompose with more hulls, rescale) · replace · reject. Generated assets (Hunyuan3D etc.) enter here.</td></tr>
+<tr><td class="gate">G1 layout solve</td><td>the native placer of each world (RoboLab predicate solvers, robosuite samplers) produces an initial pose; the DSL program records what it was asked to satisfy</td><td>SpatialSolver / PhysicalSolver · UniformRandomSampler</td><td>existing behaviour</td></tr>
+<tr class="g2"><td class="gate">G2 mesh-level verify</td><td>penetrating pairs = 0 in <em>both</em> spaces: the collision mesh (what grasps and renders see) and the PhysX proxy (what the engine sees); minimum signed gap ≥ margin; support check (no floating object, resting on table or a stacked support)</td><td>shared S4R evaluator (FCL, no Isaac required)</td><td>→ G3</td></tr>
+<tr class="repair"><td class="gate">G3 repair</td><td>minimum-norm resolution; default mode is the <strong>upright-on-plane</strong> variant (in-plane translation + yaw, objects stay upright on the table); fixtures fixed; containers fixed so <code>place-in</code> survives; 6-DOF for interlocked pairs</td><td>S4R</td><td>tail residual (tight packing, nested cavities): agent shrinks intent — fewer objects, larger region, different objects — never the solver</td></tr>
+<tr><td class="gate">G4 semantic re-validation</td><td>re-run the task predicates on the repaired poses</td><td>RoboLab <code>conditionals</code></td><td>agent adjusts predicate coordinates → G1</td></tr>
+<tr class="g5"><td class="gate">G5 settle as certification</td><td>settle from a pen=0, positive-gap state with engine-like proxies; measure peak speed, displacement, and which bodies leave their support; thresholds, not a fixed step count</td><td>MuJoCo today (<code>simready settle</code>); Isaac Sim as the target engine</td><td>a body leaves its support → <code>within(body, support.top, inset)</code> and re-repair; unstable stack or implausible mass → G0 / G1 fix</td></tr>
+<tr><td class="gate">G6 episode-reset gate</td><td>every sampled <code>InitialStateCfg</code> pose passes G2; per-reset repair costs ~0.2 s at N=40, or precompute a bank of certified initial states</td><td>S4R + evaluator</td><td>resample</td></tr>
+<tr><td class="gate">G7 certificate</td><td>manifest: asset hashes, proxy params, pen / gap / settle numbers, repair displacement, tool versions, seeds</td><td>JSON next to the <code>.usda</code></td><td>—</td></tr>
+</tbody></table></div>
+
+<h2>6. The agent</h2>
+<p>The agent is a state machine that calls tools; the gates are code. What it owns is the decisions that numbers cannot make.</p>
+<dl class="kv">
+<dt>tools</dt><dd><code>text2dsl</code> · <code>compile_dsl</code> · <code>check_asset</code> · <code>repair_asset</code> · <code>evaluate_layout</code> · <code>s4r_repair(program, fixed=[…])</code> · <code>verify_predicates</code> · <code>settle_and_measure</code> · <code>export(usda | mjcf)</code></dd>
+<dt>routes</dt><dd>overlap → S4R · repair residual → shrink intent · nested container → semantic decision · asset defect → repair or replace · settle motion → mass, friction or support fix</dd>
+<dt>VLM scope</dt><dd>semantic plausibility only (does the layout match the description). Screenshots cannot reveal mesh-level penetration; the VLM never judges geometry.</dd>
+<dt>determinism</dt><dd>seeds, hashes and certificates on every artifact; the same request reproduces the same scene</dd>
+</dl>
+<figure>
+<div class="svgwrap">
+<svg viewBox="0 0 900 250" role="img" aria-label="Agent loop: a layout enters verification; pass goes to settle certification and done; fail is classified into four routes — overlap to S4R repair, repair residual to shrink intent, asset defect to fix or replace asset, settle motion to physics fix — each returning to verification.">
+<defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+<g font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor">
+<rect x="20" y="100" width="110" height="44" rx="4" fill="none" stroke="currentColor"/><text x="75" y="126" text-anchor="middle">layout</text>
+<line x1="130" y1="122" x2="176" y2="122" stroke="currentColor" marker-end="url(#ah2)"/>
+<rect x="178" y="100" width="120" height="44" rx="4" fill="none" stroke="#2A5D9F" stroke-width="1.5"/><text x="238" y="119" text-anchor="middle" fill="#2A5D9F">G2 verify</text><text x="238" y="134" text-anchor="middle" font-size="10" fill="#2A5D9F">deterministic</text>
+<line x1="298" y1="122" x2="360" y2="122" stroke="#1F8A5B" marker-end="url(#ah2)"/><text x="329" y="114" text-anchor="middle" font-size="10" fill="#1F8A5B">pass</text>
+<rect x="362" y="100" width="120" height="44" rx="4" fill="none" stroke="#2A5D9F" stroke-width="1.5"/><text x="422" y="119" text-anchor="middle" fill="#2A5D9F">G5 settle</text><text x="422" y="134" text-anchor="middle" font-size="10" fill="#2A5D9F">measure</text>
+<line x1="482" y1="122" x2="540" y2="122" stroke="#1F8A5B" marker-end="url(#ah2)"/><text x="511" y="114" text-anchor="middle" font-size="10" fill="#1F8A5B">at rest</text>
+<rect x="542" y="100" width="100" height="44" rx="4" fill="none" stroke="currentColor"/><text x="592" y="126" text-anchor="middle">certified</text>
+<line x1="238" y1="144" x2="238" y2="184" stroke="#B93A2B" marker-end="url(#ah2)"/><text x="252" y="168" font-size="10" fill="#B93A2B">fail → classify</text>
+<rect x="150" y="186" width="176" height="40" rx="4" fill="none" stroke="currentColor" stroke-dasharray="4 3"/><text x="238" y="211" text-anchor="middle">agent routes</text>
+<line x1="326" y1="206" x2="400" y2="206" stroke="currentColor" marker-end="url(#ah2)"/>
+<rect x="402" y="160" width="150" height="30" rx="4" fill="none" stroke="#B85C1A" stroke-width="1.5"/><text x="477" y="180" text-anchor="middle" fill="#B85C1A">overlap → S4R</text>
+<rect x="402" y="196" width="150" height="30" rx="4" fill="none" stroke="currentColor"/><text x="477" y="216" text-anchor="middle">residual → shrink intent</text>
+<rect x="566" y="160" width="160" height="30" rx="4" fill="none" stroke="currentColor"/><text x="646" y="180" text-anchor="middle">defect → fix asset</text>
+<rect x="566" y="196" width="160" height="30" rx="4" fill="none" stroke="currentColor"/><text x="646" y="216" text-anchor="middle">motion → physics fix</text>
+<line x1="422" y1="144" x2="422" y2="158" stroke="#B93A2B" marker-end="url(#ah2)"/><text x="436" y="156" font-size="10" fill="#B93A2B">moved</text>
+<path d="M726 175 L780 175 L780 60 L238 60 L238 98" fill="none" stroke="currentColor" stroke-dasharray="4 3" marker-end="url(#ah2)"/><text x="509" y="52" text-anchor="middle" font-size="10">every route returns to verification; nothing is admitted on the agent's word</text>
+<path d="M552 175 L558 175" fill="none" stroke="currentColor"/>
+</g>
+</svg>
+</div>
+<figcaption>Every failure route ends back at G2. The agent chooses the route; the gate decides whether it worked.</figcaption>
+</figure>
+
+<h2>7. Where it plugs in</h2><h3>RoboLab</h3>
+<ol>
+<li><code>skills/robolab-scenegen</code> step 3 ("offer to reduce object count") becomes the G2→G3→G4 loop.</li>
+<li><code>settle_scenes.py</code> gains a pre-hook (G2/G3) and a post-measure (G5: peak speed, displacement, thresholds).</li>
+<li><code>assets/objects/_utils/</code> gains the admission script (G0) that emits an asset certificate; it also admits generated assets.</li>
+<li>Task reset (<code>InitialStateCfg</code> sampling) gains G6.</li>
+</ol>
+<p><strong>Data path.</strong> Parse the <code>.usda</code> payload references, read each object's mesh with <code>usd-core</code> (pip, no Isaac), build the scene layer with the scene transforms, verify, repair, and write the corrected <code>xformOp:translate</code> / <code>xformOp:orient</code> back. Only G5 touches Isaac Sim.</p>
+<h3>RoboCasa</h3>
+<ol>
+<li>A placement hook after <code>UniformRandomSampler</code> (or a drop-in sampler) runs G2→G3 on the sampled poses before the MuJoCo model is compiled.</li>
+<li>The MJCF importer reads fixture and object <code>&lt;body&gt;</code> poses and mesh geoms; the exporter writes <code>pos</code> / <code>quat</code> back.</li>
+<li>G5 uses <code>mujoco</code> directly (no robosuite dependency) to settle and measure.</li>
+<li>AI-generated objects go through G0 admission first; this is where generated-asset defects show up most.</li>
+</ol>
+
+<h2>8. Evaluation</h2>
+<p>The first experiment is diagnostic and needs no new method: run <code>/robolab-scenegen</code> and RoboCasa's task samplers on fixed prompt and seed sets, and measure, before and after the gate,</p>
+<ul>
+<li>the fraction of generated scenes with mesh-level penetration, and the penetration count per scene;</li>
+<li>settle statistics: peak speed, displacement, objects leaving the table;</li>
+<li>the fraction of episode resets whose task predicates are already false or already true at t = 0;</li>
+<li>the variance this induces in policy evaluation across seeds.</li>
+</ul>
+<p>The framing is <em>certified simulation-ready scene synthesis</em>: a certificate specification, repair as a tool inside an agent loop, and the measured effect on a public manipulation benchmark. Generated-asset admission ties it to the HY3D-Bench line of the S4R paper.</p>
+
+<h2>9. Plan and boundaries</h2>
+<ol>
+<li><strong>Scene layer + DSL v0</strong> — importers for <code>.usda</code> and MJCF, the typed program with its compile rules for the statements above; text2function comes after the compiler is trusted.</li>
+<li><strong>G2 on both worlds</strong> — evaluator reads RoboLab and RoboCasa scenes; report penetration on the shipped scenes and on fresh generated layouts.</li>
+<li><strong>G3 upright S4R from the DSL</strong> — compiled rows, fixtures fixed, write back; verify predicates.</li>
+<li><strong>Diagnostic paper-grade numbers</strong> — the before/after table of Section 7.</li>
+<li><strong>Agent loop and G0 admission</strong> — the agent skill wrapper, failure routing, certificates.</li>
+<li><strong>G5/G6 with Isaac</strong> — measured settle, per-reset gate.</li>
+</ol>
+
+<h2>10. Results (corrected 2026-09-08 after an independent review pass)</h2>
+<div class="callout warn"><strong>What the review changed.</strong> An independent review of the repair core, the gates, the DSL and CLI, the asset I/O and the experiments against their claims found no fabricated numbers, but the first pass had handicapped both baselines and produced claims that do not survive: the RoboLab replica seated objects on the wrong fixture (the robot's <code>franka_table</code> instead of the <code>table_oak</code> its skill uses), so the "bounds bug", the edge failures and the "orange rolls off the table" route were artifacts; its solver bounds were 35 % narrower than the skill's; layouts were not seeded; RoboLab's front/back convention was inverted in the DSL; the RoboCasa sampler replica used a bounding cylinder where RoboCasa tests rotated <code>reg_bbox</code> boxes; raw layouts were compared hovering against re-seated repaired ones; the MJCF loader ignored <code>refquat</code>; and the USD writer silently discarded the repair. All of it is fixed (see <code>docs/DIAGNOSTIC_2026-09-08.md</code>), the experiments were re-run on seeded, tracked layouts, and the withdrawn claims are listed there.</div>
+<p>The MVP runs end to end on real assets: USD and MJCF importers (MJCF objects compiled by MuJoCo itself), G2 on a probed, containment-aware FCL evaluator, the upright S4R repair with DSL rows, text2function (schema-constrained JSON, Claude backend or Claude Code skill), G5 as a measured MuJoCo settle with a per-body verdict, and certificates with provenance. Numbers below come from <code>experiments/</code> and the tracked <code>results/*.json</code>.</p>
+<h3>RoboLab, shipped library (68 scenes, already physics-settled by their pipeline)</h3>
+<ul>
+<li>Object–object <strong>mesh</strong> penetration in <span class="num">26 / 68</span> scenes (≥ 1 mm in 12; the largest score 9.9 mm, keyboard/smartphone in <code>workdesk_snacks</code>). Sub-millimetre resting penetration into fixtures in 64 / 68 (median 0.27 mm). A body wholly inside another, invisible to any surface test, in 4 scenes (cutlery inside racks and plates, a clamp inside a bin). 30 / 68 scenes hold a body that nothing supports from below.</li>
+<li>Reading: the library is clean in proxy space and not in mesh space — the two-space G2 of Section 5, with a containment test, is not a nicety. Scores are FCL clip lengths: only their sign is exact.</li>
+</ul>
+<h3>RoboLab, pre-settle layouts from its own SpatialSolver (N ∈ {4,6,8,10} × 3 seeds, staged in its base scene)</h3>
+<ul>
+<li>With the skill's own bounds the disc solver accepts 5 / 12 layouts (all at N = 4, one each at N = 6 and 8, none at N = 10). <strong>Accepted layouts carry no mesh penetration once seated</strong>; the rejected ones carry 1–7 penetrating pairs, and the skill's answer to them is "reduce the object count".</li>
+<li><strong>S4R turns all 7 rejected layouts into penetration-free ones</strong> on full-resolution meshes, planar RMSD 0.03–0.17 m, 4–17 s per cell, with the requested left/right/front/back relations kept (one <code>within</code> miss: a bottle the solver had placed beyond the table edge).</li>
+</ul>
+<h3>G5 in MuJoCo: settle as certification (12 layouts, 2 s, hull and CoACD proxies, identical harness)</h3>
+<div class="tblwrap"><table>
+<thead><tr><th>state</th><th>peak speed, median (max), hull / CoACD</th><th>peak displacement, median (max)</th><th>cells with a body off the table</th><th>pass*</th></tr></thead>
+<tbody>
+<tr><td>raw, as the skill writes it (hovering)</td><td>1.52 (4.45) / 1.44 (3.96) m/s</td><td>0.24 (2.01) / 0.20 (0.83) m</td><td>2 / 2</td><td>1 / 12</td></tr>
+<tr><td>raw, seated (same x, y, yaw)</td><td>1.01 (3.97) / 0.70 (3.96) m/s</td><td>0.16 (1.08) / 0.11 (0.83) m</td><td>3 / 1</td><td>4 / 6</td></tr>
+<tr><td>after S4R</td><td>0.41 (1.03) / 0.33 (1.03) m/s</td><td>0.07 (0.12) / 0.05 (0.12) m</td><td>0 / 0</td><td>8 / 8</td></tr>
+</tbody></table></div>
+<ul>
+<li>* pass = no body off the table, peak speed ≤ 1.0 m/s, peak displacement ≤ 0.15 m (the CLI defaults, stated). The seated row isolates the repair: the motion it removes is penetration-driven (a bottle leaving the table at 4 m/s, a jug and a pomegranate pushed away); the four repaired cells at 1.03 m/s are one tall, thin remote control toppling, present identically before the repair — an asset instability that G5 names per body rather than a repair outcome.</li>
+<li>The earlier G5 harness bugs (inertial at the AABB origin, no floor, 4000-face hulls) stay fixed; with the right table nothing sits at an edge and no repaired cell loses a body.</li>
+</ul>
+<h3>RoboCasa, packing capacity on a counter region (RoboCasa's own sampler, 5 seeds)</h3>
+<div class="tblwrap"><table>
+<thead><tr><th>region</th><th>N=4</th><th>N=6</th><th>N=8</th><th>N=10</th><th>N=12</th></tr></thead>
+<tbody>
+<tr><td>0.3×0.3 m · RoboCasa sampler (reg_bbox SAT)</td><td>5/5</td><td>5/5</td><td>4/5</td><td>1/5</td><td>0/5</td></tr>
+<tr><td>0.3×0.3 m · gate (overlap → S4R)</td><td>5/5</td><td>5/5</td><td>5/5</td><td>5/5</td><td>5/5</td></tr>
+<tr><td>0.4×0.4 m · sampler</td><td>5/5</td><td>5/5</td><td>5/5</td><td>4/5</td><td>5/5</td></tr>
+<tr><td>0.4×0.4 m · gate</td><td>5/5</td><td>5/5</td><td>5/5</td><td>5/5</td><td>5/5</td></tr>
+<tr><td>0.5×0.5 m · sampler</td><td>5/5</td><td>5/5</td><td>5/5</td><td>5/5</td><td>5/5</td></tr>
+<tr><td>0.5×0.5 m · gate</td><td>5/5</td><td>5/5</td><td>5/5</td><td>5/5</td><td>5/5</td></tr>
+</tbody></table></div>
+<ul>
+<li>RoboCasa's box test is conservative and reliable: none of its 70 accepted layouts carries mesh penetration on the collision geometry, and its z rule does not sink objects (collision meshes never extend below the <code>reg_bbox</code> bottom, 0 of 1594 objects). Its cost shows only in the tight 0.3 m region at N ≥ 8, where it gives up and the gate still places every object in 2–41 s.</li>
+<li>G0 on the 1594 AI-generated objects: no visual mesh is watertight (volume checks are invalid there); V-HACD pieces median 32; 8 objects have a single convex piece — the failure class RoboCasa's authors flagged for objaverse assets ("self turning due to single collision geom"), which RoboCasa does not exclude for these eight.</li>
+</ul>
+<h3>Videos (viz/, Blender Cycles on the solver's own meshes with the assets' textures, no text)</h3>
+<ul>
+<li>RoboLab scenes rendered as RoboLab stages them (table_oak, franka_table, ground): a solver-rejected N = 10 layout — seated as generated (object–object penetrating bodies tinted) → S4R scale continuation → repaired — and the MuJoCo settle side by side; the shipped <code>workdesk_snacks</code> scene (keyboard/smartphone 9.9 mm, bowl/spoon 2.7 mm) repaired with 3 cm planar RMSD.</li>
+</ul>
+<div class="callout">Development stays in a private repository until the diagnostic numbers are in. S4R's own failure regimes — tight confinement, fully nested cavities, near-coincident centres — are handled by the agent's re-planning routes, not hidden inside the solver.</div>
+</div>

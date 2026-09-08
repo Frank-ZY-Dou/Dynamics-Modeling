@@ -1,0 +1,270 @@
+{
+ "base_scene": "<ROBOLAB_DIR>/assets/scenes/base_empty.usda",
+ "objects": [
+  {
+   "name": "pineapple_slices_can",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hope/pineapple_slices_can.usd",
+   "x": 0.5359435566142035,
+   "y": 0.08072179954232529,
+   "z": 0.3,
+   "yaw": 337.0492955087555,
+   "dims": [
+    0.06959940493106842,
+    0.06567500531673431,
+    0.057622600346803665
+   ]
+  },
+  {
+   "name": "bbq_sauce_bottle",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hope/bbq_sauce_bottle.usd",
+   "x": 0.6030602259961646,
+   "y": -0.07086510056676051,
+   "z": 0.3,
+   "yaw": 76.59625324375936,
+   "dims": [
+    0.04347919672727585,
+    0.06463219970464706,
+    0.1483289897441864
+   ]
+  },
+  {
+   "name": "raisin_box",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hope/raisin_box.usd",
+   "x": 0.5512059368109856,
+   "y": 0.0007964575580185791,
+   "z": 0.3,
+   "yaw": 63.04189821647968,
+   "dims": [
+    0.0397518016397953,
+    0.0858749970793724,
+    0.12317539751529694
+   ]
+  },
+  {
+   "name": "tomato_sauce_can",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hope/tomato_sauce_can.usd",
+   "x": 0.6179941706949572,
+   "y": -0.06385853588897482,
+   "z": 0.3,
+   "yaw": 282.5250905556439,
+   "dims": [
+    0.070198193192482,
+    0.06646980345249176,
+    0.08284680545330048
+   ]
+  },
+  {
+   "name": "ladle",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/handal/ladle.usd",
+   "x": 0.5358801433511651,
+   "y": 0.09356605953552136,
+   "z": 0.3,
+   "yaw": 9.498293681583206,
+   "dims": [
+    0.31993821263313293,
+    0.07793059945106506,
+    0.062258802354335854
+   ]
+  },
+  {
+   "name": "lime01",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/fruits_veggies/lime.usd",
+   "x": 0.5307052042396759,
+   "y": 0.11969037823141496,
+   "z": 0.3,
+   "yaw": 52.27572811836382,
+   "dims": [
+    0.07550699636340141,
+    0.06133793666958809,
+    0.0600357006478589
+   ]
+  },
+  {
+   "name": "orange_02",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/fruits_veggies/orange2.usd",
+   "x": 0.5029070839007151,
+   "y": 0.07952178235779435,
+   "z": 0.3,
+   "yaw": 58.21035458242863,
+   "dims": [
+    0.07182184234261513,
+    0.07182251289486885,
+    0.0735187269092421
+   ]
+  },
+  {
+   "name": "bowl",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/ycb/bowl2.usd",
+   "x": 0.5814871244500418,
+   "y": -0.05210145417940166,
+   "z": 0.3,
+   "yaw": 259.32529022568326,
+   "dims": [
+    0.16144399344921112,
+    0.16111300885677338,
+    0.05496999993920326
+   ]
+  },
+  {
+   "name": "remote_control",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hot3d/remote_control.usd",
+   "x": 0.5289163538026417,
+   "y": -0.020630808160731748,
+   "z": 0.3,
+   "yaw": 103.0569291952932,
+   "dims": [
+    0.03558525629341602,
+    0.025243834592402023,
+    0.16430988907814026
+   ]
+  },
+  {
+   "name": "pitcher",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hot3d/pitcher.usd",
+   "x": 0.4376338502868825,
+   "y": -0.033314610846820164,
+   "z": 0.3,
+   "yaw": 6.577211257237945,
+   "dims": [
+    0.13578999787569046,
+    0.09974233061075213,
+    0.16740916669368744
+   ]
+  },
+  {
+   "name": "lemon_02",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/fruits_veggies/lemon2.usd",
+   "x": 0.5651447964948288,
+   "y": -0.006549702329724164,
+   "z": 0.3,
+   "yaw": 140.61084488273795,
+   "dims": [
+    0.060368726029992104,
+    0.03967265598475933,
+    0.03953404910862446
+   ]
+  },
+  {
+   "name": "spoon_big",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/vomp/spoon_big/spoon_big.usd",
+   "x": 0.6024434315316358,
+   "y": -0.11242670800268173,
+   "z": 0.3,
+   "yaw": 32.533334014269904,
+   "dims": [
+    0.16947675496339798,
+    0.04208429157733917,
+    0.017086086634662934
+   ]
+  },
+  {
+   "name": "whitepackerbottle_a02",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/vomp/whitepackerbottle_a02/whitepackerbottle_a02.usd",
+   "x": 0.6272562005702575,
+   "y": 0.0092596274753206,
+   "z": 0.3,
+   "yaw": 162.0096200055611,
+   "dims": [
+    0.05107465758919716,
+    0.05107465572655201,
+    0.08711645007133484
+   ]
+  },
+  {
+   "name": "whitepackerbottle_a01",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/vomp/whitepackerbottle_a01/whitepackerbottle_a01.usd",
+   "x": 0.5471106660268302,
+   "y": 0.022469428547700808,
+   "z": 0.3,
+   "yaw": 0.929727726213061,
+   "dims": [
+    0.043306997045874596,
+    0.0433069933205843,
+    0.07678452074527742
+   ]
+  },
+  {
+   "name": "plasticjerrican_a01",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/vomp/plasticjerrican_a01/plasticjerrican_a01.usd",
+   "x": 0.4769079105026781,
+   "y": -0.04458533865175619,
+   "z": 0.3,
+   "yaw": 357.11433189598904,
+   "dims": [
+    0.1871935874223709,
+    0.20452070981264114,
+    0.22699019313374968
+   ]
+  },
+  {
+   "name": "hammer_8",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/handal/hammer_8.usd",
+   "x": 0.49431219519983993,
+   "y": 0.06526231926887889,
+   "z": 0.3,
+   "yaw": 314.32584131607575,
+   "dims": [
+    0.3345654010772705,
+    0.1462056040763855,
+    0.03483420237898834
+   ]
+  },
+  {
+   "name": "peas_and_carrots",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hope/peas_and_carrots.usd",
+   "x": 0.5465091168235094,
+   "y": -0.09047221884002525,
+   "z": 0.3,
+   "yaw": 271.50514177429653,
+   "dims": [
+    0.07063580304384232,
+    0.0659181997179985,
+    0.05851219967007637
+   ]
+  },
+  {
+   "name": "spatula_17",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/vomp/spatula_17/spatula_17.usd",
+   "x": 0.5432022326221684,
+   "y": -0.07364805823866956,
+   "z": 0.3,
+   "yaw": 66.81230427385704,
+   "dims": [
+    0.27305376529693604,
+    0.05877986364066601,
+    0.007358454400673509
+   ]
+  },
+  {
+   "name": "bin_b02",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/vomp/bin_b02/bin_b02.usd",
+   "x": 0.5971550491272537,
+   "y": 0.0029583880363126974,
+   "z": 0.3,
+   "yaw": 134.294779596903,
+   "dims": [
+    0.17004845291376114,
+    0.09997161105275154,
+    0.07619297504425049
+   ]
+  },
+  {
+   "name": "orange_01",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/fruits_veggies/orange1.usd",
+   "x": 0.5578353224864769,
+   "y": -0.011006513528537954,
+   "z": 0.3,
+   "yaw": 87.54004239644506,
+   "dims": [
+    0.0724581852555275,
+    0.07246018946170807,
+    0.08321036636334611
+   ]
+  }
+ ],
+ "pile": {
+  "n": 20,
+  "seed": 2,
+  "radius": 0.13
+ }
+}

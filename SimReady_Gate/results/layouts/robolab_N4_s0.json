@@ -1,0 +1,82 @@
+{
+ "ok": true,
+ "msg": "All spatial constraints resolved successfully",
+ "objects": [
+  {
+   "name": "cheez_it",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/ycb/cheez_it.usd",
+   "x": 0.4105278849078052,
+   "y": 0.30261835005477683,
+   "z": 0.1087429929971695,
+   "yaw": 142.1529456420825,
+   "dims": [
+    0.07173000276088715,
+    0.1639770120382309,
+    0.213485985994339
+   ]
+  },
+  {
+   "name": "dumbbell",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/dumbbell.usd",
+   "x": 0.5463038728190545,
+   "y": -0.30987789630889895,
+   "z": 0.039217948585748674,
+   "yaw": 169.24758813207546,
+   "dims": [
+    0.0835055261850357,
+    0.18024420738220215,
+    0.07443589717149734
+   ]
+  },
+  {
+   "name": "spatula_06",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/vomp/spatula_06/spatula_06.usd",
+   "x": 0.6420925422715896,
+   "y": 0.005482832092163582,
+   "z": 0.0057130615673959256,
+   "yaw": 138.04640101258124,
+   "dims": [
+    0.2749020606279373,
+    0.0772191658616066,
+    0.007426123134791851
+   ]
+  },
+  {
+   "name": "glasses",
+   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/glasses.usd",
+   "x": 0.7180802265182138,
+   "y": 0.31808022651821377,
+   "z": 0.024941473405808226,
+   "yaw": 37.03080912963776,
+   "dims": [
+    0.146884985268116,
+    0.1638395469635725,
+    0.045882946811616455
+   ]
+  }
+ ],
+ "relations": [
+  [
+   "cheez_it",
+   "glasses",
+   "right-of",
+   0.14891902986194946
+  ],
+  [
+   "spatula_06",
+   "dumbbell",
+   "left-of",
+   0.13177021225207688
+  ]
+ ],
+ "margin": 0.05,
+ "table_bounds": [
+  0.25,
+  0.85,
+  -0.45,
+  0.45
+ ],
+ "base_scene": "/mnt/data/Frank/codes/ext/RoboLab/assets/scenes/base_empty.usda",
+ "seed": 0,
+ "n": 4
+}
