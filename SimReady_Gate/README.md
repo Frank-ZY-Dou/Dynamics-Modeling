@@ -55,8 +55,8 @@
 
 ## Overview
 
-Generated scenes reach a simulator with mesh-level interpenetration, floating bodies and objects
-that stand on nothing. SimReady Gate is the layer between a scene generator and the simulator:
+Generated scenes reach a simulator with mesh-level interpenetration and with bodies that nothing
+supports. SimReady Gate is the layer between a scene generator and the simulator:
 
 - **Reads the scenes robotics pipelines actually produce.** RoboLab USD scenes (payloads, instance proxies, gprims, MDL materials) through `usd-core`, no Isaac Sim needed; RoboCasa / robosuite MJCF objects compiled by MuJoCo itself, so the geometry is exactly what the simulator collides.
 - **Measures interpenetration on the meshes, not on proxies.** An FCL evaluator with probed contact normals, a containment test and a resting-contact test: which pairs interpenetrate, which body sits inside another, which body nothing supports.
@@ -237,7 +237,7 @@ while they are placed; the certificate records the value.
 
 ## The agent loop
 
-The agent is an interactive coding agent following [`skills/simready-scenegen/SKILL.md`](skills/simready-scenegen/SKILL.md),
+The agent is a coding agent that follows [`skills/simready-scenegen/SKILL.md`](skills/simready-scenegen/SKILL.md),
 or the SDK backend in `simready/dsl/text2dsl.py` (Claude with schema-constrained output). It
 
 1. reads `summarize`, writes the program from the request, and validates it with `check`;
