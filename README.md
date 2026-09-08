@@ -1,6 +1,8 @@
 # Dynamics-Modeling
 
-This repo contains research code for:
+Research code and open-source projects on robot dynamics.
+
+## Papers
 
 - [**NeuralActuator**](NeuralActuator/) — Neural Actuation Modeling for Robot Dynamics and External Force Perception.
   Robotics: Science and Systems (RSS) 2026.<!-- **Finalist for the Outstanding Student Paper and Outstanding Paper Awards.** -->
@@ -8,7 +10,7 @@ This repo contains research code for:
 - [**S4R**](Penetration_Solving/) — Scaling for Rigid-Body Interpenetration Resolution.
   SIGGRAPH Asia 2026 (ACM Transactions on Graphics).
 
-## Differentiable simulation
+## Projects
 
 - [**Differentiable SuperDex**](https://github.com/Frank-ZY-Dou/differentiable-superdex) — A fork of Meta's
   [Project SuperDex](https://github.com/facebookresearch/project_superdex) whose contact-first physics engine
