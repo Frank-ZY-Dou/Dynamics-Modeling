@@ -12,9 +12,9 @@ Research code and open-source projects on dynamics modeling and simulation.
 
 ## Projects
 
-- [**HandDiffSim**](HandDiffSim/) — Differentiable simulation of the Pollen Robotics AmazingHand on MuJoCo Warp.
 - [**Differentiable SuperDex**](https://github.com/Frank-ZY-Dou/differentiable-superdex) — A fork of Meta's
   [Project SuperDex](https://github.com/facebookresearch/project_superdex) whose contact-first physics engine
   is made differentiable: the discrete adjoint through frictional contact for rigid, articulated, soft and rod
   bodies, a PyTorch bridge for policy and parameter learning, and manipulation demos solved by gradient
   descent through contact.
+- [**HandDiffSim**](HandDiffSim/) — Differentiable simulation of the Pollen Robotics AmazingHand on MuJoCo Warp.
