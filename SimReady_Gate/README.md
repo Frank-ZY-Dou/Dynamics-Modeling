@@ -13,6 +13,12 @@
 
 <table>
 <tr>
+<td><img src="docs/media/scale_space_editing.png" width="640" alt="scale-space editing: two bodies overlap; S4R shrinks them; the model moves the shrunken bodies; the scale is restored" /></td>
+</tr>
+<tr>
+<td><sub><b>Scale-space editing.</b> (1) Two bodies overlap. (2) S4R shrinks every body about its reference center until nothing touches. (3) The language model moves the shrunken bodies into the requested arrangement. (4) The scale is restored under the program, and the layout comes out penetration-free.</sub></td>
+</tr>
+<tr>
 <td><img src="docs/media/pile_n20_gate.gif" width="960" alt="twenty RoboLab objects heaped on the table, shrunk, laid out by the model in scale-space, restored to full size" /></td>
 </tr>
 <tr>
