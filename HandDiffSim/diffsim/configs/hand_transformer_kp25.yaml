@@ -1,0 +1,24 @@
+side: right
+data_glob: diffsim/data/right_kp25/train_*.npz
+val_glob: diffsim/data/right_kp25/val_*.npz
+out_dir: diffsim/outputs/transformer_kp25
+seed: 0
+batch_size: 16
+history_length: 8
+rollout_steps: 48
+curriculum_epochs: [200, 400]
+curriculum_steps: [12, 24]
+epochs: 800
+ckpt_interval: 100
+model: transformer
+model_kwargs: {hidden_dim: 96, latent_dim: 48, num_heads: 4, num_layers: 2, d_ff: 192, dropout: 0.05}
+lr: 3.0e-4
+lr_warmup_epochs: 25
+lr_decay_epochs: 800
+weight_decay: 1.0e-4
+grad_clip: 1.0
+ema_decay: 0.0
+tau_max: 2.0
+qvel_clip: 30.0
+pos_loss_weight: 100.0
+torque_reg_weight: 0.0

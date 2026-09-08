@@ -1,0 +1,4 @@
+[submodule "HandDiffSim/AmazingHand"]
+	path = HandDiffSim/AmazingHand
+	url = https://github.com/pollen-robotics/AmazingHand.git
+	ignore = untracked

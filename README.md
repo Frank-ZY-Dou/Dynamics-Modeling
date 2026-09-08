@@ -12,6 +12,9 @@ Research code and open-source projects on dynamics modeling and simulation.
 
 ## Projects
 
+- [**HandDiffSim**](HandDiffSim/) — A differentiable simulator of the Pollen Robotics AmazingHand on MuJoCo Warp,
+  with a hinge-joint version of the hand identified from the original linkage; inverse kinematics and motion
+  tracking solved through the simulator, and a torque model learned from recordings.
 - [**Differentiable SuperDex**](https://github.com/Frank-ZY-Dou/differentiable-superdex) — A fork of Meta's
   [Project SuperDex](https://github.com/facebookresearch/project_superdex) whose contact-first physics engine
   is made differentiable: the discrete adjoint through frictional contact for rigid, articulated, soft and rod

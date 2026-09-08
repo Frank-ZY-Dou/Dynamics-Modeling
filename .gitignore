@@ -1,0 +1,8 @@
+HandDiffSim/diffsim/outputs/*/ckpt_ep*.pt
+HandDiffSim/diffsim/outputs/*/run_stdout.txt
+HandDiffSim/diffsim/outputs/*/train_stdout.txt
+HandDiffSim/diffsim/video/
+HandDiffSim/**/*.dora-session.yaml
+HandDiffSim/**/out/
+HandDiffSim/serial_hand/video/
+__pycache__/

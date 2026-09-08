@@ -1,0 +1,35 @@
+# Headless copy of AmazingHand/Demo/dataflow_angle_simu.yml for machines without a display.
+# The angle generator node is the untouched repo script; the two simulation nodes are the
+# repo's Client classes wrapped by tools/mj_headless_node.py (viewer replaced by a no-op).
+# Run from the project root with AmazingHand/Demo/.venv activated:
+#     timeout -s INT 40 dora run tools/dataflow_angle_simu_headless.yml
+# dora writes node logs to tools/out/<uuid>/ and a *.dora-session.yaml next to this file; safe to delete.
+nodes:
+  - id: move_angle
+    path: ../AmazingHand/Demo/AHSimulation/examples/finger_angle_control.py
+    inputs:
+      tick: dora/timer/millis/50
+    outputs:
+      - hand_quat
+
+  - id: hand_simulation_r
+    path: mj_headless_node.py
+    inputs:
+      r_hand_quat: move_angle/hand_quat
+      tick: dora/timer/millis/2
+      tick_ctrl: dora/timer/millis/10
+    outputs:
+      - mj_r_joints_pos
+      - end
+    args: -m quat -s right --seconds 6
+
+  - id: hand_simulation_l
+    path: mj_headless_node.py
+    inputs:
+      l_hand_quat: move_angle/hand_quat
+      tick: dora/timer/millis/2
+      tick_ctrl: dora/timer/millis/10
+    outputs:
+      - mj_l_joints_pos
+      - end
+    args: -m quat -s left --seconds 6
