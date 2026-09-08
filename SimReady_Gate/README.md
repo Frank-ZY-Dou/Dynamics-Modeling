@@ -3,7 +3,7 @@
 
 **Language-driven, verifier-in-the-loop repair that turns generated tabletop scenes into penetration-free, simulation-ready ones**
 
-*Part of [Dynamics-Modeling](https://github.com/Frank-ZY-Dou/Dynamics-Modeling), research code and projects by [Frank Zhiyang Dou](https://frank-zy-dou.github.io/) from [MIT CDFG](https://cdfg.mit.edu/).*
+*Part of [Dynamics-Modeling](https://github.com/Frank-ZY-Dou/Dynamics-Modeling), research code and projects by [Frank Zhiyang Dou](https://frank-zy-dou.github.io/) from [MIT CDFG](https://cdfg.mit.edu/people/#current).*
 
 *Built on [S4R](../Penetration_Solving/) — Scaling for Rigid-Body Interpenetration Resolution, ACM Transactions on Graphics (SIGGRAPH Asia 2026).*
 
@@ -11,13 +11,11 @@
 <a href="docs/DIAGNOSTIC_2026-09-08.md"><img src="https://img.shields.io/badge/Results-tracked_JSON-orange" alt="Results"></a>
 <a href="../Penetration_Solving/"><img src="https://img.shields.io/badge/Repair-S4R_(SIGGRAPH_Asia_2026)-green" alt="S4R"></a>
 
+<img src="docs/media/scale_space_editing.png" width="420" alt="scale-space editing: two bodies overlap; S4R shrinks them; the model moves the shrunken bodies; the scale is restored" />
+
+<sub><b>Scale-space editing.</b> (1) Two bodies overlap. (2) S4R shrinks every body about its reference center until nothing touches. (3) The language model moves the shrunken bodies into the requested arrangement. (4) The scale is restored under the program, and the layout comes out penetration-free.</sub>
+
 <table>
-<tr>
-<td><img src="docs/media/scale_space_editing.png" width="640" alt="scale-space editing: two bodies overlap; S4R shrinks them; the model moves the shrunken bodies; the scale is restored" /></td>
-</tr>
-<tr>
-<td><sub><b>Scale-space editing.</b> (1) Two bodies overlap. (2) S4R shrinks every body about its reference center until nothing touches. (3) The language model moves the shrunken bodies into the requested arrangement. (4) The scale is restored under the program, and the layout comes out penetration-free.</sub></td>
-</tr>
 <tr>
 <td><img src="docs/media/pile_n20_gate.gif" width="960" alt="twenty RoboLab objects heaped on the table, shrunk, laid out by the model in scale-space, restored to full size" /></td>
 </tr>
