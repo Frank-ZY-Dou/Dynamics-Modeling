@@ -16,7 +16,7 @@
 <td><img src="docs/media/pile_n20_gate.gif" width="960" alt="twenty RoboLab objects heaped on the table, shrunk, laid out by the model in scale-space, restored to full size" /></td>
 </tr>
 <tr>
-<td><sub><b>Twenty objects from a heap, laid out by language.</b> Twenty RoboLab catalog objects are dropped into a 13 cm radius on RoboLab's own table (80 interpenetrating pairs). The request asks for a cooking layout: the bowl in front of the pitcher, the ladle and the spoon within reach, the fruit grouped on the left, the cans and bottles in a row at the back, the hammer, bin, remote and spatula out of the way on the right. S4R shrinks every body about its reference centre; the model places the shrunken bodies; the scale is restored under the program, and the result is penetration-free with every predicate satisfied, in 28 s.</sub></td>
+<td><sub><b>Twenty objects from a heap, laid out by language.</b> Twenty RoboLab catalog objects are dropped into a 13 cm radius on RoboLab's own table (80 object-object interpenetrating pairs). The request asks for a cooking layout: the bowl in front of the pitcher, the ladle and the spoon within reach, the fruit grouped on the left, the cans and bottles in a row at the back, the hammer, bin, remote and spatula out of the way on the right. S4R shrinks every body about its reference center; the model places the shrunken bodies; the scale is restored under the program, and the result is penetration-free with every predicate satisfied, in 28 s.</sub></td>
 </tr>
 <tr>
 <td><img src="docs/media/pile_n20_settle.gif" width="960" alt="MuJoCo settle of the heap (left) and of the repaired layout (right)" /></td>
@@ -29,7 +29,7 @@
 
 ## 📢 Updates
 
-* [September 2026] **Twenty-object demo.** A heap of twenty RoboLab objects laid out by a language request in scale-space, two recorded rounds of the agent loop, one certificate; the request, the programs, every tool output and both certificates are in [`docs/examples/pile_n20/`](docs/examples/pile_n20/) ([Example 2](#example-2-twenty-objects-from-a-heap-laid-out-by-language)).
+* [September 2026] **Twenty-object demo.** A heap of twenty RoboLab objects laid out by a language request in scale-space, two recorded rounds of the agent loop, one passing certificate; the request, the programs, every tool output and both certificates are in [`docs/examples/pile_n20/`](docs/examples/pile_n20/) ([Example 2](#example-2-twenty-objects-from-a-heap-laid-out-by-language)).
 * [September 2026] **Scale-space placement.** `place(a, x, y, yaw)` lets the model position bodies while every body is shrunk and nothing touches; the continuation restores full scale under the program. Renders from the solver's own meshes with the assets' textures (`viz/`).
 * [September 2026] **Initial release**: the scene layer for RoboLab USD scenes (`usd-core`, no Isaac Sim) and RoboCasa MJCF objects (compiled by MuJoCo itself); the constraint language, its JSON schema and compiler; the S4R upright-on-plane repair driven by the program; the mesh-level evaluator with containment and resting-contact tests; the MuJoCo settle test; certificates with provenance; the agent skill and the Anthropic SDK backend; the diagnostics on RoboLab's 68 shipped scenes, on layouts from RoboLab's own placement solver, and on RoboCasa counter regions with RoboCasa's own placement test ([`docs/DIAGNOSTIC_2026-09-08.md`](docs/DIAGNOSTIC_2026-09-08.md)).
 
@@ -58,9 +58,9 @@
 Generated scenes reach a simulator with mesh-level interpenetration and with bodies that nothing
 supports. SimReady Gate is the layer between a scene generator and the simulator:
 
-- **Reads the scenes robotics pipelines actually produce.** RoboLab USD scenes (payloads, instance proxies, gprims, MDL materials) through `usd-core`, no Isaac Sim needed; RoboCasa / robosuite MJCF objects compiled by MuJoCo itself, so the geometry is exactly what the simulator collides.
+- **Reads the scenes robotics pipelines actually produce.** RoboLab USD scenes (payloads, instance proxies, gprims, MDL materials) through `usd-core`, no Isaac Sim needed; RoboCasa / robosuite MJCF objects compiled by MuJoCo itself, so the geometry is exactly what the simulator collides with.
 - **Measures interpenetration on the meshes, not on proxies.** An FCL evaluator with probed contact normals, a containment test and a resting-contact test: which pairs interpenetrate, which body sits inside another, which body nothing supports.
-- **Repairs with S4R under a typed constraint program.** Bodies shrink about their reference centre, grow back through minimum-norm QPs, stay upright on their support, and obey the program: regions, left/right/front/back relations, distances, soft target poses.
+- **Repairs with S4R under a typed constraint program.** Bodies shrink about their reference center, grow back through minimum-norm QPs, stay upright on their support, and obey the program: regions, left/right/front/back relations, distances, soft target poses.
 - **Lets a language model lay the scene out in scale-space.** At the shrunken scale nothing touches; the model places bodies into a semantic arrangement (`place`), and the continuation restores full scale while resolving what overlaps.
 - **Certifies by settling.** The repaired scene is simulated in MuJoCo with the proxies an engine would use (convex hulls, CoACD pieces); peak speed, displacement and bodies that leave their support are measured against the program's own thresholds.
 - **Leaves a certificate with provenance.** Program text and JSON, scene hash, git commit, library versions, every tolerance, every predicate value, the settle report.
@@ -76,7 +76,7 @@ supports. SimReady Gate is the layer between a scene generator and the simulator
 <td><img src="docs/media/workdesk_settle.gif" width="470" alt="MuJoCo settle of the shipped scene, before and after" /></td>
 </tr>
 <tr>
-<td colspan="2"><sub><code>workdesk_snacks</code>, already physics-settled by RoboLab's pipeline, still has three object-object interpenetrations, the deepest 9.9 mm (keyboard and smartphone). One sentence of intent and one certificate later it is clean, with 3 cm of planar motion. Right: the same scene settled in MuJoCo, as shipped and after the repair. Walked through step by step in <a href="#example-1-a-scene-robolab-ships-one-request-one-certificate">Example 1</a>.</sub></td>
+<td colspan="2"><sub><code>workdesk_snacks</code>, already physics-settled by RoboLab's pipeline, still has three object-object interpenetrations, the largest scoring 9.9 mm (keyboard against smartphone). One sentence of intent and one certificate later it is clean, with 3 cm of planar motion. Right: the same scene settled in MuJoCo, as shipped and after the repair. Walked through step by step in <a href="#example-1-a-scene-robolab-ships-one-request-one-certificate">Example 1</a>.</sub></td>
 </tr>
 </table>
 
@@ -99,20 +99,20 @@ supports. SimReady Gate is the layer between a scene generator and the simulator
 <td><img src="docs/media/robocasa_n10_gate.gif" width="640" alt="ten AI-generated RoboCasa objects on a 0.3 m counter region" /></td>
 </tr>
 <tr>
-<td><sub>Ten AI-generated RoboCasa objects on a 0.3 x 0.3 m counter region. RoboCasa's own placement test (a separating-axis test on rotated bounding boxes) places nine and gives up on the tenth; the gate places all ten overlapping, and S4R packs them to zero penetration on the objects' V-HACD collision pieces in 2.6 s, under <code>within</code>, <code>on_support</code> and <code>upright</code>.</sub></td>
+<td><sub>Ten AI-generated RoboCasa objects on a 0.3 x 0.3 m counter region. RoboCasa's own placement test (a separating-axis test on rotated bounding boxes) places nine and gives up on the tenth; the gate places all ten with overlaps allowed, and S4R packs them to zero penetration on the objects' V-HACD collision pieces in 2.6 s, under <code>within</code>, <code>on_support</code> and <code>upright</code>.</sub></td>
 </tr>
 </table>
 
 ## Example 1: a scene RoboLab ships, one request, one certificate
 
-`workdesk_snacks.usda` is one of RoboLab's library scenes. It has been through their physics
-settle and still carries three object-object interpenetrations, the deepest 9.9 mm (keyboard and
+`workdesk_snacks.usda` is one of RoboLab's library scenes. It has been through RoboLab's physics
+settle and still carries three object-object interpenetrations, the largest scoring 9.9 mm (keyboard and
 smartphone). Below it goes through the gate with one sentence of intent.
 
 ![raw layout (penetrating bodies tinted), scale continuation at s = 0.22 and s = 0.57, repaired](docs/media/workdesk_strip.png)
 
 *Left to right: the scene as shipped with the interpenetrating bodies tinted; S4R shrinking every
-free body about its reference centre and growing it back while the QP moves bodies in the plane;
+free body about its reference center and growing it back while the QP moves bodies in the plane;
 the repaired scene.*
 
 ### 1. Summarize the scene
@@ -133,7 +133,7 @@ $ python -m simready.cli summarize assets/scenes/workdesk_snacks.usda
 
 The request was *"Keep everything on the table, the keyboard in front of the smartphone with at
 least 5 cm between them, and nothing interpenetrating."* The model answers the prompt printed by
-`simready prompt` with one JSON object (schema-constrained; every statement carries the words that
+`python -m simready.cli prompt` with one JSON object (schema-constrained; each statement can carry the words that
 justify it):
 
 ```json
@@ -171,12 +171,12 @@ $ python -m simready.cli repair assets/scenes/workdesk_snacks.usda program.json 
  "certificate": "workdesk_repaired.certificate.json"}
 ```
 
-`pen_before` counts every negative pair, including the sub-millimetre resting contacts with the
+`pen_before` counts every negative pair, including the sub-millimeter resting contacts with the
 table that PhysX leaves behind; three of the twelve are object-object.
 
 ### 5. Settle as certification
 
-The repaired scene is simulated in MuJoCo with the proxies a physics engine would use, twice
+The repaired scene is simulated twice in MuJoCo, with the proxies a physics engine would use
 (convex hulls, CoACD pieces); the thresholds come from the program's `gate` section:
 
 ```
@@ -197,7 +197,7 @@ settle report. A scene is "ready" only with this file.
 ## Example 2: twenty objects from a heap, laid out by language
 
 Twenty catalog objects are dropped into a 13 cm radius on RoboLab's `table_oak` (seed 2 of
-`viz/make_robolab_scene_video.py --pile`): 80 interpenetrating pairs. The request:
+`viz/make_robolab_scene_video.py --pile`): 80 object-object interpenetrating pairs, 81 counting one contact with the table. The request:
 
 > *Twenty things were dumped in a heap on the kitchen table. Lay them out for cooking: the bowl in
 > front of the pitcher, the ladle and the big spoon within reach of the bowl, the fruit (both
@@ -242,17 +242,17 @@ or the SDK backend in `simready/dsl/text2dsl.py` (Claude with schema-constrained
 
 1. reads `summarize`, writes the program from the request, and validates it with `check`;
 2. runs `repair --out` and reads the JSON: `pen_after`, `failed_predicates`, `rmsd_xy`;
-3. acts on the outcome, at most three rounds: `pen_after > 0` means the intent is too tight (fewer
+3. acts on the outcome, for at most three rounds: `pen_after > 0` means the intent is too tight (fewer
    objects, a larger region); a failed relation means a gap to relax; a body in `left_support` after
    `settle` gets a `within(..., inset=)` statement;
 4. reports the certificate path, and nothing else counts as "ready".
 
-It never overrides a number, and positions are not something it types by hand: a body is placed
+It never overrides a number, and final poses are not something it types by hand: a body is placed
 through relations, regions and `place` targets, and S4R decides what is feasible.
 
 ### Scale-space editing
 
-S4R makes a scene an editable scale-space: once every body is shrunk about its reference centre,
+S4R makes a scene an editable scale-space: once every body is shrunk about its reference center,
 nothing touches, and a body can be moved anywhere. `place(a, x, y, yaw)` is that move, issued by
 the model from its understanding of the request; restoring the scale then resolves whatever still
 overlaps, with the target kept as a soft pull. The pipeline is shrink, arrange, restore.
@@ -278,7 +278,7 @@ gate
 | `no_penetration(*, margin)` | the clearance of every contact row S4R generates from FCL |
 | `on_support(a, B)`, `upright(a)` | a's lowest point on B's surface, roll/pitch to zero (removed from the QP variables) |
 | `within(a, R)`, `inside(a, C)` | per-step rectangle rows on a's exact projected footprint |
-| `left_of / right_of / in_front_of / behind (a, b, gap)`, `min_distance / near (a, b, r)` | linear rows on the reference centres |
+| `left_of / right_of / in_front_of / behind (a, b, gap)`, `min_distance / near (a, b, r)` | linear rows on the reference centers |
 | `place(a, x, y, yaw)` | a's pose at the shrunken scale, and a soft pull while the scale is restored |
 | `gate` | thresholds for the verifier and the settle test, not the QP |
 
@@ -325,7 +325,7 @@ them from their own checkouts: set `ROBOLAB_DIR` to a checkout of
 | G0 | is the asset admissible: closed visual mesh, more than one collision piece, proxy that matches the visual? | `mjcf_object_stats` |
 | G2 | does any pair interpenetrate, is any body inside another, is any body unsupported? | FCL score with probed normals, containment and resting-contact tests (`simready.gates.verify`) |
 | G3 | the repair: S4R scale continuation under the program | `simready.repair.upright_s4r` |
-| G5 | does the scene stay at rest in a physics engine? | MuJoCo settle with hull and CoACD proxies (`simready settle`) |
+| G5 | does the scene stay at rest in a physics engine? | MuJoCo settle with hull and CoACD proxies (`python -m simready.cli settle`) |
 
 ## Results
 
@@ -339,12 +339,12 @@ test; every table is backed by a tracked file under `results/`.
   clean; the 7 it rejects carry 1–7 penetrating pairs, and S4R repairs all 7 to zero with the
   requested relations kept (planar RMSD 0.03–0.17 m, 4–17 s per cell).
 - **Settle** (MuJoCo, identical harness): median peak speed 1.0 → 0.4 m/s from the seated raw
-  layouts to the repaired ones, no repaired cell loses a body; what remains is one tall remote
+  layouts to the repaired ones; no repaired cell loses a body, and what remains is one tall remote
   control toppling, present before the repair as well.
 - **RoboCasa** (own placement test, 5 seeds): the box test is conservative and reliable; it gives
   up in a 0.3 m square at 8–12 objects (4/5, 1/5, 0/5), where the gate places every object (5/5).
 
-Full tables, the corrections to the first pass and the fixes behind the reruns:
+Full tables and the fixes behind them:
 [`docs/DIAGNOSTIC_2026-09-08.md`](docs/DIAGNOSTIC_2026-09-08.md). Design note: [`docs/design.html`](docs/design.html).
 
 ## Repository layout

@@ -1,13 +1,12 @@
 # Diagnostic, corrected (2026-09-08)
 
-This file replaces the first diagnostic pass of 2026-09-07. An independent review of that pass
-found no fabricated numbers but several errors of method that
-had made the two third-party baselines look worse than they are and had produced claims that do
-not survive. The corrected experiments below were re-run after the fixes listed at the end.
+This file supersedes the diagnostic pass of 2026-09-07. A methodological audit of that pass found
+several errors that had made the two third-party baselines look worse than they are and that
+invalidated some of its claims. The experiments below were re-run after the fixes listed at the end.
 Every table here is backed by a tracked file under `results/` (result JSONs and the persisted
 layouts are committed).
 
-## Corrections to the first pass
+## Corrections to the earlier pass
 
 - **Wrong fixture for the RoboLab pre-settle replica.** The replica seated objects on `franka_table`
   at the origin; RoboLab's scenegen skill stages them on `table` (table_oak) of `base_empty.usda`
@@ -40,7 +39,7 @@ layouts are committed).
 `experiments/robolab_shipped_sweep.py` -> `results/robolab_shipped_g2.json`.
 
 - Object-object penetration in 26 / 68 scenes (>= 1 mm in 12; the largest score 9.86 mm in
-  `workdesk_snacks`: keyboard/smartphone). Sub-millimetre resting penetration into fixtures in
+  `workdesk_snacks`: keyboard/smartphone). Sub-millimeter resting penetration into fixtures in
   64 / 68 (median 0.27 mm). A body wholly inside another body (invisible to a surface test) in 4
   scenes: `cooking_table` (spoon in the plates), `front_of_shelf` (cutlery in the rack),
   `ladle_pot` (fork in a plate), `tools_picking` (clamp in a bin). 30 / 68 scenes have a free body
@@ -62,7 +61,7 @@ Layouts: skill bounds, objects from the catalog, 2 relations per layout, staged 
   penetration is in the layouts it REJECTS (its fallback is "reduce the object count"): 1-7 pairs.
   S4R turns all 7 rejected layouts into penetration-free ones with the requested relations kept
   (one `within(table.top)` miss: `mayonnaise_bottle` in N=10 s1, placed beyond the table edge).
-- RMSD is the planar RMS of the reference-centre displacement. Times are per cell in a warm
+- RMSD is the planar RMS of the reference-center displacement. Times are per cell in a warm
   process (decimation cached), full-mesh verification included.
 
 ## G5 in MuJoCo, RoboLab pre-settle layouts (12 cells, 2 s, hull and CoACD proxies)
@@ -110,8 +109,8 @@ timestep). Pass = no body off the table and peak speed <= 1.0 m/s and peak displ
   for objaverse assets ("self turning due to single collision geom"); RoboCasa does not exclude
   these eight.
 
-## Fixes that the reruns depend on (commit 53e187a and after)
-- Evaluator: contact normals oriented by probing (the centre-line heuristic pushed bodies into
+## Fixes the reruns depend on
+- Evaluator: contact normals oriented by probing (the center-line heuristic pushed bodies into
   concave fixtures); bodies wholly inside another body counted as penetrating; FCL's coplanar-touch
   artifact resolved by a 0.05 mm probe; `max_pen` documented as a score.
 - Seating: the support height is the surface under the body's lowest vertices (downward rays),
