@@ -2,7 +2,7 @@
 
 > A differentiable simulator of a servo-driven robot hand, and the hinge-joint model it runs on
 
-*Part of [Dynamics-Modeling](https://github.com/Frank-ZY-Dou/Dynamics-Modeling), research code and projects by [Frank Zhiyang Dou](https://frank-zy-dou.github.io/) from [MIT CDFG](https://cdfg.mit.edu/people/#current).*
+*Part of [Dynamics-Modeling](https://github.com/Frank-ZY-Dou/Dynamics-Modeling), research code and projects by [Frank Zhiyang Dou](https://frank-zy-dou.github.io/) from [MIT CDFG](https://cdfg.mit.edu/).*
 
 HandDiffSim takes the Pollen Robotics [AmazingHand](https://github.com/pollen-robotics/AmazingHand), an
 open-source hand whose fingers are driven by two servos through a parallel linkage, and does three things with
