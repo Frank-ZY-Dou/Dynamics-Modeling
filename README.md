@@ -1,6 +1,6 @@
 # Dynamics-Modeling
 
-Research code and open-source projects on robot dynamics.
+Research code and open-source projects on dynamics modeling and simulation.
 
 ## Papers
 
