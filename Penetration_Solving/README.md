@@ -22,10 +22,22 @@ simulation-ready scenes.</b> <b>Left:</b> progressive scaling of 1,000 Kubric as
 spell &ldquo;SIGGRAPH ASIA,&rdquo; from an interpenetrating initialization to a penetration-free
 configuration. <b>Right:</b> S4R efficiently converts cluttered 3D assets into simulation-ready
 scenes for downstream robot policy training.</sub></p>
+
+<table>
+<tr>
+<td><img src="assets/ycb48_repair_and_settle.gif" width="470" alt="48 YCB objects spawned in interpenetration, resolved by S4R and settled" /></td>
+<td><img src="assets/ycb48_pick_and_place.gif" width="470" alt="a Franka arm picks the sugar box from the repaired scene and places it in the ring" /></td>
+</tr>
+<tr>
+<td><sub><b>Repair and settle.</b> 48 YCB objects spawned in interpenetration, resolved by S4R and settled in simulation (<a href="assets/ycb48_repair_and_settle.mp4">mp4</a>).</sub></td>
+<td><sub><b>Pick and place.</b> On the repaired scene, a Franka arm picks the sugar box and sets it down in the ring (<a href="assets/ycb48_pick_and_place.mp4">mp4</a>).</sub></td>
+</tr>
+</table>
 </div>
 
 ## 📢 Updates
 
+* [September 2026] Two clips at the top of this page: 48 YCB objects spawned in interpenetration, resolved by S4R and settled, then a Franka arm picking from the repaired scene.
 * [September 2026] **SimReady Gate** — an agentic, language-driven layer on top of S4R that turns generated RoboLab and RoboCasa scenes into certified simulation-ready ones: a request becomes a typed constraint program, S4R repairs under it in scale-space, a probed mesh-level evaluator and a MuJoCo settle decide, and a certificate with provenance is written. Measured on RoboLab's 68 shipped scenes, on layouts from RoboLab's own placement solver, and on RoboCasa's counter regions with RoboCasa's own placement test. A separate project in this repository: [`../SimReady_Gate/`](../SimReady_Gate/).
 * [September 2026] Timing tables extended to N = 2000 and 3000 on both the CPU and the GPU solver, with the hardware noted.
 * [August 2026] Initial release: the CPU solver (progressive scaling, contact QP, SOI events, frozen-witness cache, tail refinement), the GPU-native solver on NVIDIA Warp, the benchmark scene generators with fixed seeds, the bundled Kubric pool and the processed HY3D meshes, and end-to-end examples.
