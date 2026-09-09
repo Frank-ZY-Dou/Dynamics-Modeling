@@ -45,6 +45,14 @@ def load_any(path: str) -> Scene:
         from .io.usd_io import body_from_object_usd
         with open(path) as f:
             L = strict_json_loads(f.read())
+        root = os.environ.get("ROBOLAB_DIR", str(Path(__file__).resolve().parents[2] / "ext" / "RoboLab"))
+        def asset(v):      # layouts store RoboLab asset paths with a <ROBOLAB_DIR>/ prefix
+            return root.rstrip("/") + "/" + v[len("<ROBOLAB_DIR>/"):] if isinstance(v, str) and v.startswith("<ROBOLAB_DIR>/") else v
+        L["base_scene"] = asset(L.get("base_scene"))
+        for o in L["objects"]:
+            o["usd_path"] = asset(o["usd_path"])
+        if isinstance(L.get("table"), dict):
+            L["table"]["usd_path"] = asset(L["table"].get("usd_path"))
         bodies = []
         tb = L.get("table")
         if tb and tb.get("usd_path") and os.path.exists(tb["usd_path"]):

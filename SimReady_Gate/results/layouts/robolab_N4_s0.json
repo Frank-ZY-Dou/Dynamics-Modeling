@@ -4,7 +4,7 @@
  "objects": [
   {
    "name": "cheez_it",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/ycb/cheez_it.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/ycb/cheez_it.usd",
    "x": 0.4105278849078052,
    "y": 0.30261835005477683,
    "z": 0.1087429929971695,
@@ -17,7 +17,7 @@
   },
   {
    "name": "dumbbell",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/dumbbell.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hot3d/dumbbell.usd",
    "x": 0.5463038728190545,
    "y": -0.30987789630889895,
    "z": 0.039217948585748674,
@@ -30,7 +30,7 @@
   },
   {
    "name": "spatula_06",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/vomp/spatula_06/spatula_06.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/vomp/spatula_06/spatula_06.usd",
    "x": 0.6420925422715896,
    "y": 0.005482832092163582,
    "z": 0.0057130615673959256,
@@ -43,7 +43,7 @@
   },
   {
    "name": "glasses",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/glasses.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hot3d/glasses.usd",
    "x": 0.7180802265182138,
    "y": 0.31808022651821377,
    "z": 0.024941473405808226,
@@ -76,7 +76,7 @@
   -0.45,
   0.45
  ],
- "base_scene": "/mnt/data/Frank/codes/ext/RoboLab/assets/scenes/base_empty.usda",
+ "base_scene": "<ROBOLAB_DIR>/assets/scenes/base_empty.usda",
  "seed": 0,
  "n": 4
 }

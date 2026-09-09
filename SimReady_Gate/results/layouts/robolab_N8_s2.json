@@ -4,7 +4,7 @@
  "objects": [
   {
    "name": "pineapple_slices_can",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/pineapple_slices_can.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hope/pineapple_slices_can.usd",
    "x": 0.3347997024655342,
    "y": -0.09597279879531662,
    "z": 0.030811300173401834,
@@ -17,7 +17,7 @@
   },
   {
    "name": "bbq_sauce_bottle",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/bbq_sauce_bottle.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hot3d/bbq_sauce_bottle.usd",
    "x": 0.5994320295362771,
    "y": 0.288970833163183,
    "z": 0.0761644948720932,
@@ -30,7 +30,7 @@
   },
   {
    "name": "raisin_box",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/raisin_box.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hope/raisin_box.usd",
    "x": 0.3429374985396862,
    "y": -0.3570625014603138,
    "z": 0.06358769875764847,
@@ -43,7 +43,7 @@
   },
   {
    "name": "tomato_sauce_can",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/tomato_sauce_can.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hope/tomato_sauce_can.usd",
    "x": 0.41826302526972237,
    "y": 0.08840871564205759,
    "z": 0.04342340272665024,
@@ -56,7 +56,7 @@
   },
   {
    "name": "ladle",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/handal/ladle.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/handal/ladle.usd",
    "x": 0.6241924368411792,
    "y": -0.24003089368343355,
    "z": 0.03312940117716793,
@@ -69,7 +69,7 @@
   },
   {
    "name": "lime01",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/fruits_veggies/lime.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/fruits_veggies/lime.usd",
    "x": 0.7622465018182992,
    "y": 0.033614919088010155,
    "z": 0.03201785032392945,
@@ -82,7 +82,7 @@
   },
   {
    "name": "orange_02",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/fruits_veggies/orange2.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/fruits_veggies/orange2.usd",
    "x": 0.5960714422901,
    "y": 0.10068957687773925,
    "z": 0.038759363454621054,
@@ -95,7 +95,7 @@
   },
   {
    "name": "bowl",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/ycb/bowl2.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/ycb/bowl2.usd",
    "x": 0.38072199672460555,
    "y": 0.31927800327539446,
    "z": 0.029484999969601633,
@@ -128,7 +128,7 @@
   -0.45,
   0.45
  ],
- "base_scene": "/mnt/data/Frank/codes/ext/RoboLab/assets/scenes/base_empty.usda",
+ "base_scene": "<ROBOLAB_DIR>/assets/scenes/base_empty.usda",
  "seed": 2,
  "n": 8
 }

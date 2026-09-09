@@ -8,7 +8,8 @@ whose top face spans x in [0.197, 0.897], y in [-0.5, 0.5] at z = 0.
 
 Reproducibility: RoboLab's SpatialSolver draws from Python's `random` module, which nothing
 seeds; `make_layout` seeds it from the NumPy seed so that every script sees the same layout.
-Layouts are persisted under results/layouts/ and reused by every downstream experiment.
+Layouts are persisted under results/layouts/ and reused by every downstream experiment; asset
+paths are stored with a `<ROBOLAB_DIR>/` prefix and expanded to the checkout on load.
 """
 import json, os, random, sys
 from pathlib import Path
@@ -20,6 +21,7 @@ from robolab.scene_gen.llm_scene_gen.predicates import (  # noqa: E402
     ObjectState, PlaceOnBasePredicate, RelativePositionPredicate, PredicateType, Predicate)
 from robolab.scene_gen.llm_scene_gen.spatial_solver import SpatialSolver  # noqa: E402
 
+PLACEHOLDER = "<ROBOLAB_DIR>/"
 TABLE_BOUNDS = (0.25, 0.85, -0.45, 0.45)          # the skill's defaults (SKILL.md)
 BASE_SCENE = ROBOLAB / "assets/scenes/base_empty.usda"
 LAYOUT_DIR = Path(__file__).resolve().parent.parent / "results" / "layouts"
@@ -67,10 +69,21 @@ def make_layout(rng, n_objects=6, n_relations=2, margin=0.05, random_rot=True, s
         if s.x is None or s.y is None:
             continue
         z = dims[nm][2] / 2 + 0.002
-        layout.append({"name": nm, "usd_path": str(ROBOLAB / BY_NAME[nm]["usd_path"]),
+        layout.append({"name": nm, "usd_path": PLACEHOLDER + BY_NAME[nm]["usd_path"],
                        "x": s.x, "y": s.y, "z": z, "yaw": s.yaw or 0.0, "dims": dims[nm]})
     return {"ok": ok, "msg": msg, "objects": layout, "relations": relations, "margin": margin,
-            "table_bounds": TABLE_BOUNDS, "base_scene": str(BASE_SCENE), "seed": seed, "n": n_objects}
+            "table_bounds": TABLE_BOUNDS, "base_scene": PLACEHOLDER + "assets/scenes/base_empty.usda", "seed": seed, "n": n_objects}
+
+
+def expand_paths(L: dict) -> dict:
+    """The layout with `<ROBOLAB_DIR>/` replaced by the checkout path (a copy)."""
+    L = json.loads(json.dumps(L))
+    def fix(v):
+        return str(ROBOLAB) + "/" + v[len(PLACEHOLDER):] if isinstance(v, str) and v.startswith(PLACEHOLDER) else v
+    L["base_scene"] = fix(L.get("base_scene"))
+    for o in L["objects"]:
+        o["usd_path"] = fix(o["usd_path"])
+    return L
 
 
 def get_layout(n, seed, regenerate=False):
@@ -78,10 +91,12 @@ def get_layout(n, seed, regenerate=False):
     LAYOUT_DIR.mkdir(parents=True, exist_ok=True)
     path = LAYOUT_DIR / f"robolab_N{n}_s{seed}.json"
     if path.exists() and not regenerate:
-        return json.load(open(path))
+        with open(path) as f:
+            return expand_paths(json.load(f))
     L = make_layout(np.random.RandomState(seed), n_objects=n, seed=seed)
-    json.dump(L, open(path, "w"), indent=1)
-    return L
+    with open(path, "w") as f:
+        json.dump(L, f, indent=1)
+    return expand_paths(L)
 
 
 if __name__ == "__main__":
@@ -91,7 +106,9 @@ if __name__ == "__main__":
     a = ap.parse_args()
     L = get_layout(a.n, a.seed, regenerate=a.regenerate)
     if a.save:
-        json.dump(L, open(a.save, "w"), indent=1); print("saved", a.save)
+        with open(a.save, "w") as f:
+            json.dump(L, f, indent=1)
+        print("saved", a.save)
     print("solver:", L["ok"], L["msg"][:80])
     for o in L["objects"]:
         print(f"  {o['name']:28s} x={o['x']:.3f} y={o['y']:.3f} z={o['z']:.3f} yaw={o['yaw']:.0f} dims={tuple(round(d,3) for d in o['dims'])}")

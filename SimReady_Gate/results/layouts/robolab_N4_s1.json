@@ -4,7 +4,7 @@
  "objects": [
   {
    "name": "popcorn_box",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/popcorn_box.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hope/popcorn_box.usd",
    "x": 0.7367540031671523,
    "y": -0.09849690225382597,
    "z": 0.044488500475883486,
@@ -17,7 +17,7 @@
   },
   {
    "name": "spaghetti",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/spaghetti.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hope/spaghetti.usd",
    "x": 0.5038655777054498,
    "y": -0.2750597015023232,
    "z": 0.026918399751186373,
@@ -30,7 +30,7 @@
   },
   {
    "name": "utilityjug_a03",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/vomp/utilityjug_a03/utilityjug_a03.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/vomp/utilityjug_a03/utilityjug_a03.usd",
    "x": 0.40491281693706815,
    "y": 0.0784398602237428,
    "z": 0.16983553838729848,
@@ -43,7 +43,7 @@
   },
   {
    "name": "remote_control",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/remote_control.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hot3d/remote_control.usd",
    "x": 0.317792628146708,
    "y": -0.10621507646673788,
    "z": 0.08415494453907013,
@@ -76,7 +76,7 @@
   -0.45,
   0.45
  ],
- "base_scene": "/mnt/data/Frank/codes/ext/RoboLab/assets/scenes/base_empty.usda",
+ "base_scene": "<ROBOLAB_DIR>/assets/scenes/base_empty.usda",
  "seed": 1,
  "n": 4
 }

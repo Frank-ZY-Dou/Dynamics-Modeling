@@ -4,7 +4,7 @@
  "objects": [
   {
    "name": "popcorn_box",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/popcorn_box.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hope/popcorn_box.usd",
    "x": 0.6867540031671524,
    "y": 0.2867540031671524,
    "z": 0.044488500475883486,
@@ -17,7 +17,7 @@
   },
   {
    "name": "spaghetti",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/spaghetti.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hope/spaghetti.usd",
    "x": 0.6250597015023232,
    "y": -0.2089032364525018,
    "z": 0.026918399751186373,
@@ -30,7 +30,7 @@
   },
   {
    "name": "utilityjug_a03",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/vomp/utilityjug_a03/utilityjug_a03.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/vomp/utilityjug_a03/utilityjug_a03.usd",
    "x": 0.43573725447058675,
    "y": 0.12037271442938832,
    "z": 0.16983553838729848,
@@ -43,7 +43,7 @@
   },
   {
    "name": "remote_control",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/remote_control.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hot3d/remote_control.usd",
    "x": 0.367792628146708,
    "y": -0.33220737185329197,
    "z": 0.08415494453907013,
@@ -56,7 +56,7 @@
   },
   {
    "name": "banana",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/ycb/banana.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/ycb/banana.usd",
    "x": 0.4392060026526451,
    "y": 0.07512431543824391,
    "z": 0.020334999680519106,
@@ -69,7 +69,7 @@
   },
   {
    "name": "hammer_5",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/handal/hammer_5.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/handal/hammer_5.usd",
    "x": 0.5183271080255508,
    "y": -0.1816728919744492,
    "z": 0.019208401113748587,
@@ -102,7 +102,7 @@
   -0.45,
   0.45
  ],
- "base_scene": "/mnt/data/Frank/codes/ext/RoboLab/assets/scenes/base_empty.usda",
+ "base_scene": "<ROBOLAB_DIR>/assets/scenes/base_empty.usda",
  "seed": 1,
  "n": 6
 }

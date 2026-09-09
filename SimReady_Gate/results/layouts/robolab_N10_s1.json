@@ -4,7 +4,7 @@
  "objects": [
   {
    "name": "popcorn_box",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/popcorn_box.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hope/popcorn_box.usd",
    "x": 0.6867540031671524,
    "y": -0.2867540031671524,
    "z": 0.044488500475883486,
@@ -17,7 +17,7 @@
   },
   {
    "name": "spaghetti",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/spaghetti.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hope/spaghetti.usd",
    "x": 0.48433762533704366,
    "y": -0.01742214945511272,
    "z": 0.026918399751186373,
@@ -30,7 +30,7 @@
   },
   {
    "name": "utilityjug_a03",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/vomp/utilityjug_a03/utilityjug_a03.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/vomp/utilityjug_a03/utilityjug_a03.usd",
    "x": 0.6642627455294132,
    "y": 0.2642627455294132,
    "z": 0.16983553838729848,
@@ -43,7 +43,7 @@
   },
   {
    "name": "remote_control",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hot3d/remote_control.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hot3d/remote_control.usd",
    "x": 0.367792628146708,
    "y": -0.33220737185329197,
    "z": 0.08415494453907013,
@@ -56,7 +56,7 @@
   },
   {
    "name": "banana",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/ycb/banana.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/ycb/banana.usd",
    "x": 0.7182394619048587,
    "y": 0.27778182999131606,
    "z": 0.020334999680519106,
@@ -69,7 +69,7 @@
   },
   {
    "name": "hammer_5",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/handal/hammer_5.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/handal/hammer_5.usd",
    "x": 0.3704422085560647,
    "y": 0.18460645561643735,
    "z": 0.019208401113748587,
@@ -82,7 +82,7 @@
   },
   {
    "name": "lunchbag",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/objaverse/lunchbag.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/objaverse/lunchbag.usd",
    "x": 0.4076898649179425,
    "y": 0.1677944533705616,
    "z": 0.07449999791383743,
@@ -95,7 +95,7 @@
   },
   {
    "name": "mayonnaise_bottle",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/hope/mayonnaise_bottle.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/hope/mayonnaise_bottle.usd",
    "x": 0.3809760637098083,
    "y": 0.5345139909709837,
    "z": 0.07595119965076447,
@@ -108,7 +108,7 @@
   },
   {
    "name": "milkjug_a01",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/vomp/milkjug_a01/milkjug_a01.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/vomp/milkjug_a01/milkjug_a01.usd",
    "x": 0.7251596823732004,
    "y": 0.15974630632365422,
    "z": 0.08818395030498505,
@@ -121,7 +121,7 @@
   },
   {
    "name": "measuring_cups",
-   "usd_path": "/mnt/data/Frank/codes/ext/RoboLab/assets/objects/handal/measuring_cups.usd",
+   "usd_path": "<ROBOLAB_DIR>/assets/objects/handal/measuring_cups.usd",
    "x": 0.5498736490396002,
    "y": 0.13778620325494562,
    "z": 0.020945500254631058,
@@ -154,7 +154,7 @@
   -0.45,
   0.45
  ],
- "base_scene": "/mnt/data/Frank/codes/ext/RoboLab/assets/scenes/base_empty.usda",
+ "base_scene": "<ROBOLAB_DIR>/assets/scenes/base_empty.usda",
  "seed": 1,
  "n": 10
 }
