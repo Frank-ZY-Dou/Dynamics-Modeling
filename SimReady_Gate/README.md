@@ -82,7 +82,7 @@ supports. SimReady Gate is the layer between a scene generator and the simulator
 <td><img src="docs/media/workdesk_settle.gif" width="470" alt="MuJoCo settle of the shipped scene, before and after" /></td>
 </tr>
 <tr>
-<td colspan="2"><sub><code>workdesk_snacks</code>, already physics-settled by RoboLab's pipeline, still has three object-object interpenetrations, the largest scoring 9.9 mm (keyboard against smartphone). One sentence of intent and one certificate later it is clean, with 3 cm of planar motion. Right: the same scene settled in MuJoCo, as shipped and after the repair. Walked through step by step in <a href="#example-1-a-scene-robolab-ships-one-request-one-certificate">Example 1</a>.</sub></td>
+<td colspan="2"><sub><code>workdesk_snacks</code>, already physics-settled by RoboLab's pipeline, still has three object-object interpenetrations, the largest scoring 9.9 mm (keyboard against smartphone). One sentence of intent and one certificate later it is clean, with 3.5 cm of planar motion. Right: the same scene settled in MuJoCo, as shipped and after the repair. Walked through step by step in <a href="#example-1-a-scene-robolab-ships-one-request-one-certificate">Example 1</a>.</sub></td>
 </tr>
 </table>
 
@@ -105,7 +105,7 @@ supports. SimReady Gate is the layer between a scene generator and the simulator
 <td><img src="docs/media/robocasa_n10_gate.gif" width="640" alt="ten AI-generated RoboCasa objects on a 0.3 m counter region" /></td>
 </tr>
 <tr>
-<td><sub>Ten AI-generated RoboCasa objects on a 0.3 x 0.3 m counter region. RoboCasa's own placement test (a separating-axis test on rotated bounding boxes) places nine and gives up on the tenth; the gate places all ten with overlaps allowed, and S4R packs them to zero penetration on the objects' V-HACD collision pieces in 2.6 s, under <code>within</code>, <code>on_support</code> and <code>upright</code>.</sub></td>
+<td><sub>Ten AI-generated RoboCasa objects on a 0.3 x 0.3 m counter region. RoboCasa's own placement test (a separating-axis test on rotated bounding boxes) places nine and gives up on the tenth; the gate places all ten with overlaps allowed, and S4R packs them to zero penetration on the objects' V-HACD collision pieces in 2.9 s, under <code>within</code>, <code>on_support</code> and <code>upright</code>.</sub></td>
 </tr>
 </table>
 
