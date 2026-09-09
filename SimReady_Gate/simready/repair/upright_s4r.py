@@ -7,6 +7,17 @@ bodies tagged upright, and every scale increment solves one minimum-norm QP
 whose rows are (a) frozen-witness contact rows from exact mesh detection and
 (b) extra linear rows supplied by the DSL compiler. Fixed bodies are
 obstacles with no variables.
+
+The step QP keeps the contact rows hard and the per-step translation and yaw
+trust regions as bounds inside the problem; every DSL row carries a
+non-negative slack with a quadratic penalty, so a statement that conflicts
+with the contacts yields to them instead of making the step infeasible, and
+the final predicates report what it cost. When the contacts cannot be met
+inside the trust region (deep penetration, more than one step's move), the
+step serves the contacts alone: they become elastic, the program rows are set
+aside for that step, every body moves as far as the region allows, and the
+remainder is carried into the next linearization. The scale never advances on
+a failed solve.
 """
 from __future__ import annotations
 
@@ -19,6 +30,11 @@ import scipy.sparse as sp
 
 from ..scene.model import Body, Scene
 from ..gates.verify import pair_signed_distances
+
+RHO_CONTACT = 1e3     # quadratic penalty on contact-row slack when a step has to relax the contacts
+RHO_DSL = 1e2         # quadratic penalty on DSL-row slack (per m^2); the multiplier over it is the row's residual
+SLACK_EPS = 1e-3      # a DSL slack above 1 mm is a row the step did not meet; below it is the penalty's own residual
+MAX_STEP_FAILURES = 4  # retries of one scale with a halved look-ahead before the continuation stops
 
 
 def rotz(t):
@@ -59,7 +75,7 @@ class RepairSpec:
     upright: set = field(default_factory=set)   # bodies whose roll/pitch go to 0
     rows_fn: object = None               # callable(state) -> list[(coeffs, lo, hi)]
     prefer: dict = field(default_factory=dict)  # name -> (target_xy, weight)
-    place: dict = field(default_factory=dict)   # name -> (x, y, yaw_deg|None): the drag in the shrunken scale-space
+    place: dict = field(default_factory=dict)   # name -> (x, y, yaw_deg|None): the pose given at the shrunken scale
     yaw_weight: dict = field(default_factory=dict)  # name -> weight (default size^2)
     d_hat: float = 0.01
     ds_max: float = 0.05
@@ -94,7 +110,45 @@ class RepairResult:
     steps: int
     displacement: np.ndarray     # per free body xy displacement
     rmsd: float
-    trace: list = field(default_factory=list)
+    trace: list = field(default_factory=list)   # (scale, contact rows, penetrating pairs, contact slack, DSL slack)
+    notes: list = field(default_factory=list)   # what the solver could not do as asked
+    relaxed_steps: int = 0                      # steps at which a DSL row was not met by more than SLACK_EPS
+
+
+def _validate_spec(spec: RepairSpec) -> None:
+    for key in ("d_hat", "ds_max", "s_min", "max_yaw_step", "max_xy_step"):
+        v = getattr(spec, key)
+        if isinstance(v, (bool, np.bool_)) or not isinstance(v, (int, float, np.integer, np.floating)) or not math.isfinite(v):
+            raise ValueError(f"{key} must be a finite number, got {v!r}")
+    if spec.d_hat < 0.0:
+        raise ValueError(f"d_hat must be non-negative, got {spec.d_hat}")
+    if not 0.0 < spec.s_min <= 1.0:
+        raise ValueError(f"s_min must lie in (0, 1], got {spec.s_min}")
+    if not 0.0 < spec.ds_max <= 1.0:
+        raise ValueError(f"ds_max must lie in (0, 1], got {spec.ds_max}")
+    if spec.max_xy_step <= 0.0 or spec.max_yaw_step <= 0.0:
+        raise ValueError("max_xy_step and max_yaw_step must be positive")
+    if isinstance(spec.tail_iters, bool) or not isinstance(spec.tail_iters, (int, np.integer)) or spec.tail_iters < 0:
+        raise ValueError(f"tail_iters must be a non-negative integer, got {spec.tail_iters!r}")
+    if (1.0 - spec.s_min) / spec.ds_max + spec.tail_iters > 100000:
+        raise ValueError("more than 100000 steps requested; raise ds_max or lower tail_iters")
+
+
+def _qp_solved(info) -> bool:
+    """OSQP reports success as status_val 1 (solved) or 2 (solved inaccurate); the status text
+    has a space in it ('solved inaccurate'), so the numeric code is the reliable test."""
+    sv = getattr(info, "status_val", None)
+    if sv is not None:
+        return int(sv) in (1, 2)
+    return str(getattr(info, "status", "")).replace("_", " ").strip() in ("solved", "solved inaccurate")
+
+
+def _qp_infeasible(info) -> bool:
+    """OSQP status 3 / -3: primal infeasible (inaccurate)."""
+    sv = getattr(info, "status_val", None)
+    if sv is not None:
+        return int(sv) in (3, -3)
+    return "primal infeasible" in str(getattr(info, "status", "")).replace("_", " ")
 
 
 def _is_support_pair(scene: Scene, i: int, j: int, spec: RepairSpec) -> bool:
@@ -156,10 +210,10 @@ def _footprint_overlap(scene: Scene, i: int, j: int, nrm: np.ndarray) -> float:
     return max(0.0, float(min(pi.max(), pj.max()) - max(pi.min(), pj.min())))
 
 
-def _scaled_pairs(st: State, spec: RepairSpec):
+def _scaled_pairs(st: State, spec: RepairSpec, ds: float):
     """Contact candidates with free bodies scaled by s and fixed bodies at full size."""
     sc = st.scene
-    # Temporarily scale free bodies' vertices for detection.
+    # Temporarily scale free bodies' vertices for detection (arrays are rebound, not edited).
     saved = []
     for k in st.free:
         b = sc.bodies[k]
@@ -167,7 +221,7 @@ def _scaled_pairs(st: State, spec: RepairSpec):
         b.verts = b.verts * st.scale
     try:
         # every pair that can activate within one scale step: d_hat + ds * (full-scale extents)
-        pre = spec.d_hat + spec.ds_max * 2.0 * max((b.diag / max(st.scale, 1e-9) for b in sc.free()), default=0.0)
+        pre = spec.d_hat + ds * 2.0 * max((b.diag / max(st.scale, 1e-9) for b in sc.free()), default=0.0)
         pairs = pair_signed_distances(sc.bodies, scale=1.0, prefilter=pre)
     finally:
         for k, v in zip(st.free, saved):
@@ -175,9 +229,81 @@ def _scaled_pairs(st: State, spec: RepairSpec):
     return pairs
 
 
+def _solve_qp(n, contact_rows, dsl_rows, elastic_contacts, bounded, cap, yaw_cap, pd_x, q_x, verbose, scale):
+    """One step QP over x = (dx, dy, dyaw per free body) plus one slack per elastic row.
+
+    contact_rows: [(entries, rhs)] with a.x >= rhs;  dsl_rows: [(entries, lo, hi)]; `bounded`
+    puts the trust region into the problem (the continuation always does). Returns (status,
+    step (n, 3), max contact slack, max DSL slack); status 1 = solved, -1 = failed, -2 = primal
+    infeasible (only possible while the contacts are hard)."""
+    rows, cols, data, lo, hi = [], [], [], [], []
+    r = 0
+    nx = 3 * n
+    slack = []            # (row index, sign, penalty) for elastic rows
+
+    def add_row(entries, l, h, penalty):
+        nonlocal r
+        for col, val in entries:
+            rows.append(r); cols.append(col); data.append(val)
+        if penalty is not None:
+            slack.append((r, 1.0 if h == np.inf else -1.0, penalty))
+        lo.append(l); hi.append(h); r += 1
+
+    for entries, rhs in contact_rows:
+        add_row(entries, rhs, np.inf, RHO_CONTACT if elastic_contacts else None)
+    n_contact_slack = len(slack)
+    for entries, l, h in dsl_rows:
+        # one elastic row per finite bound; a two-sided row (a region) becomes two, so a body wider
+        # than its region still gives a valid problem whose slack reports the shortfall
+        if l > -np.inf:
+            add_row(entries, l, np.inf, RHO_DSL)
+        if h < np.inf:
+            add_row(entries, -np.inf, h, RHO_DSL)
+    n_slack = len(slack)
+    # The slack of a row with penalty rho enters as sigma = sqrt(rho) s, so that its cost is
+    # sigma^2 / 2 and P stays near unit diagonal: a.x + sigma / sqrt(rho) >= lo  |  a.x - sigma / sqrt(rho) <= hi.
+    scale_s = np.array([math.sqrt(pen) for _, _, pen in slack])
+    for k, (row, sign, _) in enumerate(slack):
+        rows.append(row); cols.append(nx + k); data.append(sign / scale_s[k])
+    for k in range(n_slack):                       # sigma >= 0
+        rows.append(r); cols.append(nx + k); data.append(1.0); lo.append(0.0); hi.append(np.inf); r += 1
+    for i in range(n if bounded else 0):           # trust regions, inside the problem
+        for ax in (0, 1):
+            rows.append(r); cols.append(3 * i + ax); data.append(1.0); lo.append(-cap); hi.append(cap); r += 1
+        rows.append(r); cols.append(3 * i + 2); data.append(1.0); lo.append(-yaw_cap); hi.append(yaw_cap); r += 1
+    A = sp.csc_matrix((data, (rows, cols)), shape=(r, nx + n_slack))
+    P = sp.diags(list(pd_x) + [1.0] * n_slack, format="csc")
+    q = np.concatenate([q_x, np.zeros(n_slack)])
+    try:
+        solver = osqp.OSQP()
+        # a tail step with a few hundred program rows can need more than OSQP's default 4000
+        # iterations to reach 1e-6; the cap is generous because a failed step applies nothing
+        solver.setup(P, q, A, np.asarray(lo), np.asarray(hi), verbose=False, eps_abs=1e-6, eps_rel=1e-6,
+                     max_iter=50000, polishing=True)
+        res = solver.solve(raise_error=False)      # an infeasible problem is a status, not an exception
+    except TypeError:
+        raise                     # a wrong call into the solver library is a bug, not a failed step
+    except Exception as exc:  # the solver rejected the data: a failed step, nothing applied
+        if verbose:
+            print(f"[repair] QP setup failed at s={scale:.3f}: {type(exc).__name__}: {exc}")
+        return -1, None, 0.0, 0.0
+    if _qp_infeasible(res.info) and not elastic_contacts:
+        return -2, None, 0.0, 0.0
+    if not _qp_solved(res.info) or res.x is None or not np.all(np.isfinite(res.x)):
+        if verbose:
+            print(f"[repair] QP {res.info.status} at s={scale:.3f} rows={r}")
+        return -1, None, 0.0, 0.0
+    x = np.asarray(res.x, dtype=np.float64)
+    s_all = np.maximum(x[nx:], 0.0) / scale_s if n_slack else np.zeros(0)
+    c_sl = float(s_all[:n_contact_slack].max()) if n_contact_slack else 0.0
+    d_sl = float(s_all[n_contact_slack:].max()) if n_slack > n_contact_slack else 0.0
+    return 1, x[:nx].reshape(n, 3), c_sl, d_sl
+
+
 def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_step=None) -> RepairResult:
     """on_step(state): optional hook called after every accepted step with the bodies posed at the
     step's scale and tilt (for trajectory recording / visualization)."""
+    _validate_spec(spec)
     up = scene.up
     free = [k for k, b in enumerate(scene.bodies) if not b.fixed]
     var = {k: 3 * i for i, k in enumerate(free)}
@@ -197,14 +323,20 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
     st = State(scene, free, var, xy, yaw, roll, pitch, spec.s_min, 1.0)
 
     # Penetration before repair, at full scale and original poses.
-    pen_before = sum(1 for *_, s, _n, _a, _b in [(p[0], p[1], p[2], p[3], p[4], p[5]) for p in pair_signed_distances(scene.bodies)] if s < 0.0)
+    pen_before = sum(1 for p in pair_signed_distances(scene.bodies) if p[2] < 0.0)
 
     persistent = {}      # (i, j) -> consecutive tail iterations still penetrating
+    notes = []
+    contact_relaxed = 0
 
-    def solve_step(tail: bool):
+    def solve_step(tail: bool, ds: float):
+        """Returns (contact rows, penetrating pairs now, status, contact slack, DSL slack);
+        status 1 = step applied, 0 = nothing to do, -1 = the QP failed and nothing was applied."""
+        nonlocal contact_relaxed
         st.tilt = 0.0 if tail else tilt_schedule(st.scale, spec.s_min)
         _pose_bodies(st, spec)
-        pairs = _scaled_pairs(st, spec)
+        ds = 0.0 if tail else ds
+        pairs = _scaled_pairs(st, spec, ds if not tail else spec.ds_max)
         if tail:
             now = {(i, j) for (i, j, signed, *_) in pairs if signed < 0.0}
             for key in list(persistent):
@@ -212,9 +344,7 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
                     del persistent[key]
             for key in now:
                 persistent[key] = persistent.get(key, 0) + 1
-        ds = 0.0 if tail else spec.ds_max
-        rows, cols, data, lo, hi = [], [], [], [], []
-        r = 0
+        contact_rows = []
         pen_now = 0
         for (i, j, signed, nrm, wi, wj) in pairs:
             if signed < 0.0:
@@ -255,29 +385,17 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
                         entries.append((col, val))
             if not entries:
                 continue   # no in-plane handle on this pair: nothing the QP can do
-            for col, val in entries:
-                rows.append(r); cols.append(col); data.append(val)
-            lo.append(rhs); hi.append(np.inf); r += 1
-        n_contact = r
-        # DSL rows.
-        extra = spec.rows_fn(st) if spec.rows_fn is not None else []
-        for coeffs, l, h in extra:
-            any_col = False
-            for (body, v), val in coeffs.items():
-                if scene.bodies[body].fixed or abs(val) < 1e-12:
-                    continue
-                rows.append(r); cols.append(var[body] + {"x": 0, "y": 1, "yaw": 2}[v]); data.append(val); any_col = True
-            if any_col:
-                lo.append(l); hi.append(h); r += 1
-        if r == 0:
-            return 0, pen_now, 0
-        # Yaw trust region.
-        for i in range(n):
-            rows.append(r); cols.append(3 * i + 2); data.append(1.0)
-            lo.append(-spec.max_yaw_step); hi.append(spec.max_yaw_step); r += 1
-        A = sp.csc_matrix((data, (rows, cols)), shape=(r, 3 * n))
-        pd = []
-        q = np.zeros(3 * n)
+            contact_rows.append((entries, rhs))
+        n_contact = len(contact_rows)
+        dsl_rows = []
+        for coeffs, l, h in (spec.rows_fn(st) if spec.rows_fn is not None else []):
+            ent = [(var[body] + {"x": 0, "y": 1, "yaw": 2}[v], val) for (body, v), val in coeffs.items()
+                   if not scene.bodies[body].fixed and abs(val) >= 1e-12]
+            if ent:
+                dsl_rows.append((ent, l, h))
+        if not contact_rows and not dsl_rows and not spec.prefer:
+            return 0, pen_now, 0, 0.0, 0.0
+        pd_x, q_x = [], np.zeros(3 * n)
         for i, k in enumerate(free):
             b = scene.bodies[k]
             yw = spec.yaw_weight.get(b.name, max(b.extent_along(np.array([1.0, 0, 0])), b.extent_along(np.array([0, 1.0, 0]))) ** 2)
@@ -285,65 +403,59 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
             if b.name in spec.prefer:
                 tgt, w = spec.prefer[b.name]
                 wx += w
-                q[3 * i:3 * i + 2] += w * (xy[i] - np.asarray(tgt))
-            pd.extend([wx, wx, yw])
-        P = sp.diags(pd, format="csc")
-        solver = osqp.OSQP()
-        solver.setup(P, q, A, np.asarray(lo), np.asarray(hi), verbose=False, eps_abs=1e-6, eps_rel=1e-6,
-                     max_iter=8000, polish=True)
-        res = solver.solve()
-        if res.info.status not in ("solved", "solved_inaccurate") and r > n_contact + n:
-            # DSL rows conflict with the contacts at this step: keep the contacts only,
-            # so inflation never proceeds with unresolved penetration; the predicates
-            # report the DSL violation at the end.
-            keep = [k for k in range(len(rows)) if rows[k] < n_contact or rows[k] >= r - n]
-            rows2 = [rows[k] for k in keep]; cols2 = [cols[k] for k in keep]; data2 = [data[k] for k in keep]
-            remap = {}
-            for rr in sorted(set(rows2)):
-                remap[rr] = len(remap)
-            rows2 = [remap[rr] for rr in rows2]
-            lo2 = [lo[rr] for rr in sorted(remap)]; hi2 = [hi[rr] for rr in sorted(remap)]
-            A2 = sp.csc_matrix((data2, (rows2, cols2)), shape=(len(remap), 3 * n))
-            solver = osqp.OSQP(); solver.setup(P, q, A2, np.asarray(lo2), np.asarray(hi2), verbose=False,
-                                                eps_abs=1e-6, eps_rel=1e-6, max_iter=8000, polish=True)
-            res = solver.solve()
-            if verbose:
-                print(f"[repair] DSL rows dropped at s={st.scale:.3f}: {res.info.status}")
-        if res.info.status not in ("solved", "solved_inaccurate"):
-            if verbose:
-                print(f"[repair] QP {res.info.status} at s={st.scale:.3f} rows={r}")
-            return n_contact, pen_now, -1
-        step = res.x.reshape(n, 3)
+                q_x[3 * i:3 * i + 2] += w * (xy[i] - np.asarray(tgt))
+            pd_x.extend([wx, wx, yw])
         cap = spec.max_xy_step * (0.6 if tail else 1.0)
+        status, step, c_sl, d_sl = _solve_qp(n, contact_rows, dsl_rows, False, True, cap, spec.max_yaw_step, pd_x, q_x, verbose, st.scale)
+        if status == -2:
+            # the contacts cannot all be met inside this step's trust region: serve them alone,
+            # elastically, as far as the region allows; the program rows return at the next step
+            status, step, c_sl, d_sl = _solve_qp(n, contact_rows, [], True, True, cap, spec.max_yaw_step, pd_x, q_x, verbose, st.scale)
+            if status == 1:
+                contact_relaxed += 1
+                d_sl = math.inf          # every program row was set aside for this step
+        if status != 1:
+            return n_contact, pen_now, -1, 0.0, 0.0
         for i in range(n):
-            d = step[i, :2]
-            nn = float(np.linalg.norm(d))
-            if nn > cap:
-                d = d * (cap / nn)
-            xy[i] += d
+            xy[i] += step[i, :2]
             yaw[i] += float(step[i, 2])
-        return n_contact, pen_now, 1
+        return n_contact, pen_now, 1, c_sl, d_sl
 
     trace = []
     steps = 0
+    relaxed = 0
     s = spec.s_min
+    ds = spec.ds_max
+    failures = 0
     while s < 1.0 - 1e-12:
         st.scale = s
-        n_rows, pen_now, status = solve_step(tail=False)
-        trace.append((s, n_rows, pen_now))
+        n_rows, pen_now, status, c_sl, d_sl = solve_step(tail=False, ds=ds)
         steps += 1
+        if status == -1:
+            failures += 1
+            if failures <= MAX_STEP_FAILURES:
+                ds *= 0.5      # nothing was applied: retry this scale with a shorter look-ahead
+                continue
+            notes.append(f"continuation stopped at scale {s:.3f}: the step QP failed {failures} times")
+            break
+        failures = 0
+        trace.append((s, n_rows, pen_now, c_sl, d_sl))
+        if d_sl > SLACK_EPS:
+            relaxed += 1
         if on_step is not None:
             _pose_bodies(st, spec); on_step(st)
-        s = min(1.0, s + spec.ds_max)
+        s = min(1.0, s + ds)
+        ds = spec.ds_max
     st.scale = 1.0
     st.tilt = 0.0
-    pen_now = None
     idle = 0
     for _ in range(spec.tail_iters):
-        n_rows, pen_now, status = solve_step(tail=True)
+        n_rows, pen_now, status, c_sl, d_sl = solve_step(tail=True, ds=0.0)
         steps += 1
-        trace.append((1.0, n_rows, pen_now))
-        idle = idle + 1 if (n_rows == 0 or status == -1) else 0
+        trace.append((1.0, n_rows, pen_now, c_sl, d_sl))
+        if d_sl > SLACK_EPS:
+            relaxed += 1
+        idle = idle + 1 if status in (0, -1) else 0     # nothing to solve, or nothing applied
         if idle >= 3:
             if verbose:
                 print("[repair] tail: no usable rows for 3 iterations, stopping")
@@ -355,21 +467,24 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
         if on_step is not None:
             on_step(st)
         pen_check = sum(1 for p in pair_signed_distances(scene.bodies) if p[2] < 0.0)
-        pen_now = pen_check
         if pen_check == 0 and _rows_satisfied(st, spec, tol=1e-4) and status != -1:
             break
     _pose_bodies(st, spec)
     pen_after = sum(1 for p in pair_signed_distances(scene.bodies) if p[2] < 0.0)
     disp = xy - xy0
     rmsd = float(np.sqrt(np.mean(np.sum(disp ** 2, axis=1)))) if n else 0.0
+    if relaxed:
+        notes.append(f"a program row was not met within the step at {relaxed} step(s) (a contact in the way, or the step's trust region); the predicates report the outcome")
+    if contact_relaxed:
+        notes.append(f"the contacts exceeded the trust region at {contact_relaxed} step(s); those steps served the contacts alone")
     if verbose:
         print(f"[repair] pen {pen_before} -> {pen_after}, steps={steps}, rmsd={rmsd:.4f}")
-    return RepairResult(scene, pen_before, pen_after, steps, disp, rmsd, trace)
+    return RepairResult(scene, pen_before, pen_after, steps, disp, rmsd, trace, notes, relaxed)
 
 
 def reseat_on_supports(scene: Scene, spec: RepairSpec) -> None:
     """Re-seat every free body on its declared support using its current (full-resolution)
-    mesh and the support height under its FINAL position; call after repair ran on proxies."""
+    mesh and the support height under its final position; call after repair ran on proxies."""
     for b in scene.free():
         sup = spec.support_of.get(b.name)
         if sup is None:

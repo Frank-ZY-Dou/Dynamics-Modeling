@@ -7,9 +7,9 @@
  "min_score_after": 0.0,
  "contained_after": [],
  "floating_after": [],
- "rmsd_xy": 0.33272861440653756,
- "steps": 34,
- "time_s": 24.44,
+ "rmsd_xy": 0.3331254985320989,
+ "steps": 44,
+ "time_s": 31.02,
  "predicates": [
   [
    "on_support(pineapple_slices_can,table)",
@@ -289,7 +289,7 @@
   [
    "within(hammer_8,table.top)",
    true,
-   0.0
+   0.000807099481844431
   ],
   [
    "within(peas_and_carrots,table.top)",
@@ -304,7 +304,7 @@
   [
    "within(bin_b02,table.top)",
    true,
-   0.0
+   0.0006570811519192032
   ],
   [
    "within(orange_01,table.top)",
@@ -314,22 +314,22 @@
   [
    "place(pitcher)",
    true,
-   0.00014062500000000533
+   0.0
   ],
   [
    "place(bowl)",
    true,
-   0.012678679346677445
+   0.0032705518227384056
   ],
   [
    "place(ladle)",
    true,
-   0.005215595186006002
+   0.0032647063407607183
   ],
   [
    "place(spoon_big)",
    true,
-   0.00014062553077683634
+   8.596390512924525e-07
   ],
   [
    "place(orange_02)",
@@ -384,17 +384,17 @@
   [
    "place(plasticjerrican_a01)",
    true,
-   0.008415248853788053
+   0.008203058186891017
   ],
   [
    "place(hammer_8)",
    false,
-   0.07286654276525655
+   0.07300434600845908
   ],
   [
    "place(bin_b02)",
    true,
-   0.037288344164202805
+   0.0370259980933725
   ],
   [
    "place(remote_control)",
@@ -404,7 +404,7 @@
   [
    "place(spatula_17)",
    true,
-   0.0020765493340130954
+   0.002070385048213231
   ],
   [
    "place(raisin_box)",
@@ -414,17 +414,17 @@
   [
    "in_front_of(bowl,pitcher,gap=0.12)",
    true,
-   0.07348013505322021
+   0.07881471937039203
   ],
   [
    "near(ladle,bowl,r=0.22)",
    true,
-   0.21599677063694264
+   0.20684770979118217
   ],
   [
    "near(spoon_big,bowl,r=0.22)",
    true,
-   0.14949901795583045
+   0.1569570780010682
   ],
   [
    "near(lime01,orange_02,r=0.12)",
@@ -444,70 +444,75 @@
   [
    "left_of(orange_02,bowl,gap=0.18)",
    true,
-   0.14921172934874594
+   0.15695178428350398
   ],
   [
    "in_front_of(pineapple_slices_can,bowl,gap=0.12)",
    true,
-   0.06666048994677987
+   0.06118528062960804
   ],
   [
    "in_front_of(tomato_sauce_can,bowl,gap=0.12)",
    true,
-   0.06666048994677987
+   0.06118528062960804
   ],
   [
    "in_front_of(peas_and_carrots,bowl,gap=0.12)",
    true,
-   0.06666048994677987
+   0.06118528062960804
   ],
   [
    "in_front_of(bbq_sauce_bottle,bowl,gap=0.12)",
    true,
-   0.06666048994677987
+   0.06118528062960804
   ],
   [
    "in_front_of(whitepackerbottle_a01,bowl,gap=0.12)",
    true,
-   0.06666048994677987
+   0.06118528062960804
   ],
   [
    "in_front_of(whitepackerbottle_a02,bowl,gap=0.12)",
    true,
-   0.06666048994677987
+   0.06118528062960804
   ],
   [
    "in_front_of(plasticjerrican_a01,bowl,gap=0.12)",
    true,
-   0.028530948877507956
+   0.03747204744999122
   ],
   [
    "right_of(hammer_8,bowl,gap=0.22)",
    true,
-   0.11794993850431598
+   0.11007169929930419
   ],
   [
    "right_of(bin_b02,bowl,gap=0.25)",
    true,
-   0.14350964654166437
+   0.13655943257113362
   ],
   [
    "right_of(remote_control,bowl,gap=0.22)",
    true,
-   0.19078827065125412
+   0.18304821571649607
   ],
   [
    "right_of(spatula_17,bowl,gap=0.12)",
    true,
-   0.040313679028720684
+   0.03257507130382492
   ]
  ],
  "failed_predicates": [
   "place(hammer_8)"
  ],
+ "clearance": null,
  "notes": [
   "RoboLab frame: the robot at -x looks along +x; 'in front of X' means larger x than X and 'left of X' means larger y. So the far edge of the table ('the back') is larger x: the back row is in_front_of the bowl.",
   "targets were chosen from the table rectangle x[0.20, 0.90] y[-0.50, 0.50] and the listed object sizes; the continuation resolves any residual overlap"
+ ],
+ "solver_notes": [
+  "a program row was not met within the step at 17 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+  "the contacts exceeded the trust region at 4 step(s); those steps served the contacts alone"
  ],
  "dropped_children": [],
  "provenance": {
@@ -852,7 +857,7 @@
    }
   },
   "software": {
-   "git": "6bc8510daf75",
+   "git": "534bc9f8fc81",
    "python": "3.13.11",
    "numpy": "2.4.0",
    "trimesh": "4.11.5",
@@ -861,11 +866,13 @@
    "mujoco": "3.10.0",
    "pxr": null
   },
-  "time": "2026-09-08T19:05:42"
+  "time": "2026-09-09T05:06:39"
  },
  "written": "results/videos/pile_n20/agent_round1_repaired.json",
+ "written_sha256": "5e995999646aecc9",
  "g5": {
   "scene": "results/videos/pile_n20/agent_round1_repaired.json",
+  "program": "results/videos/pile_n20/program_round1.json",
   "seconds": 2.0,
   "supports": {
    "table": 4.004687026437637e-09
@@ -874,14 +881,18 @@
   "free_fall_bound_m_s": 0.0,
   "hull": {
    "peak_speed": 0.893,
-   "peak_disp": 0.0949,
+   "peak_disp": 0.0948,
+   "peak_tilt_deg": 81.58,
    "left_support": [],
+   "steps": 1000,
+   "sim_seconds": 2.0,
+   "engine_warnings": {},
    "per_body_peak_speed": {
     "pineapple_slices_can": 0.032,
     "bbq_sauce_bottle": 0.048,
     "raisin_box": 0.06,
     "tomato_sauce_can": 0.027,
-    "ladle": 0.372,
+    "ladle": 0.398,
     "lime01": 0.099,
     "orange_02": 0.114,
     "bowl": 0.027,
@@ -891,48 +902,75 @@
     "spoon_big": 0.121,
     "whitepackerbottle_a02": 0.006,
     "whitepackerbottle_a01": 0.011,
-    "plasticjerrican_a01": 0.005,
-    "hammer_8": 0.103,
+    "plasticjerrican_a01": 0.006,
+    "hammer_8": 0.097,
     "peas_and_carrots": 0.058,
-    "spatula_17": 0.126,
-    "bin_b02": 0.028,
+    "spatula_17": 0.078,
+    "bin_b02": 0.014,
     "orange_01": 0.168
+   },
+   "per_body_peak_tilt_deg": {
+    "pineapple_slices_can": 0.47,
+    "bbq_sauce_bottle": 1.1,
+    "raisin_box": 1.31,
+    "tomato_sauce_can": 0.36,
+    "ladle": 8.16,
+    "lime01": 38.43,
+    "orange_02": 72.73,
+    "bowl": 0.16,
+    "remote_control": 68.59,
+    "pitcher": 0.22,
+    "lemon_02": 5.6,
+    "spoon_big": 3.48,
+    "whitepackerbottle_a02": 0.08,
+    "whitepackerbottle_a01": 0.21,
+    "plasticjerrican_a01": 0.11,
+    "hammer_8": 0.9,
+    "peas_and_carrots": 1.23,
+    "spatula_17": 4.62,
+    "bin_b02": 0.12,
+    "orange_01": 81.58
    },
    "final_disp": {
     "pineapple_slices_can": 0.0004,
     "bbq_sauce_bottle": 0.0012,
     "raisin_box": 0.0009,
     "tomato_sauce_can": 0.0003,
-    "ladle": 0.0192,
-    "lime01": 0.0099,
-    "orange_02": 0.014,
+    "ladle": 0.0184,
+    "lime01": 0.0166,
+    "orange_02": 0.0234,
     "bowl": 0.0002,
-    "remote_control": 0.0875,
+    "remote_control": 0.0859,
     "pitcher": 0.0003,
     "lemon_02": 0.0016,
-    "spoon_big": 0.0042,
+    "spoon_big": 0.007,
     "whitepackerbottle_a02": 0.0002,
     "whitepackerbottle_a01": 0.0001,
     "plasticjerrican_a01": 0.0001,
-    "hammer_8": 0.0029,
-    "peas_and_carrots": 0.0007,
-    "spatula_17": 0.0026,
+    "hammer_8": 0.0009,
+    "peas_and_carrots": 0.0006,
+    "spatula_17": 0.0016,
     "bin_b02": 0.0001,
     "orange_01": 0.0322
    },
+   "hull_fallback": [],
    "faster_than_free_fall": true,
    "pass": true
   },
   "coacd": {
    "peak_speed": 0.991,
-   "peak_disp": 0.11,
+   "peak_disp": 0.1102,
+   "peak_tilt_deg": 79.07,
    "left_support": [],
+   "steps": 1000,
+   "sim_seconds": 2.0,
+   "engine_warnings": {},
    "per_body_peak_speed": {
     "pineapple_slices_can": 0.005,
     "bbq_sauce_bottle": 0.05,
     "raisin_box": 0.013,
     "tomato_sauce_can": 0.006,
-    "ladle": 0.317,
+    "ladle": 0.332,
     "lime01": 0.02,
     "orange_02": 0.048,
     "bowl": 0.013,
@@ -949,16 +987,38 @@
     "bin_b02": 0.017,
     "orange_01": 0.156
    },
+   "per_body_peak_tilt_deg": {
+    "pineapple_slices_can": 0.27,
+    "bbq_sauce_bottle": 1.85,
+    "raisin_box": 0.78,
+    "tomato_sauce_can": 0.15,
+    "ladle": 7.88,
+    "lime01": 1.3,
+    "orange_02": 9.78,
+    "bowl": 0.12,
+    "remote_control": 79.07,
+    "pitcher": 0.2,
+    "lemon_02": 5.89,
+    "spoon_big": 0.25,
+    "whitepackerbottle_a02": 0.06,
+    "whitepackerbottle_a01": 0.06,
+    "plasticjerrican_a01": 0.01,
+    "hammer_8": 0.54,
+    "peas_and_carrots": 0.91,
+    "spatula_17": 0.3,
+    "bin_b02": 0.0,
+    "orange_01": 76.75
+   },
    "final_disp": {
     "pineapple_slices_can": 0.0002,
     "bbq_sauce_bottle": 0.0013,
     "raisin_box": 0.0008,
     "tomato_sauce_can": 0.0003,
-    "ladle": 0.0177,
+    "ladle": 0.0171,
     "lime01": 0.0006,
     "orange_02": 0.0028,
     "bowl": 0.0007,
-    "remote_control": 0.102,
+    "remote_control": 0.1015,
     "pitcher": 0.0007,
     "lemon_02": 0.0016,
     "spoon_big": 0.0006,
@@ -967,10 +1027,11 @@
     "plasticjerrican_a01": 0.0011,
     "hammer_8": 0.0007,
     "peas_and_carrots": 0.0003,
-    "spatula_17": 0.0011,
+    "spatula_17": 0.001,
     "bin_b02": 0.0009,
     "orange_01": 0.0312
    },
+   "hull_fallback": [],
    "faster_than_free_fall": true,
    "pass": true
   },
@@ -980,5 +1041,6 @@
    "d_max": 0.15,
    "source": "program gate"
   }
- }
+ },
+ "ready": false
 }

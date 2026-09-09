@@ -107,7 +107,22 @@ def load_scene_usda(path, fixture_key: str = "fixtures", world_prim: str | None 
                     support_names=("table", "franka_table", "island", "counter")) -> Scene:
     from pxr import Usd, UsdGeom
     path = str(path)
-    stage = Usd.Stage.Open(path)
+    try:
+        stage = Usd.Stage.Open(path)
+    except Exception as e:  # pxr reports a missing or unreadable file as an exception
+        raise ValueError(f"cannot open USD stage {path}: {e}") from e
+    if stage is None:
+        raise ValueError(f"cannot open USD stage {path}")
+    # The scene layer works in metres, Z up. A stage that says otherwise is refused rather than
+    # read as if it were; a stage that says nothing is taken as metres, Z up (RoboLab authors both).
+    # (GetMetadata returns the schema fallback, centimetres and Y up, for a stage that authors
+    # nothing, so only authored values are judged.)
+    mpu = stage.GetMetadata("metersPerUnit") if stage.HasAuthoredMetadata("metersPerUnit") else None
+    if mpu is not None and abs(float(mpu) - 1.0) > 1e-9:
+        raise ValueError(f"{path}: stage metersPerUnit={mpu}; only stages authored in metres are supported")
+    up_axis = stage.GetMetadata("upAxis") if stage.HasAuthoredMetadata("upAxis") else None
+    if up_axis is not None and str(up_axis) != "Z":
+        raise ValueError(f"{path}: stage upAxis={up_axis}; only Z-up stages are supported")
     root = stage.GetPrimAtPath(world_prim) if world_prim else stage.GetDefaultPrim()
     if not root or not root.IsValid():
         root = stage.GetPseudoRoot().GetChildren()[0]
@@ -171,7 +186,8 @@ def load_scene_usda(path, fixture_key: str = "fixtures", world_prim: str | None 
     if dropped:
         import warnings
         warnings.warn(f"{path}: {len(dropped)} referenced children without geometry (unresolved payloads?): {dropped}")
-    return Scene(bodies, meta={"path": path, "root": str(root.GetPath()), "dropped": dropped})
+    return Scene(bodies, meta={"path": path, "root": str(root.GetPath()), "dropped": dropped,
+                               "meters_per_unit": None if mpu is None else float(mpu), "up_axis": None if up_axis is None else str(up_axis)})
 
 
 def _quat_wxyz(R: np.ndarray):

@@ -105,8 +105,13 @@ def _geom_mesh(model, g):
         m = trimesh.creation.box(extents=(2 * sz[0], 2 * sz[1], 2 * sz[2]))
     elif t == mujoco.mjtGeom.mjGEOM_SPHERE:
         m = trimesh.creation.icosphere(subdivisions=2, radius=float(sz[0]))
-    elif t in (mujoco.mjtGeom.mjGEOM_CYLINDER, mujoco.mjtGeom.mjGEOM_CAPSULE):
+    elif t == mujoco.mjtGeom.mjGEOM_CYLINDER:
         m = trimesh.creation.cylinder(radius=float(sz[0]), height=2 * float(sz[1]))
+    elif t == mujoco.mjtGeom.mjGEOM_CAPSULE:
+        # MuJoCo: size = (radius, half-length of the cylindrical part); the hemispherical caps
+        # add a radius at each end, so the full length is 2 (h + r). trimesh's capsule takes the
+        # cylindrical height and is centred at the origin, like the MuJoCo geom frame.
+        m = trimesh.creation.capsule(radius=float(sz[0]), height=2 * float(sz[1]))
     elif t == mujoco.mjtGeom.mjGEOM_ELLIPSOID:
         m = trimesh.creation.icosphere(subdivisions=2, radius=1.0); m.apply_scale(sz[:3])
     else:

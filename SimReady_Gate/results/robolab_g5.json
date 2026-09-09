@@ -5,14 +5,15 @@
   "pen_raw": 1,
   "pen_seated": 0,
   "pen_rep": 0,
-  "rmsd_xy": 0.031308825319970604,
-  "repair_s": 3.80391263961792,
+  "rmsd_xy": 0.03130782186229734,
+  "repair_s": 3.639137029647827,
   "raw_hull": {
    "vmax": 0.29176000020219944,
    "dmax": 0.015807216579882565,
    "left": [],
    "worst_body": "glasses",
    "worst_v": 0.29176000020219944,
+   "engine_warnings": {},
    "pass": true
   },
   "raw_coacd": {
@@ -21,6 +22,7 @@
    "left": [],
    "worst_body": "glasses",
    "worst_v": 0.19815415517748639,
+   "engine_warnings": {},
    "pass": true
   },
   "seated_hull": {
@@ -29,6 +31,7 @@
    "left": [],
    "worst_body": "glasses",
    "worst_v": 0.35510022152990445,
+   "engine_warnings": {},
    "pass": true
   },
   "seated_coacd": {
@@ -37,22 +40,25 @@
    "left": [],
    "worst_body": "glasses",
    "worst_v": 0.2593537533848387,
+   "engine_warnings": {},
    "pass": true
   },
   "rep_hull": {
-   "vmax": 0.3551002215299046,
-   "dmax": 0.022642096690263923,
+   "vmax": 0.35510022152990417,
+   "dmax": 0.022642096690263902,
    "left": [],
    "worst_body": "glasses",
-   "worst_v": 0.3551002215299046,
+   "worst_v": 0.35510022152990417,
+   "engine_warnings": {},
    "pass": true
   },
   "rep_coacd": {
    "vmax": 0.2593537533848386,
-   "dmax": 0.013490807926357259,
+   "dmax": 0.013490829773251918,
    "left": [],
    "worst_body": "glasses",
    "worst_v": 0.2593537533848386,
+   "engine_warnings": {},
    "pass": true
   }
  },
@@ -63,13 +69,14 @@
   "pen_seated": 0,
   "pen_rep": 0,
   "rmsd_xy": 0.0,
-  "repair_s": 3.3927602767944336,
+  "repair_s": 3.1053435802459717,
   "raw_hull": {
    "vmax": 1.8246599999999984,
    "dmax": 0.1830556810528791,
    "left": [],
    "worst_body": "utilityjug_a03",
    "worst_v": 1.8246599999999984,
+   "engine_warnings": {},
    "pass": false
   },
   "raw_coacd": {
@@ -78,6 +85,7 @@
    "left": [],
    "worst_body": "utilityjug_a03",
    "worst_v": 1.8246599999999977,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_hull": {
@@ -86,6 +94,7 @@
    "left": [],
    "worst_body": "remote_control",
    "worst_v": 1.0306941813394452,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_coacd": {
@@ -94,6 +103,7 @@
    "left": [],
    "worst_body": "remote_control",
    "worst_v": 1.034372896678536,
+   "engine_warnings": {},
    "pass": false
   },
   "rep_hull": {
@@ -102,6 +112,7 @@
    "left": [],
    "worst_body": "remote_control",
    "worst_v": 1.0306941813394452,
+   "engine_warnings": {},
    "pass": false
   },
   "rep_coacd": {
@@ -110,6 +121,7 @@
    "left": [],
    "worst_body": "remote_control",
    "worst_v": 1.034372896678536,
+   "engine_warnings": {},
    "pass": false
   }
  },
@@ -120,13 +132,14 @@
   "pen_seated": 0,
   "pen_rep": 0,
   "rmsd_xy": 0.015862529603580585,
-  "repair_s": 3.904345750808716,
+  "repair_s": 3.3421144485473633,
   "raw_hull": {
    "vmax": 1.2164399999999986,
    "dmax": 0.08359306383910317,
    "left": [],
    "worst_body": "bbq_sauce_bottle",
    "worst_v": 1.2164399999999986,
+   "engine_warnings": {},
    "pass": false
   },
   "raw_coacd": {
@@ -135,6 +148,7 @@
    "left": [],
    "worst_body": "bbq_sauce_bottle",
    "worst_v": 1.2164399999999993,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_hull": {
@@ -143,6 +157,7 @@
    "left": [],
    "worst_body": "raisin_box",
    "worst_v": 0.06045674803061791,
+   "engine_warnings": {},
    "pass": true
   },
   "seated_coacd": {
@@ -151,6 +166,7 @@
    "left": [],
    "worst_body": "bbq_sauce_bottle",
    "worst_v": 0.02346850368480956,
+   "engine_warnings": {},
    "pass": true
   },
   "rep_hull": {
@@ -159,6 +175,7 @@
    "left": [],
    "worst_body": "raisin_box",
    "worst_v": 0.060456748030618006,
+   "engine_warnings": {},
    "pass": true
   },
   "rep_coacd": {
@@ -167,6 +184,7 @@
    "left": [],
    "worst_body": "bbq_sauce_bottle",
    "worst_v": 0.02346850368480956,
+   "engine_warnings": {},
    "pass": true
   }
  },
@@ -176,14 +194,15 @@
   "pen_raw": 2,
   "pen_seated": 1,
   "pen_rep": 0,
-  "rmsd_xy": 0.16483979728400971,
-  "repair_s": 9.442237615585327,
+  "rmsd_xy": 0.16337112503485618,
+  "repair_s": 9.89113450050354,
   "raw_hull": {
    "vmax": 1.561664929384477,
    "dmax": 0.36049563197673823,
    "left": [],
    "worst_body": "milkjug_a02",
    "worst_v": 1.561664929384477,
+   "engine_warnings": {},
    "pass": false
   },
   "raw_coacd": {
@@ -192,6 +211,7 @@
    "left": [],
    "worst_body": "milkjug_a02",
    "worst_v": 1.4907180208169022,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_hull": {
@@ -200,6 +220,7 @@
    "left": [],
    "worst_body": "milkjug_a02",
    "worst_v": 1.0080594972026105,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_coacd": {
@@ -208,22 +229,25 @@
    "left": [],
    "worst_body": "milkjug_a02",
    "worst_v": 0.8705534008454667,
+   "engine_warnings": {},
    "pass": false
   },
   "rep_hull": {
-   "vmax": 0.3551001557675824,
-   "dmax": 0.022641455194490855,
+   "vmax": 0.3551001568400592,
+   "dmax": 0.02264146944895498,
    "left": [],
    "worst_body": "glasses",
-   "worst_v": 0.3551001557675824,
+   "worst_v": 0.3551001568400592,
+   "engine_warnings": {},
    "pass": true
   },
   "rep_coacd": {
-   "vmax": 0.2593540277249866,
-   "dmax": 0.013516059802664782,
+   "vmax": 0.2593540231820696,
+   "dmax": 0.013516059621771043,
    "left": [],
    "worst_body": "glasses",
-   "worst_v": 0.2593540277249866,
+   "worst_v": 0.2593540231820696,
+   "engine_warnings": {},
    "pass": true
   }
  },
@@ -234,13 +258,14 @@
   "pen_seated": 2,
   "pen_rep": 0,
   "rmsd_xy": 0.03249615030262521,
-  "repair_s": 4.6113739013671875,
+  "repair_s": 4.026158571243286,
   "raw_hull": {
    "vmax": 1.6284599999999987,
    "dmax": 0.3550220475484518,
    "left": [],
    "worst_body": "utilityjug_a03",
    "worst_v": 1.6284599999999987,
+   "engine_warnings": {},
    "pass": false
   },
   "raw_coacd": {
@@ -249,6 +274,7 @@
    "left": [],
    "worst_body": "utilityjug_a03",
    "worst_v": 1.608839999999998,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_hull": {
@@ -257,6 +283,7 @@
    "left": [],
    "worst_body": "remote_control",
    "worst_v": 1.0204470926027223,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_coacd": {
@@ -265,6 +292,7 @@
    "left": [],
    "worst_body": "remote_control",
    "worst_v": 1.0498076767010007,
+   "engine_warnings": {},
    "pass": false
   },
   "rep_hull": {
@@ -273,6 +301,7 @@
    "left": [],
    "worst_body": "remote_control",
    "worst_v": 1.0306941813394388,
+   "engine_warnings": {},
    "pass": false
   },
   "rep_coacd": {
@@ -281,6 +310,7 @@
    "left": [],
    "worst_body": "remote_control",
    "worst_v": 1.0343728966785046,
+   "engine_warnings": {},
    "pass": false
   }
  },
@@ -291,13 +321,14 @@
   "pen_seated": 0,
   "pen_rep": 0,
   "rmsd_xy": 0.017543344969133103,
-  "repair_s": 4.621328353881836,
+  "repair_s": 3.8755099773406982,
   "raw_hull": {
    "vmax": 1.2164399999999986,
    "dmax": 0.08359306383910317,
    "left": [],
    "worst_body": "bbq_sauce_bottle",
    "worst_v": 1.2164399999999986,
+   "engine_warnings": {},
    "pass": false
   },
   "raw_coacd": {
@@ -306,6 +337,7 @@
    "left": [],
    "worst_body": "bbq_sauce_bottle",
    "worst_v": 1.2164399999999993,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_hull": {
@@ -314,6 +346,7 @@
    "left": [],
    "worst_body": "ladle",
    "worst_v": 0.4119538048813919,
+   "engine_warnings": {},
    "pass": true
   },
   "seated_coacd": {
@@ -322,6 +355,7 @@
    "left": [],
    "worst_body": "ladle",
    "worst_v": 0.3320134269989517,
+   "engine_warnings": {},
    "pass": true
   },
   "rep_hull": {
@@ -330,6 +364,7 @@
    "left": [],
    "worst_body": "ladle",
    "worst_v": 0.4119538048813919,
+   "engine_warnings": {},
    "pass": true
   },
   "rep_coacd": {
@@ -338,6 +373,7 @@
    "left": [],
    "worst_body": "ladle",
    "worst_v": 0.3320134269989517,
+   "engine_warnings": {},
    "pass": true
   }
  },
@@ -347,14 +383,15 @@
   "pen_raw": 2,
   "pen_seated": 3,
   "pen_rep": 0,
-  "rmsd_xy": 0.09131495223815089,
-  "repair_s": 11.10011076927185,
+  "rmsd_xy": 0.09203309815468112,
+  "repair_s": 9.804809331893921,
   "raw_hull": {
    "vmax": 1.487060815915402,
    "dmax": 0.20766685231444196,
    "left": [],
    "worst_body": "birdhouse",
    "worst_v": 1.487060815915402,
+   "engine_warnings": {},
    "pass": false
   },
   "raw_coacd": {
@@ -363,6 +400,7 @@
    "left": [],
    "worst_body": "birdhouse",
    "worst_v": 1.4557131445069431,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_hull": {
@@ -371,6 +409,7 @@
    "left": [],
    "worst_body": "pomegranate01",
    "worst_v": 0.7978915512722965,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_coacd": {
@@ -379,22 +418,25 @@
    "left": [],
    "worst_body": "pomegranate01",
    "worst_v": 0.5311723538526538,
+   "engine_warnings": {},
    "pass": true
   },
   "rep_hull": {
-   "vmax": 0.3551002022276059,
-   "dmax": 0.05219196687671134,
+   "vmax": 0.29593847240414717,
+   "dmax": 0.052191966876712244,
    "left": [],
    "worst_body": "glasses",
-   "worst_v": 0.3551002022276059,
+   "worst_v": 0.29593847240414717,
+   "engine_warnings": {},
    "pass": true
   },
   "rep_coacd": {
-   "vmax": 0.25935383303250464,
+   "vmax": 0.21325695569399203,
    "dmax": 0.05267987214767903,
    "left": [],
    "worst_body": "glasses",
-   "worst_v": 0.25935383303250464,
+   "worst_v": 0.21325695569399203,
+   "engine_warnings": {},
    "pass": true
   }
  },
@@ -404,14 +446,15 @@
   "pen_raw": 1,
   "pen_seated": 2,
   "pen_rep": 0,
-  "rmsd_xy": 0.07875456157084605,
-  "repair_s": 5.473824739456177,
+  "rmsd_xy": 0.07852502022959623,
+  "repair_s": 4.795176029205322,
   "raw_hull": {
    "vmax": 1.775893903539242,
    "dmax": 0.3133394820243416,
    "left": [],
    "worst_body": "utilityjug_a03",
    "worst_v": 1.775893903539242,
+   "engine_warnings": {},
    "pass": false
   },
   "raw_coacd": {
@@ -420,6 +463,7 @@
    "left": [],
    "worst_body": "utilityjug_a03",
    "worst_v": 1.7724320691349476,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_hull": {
@@ -428,6 +472,7 @@
    "left": [],
    "worst_body": "mayonnaise_bottle",
    "worst_v": 1.2339787093305405,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_coacd": {
@@ -436,22 +481,25 @@
    "left": [],
    "worst_body": "remote_control",
    "worst_v": 1.034372896678514,
+   "engine_warnings": {},
    "pass": false
   },
   "rep_hull": {
-   "vmax": 0.8427227356441895,
-   "dmax": 0.09191378570893395,
+   "vmax": 0.8307236709376505,
+   "dmax": 0.08980163574199594,
    "left": [],
    "worst_body": "remote_control",
-   "worst_v": 0.8427227356441895,
+   "worst_v": 0.8307236709376505,
+   "engine_warnings": {},
    "pass": true
   },
   "rep_coacd": {
-   "vmax": 0.8158343963802309,
-   "dmax": 0.08710478581214685,
+   "vmax": 0.7998804850388378,
+   "dmax": 0.0857048617859127,
    "left": [],
    "worst_body": "remote_control",
-   "worst_v": 0.8158343963802309,
+   "worst_v": 0.7998804850388378,
+   "engine_warnings": {},
    "pass": true
   }
  },
@@ -461,14 +509,15 @@
   "pen_raw": 0,
   "pen_seated": 0,
   "pen_rep": 0,
-  "rmsd_xy": 0.03115819530659411,
-  "repair_s": 5.275714635848999,
+  "rmsd_xy": 0.031158195306594107,
+  "repair_s": 4.582388162612915,
   "raw_hull": {
    "vmax": 1.2164399999999986,
    "dmax": 0.08359306383910317,
    "left": [],
    "worst_body": "bbq_sauce_bottle",
    "worst_v": 1.2164399999999986,
+   "engine_warnings": {},
    "pass": false
   },
   "raw_coacd": {
@@ -477,6 +526,7 @@
    "left": [],
    "worst_body": "bbq_sauce_bottle",
    "worst_v": 1.2164399999999993,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_hull": {
@@ -485,6 +535,7 @@
    "left": [],
    "worst_body": "ladle",
    "worst_v": 0.4119538048813913,
+   "engine_warnings": {},
    "pass": true
   },
   "seated_coacd": {
@@ -493,6 +544,7 @@
    "left": [],
    "worst_body": "ladle",
    "worst_v": 0.332013426998952,
+   "engine_warnings": {},
    "pass": true
   },
   "rep_hull": {
@@ -501,6 +553,7 @@
    "left": [],
    "worst_body": "ladle",
    "worst_v": 0.4119538048813913,
+   "engine_warnings": {},
    "pass": true
   },
   "rep_coacd": {
@@ -509,6 +562,7 @@
    "left": [],
    "worst_body": "ladle",
    "worst_v": 0.332013426998952,
+   "engine_warnings": {},
    "pass": true
   }
  },
@@ -518,14 +572,15 @@
   "pen_raw": 3,
   "pen_seated": 7,
   "pen_rep": 0,
-  "rmsd_xy": 0.048841342292673354,
-  "repair_s": 15.605666637420654,
+  "rmsd_xy": 0.04869238762786954,
+  "repair_s": 13.74864673614502,
   "raw_hull": {
    "vmax": 1.474570735996521,
    "dmax": 0.2670087379482724,
    "left": [],
    "worst_body": "birdhouse",
    "worst_v": 1.474570735996521,
+   "engine_warnings": {},
    "pass": false
   },
   "raw_coacd": {
@@ -534,6 +589,7 @@
    "left": [],
    "worst_body": "birdhouse",
    "worst_v": 1.4234732302773352,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_hull": {
@@ -544,6 +600,7 @@
    ],
    "worst_body": "pomegranate01",
    "worst_v": 3.9709407149342275,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_coacd": {
@@ -552,22 +609,25 @@
    "left": [],
    "worst_body": "orange_01",
    "worst_v": 0.26499279183266916,
+   "engine_warnings": {},
    "pass": true
   },
   "rep_hull": {
    "vmax": 0.3551002215299045,
-   "dmax": 0.09056151726522073,
+   "dmax": 0.09066712844771498,
    "left": [],
    "worst_body": "glasses",
    "worst_v": 0.3551002215299045,
+   "engine_warnings": {},
    "pass": true
   },
   "rep_coacd": {
    "vmax": 0.2593537533848389,
-   "dmax": 0.052679969257432444,
+   "dmax": 0.057915571972092454,
    "left": [],
    "worst_body": "glasses",
    "worst_v": 0.2593537533848389,
+   "engine_warnings": {},
    "pass": true
   }
  },
@@ -577,8 +637,8 @@
   "pen_raw": 1,
   "pen_seated": 2,
   "pen_rep": 0,
-  "rmsd_xy": 0.039998007464618866,
-  "repair_s": 6.952413558959961,
+  "rmsd_xy": 0.04048417815606276,
+  "repair_s": 5.996975421905518,
   "raw_hull": {
    "vmax": 3.9632400000000176,
    "dmax": 0.827160439942948,
@@ -587,6 +647,7 @@
    ],
    "worst_body": "mayonnaise_bottle",
    "worst_v": 3.9632400000000176,
+   "engine_warnings": {},
    "pass": false
   },
   "raw_coacd": {
@@ -597,6 +658,7 @@
    ],
    "worst_body": "mayonnaise_bottle",
    "worst_v": 3.9632400000000176,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_hull": {
@@ -607,6 +669,7 @@
    ],
    "worst_body": "mayonnaise_bottle",
    "worst_v": 3.9632400000000176,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_coacd": {
@@ -617,6 +680,7 @@
    ],
    "worst_body": "mayonnaise_bottle",
    "worst_v": 3.9632400000000176,
+   "engine_warnings": {},
    "pass": false
   },
   "rep_hull": {
@@ -625,6 +689,7 @@
    "left": [],
    "worst_body": "remote_control",
    "worst_v": 1.0306941813394292,
+   "engine_warnings": {},
    "pass": false
   },
   "rep_coacd": {
@@ -633,6 +698,7 @@
    "left": [],
    "worst_body": "remote_control",
    "worst_v": 1.034372896678531,
+   "engine_warnings": {},
    "pass": false
   }
  },
@@ -642,8 +708,8 @@
   "pen_raw": 8,
   "pen_seated": 7,
   "pen_rep": 0,
-  "rmsd_xy": 0.061741294752971757,
-  "repair_s": 6.182760000228882,
+  "rmsd_xy": 0.06174660627939015,
+  "repair_s": 5.574333906173706,
   "raw_hull": {
    "vmax": 4.444603926116742,
    "dmax": 2.0112712249273406,
@@ -654,6 +720,7 @@
    ],
    "worst_body": "tomato_sauce_can",
    "worst_v": 4.444603926116742,
+   "engine_warnings": {},
    "pass": false
   },
   "raw_coacd": {
@@ -664,6 +731,7 @@
    ],
    "worst_body": "bbq_sauce_bottle",
    "worst_v": 1.2164399999999993,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_hull": {
@@ -674,6 +742,7 @@
    ],
    "worst_body": "tomato_sauce_can",
    "worst_v": 3.9647272267846168,
+   "engine_warnings": {},
    "pass": false
   },
   "seated_coacd": {
@@ -682,6 +751,7 @@
    "left": [],
    "worst_body": "remote_control",
    "worst_v": 0.9741597946692421,
+   "engine_warnings": {},
    "pass": false
   },
   "rep_hull": {
@@ -690,6 +760,7 @@
    "left": [],
    "worst_body": "remote_control",
    "worst_v": 1.0306148344334711,
+   "engine_warnings": {},
    "pass": false
   },
   "rep_coacd": {
@@ -698,6 +769,7 @@
    "left": [],
    "worst_body": "remote_control",
    "worst_v": 1.0342933479557506,
+   "engine_warnings": {},
    "pass": false
   }
  }

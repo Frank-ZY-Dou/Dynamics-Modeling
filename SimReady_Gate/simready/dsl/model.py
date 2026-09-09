@@ -23,6 +23,7 @@ predicate check, so the repair and the verifier enforce the same object.
 """
 from __future__ import annotations
 
+import math
 import re
 from dataclasses import dataclass, field
 
@@ -30,11 +31,19 @@ NAME_RE = re.compile(r"^[A-Za-z_][\w\-]*(\.[A-Za-z_]\w*)?$")
 KEYWORDS = {"no_penetration": {"margin"}, "within": {"inset"}, "inside": {"inset"}, "place": {"x", "y", "yaw", "w"},
             "left_of": {"gap", "axis"}, "right_of": {"gap", "axis"}, "in_front_of": {"gap", "axis"}, "behind": {"gap", "axis"},
             "min_distance": {"r"}, "near": {"r"}, "prefer": {"pose", "w"}}
+NUMERIC_KW = {"margin", "inset", "x", "y", "yaw", "w", "gap", "r"}
+SIGNED_KW = {"x", "y", "yaw"}
 STATEMENTS = {
     "no_penetration", "place", "fixed", "on_support", "upright", "within", "inside",
     "left_of", "right_of", "in_front_of", "behind", "min_distance", "near",
     "minimize", "prefer",
 }
+# positional arguments each statement takes: (min, max); None = unbounded
+ARITY = {"no_penetration": (1, 1), "place": (1, 1), "fixed": (1, None), "on_support": (2, 2), "upright": (1, 1),
+         "within": (2, 2), "inside": (2, 2), "left_of": (2, 2), "right_of": (2, 2), "in_front_of": (2, 2),
+         "behind": (2, 2), "min_distance": (2, 2), "near": (2, 2), "minimize": (2, 2), "prefer": (1, 1)}
+# gate sections, their fields and the only operator each field takes
+GATES = {"G2": {"min_gap": ">="}, "G5": {"v_max": "<=", "dx": "<="}}
 
 
 @dataclass
@@ -98,13 +107,21 @@ def parse_program(text: str) -> Program:
             continue
         if section == "gate":
             m = re.match(r"^(G\d+)\s*:\s*(.*)$", line)
-            if m:
-                for term in m.group(2).split(","):
-                    mm = re.match(r"^\s*(\w+)\s*(>=|<=|==|=)\s*([-+.\deE]+)\s*$", term)
-                    if mm:
-                        prog.gate.setdefault(m.group(1), {})[mm.group(1)] = (mm.group(2), float(mm.group(3)))
-            else:
-                prog.gate.setdefault("certify", []).append(line)
+            if not m or m.group(1) not in GATES:
+                raise SyntaxError(f"line {ln}: gate line must be one of {sorted(GATES)}: '{line}'")
+            gate = prog.gate.setdefault(m.group(1), {})
+            for term in m.group(2).split(","):
+                mm = re.match(r"^\s*(\w+)\s*(>=|<=|==|=)\s*(\S+)\s*$", term)
+                if not mm or mm.group(1) not in GATES[m.group(1)]:
+                    raise SyntaxError(f"line {ln}: cannot parse gate term '{term.strip()}' (fields: {sorted(GATES[m.group(1)])})")
+                if mm.group(2) != GATES[m.group(1)][mm.group(1)]:
+                    raise SyntaxError(f"line {ln}: {mm.group(1)} takes '{GATES[m.group(1)][mm.group(1)]}'")
+                v = _val(mm.group(3))
+                if not isinstance(v, float) or not math.isfinite(v) or v < 0:
+                    raise SyntaxError(f"line {ln}: gate value must be a finite non-negative number: '{term.strip()}'")
+                if mm.group(1) in gate:
+                    raise SyntaxError(f"line {ln}: duplicate gate field {mm.group(1)}")
+                gate[mm.group(1)] = (mm.group(2), v)
             continue
         # statements may be several per line, separated by two or more spaces
         for chunk in re.split(r"\s{2,}", line):
@@ -113,7 +130,10 @@ def parse_program(text: str) -> Program:
                 continue
             m = re.match(r"^(minimize)\s+(\w+)\((.*)\)\s*$", chunk)
             if m:
-                prog.statements.append(Statement("minimize", [m.group(2)] + _split_args(m.group(3)), {}, ln))
+                args = [m.group(2)] + _split_args(m.group(3))
+                if args != ["displacement", "*"]:
+                    raise SyntaxError(f"line {ln}: only 'minimize displacement(*)' is supported")
+                prog.statements.append(Statement("minimize", args, {}, ln))
                 continue
             m = re.match(r"^(\w+)\((.*)\)\s*$", chunk)
             if not m:
@@ -130,11 +150,29 @@ def parse_program(text: str) -> Program:
                     k = k.strip()
                     if k not in KEYWORDS.get(name, set()):
                         raise SyntaxError(f"line {ln}: {name} does not take '{k}=' (allowed: {sorted(KEYWORDS.get(name, set()))})")
-                    kw[k] = _val(v)
+                    if k in kw:
+                        raise SyntaxError(f"line {ln}: duplicate keyword '{k}='")
+                    val = _val(v)
+                    if k in NUMERIC_KW:
+                        if not isinstance(val, float) or not math.isfinite(val):
+                            raise SyntaxError(f"line {ln}: {k}= must be a finite number, got '{v.strip()}'")
+                        if k not in SIGNED_KW and val < 0:
+                            raise SyntaxError(f"line {ln}: {k}= must be non-negative")
+                    elif k == "axis" and val not in ("x", "y"):
+                        raise SyntaxError(f"line {ln}: axis must be x or y")
+                    elif k == "pose" and val != "intent":
+                        raise SyntaxError(f"line {ln}: only pose=intent is supported")
+                    kw[k] = val
                 else:
                     a = a.strip()
                     if a != "*" and not NAME_RE.match(a):
                         raise SyntaxError(f"line {ln}: bad body name '{a}'")
                     args.append(a)
+            lo_n, hi_n = ARITY[name]
+            if len(args) < lo_n or (hi_n is not None and len(args) > hi_n):
+                want = f"{lo_n}" if lo_n == hi_n else (f"at least {lo_n}" if hi_n is None else f"{lo_n}-{hi_n}")
+                raise SyntaxError(f"line {ln}: {name} takes {want} argument(s), got {len(args)}: '{chunk}'")
+            if name == "minimize" and args != ["displacement", "*"]:
+                raise SyntaxError(f"line {ln}: only 'minimize displacement(*)' is supported")
             prog.statements.append(Statement(name, args, kw, ln))
     return prog

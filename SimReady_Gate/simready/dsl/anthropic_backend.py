@@ -16,8 +16,9 @@ SYSTEM = ("You are the text2function step of a simulation-readiness gate for rob
           "geometry yourself; deterministic tools verify and repair the scene afterwards.")
 
 
-def complete(prompt: str, model: str | None = None, max_tokens: int = 16000) -> str:
-    """Return the JSON text of the program. Raises RuntimeError on a refusal."""
+def complete(prompt: str, model: str | None = None, max_tokens: int = 16000, *, scene=None) -> str:
+    """Return the JSON text of the program. Raises RuntimeError on a refusal.
+    `scene` restricts the body names the schema accepts to the scene's names."""
     client = anthropic.Anthropic()
     response = client.beta.messages.create(
         model=model or DEFAULT_MODEL,

@@ -2,7 +2,7 @@
 
 Penetration is the count of body pairs whose score is negative: the `distance()` gap when the
 surfaces are separated, minus the largest `collide()` contact depth when they intersect. Only
-the SIGN of the score is exact; the magnitude of a negative score is FCL's triangle-clip
+the sign of the score is exact; the magnitude of a negative score is FCL's triangle-clip
 length, not a penetration depth, and is reported as `max_pen` for continuity only.
 
 Two cases FCL cannot see are handled here: (1) a body wholly inside another (surfaces do not
@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from ..scene.model import Scene, Body
+from ..errors import GeometryQueryError
 
 PEN_EPS = 1e-6     # |signed| below this is floating-point touching, not penetration
 TOUCH_EPS = 5e-5   # a pair that separates under a 0.05 mm nudge is touching, not penetrating (FCL coplanar-face artifact)
@@ -80,8 +81,14 @@ def _contained(inner_verts, outer_mesh):
     pts = np.array([inner_verts.mean(0), inner_verts[np.argmin(inner_verts[:, 2])]])
     try:
         return bool(np.all(outer_mesh.contains(pts)))
-    except Exception:  # noqa: BLE001
-        return False
+    except Exception as exc:  # a failed query must not count as absence
+        raise GeometryQueryError(f"point-in-mesh query failed: {type(exc).__name__}: {exc}") from exc
+
+
+class PairScore(tuple):
+    """(i, j, signed, normal, wit_i, wit_j) with a `contained` attribute: True when the score
+    comes from the point-in-mesh test of a body wholly inside another."""
+    contained = False
 
 
 def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | None = None,
@@ -119,6 +126,7 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
                 continue
             ci, cj = bodies[i].center, bodies[j].center
             signed, nrm, wi, wj = _score(objs[i], objs[j])
+            inside = False
             if signed > 0.0:
                 # separated surfaces: FCL's witness direction is exact; but one body may be
                 # wholly inside the other (nested AABBs), which FCL reports as a positive gap
@@ -134,6 +142,7 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
                         ext = bodies[inner].extent_along(nrm if inner == j else -nrm, scale)
                         signed = -(signed + ext)
                         wi = wj = verts[inner].mean(0)
+                        inside = True
             elif nrm is None:
                 # touching without contact points: probe whether it is a resting contact
                 wi = 0.5 * (ci + cj); wj = wi.copy()
@@ -157,7 +166,9 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
                         signed = 0.0
                         break
                 objs[j].setTranslation(t0)
-            out.append((i, j, signed, nrm, wi, wj))
+            pair = PairScore((i, j, signed, nrm, wi, wj))
+            pair.contained = inside
+            out.append(pair)
     return out
 
 
@@ -195,13 +206,14 @@ def verify_scene(scene: Scene, supports: dict | None = None, gap_tol: float = 2e
     min_signed = min((s for _, _, s, *_ in pairs), default=float("inf"))
     rep = VerifyReport(pen_pairs=len(pen), max_pen=max_pen, min_signed=min_signed, pairs=pen)
     # containment is reported separately as well (it is inside `pen` already)
-    for i, j, s, nrm, wi, wj in pairs:
-        if s < -PEN_EPS and wi is not None and wj is not None and np.allclose(wi, wj):
+    for p in pairs:
+        if getattr(p, "contained", False):
+            i, j = p[0], p[1]
             bi, bj = scene.bodies[i], scene.bodies[j]
             vi, vj = bi.world_aabb(), bj.world_aabb()
             if np.all(vi[0] >= vj[0] - 1e-9) and np.all(vi[1] <= vj[1] + 1e-9):
                 rep.contained.append((bi.name, bj.name))
-            elif np.all(vj[0] >= vi[0] - 1e-9) and np.all(vj[1] <= vi[1] + 1e-9):
+            else:
                 rep.contained.append((bj.name, bi.name))
     # A free body is supported when some contact holds it from below: a pair within gap_tol whose
     # normal has a vertical component pointing up into the body (a wall contact does not count).

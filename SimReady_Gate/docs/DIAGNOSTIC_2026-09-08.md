@@ -40,10 +40,12 @@ layouts are committed).
 
 - Object-object penetration in 26 / 68 scenes (>= 1 mm in 12; the largest score 9.86 mm in
   `workdesk_snacks`: keyboard/smartphone). Sub-millimeter resting penetration into fixtures in
-  64 / 68 (median 0.27 mm). A body wholly inside another body (invisible to a surface test) in 4
-  scenes: `cooking_table` (spoon in the plates), `front_of_shelf` (cutlery in the rack),
-  `ladle_pot` (fork in a plate), `tools_picking` (clamp in a bin). 30 / 68 scenes have a free body
-  that nothing holds from below.
+  64 / 68 (median 0.27 mm). The point-in-mesh test for a body wholly inside another (invisible to
+  a surface test) fires in none of the 68 scenes; the four cases the first pass listed as
+  containment (`cooking_table`, spoon in the plates; `front_of_shelf`, cutlery in the rack;
+  `ladle_pot`, fork in a plate; `tools_picking`, clamp in a bin) are surface intersections that
+  the evaluator had labelled by their nested bounding boxes, and they are among the 26. 30 / 68
+  scenes have a free body that nothing holds from below.
 - `max_pen` values are FCL scores, not depths: only the sign is exact.
 
 ## RoboLab, pre-settle layouts from its own SpatialSolver (N in {4, 6, 8, 10} x 3 seeds)
@@ -52,15 +54,15 @@ Layouts: skill bounds, objects from the catalog, 2 relations per layout, staged 
 
 | N | solver ok | seated pairs (ok cells) | seated pairs (failed cells) | S4R pen after | RMSD_xy (m) | time (s) |
 |---|---|---|---|---|---|---|
-| 4 | 3/3 | 0, 0, 0 | - | 0, 0, 0 | 0.031, 0.000, 0.016 | 3.7-4.2 |
-| 6 | 1/3 | 0 | 1, 2 | 0, 0, 0 | 0.165, 0.032, 0.018 | 4.3-10.0 |
-| 8 | 1/3 | 0 | 3, 2 | 0, 0, 0 | 0.091, 0.079, 0.031 | 5.2-10.6 |
-| 10 | 0/3 | - | 7, 2, 7 | 0, 0, 0 | 0.049, 0.040, 0.062 | 5.9-16.5 |
+| 4 | 3/3 | 0, 0, 0 | - | 0, 0, 0 | 0.031, 0.000, 0.016 | 3.1-3.7 |
+| 6 | 1/3 | 0 | 1, 2 | 0, 0, 0 | 0.163, 0.032, 0.018 | 4.0-9.8 |
+| 8 | 1/3 | 0 | 3, 2 | 0, 0, 0 | 0.092, 0.079, 0.031 | 4.6-9.6 |
+| 10 | 0/3 | - | 7, 2, 7 | 0, 0, 0 | 0.049, 0.040, 0.062 | 5.3-13.9 |
 
 - Layouts the disc solver ACCEPTS carry no mesh penetration once seated (5 / 5 cells). The
   penetration is in the layouts it REJECTS (its fallback is "reduce the object count"): 1-7 pairs.
-  S4R turns all 7 rejected layouts into penetration-free ones with the requested relations kept
-  (one `within(table.top)` miss: `mayonnaise_bottle` in N=10 s1, placed beyond the table edge).
+  S4R turns all 7 rejected layouts into penetration-free ones with every requested relation and
+  region kept.
 - RMSD is the planar RMS of the reference-center displacement. Times are per cell in a warm
   process (decimation cached), full-mesh verification included.
 
@@ -73,7 +75,7 @@ timestep). Pass = no body off the table and peak speed <= 1.0 m/s and peak displ
 |---|---|---|---|---|
 | raw, as the skill writes it (hovering) | 1.52 (4.45) / 1.44 (3.96) m/s | 0.24 (2.01) / 0.20 (0.83) m | 2 / 2 | 1 / 12 |
 | raw, seated | 1.01 (3.97) / 0.70 (3.96) m/s | 0.16 (1.08) / 0.11 (0.83) m | 3 / 1 | 4 / 6 of 12 |
-| after S4R | 0.41 (1.03) / 0.33 (1.03) m/s | 0.07 (0.12) / 0.05 (0.12) m | 0 / 0 | 8 / 8 of 12 |
+| after S4R | 0.41 (1.03) / 0.33 (1.03) m/s | 0.07 (0.12) / 0.06 (0.12) m | 0 / 0 | 8 / 8 of 12 |
 
 - The seated row isolates the repair's effect: the remaining raw motion is penetration-driven
   (`mayonnaise_bottle` at 3.96 m/s leaves the table in N=10 s1; `milkjug_a02` 0.87 m/s in N=6 s0;
@@ -101,7 +103,7 @@ timestep). Pass = no body off the table and peak speed <= 1.0 m/s and peak displ
   penetration on the collision geometry, and the collision meshes do not extend below the
   `reg_bbox` bottom (0 of 1594 objects), so its z rule does not sink objects into the counter.
   Its cost appears only in the tight 0.3 m region at N >= 8, where it gives up and the gate still
-  places every object (2-41 s per cell).
+  places every object (0.4-4.5 s per cell).
 - G0 over the 1594 AI-generated objects (`results/robocasa_aigen_g0.json`): no visual mesh is
   watertight (so volume-based checks are invalid there), V-HACD pieces median 32 (the cap), and 8
   objects have a single convex piece (boxed_food_2, cereal_5, cutting_board_3, cutting_board_9,
@@ -109,7 +111,63 @@ timestep). Pass = no body off the table and peak speed <= 1.0 m/s and peak displ
   for objaverse assets ("self turning due to single collision geom"); RoboCasa does not exclude
   these eight.
 
-## Fixes the reruns depend on
+## Corrections after the external audit of 2026-09-09
+
+An external audit of the public source (two rounds, isolated tests against the modules) reported
+twelve defects. Every one was confirmed against the source and fixed; the regression tests in
+`tests/` pin the corrected behaviour, and the tables above were regenerated with the fixed code.
+
+- **Input validation.** JSON coordinates were interpolated into the program text without a type
+  check, so a string could add statements; `1e999` parsed to infinity and the gate line it produced
+  was silently dropped; `upright()` reached the compiler and failed with an index error; the
+  `inset` of a JSON `inside` statement was lost. Every number is now checked for type and
+  finiteness where it enters, fields are tied to their statement, gate lines that do not parse are
+  errors, statement arity is checked by the parser, and `inset` is kept.
+- **Model output parsing.** The hand-written scanner mis-handled an escaped quote followed by a
+  brace; the standard decoder now reads the first object, and rejects NaN, Infinity and duplicate keys.
+- **The SDK backend** was called with a `scene` argument its signature lacked.
+- **Geometry queries.** A failed point-in-mesh or ray query returned "not contained" / "no hit";
+  both now raise `GeometryQueryError` (exit code 2). The ray cache was keyed on the support's
+  centre and vertex count only, so a rotated or re-meshed support answered from the stale mesh; the
+  key now covers the pose and the mesh arrays.
+- **`on_support` as a predicate** accepted a body level with the support's top anywhere in the
+  world, through the vertex fallback of the seat height; the predicate now needs a downward ray
+  from the body's bottom to meet the support and fails with value `null` otherwise. The fallback
+  remains an initial guess for the repair only.
+- **`min_gap`** was read from the gate and written into the report but never compared; the
+  clearance is now checked pair by pair (`simready.gates.clearance`), with the pairs that the
+  bounding boxes certify distant counted, and declared support contacts exempt from the positive
+  clearance only.
+- **Certificates.** `settle` merged its report into any certificate of the same name; it now
+  requires the scene and program hashes to match the repair's and records `ready`.
+- **Parameters.** A settle shorter than one timestep passed without integrating; `ds_max = 0`
+  looped forever. Both are rejected, and the settle report carries the integration steps taken,
+  the simulated time, the peak tilt per body and the bodies whose CoACD decomposition fell back
+  to a single hull.
+- **MJCF capsules** were exported as cylinders of the cylindrical length, without the caps.
+- **The continuation.** OSQP's "solved inaccurate" status was compared against a string it never
+  produces, so inaccurate solves were treated as failures; a failed QP still advanced the scale;
+  the per-step translation cap was applied to the solved step afterwards, which could break the
+  rows just satisfied; two bodies with coincident centres produced a `min_distance` row with no
+  direction. The contact rows stay hard and the trust region is a bound inside the QP; every
+  program row carries a slack with a quadratic penalty, so a statement that conflicts with the
+  contacts yields to them and the predicates report it; when the contacts cannot be met inside
+  the region, the step serves the contacts alone (elastic, program rows set aside for that
+  step), moves every body as far as the region allows and carries the remainder into the next
+  linearization; a failed solve is retried at the same scale with a shorter look-ahead and the
+  scale never advances on it; coincident centres get a fixed direction.
+
+Two further review passes over the fixes themselves added: a certificate is completed only by a
+settle of the scene the repair wrote (not the scene it read), and only with the same program; a
+USD stage that authors no `metersPerUnit` or `upAxis` is read as metres, Z up (the fallback
+values the library reports would otherwise have refused every such stage); the tail of the
+continuation keeps going while program rows still move bodies; MuJoCo's own warning counters
+(a reset after a bad acceleration, position or velocity) and non-finite readings fail the settle;
+a nested pair is reported as containment only when the point-in-mesh test says so; `pen_before`
+is counted over the same pairs as `pen_after`; a missing file or an unreadable stage is exit
+code 2 like any other invalid input.
+
+## Fixes the reruns of 2026-09-08 depended on
 - Evaluator: contact normals oriented by probing (the center-line heuristic pushed bodies into
   concave fixtures); bodies wholly inside another body counted as penetrating; FCL's coplanar-touch
   artifact resolved by a 0.05 mm probe; `max_pen` documented as a score.

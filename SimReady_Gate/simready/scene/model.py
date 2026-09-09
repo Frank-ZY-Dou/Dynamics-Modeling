@@ -110,22 +110,31 @@ class Scene:
         return float(h.max())
 
     def _surface_hits(self, support: Body, xy: np.ndarray) -> np.ndarray:
-        """Highest z of the support surface hit by a downward ray at each xy (empty if none)."""
+        """Highest z of the support surface hit by a downward ray at each xy (empty if none).
+
+        The world-frame mesh and its ray intersector are cached on the support body. The cache
+        key covers the pose (centre and rotation) and the identity of the vertex and face arrays,
+        which the cache keeps alive so that the identity cannot be recycled: replacing a body's
+        mesh (a proxy, a decimated copy) or moving it invalidates the entry. Arrays are rebound,
+        never edited in place, everywhere in this package.
+        """
         import trimesh
-        key = (id(support), tuple(np.round(support.center, 9)), len(support.verts))
+        from ..errors import GeometryQueryError
+        key = (id(support), tuple(np.round(support.center, 9)), tuple(np.round(support.rotation.ravel(), 9)),
+               id(support.verts), support.verts.shape, id(support.faces), support.faces.shape)
         cache = support.meta.setdefault("_ray_cache", {})
         if key not in cache:
             cache.clear()
             m = trimesh.Trimesh(support.world_vertices(), support.faces, process=False)
-            cache[key] = (m, m.ray)
-        m, ray = cache[key]
+            cache[key] = (m, m.ray, support.verts, support.faces)
+        m, ray, _, _ = cache[key]
         top = float(m.bounds[1][2]) + 1.0
         origins = np.column_stack([xy, np.full(len(xy), top)])
         dirs = np.tile(np.array([[0.0, 0.0, -1.0]]), (len(xy), 1))
         try:
             loc, idx_ray, _ = ray.intersects_location(origins, dirs, multiple_hits=True)
-        except Exception:  # noqa: BLE001
-            return np.zeros(0)
+        except Exception as exc:  # a failed query is not a miss
+            raise GeometryQueryError(f"downward ray query on {support.name} failed: {type(exc).__name__}: {exc}") from exc
         if len(loc) == 0:
             return np.zeros(0)
         best = {}

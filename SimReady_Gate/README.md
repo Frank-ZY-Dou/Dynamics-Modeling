@@ -20,19 +20,21 @@
 <td><img src="docs/media/pile_n20_gate.gif" width="960" alt="twenty RoboLab objects heaped on the table, shrunk, laid out by the model in scale-space, restored to full size" /></td>
 </tr>
 <tr>
-<td><sub><b>Twenty objects from a heap, laid out by language.</b> Twenty RoboLab catalog objects are dropped into a 13 cm radius on RoboLab's own table (80 object-object interpenetrating pairs). The request asks for a cooking layout: the bowl in front of the pitcher, the ladle and the spoon within reach, the fruit grouped on the left, the cans and bottles in a row at the back, the hammer, bin, remote and spatula out of the way on the right. S4R shrinks every body about its reference center; the model places the shrunken bodies; the scale is restored under the program, and the result is penetration-free with every predicate satisfied, in 28 s.</sub></td>
+<td><sub><b>Twenty objects from a heap, laid out by language.</b> Twenty RoboLab catalog objects are dropped into a 13 cm radius on RoboLab's own table (80 object-object interpenetrating pairs). The request asks for a cooking layout: the bowl in front of the pitcher, the ladle and the spoon within reach, the fruit grouped on the left, the cans and bottles in a row at the back, the hammer, bin, remote and spatula out of the way on the right. S4R shrinks every body about its reference center; the model places the shrunken bodies; the scale is restored under the program, and the result is penetration-free with every predicate satisfied, in 31 s.</sub></td>
 </tr>
 <tr>
 <td><img src="docs/media/pile_n20_settle.gif" width="960" alt="MuJoCo settle of the heap (left) and of the repaired layout (right)" /></td>
 </tr>
 <tr>
-<td><sub><b>Settle as certification.</b> The heap and the repaired layout simulated in MuJoCo with CoACD proxies: the heap reaches 3.8 m/s and throws a body off the table; the repaired scene peaks at 0.84 m/s with nothing leaving the table. Every clip in this repository is rendered from the solver's own meshes with the assets' textures, without overlays.</sub></td>
+<td><sub><b>Settle as certification.</b> The heap and the repaired layout simulated in MuJoCo with CoACD proxies: the heap reaches 3.8 m/s and throws a body off the table; the repaired scene peaks at 0.83 m/s with nothing leaving the table. Every clip in this repository is rendered from the solver's own meshes with the assets' textures, without overlays.</sub></td>
 </tr>
 </table>
 </div>
 
 ## 📢 Updates
 
+* [September 2026] **Into the engines.** `export` writes a repaired scene as meshes, a manifest, an MJCF file and a USD stage with physics schemas; `examples/run_mujoco.py`, `run_genesis.py` and `run_isaac.py` load it and simulate it. The twenty-object layout runs in MuJoCo, Genesis and Isaac Sim with no body leaving the table ([details](#running-the-repaired-scene-in-a-simulator)).
+* [September 2026] **Correctness pass after an external code audit.** Inputs are checked before anything reaches the solver (finite numbers only, fields tied to their statement, gate lines that do not parse are errors); a geometric query that cannot be evaluated is an error rather than a "no"; `on_support` needs the support under the body, not merely the right height; the program's `min_gap` is now compared pair by pair with explicit coverage; `settle` adds to a certificate only when the scene and program hash to the ones the repair used, and sets `ready`; MJCF capsules keep their end caps; the continuation keeps its contact rows hard, lets program rows yield to them through penalised slacks, keeps its trust region inside the QP, and never advances the scale on a failed step. Regression tests in [`tests/`](tests/); the diagnostics were rerun ([`docs/DIAGNOSTIC_2026-09-08.md`](docs/DIAGNOSTIC_2026-09-08.md)).
 * [September 2026] **Twenty-object demo.** A heap of twenty RoboLab objects laid out by a language request in scale-space, two recorded rounds of the agent loop, one passing certificate; the request, the programs, every tool output and both certificates are in [`docs/examples/pile_n20/`](docs/examples/pile_n20/) ([Example 2](#example-2-twenty-objects-from-a-heap-laid-out-by-language)).
 * [September 2026] **Scale-space placement.** `place(a, x, y, yaw)` lets the model position bodies while every body is shrunk and nothing touches; the continuation restores full scale under the program. Renders from the solver's own meshes with the assets' textures (`viz/`).
 * [September 2026] **Initial release**: the scene layer for RoboLab USD scenes (`usd-core`, no Isaac Sim) and RoboCasa MJCF objects (compiled by MuJoCo itself); the constraint language, its JSON schema and compiler; the S4R upright-on-plane repair driven by the program; the mesh-level evaluator with containment and resting-contact tests; the MuJoCo settle test; certificates with provenance; the agent skill and the Anthropic SDK backend; the diagnostics on RoboLab's 68 shipped scenes, on layouts from RoboLab's own placement solver, and on RoboCasa counter regions with RoboCasa's own placement test ([`docs/DIAGNOSTIC_2026-09-08.md`](docs/DIAGNOSTIC_2026-09-08.md)).
@@ -50,7 +52,7 @@
    * [Scale-space editing](#scale-space-editing)
 * [The language](#the-language)
 * [Getting started](#getting-started)
-   * [Setup](#setup) · [Command line](#command-line) · [Assets](#assets)
+   * [Setup](#setup) · [Command line](#command-line) · [Running the repaired scene in a simulator](#running-the-repaired-scene-in-a-simulator) · [Assets](#assets)
 * [Gates](#gates)
 * [Results](#results)
 * [Repository layout](#repository-layout)
@@ -170,7 +172,7 @@ poses into a copy of the USD and reads it back:
 
 ```
 $ python -m simready.cli repair assets/scenes/workdesk_snacks.usda program.json --out workdesk_repaired.usda
-{"ok": true, "pen_before": 12, "pen_after": 0, "rmsd_xy": 0.032, "time_s": 46.6,
+{"ok": true, "pen_before": 12, "pen_after": 0, "rmsd_xy": 0.032, "time_s": 46.9,
  "failed_predicates": [], "written_pose_error_m": 1.2e-06,
  "certificate": "workdesk_repaired.certificate.json"}
 ```
@@ -195,8 +197,11 @@ $ python -m simready.cli settle workdesk_repaired.usda --program program.json
 ### 6. The certificate
 
 `workdesk_repaired.certificate.json` records the outcome with its provenance: the program text and
-JSON, the scene hash, the git commit, library versions, every tolerance, the predicate values, the
-settle report. A scene is "ready" only with this file.
+JSON, the hashes of the scene read and the scene written, the git commit, library versions, every
+tolerance, the predicate values, the settle report. `settle` adds its report to the certificate
+only when the scene and program it was given hash to the ones the repair used, and then sets
+`ready`: the repair's `ok` and the settle's `pass`, on the same scene and the same program. Any
+other certificate is left as it is and the settle report goes to a separate `.settle.json`.
 
 ## Example 2: twenty objects from a heap, laid out by language
 
@@ -232,8 +237,8 @@ the programs, every tool output and both certificates are in
 
 | round | repair | outcome | settle (hull / CoACD) |
 |---|---|---|---|
-| 1 | 81 → 0 pairs, planar RMSD 0.333 m, 24 s | `place(hammer_8)` missed by 7.3 cm: the 33 cm hammer does not fit at the requested corner next to the bin | 0.89 / 0.99 m/s, pass |
-| 2 | 81 → 0 pairs, planar RMSD 0.328 m, 28 s | the exact hammer target dropped (the request only asks for it out of the way on the right, which `right_of` states); every predicate holds | 0.86 / 0.84 m/s, pass |
+| 1 | 81 → 0 pairs, planar RMSD 0.333 m, 31 s | `place(hammer_8)` missed by 7.3 cm: the 33 cm hammer does not fit at the requested corner next to the bin | 0.89 / 0.99 m/s, pass |
+| 2 | 81 → 0 pairs, planar RMSD 0.328 m, 31 s | the exact hammer target dropped (the request only asks for it out of the way on the right, which `right_of` states); every predicate holds, `ready: true` | 0.83 / 0.82 m/s, pass |
 
 The heap itself, settled as is, reaches 4.9 m/s with ten bodies off the table (hull proxies) and
 3.8 m/s with one (CoACD). The continuation here starts at s = 0.3, large enough to see the bodies
@@ -249,7 +254,8 @@ or the SDK backend in `simready/dsl/text2dsl.py` (Claude with schema-constrained
 3. acts on the outcome, for at most three rounds: `pen_after > 0` means the intent is too tight (fewer
    objects, a larger region); a failed relation means a gap to relax; a body in `left_support` after
    `settle` gets a `within(..., inset=)` statement;
-4. reports the certificate path, and nothing else counts as "ready".
+4. reports the certificate path; a scene is ready when that certificate says `ready: true`, and
+   nothing else counts.
 
 It never overrides a number, and final poses are not something it types by hand: a body is placed
 through relations, regions and `place` targets, and S4R decides what is feasible.
@@ -294,12 +300,15 @@ the certificate.
 ### Setup
 
 ```
-pip install numpy scipy trimesh python-fcl osqp mujoco coacd usd-core   # Python 3.10+
+pip install numpy scipy trimesh rtree python-fcl osqp mujoco coacd usd-core   # Python 3.10+
+python -m unittest discover tests                                            # regression tests
 ```
 
-Optional: `anthropic` for the SDK backend, which reads `ANTHROPIC_API_KEY` from the environment
-only (nothing in this repository holds a credential, and `.env` files are ignored); Blender 3.6
-for the renders in `viz/` (`BLENDER=/path/to/blender`).
+`rtree` is what trimesh's ray and point-in-mesh queries run on; without it those queries fail,
+and a failed query is reported as an error (exit code 2), never as "no hit". Optional: `anthropic`
+for the SDK backend, which reads `ANTHROPIC_API_KEY` from the environment only (nothing in this
+repository holds a credential, and `.env` files are ignored); Blender 3.6 for the renders in
+`viz/` (`BLENDER=/path/to/blender`).
 
 ### Command line
 
@@ -309,11 +318,49 @@ for the renders in `viz/` (`BLENDER=/path/to/blender`).
 | `python -m simready.cli prompt <scene> --request "..."` | the text-to-program prompt with the schema | — |
 | `python -m simready.cli check <scene> program.json` | validate, parse and compile the program | the program is usable |
 | `python -m simready.cli verify <scene>` | the mesh-level evaluator on the scene as is | no penetrating pair |
-| `python -m simready.cli repair <scene> program.json --out <file>` | S4R under the program, full-mesh verification, write-back, certificate | pen 0 and every predicate holds |
-| `python -m simready.cli settle <scene> --program program.json` | the MuJoCo settle test, thresholds from the program's gate | the scene stays at rest |
+| `python -m simready.cli repair <scene> program.json --out <file>` | S4R under the program, full-mesh verification, write-back, certificate | pen 0, every predicate holds and, with a `G2: min_gap` gate, every pair keeps that clearance |
+| `python -m simready.cli settle <scene> --program program.json` | the MuJoCo settle test, thresholds from the program's gate | the scene stays at rest (and keeps `min_gap` when the gate sets one) |
+| `python -m simready.cli export <scene> --out <dir>` | meshes, manifest, MJCF and USD for MuJoCo, Genesis and Isaac Sim | the files were written |
 
-Scenes are RoboLab `.usda` files or layout JSONs (`base_scene` + objects); RoboCasa objects come
-in through `simready.io.mjcf_io` (see `experiments/robocasa_capacity.py`).
+Exit code 1 means the outcome does not hold; exit code 2 means the program or an input is invalid,
+or a geometric query could not be evaluated. A gate value that cannot be parsed, a coordinate that
+is not a finite number, a statement with the wrong number of arguments: all of these are exit 2,
+none of them is silently dropped.
+
+Scenes are RoboLab `.usda` files (metres, Z up; a stage that says otherwise is refused) or layout
+JSONs (`base_scene` + objects); RoboCasa objects come in through `simready.io.mjcf_io` (see
+`experiments/robocasa_capacity.py`).
+
+### Running the repaired scene in a simulator
+
+`export` writes a scene the engines load directly: one OBJ per body in its own frame, a
+manifest with every pose (metres, Z up), an MJCF file and a USD stage with UsdPhysics rigid
+bodies, colliders and a physics scene. The three runners in `examples/` load that export, step
+it and print the peak and final displacement of every free body.
+
+```
+python -m simready.cli export pile_repaired.json --out pile_export --program program.json
+python examples/run_mujoco.py pile_export --seconds 2                 # MuJoCo, from scene.xml
+python examples/run_genesis.py pile_export --seconds 2                # Genesis, from manifest.json (add --cpu without a GPU)
+python examples/run_isaac.py pile_export --seconds 2                  # Isaac Sim (its own Python), from scene.usda
+```
+
+The twenty-object layout of Example 2, exported and simulated for 2 s in each engine on this
+machine. Fixtures keep their full meshes; the MJCF file gives every free body one convex hull
+unless `--decompose` writes CoACD pieces, Genesis decomposes the meshes itself (`--convex` for
+one hull per body), and Isaac Sim's stage asks PhysX for a convex decomposition:
+
+| engine | peak displacement of a free body | bodies below the ground |
+|---|---|---|
+| MuJoCo 3.10 | 0.135 m (the remote control tips over, as in the settle test) | none |
+| Genesis 1.2.3, GPU, conjugate-gradient solver | 0.119 m with its decomposition, 0.138 m with one hull per body | none |
+| Isaac Sim 4.5 (PhysX) | 0.024 m | none |
+
+A flat fixed sheet such as RoboLab's ground plane has no volume to hull; it is marked `flat` in
+the manifest and every runner uses the export's ground height instead. Genesis's Newton
+constraint solver needs more shared memory than a 2080-class GPU offers at 120 free degrees of
+freedom; the runner therefore defaults to its conjugate-gradient solver (`--solver newton` to
+switch).
 
 ### Assets
 
@@ -327,7 +374,7 @@ them from their own checkouts: set `ROBOLAB_DIR` to a checkout of
 | gate | question | tool |
 |---|---|---|
 | G0 | is the asset admissible: closed visual mesh, more than one collision piece, proxy that matches the visual? | `mjcf_object_stats` |
-| G2 | does any pair interpenetrate, is any body inside another, is any body unsupported? | FCL score with probed normals, containment and resting-contact tests (`simready.gates.verify`) |
+| G2 | does any pair interpenetrate, is any body inside another, is any body unsupported, and (with `min_gap`) does every pair other than a body and its declared support keep the clearance? | FCL score with probed normals, containment and resting-contact tests (`simready.gates.verify`); pair-by-pair clearance with coverage (`simready.gates.clearance`) |
 | G3 | the repair: S4R scale continuation under the program | `simready.repair.upright_s4r` |
 | G5 | does the scene stay at rest in a physics engine? | MuJoCo settle with hull and CoACD proxies (`python -m simready.cli settle`) |
 
@@ -337,11 +384,11 @@ Measured on RoboLab's 68 shipped scenes, on pre-settle layouts from RoboLab's ow
 solver staged in its base scene, and on RoboCasa counter regions with RoboCasa's own placement
 test; every table is backed by a tracked file under `results/`.
 
-- **RoboLab library**: object-object mesh penetration in 26 / 68 scenes (12 at or above 1 mm), a
-  body wholly inside another in 4, a body nothing supports in 30.
+- **RoboLab library**: object-object mesh penetration in 26 / 68 scenes (12 at or above 1 mm; all
+  of them surface intersections, none a body wholly inside another), a body nothing supports in 30.
 - **RoboLab pre-settle layouts** (N = 4–10, 3 seeds): the disc solver accepts 5 / 12 and those are
-  clean; the 7 it rejects carry 1–7 penetrating pairs, and S4R repairs all 7 to zero with the
-  requested relations kept (planar RMSD 0.03–0.17 m, 4–17 s per cell).
+  clean; the 7 it rejects carry 1–7 penetrating pairs, and S4R repairs all 7 to zero with every
+  requested relation and region kept (planar RMSD 0.03–0.17 m, 3–14 s per cell).
 - **Settle** (MuJoCo, identical harness): median peak speed 1.0 → 0.4 m/s from the seated raw
   layouts to the repaired ones; no repaired cell loses a body, and what remains is one tall remote
   control toppling, present before the repair as well.
@@ -356,11 +403,14 @@ Full tables and the fixes behind them:
 ```
 simready/            the library
   scene/             Body, Scene, mesh proxies, surface-based seating
-  gates/             verify.py (G2)  settle_mujoco.py (G5)
+  gates/             verify.py (G2)  clearance.py (G2 min_gap)  settle_mujoco.py (G5)
   repair/            upright_s4r.py: S4R upright-on-plane continuation with program rows
   dsl/               model.py (parser)  schema.py (JSON schema, prompt)  compile.py  text2dsl.py  anthropic_backend.py
-  io/                usd_io.py (RoboLab USD read/write)  mjcf_io.py (RoboCasa MJCF via MuJoCo)
-  cli.py             summarize | prompt | check | verify | repair | settle
+  io/                usd_io.py (RoboLab USD read/write)  mjcf_io.py (RoboCasa MJCF via MuJoCo)  export.py (meshes, manifest, MJCF, USD for the engines)
+  errors.py          GeometryQueryError: a query that could not be evaluated is an error, not a result
+  cli.py             summarize | prompt | check | verify | repair | settle | export
+examples/            run_mujoco.py, run_genesis.py, run_isaac.py: load an export and simulate it
+tests/               regression tests (python -m unittest discover tests)
 skills/              the agent skill that runs the loop
 experiments/         the diagnostics behind docs/DIAGNOSTIC_2026-09-08.md (RoboLab, RoboCasa, settle)
 viz/                 Blender rendering on the solver's meshes, video drivers, the agent-run page generator

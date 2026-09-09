@@ -7,7 +7,7 @@ Frame convention = RoboLab's (robot at the origin looking along +x, table in fro
 
 Per-step rows are linear in (dx, dy, dyaw) of free bodies. Region rows use the exact
 projection interval of the scaled, yawed footprint (not a symmetric half-extent), and regions
-attached to a FREE reference body are re-evaluated from that body's current pose every step.
+attached to a free reference body are re-evaluated from that body's current pose every step.
 Defaults for omitted keyword arguments come from dsl.schema.DEFAULTS in both the text and the
 JSON path.
 """
@@ -68,8 +68,17 @@ def _low_footprint(b: Body):
     return w[band][:, :2]
 
 
-def support_height_for(scene: Scene, body: Body, support: Body):
-    """Seat height of `body` on `support` from the support surface under the body's bottom."""
+def support_height_for(scene: Scene, body: Body, support: Body, require_hit: bool = False):
+    """Seat height of `body` on `support` from the support surface under the body's bottom.
+
+    With `require_hit` the height is taken only from downward rays under the body's lowest
+    vertices and its centre; when none of them meets the support the result is None (the body
+    is not over the support at all). Without it, the vertex fallback in `Scene.support_height`
+    supplies an initial guess for the repair, which is never used as evidence."""
+    if require_hit:
+        pts = np.vstack([_low_footprint(body), body.center[None, :2]])
+        hits = scene._surface_hits(support, pts)
+        return float(hits.max()) if hits.size else None
     return scene.support_height(support, at=body.center[:2], radius=0.5 * float(np.linalg.norm(body.world_aabb()[1][:2] - body.world_aabb()[0][:2])) + 0.02,
                                 footprint=_low_footprint(body))
 
@@ -177,7 +186,7 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
     def rows_fn(state):
         out = []
         sc = state.scene
-        for nm, sup in dyn_support:                      # a body on a FREE support follows its top
+        for nm, sup in dyn_support:                      # a body on a free support follows its top
             spec.supports[nm] = support_height_for(sc, sc[nm], sc[sup])
         for nm, lst in rects_static.items():
             k = idx[nm]; b = sc.bodies[k]
@@ -203,7 +212,12 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
             ka, kb = idx[a], idx[bname]
             d = sc.bodies[ka].center[:2] - sc.bodies[kb].center[:2]
             dist = float(np.linalg.norm(d))
-            u = d / max(dist, 1e-9)
+            if dist < 1e-9:
+                # coincident centres give no direction: break the symmetry along +x, ordered by
+                # name so that the row is the same whichever way the statement was written
+                u = np.array([1.0 if a < bname else -1.0, 0.0])
+            else:
+                u = d / dist
             coeffs = {(ka, "x"): u[0], (ka, "y"): u[1], (kb, "x"): -u[0], (kb, "y"): -u[1]}
             if kind == "min_distance":
                 out.append((coeffs, r - dist, np.inf))
@@ -218,7 +232,8 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
 def check_predicates(program: Program, scene: Scene, tol: float = 2e-3):
     """Evaluate every statement on the final scene. Returns [(statement, ok, value)].
     on_support is judged by the body's lowest point against the support SURFACE under its bottom
-    (downward rays), a geometric fact independent of the numbers the repair used."""
+    (downward rays), a geometric fact independent of the numbers the repair used; a body whose
+    bottom is over no part of the support fails with value None, whatever its height."""
     out = []
     for st in program.statements:
         n = st.name
@@ -226,7 +241,10 @@ def check_predicates(program: Program, scene: Scene, tol: float = 2e-3):
             sup = _ref(st.args[1])
             for nm in _bodies(scene, st.args[0], exclude=(sup,)):
                 b = scene[nm]
-                h = support_height_for(scene, b, scene[sup])          # the surface under the body's bottom
+                h = support_height_for(scene, b, scene[sup], require_hit=True)
+                if h is None:
+                    out.append((f"on_support({nm},{sup})", False, None))
+                    continue
                 g = float((b.world_vertices() @ scene.up).min()) - h
                 out.append((f"on_support({nm},{sup})", abs(g) <= tol, g))
         elif n == "upright":

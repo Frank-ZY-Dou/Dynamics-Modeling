@@ -9,6 +9,7 @@ show what was assumed.
 from __future__ import annotations
 
 import json
+import math
 import re
 
 from ..scene.model import Scene
@@ -106,7 +107,7 @@ def validate_program_json(obj: dict, scene: Scene) -> tuple[str, list[str]]:
             need(a, "a"); need(b, "container")
             if "container" not in tags.get(b, set()):
                 notes.append(f"{b} is not tagged as a container; inside() uses its bounding footprint")
-            lines.append(f"  inside({a}, {b})")
+            lines.append(f"  inside({a}, {b}, inset={st['inset']})" if "inset" in st else f"  inside({a}, {b})")
         elif op in ("left_of", "right_of", "in_front_of", "behind"):
             need(a, "a"); need(b, "b")
             if a == b:
@@ -142,20 +143,57 @@ def validate_program_json(obj: dict, scene: Scene) -> tuple[str, list[str]]:
     return "\n".join(lines), notes
 
 
+FIELDS = {
+    "no_penetration": {"a", "margin"}, "fixed": {"a"}, "on_support": {"a", "b"}, "upright": {"a"},
+    "within": {"a", "b", "inset"}, "inside": {"a", "b", "inset"}, "place": {"a", "x", "y", "yaw", "w"},
+    "left_of": {"a", "b", "gap", "axis"}, "right_of": {"a", "b", "gap", "axis"},
+    "in_front_of": {"a", "b", "gap", "axis"}, "behind": {"a", "b", "gap", "axis"},
+    "min_distance": {"a", "b", "r"}, "near": {"a", "b", "r"}, "minimize": {"a"}, "prefer": {"a", "w"},
+}
+NUMERIC = ("gap", "inset", "r", "margin", "w", "x", "y", "yaw")
+SIGNED = ("x", "y", "yaw")
+
+
+def _number(v, label, signed=False):
+    """Every number that reaches the DSL text is a finite int/float (bools, strings, NaN and
+    infinities are rejected here, before anything is interpolated into a statement)."""
+    try:
+        finite = not isinstance(v, bool) and isinstance(v, (int, float)) and math.isfinite(float(v))
+    except OverflowError:          # an integer too large for a float
+        finite = False
+    if not finite:
+        raise ProgramError(f"{label} must be a finite number")
+    if not signed and v < 0:
+        raise ProgramError(f"{label} must be non-negative")
+
+
 def _check_shape(obj):
-    """Structural validation that does not need jsonschema: types, ranges, allowed keys."""
+    """Structural validation that does not need jsonschema: types, ranges, allowed keys.
+    Every field is checked for the op it belongs to; a value of the wrong type is an error, never
+    something that is passed through into the program text."""
     if not isinstance(obj, dict) or not isinstance(obj.get("statements"), list):
         raise ProgramError("program must be an object with a 'statements' list")
-    ops = set(PROGRAM_SCHEMA["properties"]["statements"]["items"]["properties"]["op"]["enum"])
+    extra = set(obj) - {"statements", "intent", "assumptions", "gate"}
+    if extra:
+        raise ProgramError(f"unknown program fields: {sorted(extra)}")
+    if "intent" in obj and not isinstance(obj["intent"], str):
+        raise ProgramError("intent must be a string")
+    if "assumptions" in obj and (not isinstance(obj["assumptions"], list)
+                                 or not all(isinstance(s, str) for s in obj["assumptions"])):
+        raise ProgramError("assumptions must be a list of strings")
     for i, st in enumerate(obj["statements"]):
-        if not isinstance(st, dict) or not isinstance(st.get("op"), str) or st["op"] not in ops:
-            raise ProgramError(f"statement {i}: 'op' must be one of {sorted(ops)}")
-        for k in st:
-            if k not in ("op", "a", "b", "gap", "axis", "inset", "r", "margin", "w", "reason", "x", "y", "yaw"):
-                raise ProgramError(f"statement {i}: unknown field '{k}'")
-        for k in ("gap", "inset", "r", "margin", "w"):
-            if k in st and (isinstance(st[k], bool) or not isinstance(st[k], (int, float)) or st[k] < 0):
-                raise ProgramError(f"statement {i}: '{k}' must be a non-negative number")
+        if not isinstance(st, dict) or not isinstance(st.get("op"), str) or st["op"] not in FIELDS:
+            raise ProgramError(f"statement {i}: 'op' must be one of {sorted(FIELDS)}")
+        op = st["op"]
+        unknown = set(st) - FIELDS[op] - {"op", "reason"}
+        if unknown:
+            raise ProgramError(f"statement {i} ({op}): fields {sorted(unknown)} do not belong to {op}")
+        for k in ("a", "b", "reason"):
+            if k in st and not isinstance(st[k], str):
+                raise ProgramError(f"statement {i} ({op}): '{k}' must be a string")
+        for k in NUMERIC:
+            if k in st:
+                _number(st[k], f"statement {i} ({op}): '{k}'", signed=k in SIGNED)
         if "axis" in st and st["axis"] not in ("x", "y"):
             raise ProgramError(f"statement {i}: axis must be x or y")
     g = obj.get("gate")
@@ -163,10 +201,9 @@ def _check_shape(obj):
         if not isinstance(g, dict):
             raise ProgramError("gate must be an object")
         for k, v in g.items():
-            if k not in ("min_gap", "settle_v_max", "settle_dx") or isinstance(v, bool) or not isinstance(v, (int, float)) or v < 0:
-                raise ProgramError(f"gate.{k} must be a non-negative number")
-    if "assumptions" in obj and not isinstance(obj["assumptions"], list):
-        raise ProgramError("assumptions must be a list of strings")
+            if k not in ("min_gap", "settle_v_max", "settle_dx"):
+                raise ProgramError(f"unknown gate field '{k}'")
+            _number(v, f"gate.{k}")
 
 
 def api_schema(scene=None):

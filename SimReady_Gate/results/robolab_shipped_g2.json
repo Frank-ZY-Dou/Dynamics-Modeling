@@ -11,7 +11,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 4.9
+  "t": 4.3
  },
  {
   "scene": "banana_bowl.usda",
@@ -25,7 +25,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.5
+  "t": 2.2
  },
  {
   "scene": "banana_crate.usda",
@@ -39,7 +39,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.3
+  "t": 2.0
  },
  {
   "scene": "bananas_5_grey_bin.usda",
@@ -72,7 +72,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 2.7
+  "t": 2.5
  },
  {
   "scene": "base_empty.usda",
@@ -86,7 +86,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.2
+  "t": 1.9
  },
  {
   "scene": "bin_condiments.usda",
@@ -100,7 +100,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 3.6
+  "t": 3.2
  },
  {
   "scene": "bin_mug_mustard_marker_bowl.usda",
@@ -114,7 +114,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.6
+  "t": 2.4
  },
  {
   "scene": "bin_mug_mustard_marker_bowl_spoon_mayo_soup.usda",
@@ -130,7 +130,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 2.9
+  "t": 2.7
  },
  {
   "scene": "blue.usda",
@@ -144,7 +144,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.4
+  "t": 2.1
  },
  {
   "scene": "bottles_crate.usda",
@@ -160,7 +160,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 2.3
+  "t": 2.2
  },
  {
   "scene": "bowl_5_table.usda",
@@ -174,7 +174,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.7
+  "t": 2.5
  },
  {
   "scene": "bowls_2.usda",
@@ -205,7 +205,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.4
+  "t": 2.1
  },
  {
   "scene": "bowls_5.usda",
@@ -239,7 +239,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 8.3
+  "t": 7.8
  },
  {
   "scene": "butter_on_top_of_raisin_box.usda",
@@ -253,7 +253,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.4
+  "t": 2.2
  },
  {
   "scene": "butter_raisin_box.usda",
@@ -267,7 +267,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.3
+  "t": 2.1
  },
  {
   "scene": "butter_raisin_box_grey_bin.usda",
@@ -281,7 +281,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.2
+  "t": 2.1
  },
  {
   "scene": "cartons_in_crate.usda",
@@ -300,7 +300,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 2.8
+  "t": 2.5
  },
  {
   "scene": "cartons_in_vertical_crate.usda",
@@ -320,7 +320,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 2.9
+  "t": 2.6
  },
  {
   "scene": "cartons_on_box.usda",
@@ -340,7 +340,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 2.8
+  "t": 2.5
  },
  {
   "scene": "cleaning_products.usda",
@@ -357,7 +357,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 2.8
+  "t": 2.5
  },
  {
   "scene": "clutter_fruit_bottle_bluebin.usda",
@@ -376,7 +376,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 9.1
+  "t": 8.9
  },
  {
   "scene": "clutter_shelf.usda",
@@ -396,7 +396,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 9.7
+  "t": 9.1
  },
  {
   "scene": "colored_blocks.usda",
@@ -410,7 +410,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.1
+  "t": 1.9
  },
  {
   "scene": "conditionals_test_scene.usda",
@@ -431,7 +431,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 4.4
+  "t": 4.3
  },
  {
   "scene": "cooking_table.usda",
@@ -448,14 +448,9 @@
    "tomato_sauce_can",
    "pink_spaghetti_spoon"
   ],
-  "contained": [
-   [
-    "spoon_1",
-    "clay_plates"
-   ]
-  ],
+  "contained": [],
   "dropped": [],
-  "t": 8.7
+  "t": 7.7
  },
  {
   "scene": "cutlery_shelf.usda",
@@ -475,7 +470,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 15.3
+  "t": 13.8
  },
  {
   "scene": "food_packing.usda",
@@ -489,7 +484,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 3.1
+  "t": 2.7
  },
  {
   "scene": "food_packing_dense.usda",
@@ -503,7 +498,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 3.0
+  "t": 2.6
  },
  {
   "scene": "foodpacking_1bin_1box_1can.usda",
@@ -517,7 +512,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.5
+  "t": 2.3
  },
  {
   "scene": "foodpacking_1bin_2box_2can.usda",
@@ -531,7 +526,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.9
+  "t": 2.4
  },
  {
   "scene": "foodpacking_1bin_3box_3can.usda",
@@ -545,7 +540,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 3.2
+  "t": 2.6
  },
  {
   "scene": "front_of_shelf.usda",
@@ -557,22 +552,9 @@
   "max_pen_obj_fixture_mm": 0.0,
   "obj_obj_ge_1mm": 0,
   "floating": [],
-  "contained": [
-   [
-    "spoon_big",
-    "sm_rack_m01"
-   ],
-   [
-    "spoon_small",
-    "sm_rack_m01"
-   ],
-   [
-    "fork_small",
-    "sm_rack_m01"
-   ]
-  ],
+  "contained": [],
   "dropped": [],
-  "t": 9.9
+  "t": 8.6
  },
  {
   "scene": "fruits_in_basket.usda",
@@ -590,7 +572,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 9.2
+  "t": 8.1
  },
  {
   "scene": "fruits_out_of_basket.usda",
@@ -606,7 +588,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 8.8
+  "t": 7.7
  },
  {
   "scene": "fruits_out_of_basket_2oranges.usda",
@@ -625,7 +607,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 9.1
+  "t": 7.9
  },
  {
   "scene": "green.usda",
@@ -639,7 +621,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.6
+  "t": 2.4
  },
  {
   "scene": "ladle_pot.usda",
@@ -653,14 +635,9 @@
   "floating": [
    "anza_medium"
   ],
-  "contained": [
-   [
-    "fork_small",
-    "plate_small"
-   ]
-  ],
+  "contained": [],
   "dropped": [],
-  "t": 4.8
+  "t": 4.3
  },
  {
   "scene": "mug_banana_ketchup_bowl_rubiks3_bin.usda",
@@ -674,7 +651,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 3.4
+  "t": 2.8
  },
  {
   "scene": "mugs2_bananas2_ketchup_rubiks3_bin.usda",
@@ -690,7 +667,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 3.9
+  "t": 3.3
  },
  {
   "scene": "mugs4_measuringcup_drill_bowl.usda",
@@ -704,7 +681,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 3.5
+  "t": 2.7
  },
  {
   "scene": "mugs4_measuringcup_drill_bowl_v2.usda",
@@ -720,7 +697,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 3.6
+  "t": 2.8
  },
  {
   "scene": "mugs_on_shelf.usda",
@@ -734,7 +711,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 8.9
+  "t": 8.4
  },
  {
   "scene": "mustard_raisin_box.usda",
@@ -748,7 +725,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.5
+  "t": 2.2
  },
  {
   "scene": "objects_around_table.usda",
@@ -766,7 +743,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 3.2
+  "t": 2.9
  },
  {
   "scene": "rubiks_cube_2_bowl.usda",
@@ -780,7 +757,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.9
+  "t": 2.4
  },
  {
   "scene": "rubiks_cube_3.usda",
@@ -794,7 +771,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.8
+  "t": 2.5
  },
  {
   "scene": "rubiks_cube_banana_bowl.usda",
@@ -808,7 +785,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.5
+  "t": 2.4
  },
  {
   "scene": "rubiks_cube_banana_bowl_mug_bin.usda",
@@ -822,7 +799,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.8
+  "t": 2.5
  },
  {
   "scene": "rubiks_cube_bowl.usda",
@@ -836,7 +813,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.4
+  "t": 2.2
  },
  {
   "scene": "shelf2_with_condiments.usda",
@@ -850,7 +827,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 13.5
+  "t": 12.2
  },
  {
   "scene": "shelf2_without_condiments.usda",
@@ -864,7 +841,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 13.8
+  "t": 12.3
  },
  {
   "scene": "shelf_mugs_jug_bowl.usda",
@@ -878,7 +855,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 9.2
+  "t": 7.8
  },
  {
   "scene": "shelf_with_cleaning_products.usda",
@@ -895,7 +872,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 4.5
+  "t": 3.8
  },
  {
   "scene": "shelf_with_cleaning_products2.usda",
@@ -912,7 +889,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 4.6
+  "t": 3.8
  },
  {
   "scene": "spam_mug.usda",
@@ -926,7 +903,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.4
+  "t": 2.0
  },
  {
   "scene": "test_plate_banana_rubiks_cube.usda",
@@ -946,7 +923,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 4.6
+  "t": 4.0
  },
  {
   "scene": "tools_container.usda",
@@ -962,7 +939,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 3.5
+  "t": 2.8
  },
  {
   "scene": "tools_picking.usda",
@@ -979,14 +956,9 @@
    "clamp_01",
    "wood_hammer"
   ],
-  "contained": [
-   [
-    "clamp_01",
-    "center_bin"
-   ]
-  ],
+  "contained": [],
   "dropped": [],
-  "t": 3.9
+  "t": 3.4
  },
  {
   "scene": "tools_sorting.usda",
@@ -1000,7 +972,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 3.8
+  "t": 3.3
  },
  {
   "scene": "toys_cleanup.usda",
@@ -1014,7 +986,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 6.3
+  "t": 5.4
  },
  {
   "scene": "two_bin.usda",
@@ -1028,7 +1000,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 2.6
+  "t": 2.0
  },
  {
   "scene": "wire_shelf_mugs_plate_spatula.usda",
@@ -1042,7 +1014,7 @@
   "floating": [],
   "contained": [],
   "dropped": [],
-  "t": 3.9
+  "t": 3.4
  },
  {
   "scene": "workdesk.usda",
@@ -1059,7 +1031,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 5.7
+  "t": 4.8
  },
  {
   "scene": "workdesk_bin.usda",
@@ -1075,7 +1047,7 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 5.3
+  "t": 4.5
  },
  {
   "scene": "workdesk_snacks.usda",
@@ -1091,6 +1063,6 @@
   ],
   "contained": [],
   "dropped": [],
-  "t": 6.9
+  "t": 6.1
  }
 ]

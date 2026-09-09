@@ -28,7 +28,8 @@ def g5(sc, tops, mode):
     r = settle_and_measure(sc, seconds=2.0, support_tops=tops, decompose_free=(mode == "coacd"))
     worst = max(r.per_body_peak_speed.items(), key=lambda kv: kv[1]) if r.per_body_peak_speed else ("-", 0.0)
     return {"vmax": r.peak_speed, "dmax": r.peak_disp, "left": list(r.left_support), "worst_body": worst[0], "worst_v": worst[1],
-            "pass": (not r.left_support) and r.peak_speed <= V_MAX and r.peak_disp <= D_MAX}
+            "engine_warnings": r.engine_warnings,
+            "pass": (not r.left_support) and r.peak_speed <= V_MAX and r.peak_disp <= D_MAX and not r.engine_warnings}
 
 
 def cell(n, seed):

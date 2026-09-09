@@ -1,17 +1,17 @@
 """Synthetic tabletop check: Kubric meshes spawned densely on a table, verified,
 repaired with a DSL program, verified again, predicates checked."""
-import math, sys, time
+import math, os, sys, time
 from pathlib import Path
 import numpy as np
 import trimesh
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-import simready  # noqa: F401  (sets up S4R release path)
 from simready.scene import Body, Scene
 from simready.gates import verify_scene
 from simready.dsl import parse_program, compile_program, check_predicates
 from simready.repair import repair_upright
 
-POOL = simready.S4R_RELEASE_DIR / "data" / "kubric_pool"
+# the Kubric collision meshes shipped with the S4R release (Penetration_Solving/data/kubric_pool)
+POOL = Path(os.environ.get("KUBRIC_POOL", str(Path(__file__).resolve().parents[2] / "Penetration_Solving" / "data" / "kubric_pool")))
 
 def main(N=8, seed=3, target=0.12):
     rng = np.random.RandomState(seed)
@@ -52,7 +52,7 @@ program
     print(f"G3 repair: pen {res.pen_before} -> {res.pen_after}, steps={res.steps}, rmsd={res.rmsd:.4f}, {dt:.1f}s")
     print("G2 after: ", after.summary())
     for name, ok, val in check_predicates(prog, scene):
-        print(f"  {'PASS' if ok else 'FAIL'}  {name:34s} {val:+.4f}")
+        print(f"  {'PASS' if ok else 'FAIL'}  {name:34s} {'not over the support' if val is None else f'{val:+.4f}'}")
 
 if __name__ == "__main__":
     main()

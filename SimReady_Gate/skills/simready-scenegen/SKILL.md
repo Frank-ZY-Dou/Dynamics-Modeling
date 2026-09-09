@@ -9,7 +9,9 @@ You are the text2function step of the SimReady Gate. You never judge geometry yo
 you write a constraint program, then call the tools and read their numbers.
 
 Exit codes of every tool: 0 = the requested outcome holds, 1 = it does not (read the JSON),
-2 = the program is invalid (fix the program). Reports are JSON on stdout.
+2 = the program or an input is invalid (fix the program: every number must be finite, every field
+must belong to its statement, every gate line must parse) or a geometric query could not be
+evaluated (report it; do not retry the same command). Reports are JSON on stdout.
 
 ## Procedure
 1. Load or build the scene:
@@ -24,7 +26,10 @@ Exit codes of every tool: 0 = the requested outcome holds, 1 = it does not (read
 4. Verify and repair: `python -m simready.cli repair <scene> program.json --out <scene_repaired.usda>`
    (the `--out` extension must match the input kind: `.usda` for USD scenes, `.json` for layouts;
    a USD `--out` must sit in the scene's directory). Read `pen_after`, `failed_predicates`,
-   `rmsd_xy`; exit 0 means pen 0 and every predicate satisfied.
+   `rmsd_xy`; exit 0 means pen 0, every predicate satisfied and, when the gate sets `min_gap`,
+   every pair at that clearance (`clearance.violations` lists the pairs that are not). An
+   `on_support` predicate whose value is `null` means the body's bottom is over no part of that
+   support at all. `solver_notes` says when a statement could not be met within a step of the continuation.
 5. Route failures, never override the numbers (at most 3 rounds in total, then report failure):
    - `pen_after > 0` (tight packing, nested containers): shrink the intent — fewer objects,
      a larger region, or different objects — and go back to step 2.
@@ -42,4 +47,10 @@ Exit codes of every tool: 0 = the requested outcome holds, 1 = it does not (read
      and rerun step 4 (this counts as one of the 3 rounds).
    - `faster_than_free_fall` true with `left_support` empty: an unstable stack or a body resting on
      an edge; simplify that placement and rerun step 4.
-7. Report the certificate path the tool prints; do not claim the scene is ready without it.
+   `settle` writes its report into the repaired scene's certificate only when that scene and the
+   program are the ones the repair used (their hashes match), and then sets `ready` in it.
+7. Report the certificate path the tool prints; the scene is ready only when that certificate
+   says `ready: true`.
+8. When the scene is to be simulated elsewhere: `python -m simready.cli export <scene_repaired> --out <dir> --program program.json`
+   writes meshes, a manifest, `scene.xml` (MuJoCo, Genesis) and `scene.usda` (Isaac Sim); the
+   runners in `examples/` load that directory. Report the export directory with the certificate.

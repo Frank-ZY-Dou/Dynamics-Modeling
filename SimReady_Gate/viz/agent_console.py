@@ -51,7 +51,8 @@ def main():
     cert_path = next((c for c in run.glob("*.certificate.json") if "round" not in c.name), None)
     cert = json.load(open(cert_path)) if cert_path else {}
     verdict = {"pen_before": cert.get("pen_before"), "pen_after": cert.get("pen_after"), "rmsd_xy": cert.get("rmsd_xy"),
-               "time_s": cert.get("time_s"), "failed_predicates": cert.get("failed_predicates"), "g5_pass": cert.get("g5", {}).get("pass")}
+               "time_s": cert.get("time_s"), "failed_predicates": cert.get("failed_predicates"), "g5_pass": cert.get("g5", {}).get("pass"),
+               "ready": cert.get("ready")}
     steps = [block("1 · summarize — the agent reads the scene as text", pre(summarize.strip()[:4000])),
              block("request", f'<p class="req">“{esc(request)}”</p>')]
     for i, r in enumerate(rounds, 1):
@@ -82,7 +83,7 @@ figure{{margin:0 0 16px}} video{{width:100%;border-radius:8px;background:#000}} 
 <div class="page">
 <h1>SimReady Gate · one agent run</h1>
 <p class="lede">A language request, a typed program written by the model, and the deterministic gates that decide. Every number on this page was read from the tools' own outputs in <code>{esc(run)}</code>.</p>
-<div class="verdict"><span>penetrating pairs <b>{verdict['pen_before']} → {verdict['pen_after']}</b></span><span>planar RMSD <b>{verdict['rmsd_xy']:.3f} m</b></span><span>repair <b>{verdict['time_s']} s</b></span><span>failed predicates <b>{verdict['failed_predicates']}</b></span><span>G5 <b>{'pass' if verdict['g5_pass'] else verdict['g5_pass']}</b></span></div>
+<div class="verdict"><span>penetrating pairs <b>{verdict['pen_before']} → {verdict['pen_after']}</b></span><span>planar RMSD <b>{verdict['rmsd_xy']:.3f} m</b></span><span>repair <b>{verdict['time_s']} s</b></span><span>failed predicates <b>{verdict['failed_predicates']}</b></span><span>G5 <b>{'pass' if verdict['g5_pass'] else verdict['g5_pass']}</b></span><span>ready <b>{verdict['ready']}</b></span></div>
 <div class="grid"><div>{''.join(steps)}</div><div>{vids}<section class="step"><h3>certificate</h3>{cert_html}</section></div></div>
 </div>
 """

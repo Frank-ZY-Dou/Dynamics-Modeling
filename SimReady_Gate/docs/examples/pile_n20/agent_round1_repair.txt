@@ -7,9 +7,9 @@
  "min_score_after": 0.0,
  "contained_after": [],
  "floating_after": [],
- "rmsd_xy": 0.33272861440653756,
- "steps": 34,
- "time_s": 24.44,
+ "rmsd_xy": 0.3331254985320989,
+ "steps": 44,
+ "time_s": 31.02,
  "predicates": [
   [
    "on_support(pineapple_slices_can,table)",
@@ -289,7 +289,7 @@
   [
    "within(hammer_8,table.top)",
    true,
-   0.0
+   0.000807099481844431
   ],
   [
    "within(peas_and_carrots,table.top)",
@@ -304,7 +304,7 @@
   [
    "within(bin_b02,table.top)",
    true,
-   0.0
+   0.0006570811519192032
   ],
   [
    "within(orange_01,table.top)",
@@ -314,22 +314,22 @@
   [
    "place(pitcher)",
    true,
-   0.00014062500000000533
+   0.0
   ],
   [
    "place(bowl)",
    true,
-   0.012678679346677445
+   0.0032705518227384056
   ],
   [
    "place(ladle)",
    true,
-   0.005215595186006002
+   0.0032647063407607183
   ],
   [
    "place(spoon_big)",
    true,
-   0.00014062553077683634
+   8.596390512924525e-07
   ],
   [
    "place(orange_02)",
@@ -384,17 +384,17 @@
   [
    "place(plasticjerrican_a01)",
    true,
-   0.008415248853788053
+   0.008203058186891017
   ],
   [
    "place(hammer_8)",
    false,
-   0.07286654276525655
+   0.07300434600845908
   ],
   [
    "place(bin_b02)",
    true,
-   0.037288344164202805
+   0.0370259980933725
   ],
   [
    "place(remote_control)",
@@ -404,7 +404,7 @@
   [
    "place(spatula_17)",
    true,
-   0.0020765493340130954
+   0.002070385048213231
   ],
   [
    "place(raisin_box)",
@@ -414,17 +414,17 @@
   [
    "in_front_of(bowl,pitcher,gap=0.12)",
    true,
-   0.07348013505322021
+   0.07881471937039203
   ],
   [
    "near(ladle,bowl,r=0.22)",
    true,
-   0.21599677063694264
+   0.20684770979118217
   ],
   [
    "near(spoon_big,bowl,r=0.22)",
    true,
-   0.14949901795583045
+   0.1569570780010682
   ],
   [
    "near(lime01,orange_02,r=0.12)",
@@ -444,73 +444,79 @@
   [
    "left_of(orange_02,bowl,gap=0.18)",
    true,
-   0.14921172934874594
+   0.15695178428350398
   ],
   [
    "in_front_of(pineapple_slices_can,bowl,gap=0.12)",
    true,
-   0.06666048994677987
+   0.06118528062960804
   ],
   [
    "in_front_of(tomato_sauce_can,bowl,gap=0.12)",
    true,
-   0.06666048994677987
+   0.06118528062960804
   ],
   [
    "in_front_of(peas_and_carrots,bowl,gap=0.12)",
    true,
-   0.06666048994677987
+   0.06118528062960804
   ],
   [
    "in_front_of(bbq_sauce_bottle,bowl,gap=0.12)",
    true,
-   0.06666048994677987
+   0.06118528062960804
   ],
   [
    "in_front_of(whitepackerbottle_a01,bowl,gap=0.12)",
    true,
-   0.06666048994677987
+   0.06118528062960804
   ],
   [
    "in_front_of(whitepackerbottle_a02,bowl,gap=0.12)",
    true,
-   0.06666048994677987
+   0.06118528062960804
   ],
   [
    "in_front_of(plasticjerrican_a01,bowl,gap=0.12)",
    true,
-   0.028530948877507956
+   0.03747204744999122
   ],
   [
    "right_of(hammer_8,bowl,gap=0.22)",
    true,
-   0.11794993850431598
+   0.11007169929930419
   ],
   [
    "right_of(bin_b02,bowl,gap=0.25)",
    true,
-   0.14350964654166437
+   0.13655943257113362
   ],
   [
    "right_of(remote_control,bowl,gap=0.22)",
    true,
-   0.19078827065125412
+   0.18304821571649607
   ],
   [
    "right_of(spatula_17,bowl,gap=0.12)",
    true,
-   0.040313679028720684
+   0.03257507130382492
   ]
  ],
  "failed_predicates": [
   "place(hammer_8)"
  ],
+ "clearance": null,
  "notes": [
   "RoboLab frame: the robot at -x looks along +x; 'in front of X' means larger x than X and 'left of X' means larger y. So the far edge of the table ('the back') is larger x: the back row is in_front_of the bowl.",
   "targets were chosen from the table rectangle x[0.20, 0.90] y[-0.50, 0.50] and the listed object sizes; the continuation resolves any residual overlap"
  ],
+ "solver_notes": [
+  "a program row was not met within the step at 17 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+  "the contacts exceeded the trust region at 4 step(s); those steps served the contacts alone"
+ ],
  "dropped_children": [],
  "written": "results/videos/pile_n20/agent_round1_repaired.json",
+ "written_sha256": "5e995999646aecc9",
  "certificate": "results/videos/pile_n20/agent_round1_repaired.certificate.json"
 }
 repair exit=1
