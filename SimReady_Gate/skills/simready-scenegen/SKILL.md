@@ -47,8 +47,11 @@ evaluated (report it; do not retry the same command). Reports are JSON on stdout
      and rerun step 4 (this counts as one of the 3 rounds).
    - `faster_than_free_fall` true with `left_support` empty: an unstable stack or a body resting on
      an edge; simplify that placement and rerun step 4.
-   `settle` writes its report into the repaired scene's certificate only when that scene and the
-   program are the ones the repair used (their hashes match), and then sets `ready` in it.
+   `settle` writes its report into the repaired scene's certificate only when that scene, the
+   program and every asset file are the ones the repair used (their hashes match), and then sets
+   `ready` in it. Its `after_settle` block lists the predicates that no longer hold on the settled
+   poses (a body that tipped over fails `upright`); pass `--hold-predicates` when the task needs
+   the layout's intent to survive the settle, and read `final_tilt_deg` per body either way.
 7. Report the certificate path the tool prints; the scene is ready only when that certificate
    says `ready: true`.
 8. When the scene is to be simulated elsewhere: `python -m simready.cli export <scene_repaired> --out <dir> --program program.json`

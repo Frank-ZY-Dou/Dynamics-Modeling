@@ -229,11 +229,13 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
     return spec
 
 
-def check_predicates(program: Program, scene: Scene, tol: float = 2e-3):
+def check_predicates(program: Program, scene: Scene, tol: float = 2e-3, upright_deg: float = 1.0, place_tol: float = PLACE_TOL):
     """Evaluate every statement on the final scene. Returns [(statement, ok, value)].
     on_support is judged by the body's lowest point against the support SURFACE under its bottom
     (downward rays), a geometric fact independent of the numbers the repair used; a body whose
-    bottom is over no part of the support fails with value None, whatever its height."""
+    bottom is over no part of the support fails with value None, whatever its height.
+    `tol` (m), `upright_deg` and `place_tol` (m) are the tolerances; the repair's verdict uses the
+    defaults, a check on settled poses passes looser ones."""
     out = []
     for st in program.statements:
         n = st.name
@@ -251,7 +253,7 @@ def check_predicates(program: Program, scene: Scene, tol: float = 2e-3):
             for nm in _bodies(scene, st.args[0]):
                 _, roll, pitch = decompose_zyx(scene[nm].rotation)
                 t = max(abs(roll), abs(pitch))
-                out.append((f"upright({nm})", t <= math.radians(1.0), t))
+                out.append((f"upright({nm})", t <= math.radians(upright_deg), t))
         elif n in ("within", "inside"):
             inset = float(st.kw.get("inset", DEFAULTS["inset"] if n == "within" else 0.0))
             ref = _ref(st.args[1])
@@ -279,5 +281,5 @@ def check_predicates(program: Program, scene: Scene, tol: float = 2e-3):
         elif n == "place":
             a = st.args[0]
             d = float(np.linalg.norm(scene[a].center[:2] - np.array([float(st.kw["x"]), float(st.kw["y"])])))
-            out.append((f"place({a})", d <= PLACE_TOL, d))      # a soft target: reported against a loose tolerance
+            out.append((f"place({a})", d <= place_tol, d))      # a soft target: reported against a loose tolerance
     return out

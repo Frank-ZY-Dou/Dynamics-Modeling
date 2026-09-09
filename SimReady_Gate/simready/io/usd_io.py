@@ -168,6 +168,9 @@ def load_scene_usda(path, fixture_key: str = "fixtures", world_prim: str | None 
             for pp in getattr(spec, "payloadList", None).GetAddedOrExplicitItems() if getattr(spec, "payloadList", None) else []:
                 payload_targets.append(pp.assetPath)
         srcpath = payload_targets[0] if payload_targets else src
+        if srcpath and not os.path.isabs(srcpath) and not srcpath.startswith(("omniverse:", "http")):
+            # a payload path is relative to the layer that declares it: the scene file here
+            srcpath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(path)), srcpath))
         lname = child.GetName().lower()
         inline = not payload_targets                      # authored in the scene layer itself
         is_fixture = (f"/{fixture_key}/" in srcpath.replace("\\", "/")) or any(k in lname for k in support_names) \
@@ -296,7 +299,15 @@ def load_object_usd(path):
     """Mesh (verts, faces) of an object USD in its own default-prim frame, plus
     the AABB centre offset. Used to instantiate catalog objects at solver poses."""
     from pxr import Usd, UsdGeom
-    stage = Usd.Stage.Open(str(path))
+    import os
+    if not os.path.exists(str(path)):
+        raise FileNotFoundError(f"object USD not found: {path}")
+    try:
+        stage = Usd.Stage.Open(str(path))
+    except Exception as e:  # pxr reports an unreadable file as an exception
+        raise ValueError(f"cannot open object USD {path}: {e}") from e
+    if stage is None:
+        raise ValueError(f"cannot open object USD {path}")
     root = stage.GetDefaultPrim()
     cache = UsdGeom.XformCache()
     V, F, off = [], [], 0

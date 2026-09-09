@@ -6,16 +6,22 @@ file and the USD stage are generated from the same data, so MuJoCo, Genesis (whi
 manifest or the MJCF) and Isaac Sim (which reads the USD stage) simulate the same scene:
 
     out/
-      manifest.json      bodies, poses (metres, Z up), mesh files, fixed flags, ground height
-      meshes/<name>.obj  one mesh per body in the body frame (plus CoACD pieces with --decompose)
-      scene.xml          MJCF: static bodies for fixtures, free joints for the rest, a floor plane
-      scene.usda         USD: UsdPhysics rigid bodies and colliders, a physics scene, a ground slab
+      manifest.json                bodies, poses (metres, Z up), mesh files, fixed flags, ground height
+      meshes/0007_cup.obj          one mesh per body in the body frame, named by the body's index
+      meshes/0007_cup/p0000.obj    CoACD pieces of that body (with --decompose)
+      scene.xml                    MJCF: static bodies for fixtures, free joints for the rest, a floor plane
+      scene.usda                   USD: UsdPhysics rigid bodies and colliders, a physics scene, a ground slab
+
+File names carry the body's index, so two bodies whose names differ only by a suffix can never
+share a file; every output path is checked for uniqueness before anything is written.
 
 Fixed bodies keep their full mesh as a collider; MuJoCo replaces it by its convex hull, whose top
-face is the plate of a table, and Isaac Sim keeps the triangle mesh for static colliders. A flat
-fixed sheet (a ground plane) has no volume to hull, so it is marked `flat` in the manifest and
-the ground of the export stands in for it. Free bodies are convex hulls unless `decompose`
-writes CoACD pieces for them.
+face is the plate of a table, and Isaac Sim keeps the triangle mesh for static colliders. A fixed
+body whose mesh is a single plane is handled by what it is: a horizontal sheet at the ground
+height, or one tagged `ground`, is the ground and is marked `flat` (the export's ground stands in
+for it); any other sheet (a wall, a shelf board) is written with a small thickness so that every
+engine keeps it as a solid collider, and the manifest records that thickness. Free bodies are
+convex hulls unless `decompose` writes CoACD pieces for them.
 """
 from __future__ import annotations
 
@@ -27,6 +33,9 @@ from pathlib import Path
 import numpy as np
 
 from ..scene.model import Scene
+from .paths import portable
+
+SHEET_THICKNESS = 0.01     # metres given to a planar fixed body that is not the ground
 
 
 def _write_obj(path, verts, faces):
@@ -56,6 +65,34 @@ def ground_height(scene: Scene) -> float:
     return min(float(b.world_aabb()[0][2]) for b in scene.bodies) - 1.0
 
 
+def plane_normal(verts: np.ndarray):
+    """Unit normal of a planar vertex set (rank 2), or None when the set spans a volume."""
+    c = verts - verts.mean(0)
+    if np.linalg.matrix_rank(c, tol=1e-6) >= 3:
+        return None
+    _, _, vt = np.linalg.svd(c, full_matrices=False)
+    return vt[-1] / max(np.linalg.norm(vt[-1]), 1e-12)
+
+
+def thicken(verts: np.ndarray, faces: np.ndarray, normal: np.ndarray, thickness: float):
+    """A solid slab from a planar mesh: the sheet offset by half the thickness to each side, its
+    boundary edges closed by side walls."""
+    n = np.asarray(normal, dtype=np.float64) * (0.5 * thickness)
+    top = verts + n; bot = verts - n
+    V = np.vstack([top, bot]); k = len(verts)
+    F = [np.asarray(faces, dtype=np.int32), np.asarray(faces, dtype=np.int32)[:, ::-1] + k]
+    edges = {}
+    for tri in faces:
+        for a, b in ((tri[0], tri[1]), (tri[1], tri[2]), (tri[2], tri[0])):
+            key = (min(int(a), int(b)), max(int(a), int(b)))
+            edges[key] = edges.get(key, 0) + 1
+    boundary = [e for e, count in edges.items() if count == 1]
+    sides = [[a, b, b + k] for a, b in boundary] + [[a, b + k, a + k] for a, b in boundary]
+    if sides:
+        F.append(np.array(sides, dtype=np.int32))
+    return V, np.vstack(F).astype(np.int32)
+
+
 def export_scene(scene: Scene, out_dir, decompose: bool = False, max_hull_verts: int = 256,
                  density: float = 500.0, friction=(1.0, 0.005, 0.0001), timestep: float = 2e-3) -> dict:
     out = Path(out_dir); (out / "meshes").mkdir(parents=True, exist_ok=True)
@@ -63,29 +100,47 @@ def export_scene(scene: Scene, out_dir, decompose: bool = False, max_hull_verts:
     if len(set(names)) != len(names):
         raise ValueError(f"body names collide after sanitising: {names}")
     z_floor = ground_height(scene)
+    planned = {}                      # relative path -> (verts, faces); every path checked before writing
     bodies = []
-    for b, pn in zip(scene.bodies, names):
-        flat = bool(b.fixed and ("ground" in b.tags or int(np.linalg.matrix_rank(b.verts - b.verts.mean(0), tol=1e-6)) < 3))
-        mesh_rel = f"meshes/{pn}.obj"
-        _write_obj(out / mesh_rel, b.verts, b.faces)
-        pieces = []
+    for k, (b, pn) in enumerate(zip(scene.bodies, names)):
+        stem = f"{k:04d}_{pn}"
+        normal = plane_normal(b.verts) if b.fixed else None
+        horizontal = normal is not None and abs(float(normal[2])) > 0.99
+        at_ground = horizontal and float(b.world_aabb()[0][2]) <= z_floor + 0.01
+        flat = bool(b.fixed and ("ground" in b.tags or at_ground))
+        verts, faces, thickness = b.verts, b.faces, 0.0
+        if normal is not None and not flat:
+            verts, faces = thicken(b.verts, b.faces, normal, SHEET_THICKNESS)
+            thickness = SHEET_THICKNESS
+        mesh_rel = f"meshes/{stem}.obj"
+        planned[mesh_rel] = (verts, faces)
+        pieces, note = [], ""
         if decompose and not b.fixed:
             from ..gates.settle_mujoco import coacd_pieces_info
-            parts, _ = coacd_pieces_info(b)
-            for k, (v, f) in enumerate(parts):
-                rel = f"meshes/{pn}_p{k}.obj"
-                _write_obj(out / rel, v, f)
+            parts, used_hull = coacd_pieces_info(b)
+            for j, (v, f) in enumerate(parts):
+                rel = f"meshes/{stem}/p{j:04d}.obj"
+                planned[rel] = (v, f)
                 pieces.append(rel)
-        bodies.append({"name": b.name, "prim": pn, "fixed": bool(b.fixed), "flat": flat, "mesh": mesh_rel, "collision_pieces": pieces,
-                       "position": [float(x) for x in b.center], "quaternion_wxyz": _quat_wxyz(b.rotation),
-                       "tags": sorted(b.tags), "source": b.source})
+            note = "CoACD failed; one convex hull" if used_hull else f"{len(parts)} CoACD pieces"
+        entry = {"name": b.name, "prim": pn, "fixed": bool(b.fixed), "flat": flat, "mesh": mesh_rel, "collision_pieces": pieces,
+                 "position": [float(x) for x in b.center], "quaternion_wxyz": _quat_wxyz(b.rotation),
+                 "tags": sorted(b.tags), "source": portable(b.source)}
+        if thickness:
+            entry["thickened_m"] = thickness
+        if note:
+            entry["collision_note"] = note
+        bodies.append(entry)
+    if len(planned) != len({os.path.normpath(p) for p in planned}):
+        raise ValueError("export paths collide")
+    for rel, (v, f) in planned.items():
+        (out / rel).parent.mkdir(parents=True, exist_ok=True)
+        _write_obj(out / rel, v, f)
     manifest = {"units": "m", "up": "z", "ground_z": z_floor, "timestep": timestep, "density": density,
                 "friction": list(friction), "max_hull_verts": max_hull_verts,
                 "files": {"mjcf": "scene.xml", "usd": "scene.usda"}, "bodies": bodies}
-    with open(out / "manifest.json", "w") as f:
-        json.dump(manifest, f, indent=1)
     write_mjcf(manifest, out / "scene.xml")
-    manifest["usd_written"] = write_usd(scene, manifest, out / "scene.usda")
+    manifest["usd_written"] = write_usd(manifest, out / "scene.usda", planned)
     with open(out / "manifest.json", "w") as f:
         json.dump(manifest, f, indent=1)
     return manifest
@@ -96,12 +151,12 @@ def write_mjcf(manifest: dict, path) -> None:
     assets, bodies = [], []
     for b in manifest["bodies"]:
         if b.get("flat"):
-            continue                       # the floor plane stands in for a flat sheet
+            continue                       # the floor plane stands in for the ground sheet
         files = b["collision_pieces"] or [b["mesh"]]
         geoms = []
         for k, rel in enumerate(files):
             mname = f"{b['prim']}_{k}"
-            assets.append(f'<mesh name="{mname}" file="{os.path.basename(rel)}" inertia="convex" maxhullvert="{manifest["max_hull_verts"]}"/>')
+            assets.append(f'<mesh name="{mname}" file="{os.path.relpath(rel, "meshes")}" inertia="convex" maxhullvert="{manifest["max_hull_verts"]}"/>')
             geoms.append(f'<geom type="mesh" mesh="{mname}" condim="3" friction="{fr}" density="{manifest["density"]:g}"/>')
         w, x, y, z = b["quaternion_wxyz"]
         pos = " ".join(f"{v:.6f}" for v in b["position"])
@@ -115,10 +170,11 @@ def write_mjcf(manifest: dict, path) -> None:
         f.write(xml)
 
 
-def write_usd(scene: Scene, manifest: dict, path) -> bool:
-    """A self-contained stage with UsdPhysics schemas; returns False when pxr is not installed."""
+def write_usd(manifest: dict, path, meshes: dict) -> bool:
+    """A self-contained stage with UsdPhysics schemas; returns False when pxr is not installed.
+    `meshes` maps the manifest's mesh paths to the (verts, faces) that were written."""
     try:
-        from pxr import Usd, UsdGeom, UsdPhysics, Gf, Sdf, Vt
+        from pxr import Usd, UsdGeom, UsdPhysics, Gf, Vt
     except ImportError:
         return False
     stage = Usd.Stage.CreateNew(str(path))
@@ -144,14 +200,15 @@ def write_usd(scene: Scene, manifest: dict, path) -> bool:
     gf = np.array([[0, 2, 1], [1, 2, 3], [4, 5, 6], [5, 7, 6], [0, 1, 5], [0, 5, 4], [2, 6, 7], [2, 7, 3], [0, 4, 6], [0, 6, 2], [1, 3, 7], [1, 7, 5]])
     gm = mesh_prim("/World/ground", gv, gf)
     UsdPhysics.CollisionAPI.Apply(gm.GetPrim())
-    for body, b in zip(scene.bodies, manifest["bodies"]):
+    for b in manifest["bodies"]:
         if b.get("flat"):
-            continue                       # the ground slab stands in for a flat sheet
+            continue                       # the ground slab stands in for the ground sheet
         xf = UsdGeom.Xform.Define(stage, f"/World/{b['prim']}")
         xf.AddTranslateOp().Set(Gf.Vec3d(*b["position"]))
         w, x, y, z = b["quaternion_wxyz"]
         xf.AddOrientOp().Set(Gf.Quatf(w, x, y, z))
-        m = mesh_prim(f"/World/{b['prim']}", body.verts, body.faces)
+        verts, faces = meshes[b["mesh"]]
+        m = mesh_prim(f"/World/{b['prim']}", verts, faces)
         UsdPhysics.CollisionAPI.Apply(m.GetPrim())
         mc = UsdPhysics.MeshCollisionAPI.Apply(m.GetPrim())
         mc.CreateApproximationAttr("none" if b["fixed"] else "convexDecomposition")

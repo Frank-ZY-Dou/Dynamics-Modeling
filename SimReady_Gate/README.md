@@ -34,7 +34,7 @@
 ## 📢 Updates
 
 * [September 2026] **Into the engines.** `export` writes a repaired scene as meshes, a manifest, an MJCF file and a USD stage with physics schemas; `examples/run_mujoco.py`, `run_genesis.py` and `run_isaac.py` load it and simulate it. The twenty-object layout runs in MuJoCo, Genesis and Isaac Sim with no body leaving the table ([details](#running-the-repaired-scene-in-a-simulator)).
-* [September 2026] **Correctness pass after an external code audit.** Inputs are checked before anything reaches the solver (finite numbers only, fields tied to their statement, gate lines that do not parse are errors); a geometric query that cannot be evaluated is an error rather than a "no"; `on_support` needs the support under the body, not merely the right height; the program's `min_gap` is now compared pair by pair with explicit coverage; `settle` adds to a certificate only when the scene and program hash to the ones the repair used, and sets `ready`; MJCF capsules keep their end caps; the continuation keeps its contact rows hard, lets program rows yield to them through penalised slacks, keeps its trust region inside the QP, and never advances the scale on a failed step. Regression tests in [`tests/`](tests/); the diagnostics were rerun ([`docs/DIAGNOSTIC_2026-09-08.md`](docs/DIAGNOSTIC_2026-09-08.md)).
+* [September 2026] **Correctness pass after three external code audits.** Inputs are checked before anything reaches the solver (finite numbers only, fields tied to their statement, gate lines that do not parse are errors); a geometric query that cannot be evaluated is an error rather than a "no"; `on_support` needs the support under the body, not merely the right height; the program's `min_gap` is now compared pair by pair with explicit coverage; `settle` adds to a certificate only when the scene, the program and every asset file hash to the ones the repair used, and sets `ready`; MJCF capsules keep their end caps; the continuation keeps its contact rows hard, lets program rows yield to them through penalised slacks, keeps its trust region inside the QP, and never advances the scale on a failed step. Regression tests in [`tests/`](tests/); the diagnostics were rerun ([`docs/DIAGNOSTIC_2026-09-08.md`](docs/DIAGNOSTIC_2026-09-08.md)).
 * [September 2026] **Twenty-object demo.** A heap of twenty RoboLab objects laid out by a language request in scale-space, two recorded rounds of the agent loop, one passing certificate; the request, the programs, every tool output and both certificates are in [`docs/examples/pile_n20/`](docs/examples/pile_n20/) ([Example 2](#example-2-twenty-objects-from-a-heap-laid-out-by-language)).
 * [September 2026] **Scale-space placement.** `place(a, x, y, yaw)` lets the model position bodies while every body is shrunk and nothing touches; the continuation restores full scale under the program. Renders from the solver's own meshes with the assets' textures (`viz/`).
 * [September 2026] **Initial release**: the scene layer for RoboLab USD scenes (`usd-core`, no Isaac Sim) and RoboCasa MJCF objects (compiled by MuJoCo itself); the constraint language, its JSON schema and compiler; the S4R upright-on-plane repair driven by the program; the mesh-level evaluator with containment and resting-contact tests; the MuJoCo settle test; certificates with provenance; the agent skill and the Anthropic SDK backend; the diagnostics on RoboLab's 68 shipped scenes, on layouts from RoboLab's own placement solver, and on RoboCasa counter regions with RoboCasa's own placement test ([`docs/DIAGNOSTIC_2026-09-08.md`](docs/DIAGNOSTIC_2026-09-08.md)).
@@ -197,11 +197,16 @@ $ python -m simready.cli settle workdesk_repaired.usda --program program.json
 ### 6. The certificate
 
 `workdesk_repaired.certificate.json` records the outcome with its provenance: the program text and
-JSON, the hashes of the scene read and the scene written, the git commit, library versions, every
-tolerance, the predicate values, the settle report. `settle` adds its report to the certificate
-only when the scene and program it was given hash to the ones the repair used, and then sets
-`ready`: the repair's `ok` and the settle's `pass`, on the same scene and the same program. Any
-other certificate is left as it is and the settle report goes to a separate `.settle.json`.
+JSON, the hashes of the scene read and the scene written and of every asset file the bodies came
+from, the git commit, library versions, every tolerance, the predicate values, the settle report.
+`settle` adds its report to the certificate only when the scene it was given hashes to the one the
+repair wrote, the program to the one the repair used and every asset to what the repair read, and
+then sets `ready`: the repair's `ok` and the settle's `pass`. Any other certificate is left as it
+is and the settle report goes to a separate `.settle.json`. The settle report also carries the
+program's predicates evaluated on the settled poses (`after_settle`, at settle tolerances: 1 cm,
+15° of tilt, 10 cm for a placement) and the final tilt of every body; with `--hold-predicates`
+those predicates must hold for the settle to pass, and the certificate records which policy was
+used.
 
 ## Example 2: twenty objects from a heap, laid out by language
 
@@ -243,6 +248,14 @@ the programs, every tool output and both certificates are in
 The heap itself, settled as is, reaches 4.9 m/s with ten bodies off the table (hull proxies) and
 3.8 m/s with one (CoACD). The continuation here starts at s = 0.3, large enough to see the bodies
 while they are placed; the certificate records the value.
+
+The settle report also re-evaluates the program on the settled poses (`after_settle`). It shows
+what the peak-speed and displacement thresholds do not: the remote control, 16 cm tall on a
+3.6 × 2.5 cm footprint, tips over in MuJoCo under both proxies (final tilt 82° and 91°), and the
+round fruit rolls out of `upright`; every other statement still holds. The default policy leaves
+`ready` to the G5 thresholds and reports this; `--hold-predicates` would make the certificate not
+ready until the request is changed for that body. In Isaac Sim the same export keeps the remote
+standing (see [Running the repaired scene in a simulator](#running-the-repaired-scene-in-a-simulator)).
 
 ## The agent loop
 
@@ -333,10 +346,13 @@ JSONs (`base_scene` + objects); RoboCasa objects come in through `simready.io.mj
 
 ### Running the repaired scene in a simulator
 
-`export` writes a scene the engines load directly: one OBJ per body in its own frame, a
-manifest with every pose (metres, Z up), an MJCF file and a USD stage with UsdPhysics rigid
-bodies, colliders and a physics scene. The three runners in `examples/` load that export, step
-it and print the peak and final displacement of every free body.
+`export` writes a scene the engines load directly: one OBJ per body in its own frame (named by
+the body's index, so no two bodies can share a file), a manifest with every pose (metres, Z up),
+an MJCF file and a USD stage with UsdPhysics rigid bodies, colliders and a physics scene. A fixed
+body whose mesh is a single plane is kept as a 1 cm solid unless it is the ground (a horizontal
+sheet at the ground height, or one tagged `ground`), which the export's own ground replaces. The
+three runners in `examples/` load that export, step it and print the peak and final displacement
+of every free body.
 
 ```
 python -m simready.cli export pile_repaired.json --out pile_export --program program.json

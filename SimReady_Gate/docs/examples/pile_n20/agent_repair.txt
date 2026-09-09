@@ -9,7 +9,7 @@
  "floating_after": [],
  "rmsd_xy": 0.32776480303240424,
  "steps": 44,
- "time_s": 30.76,
+ "time_s": 29.86,
  "predicates": [
   [
    "on_support(pineapple_slices_can,table)",
@@ -509,6 +509,12 @@
   "the contacts exceeded the trust region at 1 step(s); those steps served the contacts alone"
  ],
  "dropped_children": [],
+ "continuation": {
+  "complete": true,
+  "last_accepted_scale": 1.0,
+  "termination": "complete"
+ },
+ "synthetic_table": null,
  "written": "results/videos/pile_n20/agent_repaired.json",
  "written_sha256": "ad2d8f19d04fd074",
  "certificate": "results/videos/pile_n20/agent_repaired.certificate.json"

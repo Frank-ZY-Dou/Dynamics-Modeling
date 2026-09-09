@@ -3,8 +3,8 @@
 Every body becomes a MuJoCo mesh geom (MuJoCo convex-hulls mesh geoms; pass
 `pieces` to supply convex pieces per body, e.g. from CoACD, for a PhysX-like
 proxy). Fixed bodies are static geoms in the world body. Reports peak body
-speed, peak displacement, peak tilt and the final displacement per free body,
-together with the number of integration steps actually taken and which bodies
+speed, peak displacement, peak and final tilt, the final displacement and the final
+pose per free body, the number of integration steps actually taken and which bodies
 fell back from CoACD to a single hull.
 """
 from __future__ import annotations
@@ -48,6 +48,8 @@ class SettleReport:
     per_body_peak_tilt_deg: dict = field(default_factory=dict)
     proxy_fallback: list = field(default_factory=list)  # bodies whose CoACD decomposition failed and used one hull
     engine_warnings: dict = field(default_factory=dict) # MuJoCo warning counters that fired (the engine reset the state), non-finite readings
+    final_pose: dict = field(default_factory=dict)      # name -> (xpos (3,), xquat wxyz (4,)) of every free body at the end
+    final_tilt_deg: dict = field(default_factory=dict)  # name -> rotation of the body's up axis from its start, at the end
 
     def summary(self):
         worst = max(self.final_disp.items(), key=lambda kv: kv[1])[0] if self.final_disp else "-"
@@ -220,8 +222,10 @@ def settle_and_measure(scene: Scene, seconds: float = 2.0, timestep: float = 2e-
     else:
         left = [n for n in free if data.xpos[bid[n]][2] < p0[n][2] - 0.3]
     tilt = {n: float(t) for n, t in zip(free, per_tilt)}
+    final_pose = {n: (data.xpos[bid[n]].copy(), data.xquat[bid[n]].copy()) for n in free}
+    end_tilt = {n: float(t) for n, t in zip(free, _tilt_deg(data.xquat[ids], z0))} if free else {}
     rep = SettleReport(peak_v, peak_d, final, per_v, done, timestep, left, traj, done * timestep,
-                       float(per_tilt.max()) if free else 0.0, tilt, fallback, warnings)
+                       float(per_tilt.max()) if free else 0.0, tilt, fallback, warnings, final_pose, end_tilt)
     if verbose:
         print("[settle]", rep.summary())
     return rep

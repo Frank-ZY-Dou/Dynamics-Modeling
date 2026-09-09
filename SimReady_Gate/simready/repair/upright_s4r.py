@@ -113,6 +113,9 @@ class RepairResult:
     trace: list = field(default_factory=list)   # (scale, contact rows, penetrating pairs, contact slack, DSL slack)
     notes: list = field(default_factory=list)   # what the solver could not do as asked
     relaxed_steps: int = 0                      # steps at which a DSL row was not met by more than SLACK_EPS
+    continuation_complete: bool = True          # every scale step up to 1 was accepted
+    last_accepted_scale: float = 1.0            # the last scale whose step was applied
+    termination: str = "complete"               # "complete", or "qp_failures" when the continuation stopped early
 
 
 def _validate_spec(spec: RepairSpec) -> None:
@@ -134,21 +137,38 @@ def _validate_spec(spec: RepairSpec) -> None:
         raise ValueError("more than 100000 steps requested; raise ds_max or lower tail_iters")
 
 
+def _status_codes():
+    """OSQP's numeric status codes for the installed version (1.x names them in SolverStatus;
+    0.6 used 1, 2 for solved and 3, -3 for primal infeasible)."""
+    try:
+        from osqp import SolverStatus
+        return ({int(SolverStatus.OSQP_SOLVED), int(SolverStatus.OSQP_SOLVED_INACCURATE)},
+                {int(SolverStatus.OSQP_PRIMAL_INFEASIBLE), int(SolverStatus.OSQP_PRIMAL_INFEASIBLE_INACCURATE)})
+    except (ImportError, AttributeError):
+        return {1, 2}, {3, -3}
+
+
+def _status_text(info) -> str:
+    return str(getattr(info, "status", "")).replace("_", " ").strip().lower()
+
+
 def _qp_solved(info) -> bool:
-    """OSQP reports success as status_val 1 (solved) or 2 (solved inaccurate); the status text
-    has a space in it ('solved inaccurate'), so the numeric code is the reliable test."""
+    """Solved or solved inaccurately, by the status text first (it is the same across versions)
+    and by the version's numeric code otherwise."""
+    text = _status_text(info)
+    if text:
+        return text in ("solved", "solved inaccurate")
     sv = getattr(info, "status_val", None)
-    if sv is not None:
-        return int(sv) in (1, 2)
-    return str(getattr(info, "status", "")).replace("_", " ").strip() in ("solved", "solved inaccurate")
+    return sv is not None and int(sv) in _status_codes()[0]
 
 
 def _qp_infeasible(info) -> bool:
-    """OSQP status 3 / -3: primal infeasible (inaccurate)."""
+    """Primal infeasible, accurately or not."""
+    text = _status_text(info)
+    if text:
+        return text.startswith("primal infeasible")
     sv = getattr(info, "status_val", None)
-    if sv is not None:
-        return int(sv) in (3, -3)
-    return "primal infeasible" in str(getattr(info, "status", "")).replace("_", " ")
+    return sv is not None and int(sv) in _status_codes()[1]
 
 
 def _is_support_pair(scene: Scene, i: int, j: int, spec: RepairSpec) -> bool:
@@ -427,6 +447,7 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
     s = spec.s_min
     ds = spec.ds_max
     failures = 0
+    complete, last_accepted, termination = True, spec.s_min, "complete"
     while s < 1.0 - 1e-12:
         st.scale = s
         n_rows, pen_now, status, c_sl, d_sl = solve_step(tail=False, ds=ds)
@@ -436,9 +457,12 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
             if failures <= MAX_STEP_FAILURES:
                 ds *= 0.5      # nothing was applied: retry this scale with a shorter look-ahead
                 continue
-            notes.append(f"continuation stopped at scale {s:.3f}: the step QP failed {failures} times")
+            complete, termination = False, "qp_failures"
+            notes.append(f"continuation stopped at scale {s:.3f} after {failures} failed steps; the bodies were restored to "
+                         f"full size at their last accepted positions and the tail ran there as a recovery, not as an accepted continuation")
             break
         failures = 0
+        last_accepted = s
         trace.append((s, n_rows, pen_now, c_sl, d_sl))
         if d_sl > SLACK_EPS:
             relaxed += 1
@@ -446,6 +470,8 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
             _pose_bodies(st, spec); on_step(st)
         s = min(1.0, s + ds)
         ds = spec.ds_max
+    if complete:
+        last_accepted = 1.0
     st.scale = 1.0
     st.tilt = 0.0
     idle = 0
@@ -479,7 +505,7 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
         notes.append(f"the contacts exceeded the trust region at {contact_relaxed} step(s); those steps served the contacts alone")
     if verbose:
         print(f"[repair] pen {pen_before} -> {pen_after}, steps={steps}, rmsd={rmsd:.4f}")
-    return RepairResult(scene, pen_before, pen_after, steps, disp, rmsd, trace, notes, relaxed)
+    return RepairResult(scene, pen_before, pen_after, steps, disp, rmsd, trace, notes, relaxed, complete, last_accepted, termination)
 
 
 def reseat_on_supports(scene: Scene, spec: RepairSpec) -> None:

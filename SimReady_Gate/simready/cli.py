@@ -31,6 +31,7 @@ from .dsl.model import parse_program
 from .dsl.compile import compile_program, check_predicates, CompileError
 from .dsl.schema import prompt_for, validate_program_json, scene_summary, ProgramError, DEFAULTS
 from .dsl.text2dsl import strict_json_loads
+from .io.paths import portable, expand
 from .repair.upright_s4r import repair_upright, reseat_on_supports, polish_full_mesh
 
 SCENE_EXT = (".usda", ".usd", ".usdc")
@@ -45,28 +46,31 @@ def load_any(path: str) -> Scene:
         from .io.usd_io import body_from_object_usd
         with open(path) as f:
             L = strict_json_loads(f.read())
-        root = os.environ.get("ROBOLAB_DIR", str(Path(__file__).resolve().parents[2] / "ext" / "RoboLab"))
-        def asset(v):      # layouts store RoboLab asset paths with a <ROBOLAB_DIR>/ prefix
-            return root.rstrip("/") + "/" + v[len("<ROBOLAB_DIR>/"):] if isinstance(v, str) and v.startswith("<ROBOLAB_DIR>/") else v
-        L["base_scene"] = asset(L.get("base_scene"))
+        L["base_scene"] = expand(L.get("base_scene"))          # layouts store RoboLab asset paths as <ROBOLAB_DIR>/...
         for o in L["objects"]:
-            o["usd_path"] = asset(o["usd_path"])
+            o["usd_path"] = expand(o["usd_path"])
         if isinstance(L.get("table"), dict):
-            L["table"]["usd_path"] = asset(L["table"].get("usd_path"))
+            L["table"]["usd_path"] = expand(L["table"].get("usd_path"))
         bodies = []
+        meta = {"path": path}
         tb = L.get("table")
-        if tb and tb.get("usd_path") and os.path.exists(tb["usd_path"]):
+        if tb and tb.get("usd_path"):
+            if not os.path.exists(tb["usd_path"]):
+                raise FileNotFoundError(f"the layout's table asset does not exist: {tb['usd_path']}")
             bodies.append(body_from_object_usd("table", tb["usd_path"], tb.get("position", (0, 0, 0)), fixed=True, tags={"support", "fixture"}))
-        elif L.get("base_scene") and os.path.exists(L["base_scene"]):
+        elif L.get("base_scene"):
+            if not os.path.exists(L["base_scene"]):
+                raise FileNotFoundError(f"the layout's base scene does not exist: {L['base_scene']}")
             from .io.usd_io import load_scene_usda
             bodies.extend(load_scene_usda(L["base_scene"]).bodies)
-        else:
+        else:                                   # the layout declares no support: a synthetic slab, recorded as such
             import trimesh
             slab = trimesh.creation.box(extents=(0.8, 1.0, 0.04))
             bodies.append(Body.from_mesh("table", slab.vertices, slab.faces, center=np.array([0.274, 0.0, -0.02]), fixed=True, tags={"support", "fixture"}))
+            meta["synthetic_table"] = "0.8 x 1.0 x 0.04 m slab at (0.274, 0, -0.02): the layout declares no support"
         for o in L["objects"]:
             bodies.append(body_from_object_usd(o["name"], o["usd_path"], (o["x"], o["y"], o["z"]), yaw_deg=o.get("yaw", 0.0), tags={"object"}))
-        return Scene(bodies, meta={"path": path})
+        return Scene(bodies, meta=meta)
     raise ValueError(f"unsupported scene file {path} (expected .usda/.usd/.usdc or a layout .json)")
 
 
@@ -128,7 +132,24 @@ def sha16(path):
         return None
 
 
-def provenance(scene_path, program_path=None, dsl=None, raw=None, params=None):
+def asset_hashes(scene: Scene) -> dict:
+    """sha256 (16 hex digits) of every asset file the scene's bodies were read from, by portable
+    path; a source that is not a readable file hashes to None. The scene file itself is left out
+    (a body authored inline names it as its source): the certificate binds it by its own hash."""
+    own = os.path.abspath(str(scene.meta.get("path", ""))) if scene.meta.get("path") else None
+    out = {}
+    for b in scene.bodies:
+        src = b.source
+        if not src or (own and os.path.abspath(src) == own):
+            continue
+        if portable(src) not in out:
+            out[portable(src)] = sha16(src)
+    if scene.meta.get("synthetic_table"):
+        out["<synthetic table>"] = scene.meta["synthetic_table"]
+    return out
+
+
+def provenance(scene_path, program_path=None, dsl=None, raw=None, params=None, assets=None):
     try:
         git = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(Path(__file__).resolve().parents[1]), capture_output=True, text=True).stdout.strip()[:12]
     except Exception:  # noqa: BLE001
@@ -139,21 +160,25 @@ def provenance(scene_path, program_path=None, dsl=None, raw=None, params=None):
             versions[mod] = __import__(mod).__version__
         except Exception:  # noqa: BLE001
             versions[mod] = None
-    return {"scene": {"path": scene_path, "sha256": sha16(scene_path)}, "program": {"path": program_path, "sha256": sha16(program_path) if program_path else None,
+    return {"scene": {"path": scene_path, "sha256": sha16(scene_path)}, "assets": assets or {},
+            "program": {"path": program_path, "sha256": sha16(program_path) if program_path else None,
             "dsl": dsl, "json": raw}, "params": params or {}, "tolerances": {"pen_eps": PEN_EPS, "touch_eps": TOUCH_EPS, "predicate_tol": 2e-3,
             "verify_gap_tol": 2e-3, "verify_sink_tol": 1e-3, "defaults": DEFAULTS}, "software": {"git": git, "python": platform.python_version(), **versions},
             "time": time.strftime("%Y-%m-%dT%H:%M:%S")}
 
 
-def certificate_bound(cert: dict, scene_path: str, program_path: str | None) -> bool:
+def certificate_bound(cert: dict, scene_path: str, program_path: str | None, assets: dict | None = None) -> bool:
     """A certificate belongs to a settle run when the scene file hashes to the one the repair wrote
-    (`written_sha256`; the scene it read is not the repaired scene) and the program file hashes to
-    the one the repair used. A settle without a program judges against the command-line
-    thresholds, so it can complete only a certificate whose repair had no program either."""
+    (`written_sha256`; the scene it read is not the repaired scene), the program file hashes to the
+    one the repair used, and every asset the scene refers to (`provenance.assets`) still hashes to
+    what the repair read. A settle without a program judges against the command-line thresholds,
+    so it can complete only a certificate whose repair had no program either."""
     prov = cert.get("provenance") or {}
     written = cert.get("written_sha256")
     scene_ok = written is not None and sha16(scene_path) == written
     cert_program = (prov.get("program") or {}).get("sha256")
+    if "assets" not in prov or (assets is not None and prov["assets"] != assets):
+        return False
     if program_path is None:
         return scene_ok and cert_program is None
     return scene_ok and sha16(program_path) is not None and sha16(program_path) == cert_program
@@ -243,7 +268,9 @@ def cmd_repair(a):
               "predicates": [(n, bool(okp), None if v is None else float(v)) for n, okp, v in preds],
               "failed_predicates": [n for n, okp, _ in preds if not okp],
               "clearance": clearance, "notes": notes, "solver_notes": solver_notes, "dropped_children": dropped,
-              "provenance": provenance(a.scene, a.program, dsl, raw, params)}
+              "continuation": {"complete": res.continuation_complete, "last_accepted_scale": res.last_accepted_scale, "termination": res.termination},
+              "synthetic_table": sc.meta.get("synthetic_table"),
+              "provenance": provenance(a.scene, a.program, dsl, raw, params, asset_hashes(sc))}
     if a.out:
         out_is_usd = a.out.endswith(SCENE_EXT)
         if out_is_usd != a.scene.endswith(SCENE_EXT):
@@ -312,19 +339,26 @@ def cmd_settle(a):
             hover = max(hover, float(b.world_aabb()[0][2] - top))
     free_fall_bound = float(np.sqrt(2 * 9.81 * max(hover, 0.0)))
     modes = ("hull", "coacd") if a.proxy == "both" else (a.proxy,)
+    hold = bool(getattr(a, "hold_predicates", False))
     report, ok = {"scene": a.scene, "program": a.program, "seconds": a.seconds, "supports": tops, "max_hover_m": hover,
-                  "free_fall_bound_m_s": free_fall_bound}, True
+                  "free_fall_bound_m_s": free_fall_bound,
+                  "policy": {"hold_predicates_after_settle": hold}}, True
     for mode in modes:
         with quiet_stdout():
             r = settle_and_measure(sc, seconds=a.seconds, support_tops=tops, decompose_free=(mode == "coacd"), max_hull_verts=a.hull_verts)
         passed = (not r.left_support) and r.peak_speed <= v_max and r.peak_disp <= d_max and not r.engine_warnings
+        after = settled_check(sc, r, prog) if prog is not None else None
+        if hold and after is not None and after["failed_predicates"]:
+            passed = False
         ok &= passed
         report[mode] = {"peak_speed": round(r.peak_speed, 3), "peak_disp": round(r.peak_disp, 4), "peak_tilt_deg": round(r.peak_tilt_deg, 2),
                         "left_support": r.left_support, "steps": r.steps, "sim_seconds": round(r.sim_seconds, 4),
                         "engine_warnings": r.engine_warnings,
                         "per_body_peak_speed": {k: round(v, 3) for k, v in r.per_body_peak_speed.items()},
                         "per_body_peak_tilt_deg": {k: round(v, 2) for k, v in r.per_body_peak_tilt_deg.items()},
+                        "final_tilt_deg": {k: round(v, 2) for k, v in r.final_tilt_deg.items()},
                         "final_disp": {k: round(v, 4) for k, v in r.final_disp.items()},
+                        "after_settle": after,
                         "hull_fallback": r.proxy_fallback,
                         "faster_than_free_fall": r.peak_speed > free_fall_bound + 0.05, "pass": passed}
     if min_gap is not None:
@@ -344,9 +378,10 @@ def cmd_settle(a):
             print(f"{cert} is not valid JSON ({e}); it is left unchanged", file=sys.stderr)
     print(dump_json(report, indent=1))
     if c is not None:
-        if certificate_bound(c, a.scene, a.program):
+        if certificate_bound(c, a.scene, a.program, asset_hashes(sc)):
             c["g5"] = report
-            c["ready"] = bool(c.get("ok")) and ok       # the repair's outcome and this settle, on the same scene and program
+            c["ready"] = bool(c.get("ok")) and ok       # the repair's outcome and this settle, on the same scene, program and assets
+            c["ready_policy"] = {"hold_predicates_after_settle": hold}
             with open(cert, "w") as f:
                 dump_json(c, f, indent=1)
             print("updated", cert, "ready =", c["ready"], file=sys.stderr)
@@ -356,6 +391,30 @@ def cmd_settle(a):
                 dump_json(report, f, indent=1)
             print(f"{cert} was not produced from this scene and program; it is unchanged, report written to {side}", file=sys.stderr)
     sys.exit(0 if ok else 1)
+
+
+SETTLED_TOL = {"tol": 0.01, "upright_deg": 15.0, "place_tol": 0.10}   # a settled body rests on proxy facets: looser than the repair's
+
+
+def settled_check(scene: Scene, r, prog) -> dict:
+    """The program's predicates and the mesh-level penetration count on the poses the settle ended
+    with (a copy of the scene, free bodies moved to their final position and orientation), judged
+    with SETTLED_TOL: a body that rocked a few degrees on its hull still counts as upright, one that
+    tipped over does not."""
+    import copy
+    from scipy.spatial.transform import Rotation as Rot
+    settled = copy.deepcopy(scene)
+    for b in settled.free():
+        if b.name in r.final_pose:
+            pos, q = r.final_pose[b.name]
+            b.center = np.asarray(pos, dtype=np.float64).copy()
+            b.rotation = Rot.from_quat([q[1], q[2], q[3], q[0]]).as_matrix()
+    preds = check_predicates(prog, settled, **SETTLED_TOL)
+    rep = verify_scene(settled)
+    return {"failed_predicates": [n for n, okp, _ in preds if not okp],
+            "predicates": [(n, bool(okp), None if v is None else float(v)) for n, okp, v in preds],
+            "tolerances": dict(SETTLED_TOL),
+            "pen_pairs_full_mesh": rep.pen_pairs, "floating": rep.floating}
 
 
 def cmd_export(a):
@@ -388,7 +447,9 @@ def main(argv=None):
     s = sub.add_parser("settle"); s.add_argument("scene"); s.add_argument("--program"); s.add_argument("--seconds", type=float, default=2.0)
     s.add_argument("--proxy", choices=("hull", "coacd", "both"), default="both"); s.add_argument("--hull-verts", type=int, default=256)
     s.add_argument("--v-max", type=float, default=1.0, help="peak body speed allowed (m/s) unless the program's gate says otherwise")
-    s.add_argument("--d-max", type=float, default=0.15, help="peak displacement allowed (m)"); s.set_defaults(fn=cmd_settle)
+    s.add_argument("--d-max", type=float, default=0.15, help="peak displacement allowed (m)")
+    s.add_argument("--hold-predicates", action="store_true", help="the program's predicates must also hold on the settled poses")
+    s.set_defaults(fn=cmd_settle)
     s = sub.add_parser("export"); s.add_argument("scene"); s.add_argument("--out", required=True); s.add_argument("--program")
     s.add_argument("--decompose", action="store_true", help="CoACD pieces for the free bodies instead of one convex hull each")
     s.add_argument("--hull-verts", type=int, default=256); s.set_defaults(fn=cmd_export)

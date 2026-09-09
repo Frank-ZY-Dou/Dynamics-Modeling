@@ -218,16 +218,22 @@ class Gates(unittest.TestCase):
             scene = os.path.join(d, "s.json"); prog = os.path.join(d, "p.json"); out = os.path.join(d, "o.json")
             for p, txt in ((scene, "{}"), (prog, '{"statements": []}'), (out, '{"objects": []}')):
                 open(p, "w").write(txt)
-            cert = {"provenance": {"scene": {"sha256": sha16(scene)}, "program": {"sha256": sha16(prog)}}, "written_sha256": sha16(out)}
-            self.assertTrue(certificate_bound(cert, out, prog))
-            self.assertFalse(certificate_bound(cert, scene, prog))        # the scene the repair read is not the repaired scene
-            self.assertFalse(certificate_bound(cert, out, None))          # a settle without the program judges by other thresholds
+            asset = os.path.join(d, "mug.usda"); open(asset, "w").write("#usda 1.0\n")
+            assets = {asset: sha16(asset)}
+            cert = {"provenance": {"scene": {"sha256": sha16(scene)}, "program": {"sha256": sha16(prog)}, "assets": assets}, "written_sha256": sha16(out)}
+            self.assertTrue(certificate_bound(cert, out, prog, assets))
+            self.assertFalse(certificate_bound(cert, scene, prog, assets))   # the scene the repair read is not the repaired scene
+            self.assertFalse(certificate_bound(cert, out, None, assets))     # a settle without the program judges by other thresholds
+            open(asset, "w").write("#usda 1.0\n# changed\n")
+            self.assertFalse(certificate_bound(cert, out, prog, {asset: sha16(asset)}))   # an asset changed under the scene
+            open(asset, "w").write("#usda 1.0\n")
             with open(prog, "w") as f:
                 f.write('{"statements": [{"op": "minimize"}]}')
-            self.assertFalse(certificate_bound(cert, out, prog))         # the program changed
+            self.assertFalse(certificate_bound(cert, out, prog, assets))    # the program changed
             self.assertFalse(certificate_bound({"provenance": {}}, scene, None))
-            bare = {"provenance": {"program": {"sha256": None}}, "written_sha256": sha16(out)}
-            self.assertTrue(certificate_bound(bare, out, None))
+            self.assertFalse(certificate_bound({"provenance": {"program": {"sha256": None}}, "written_sha256": sha16(out)}, out, None))   # no assets record
+            bare = {"provenance": {"program": {"sha256": None}, "assets": {}}, "written_sha256": sha16(out)}
+            self.assertTrue(certificate_bound(bare, out, None, {}))
 
     def test_reports_are_valid_json(self):
         from simready.cli import dump_json
@@ -247,6 +253,12 @@ class Solver(unittest.TestCase):
         self.assertTrue(_qp_solved(Info("solved inaccurate")))
         self.assertFalse(_qp_solved(Info("primal infeasible", 3)))
         self.assertFalse(_qp_solved(Info("maximum iterations reached", -2)))
+        from simready.repair.upright_s4r import _qp_infeasible
+        self.assertTrue(_qp_infeasible(Info("primal infeasible", 3)))
+        self.assertTrue(_qp_infeasible(Info("primal infeasible inaccurate", 4)))
+        self.assertTrue(_qp_infeasible(Info("", 4)))
+        self.assertFalse(_qp_infeasible(Info("solved inaccurate", 2)))
+        self.assertFalse(_qp_infeasible(Info("dual infeasible", 5)))
 
     def test_spec_validation(self):
         sc = table_scene(box("a", (0.1, 0.1, 0.1), (0.0, 0.0, 0.05)))
@@ -326,6 +338,9 @@ class Solver(unittest.TestCase):
         self.assertEqual(res.trace, [])                                   # no step was accepted
         self.assertTrue(any("stopped at scale 0.900" in n for n in res.notes))
         self.assertEqual(res.steps, U.MAX_STEP_FAILURES + 1)
+        self.assertFalse(res.continuation_complete)
+        self.assertEqual(res.termination, "qp_failures")
+        self.assertAlmostEqual(res.last_accepted_scale, 0.9)
         self.assertTrue(np.allclose(sc["a"].center[:2], [0.0, 0.0]) and np.allclose(sc["b"].center[:2], [0.02, 0.0]))
 
     def test_steps_respect_the_trust_region(self):
@@ -408,6 +423,9 @@ class Scenes(unittest.TestCase):
             self.assertTrue(any("unresolved" in n for n in report["notes"]))
             cert = json.load(open(os.path.join(d, "s_repaired.certificate.json")))
             self.assertFalse(cert["ok"]); self.assertIsNotNone(cert["written_sha256"])
+            from simready.cli import certificate_bound, asset_hashes, load_any
+            self.assertTrue(certificate_bound(cert, out, prog, asset_hashes(load_any(out))))   # the written scene binds, inline bodies included
+            self.assertFalse(certificate_bound(cert, scene, prog, asset_hashes(load_any(scene))))
 
     def test_settle_cleanup_fallback_and_one_report(self):
         import contextlib, glob, io, types
@@ -441,6 +459,66 @@ class Scenes(unittest.TestCase):
 
 
 class Export(unittest.TestCase):
+    def test_pieces_never_share_a_file_with_another_body(self):
+        from unittest import mock
+        from simready.io.export import export_scene
+        from simready.gates import settle_mujoco as S
+        cup = box("cup", (0.1, 0.1, 0.1), (0.0, 0.0, 0.05)); other = box("cup_p0", (0.4, 0.4, 0.4), (2.0, 0.0, 0.2))
+        sc = table_scene(cup, other)
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(S, "coacd_pieces_info", lambda b: ([(b.verts.copy(), b.faces.copy())], False)):
+            m = export_scene(sc, d, decompose=True)
+            piece = os.path.join(d, m["bodies"][1]["collision_pieces"][0])
+            v = np.array([[float(x) for x in ln.split()[1:]] for ln in open(piece) if ln.startswith("v ")])
+            self.assertTrue(np.allclose(np.ptp(v, axis=0), [0.1, 0.1, 0.1]))
+            paths = [b["mesh"] for b in m["bodies"]] + [p for b in m["bodies"] for p in b["collision_pieces"]]
+            self.assertEqual(len(paths), len(set(paths)))
+            import mujoco
+            mujoco.MjModel.from_xml_path(os.path.join(d, "scene.xml"))
+
+    def test_vertical_sheet_is_kept_as_a_thin_solid(self):
+        from simready.io.export import export_scene
+        import mujoco
+        v = np.array([[0.0, -1.0, 0.0], [0.0, 1.0, 0.0], [0.0, 1.0, 2.0], [0.0, -1.0, 2.0]]); f = np.array([[0, 1, 2], [0, 2, 3]])
+        wall = Body.from_mesh("wall", v, f, fixed=True, tags={"fixture"})
+        sc = table_scene(wall, box("a", (0.1, 0.1, 0.1), (0.3, 0.0, 0.05)))
+        with tempfile.TemporaryDirectory() as d:
+            m = export_scene(sc, d)
+            entry = next(b for b in m["bodies"] if b["name"] == "wall")
+            self.assertFalse(entry["flat"]); self.assertAlmostEqual(entry["thickened_m"], 0.01)
+            model = mujoco.MjModel.from_xml_path(os.path.join(d, "scene.xml"))
+            self.assertGreaterEqual(mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "wall"), 1)
+            v2 = np.array([[float(x) for x in ln.split()[1:]] for ln in open(os.path.join(d, entry["mesh"])) if ln.startswith("v ")])
+            self.assertAlmostEqual(float(np.ptp(v2[:, 0])), 0.01, places=6)
+
+    def test_declared_missing_fixture_is_an_error(self):
+        from simready.cli import load_any
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "s.json")
+            json.dump({"table": {"usd_path": os.path.join(d, "missing.usda")}, "objects": []}, open(p, "w"))
+            with self.assertRaises(FileNotFoundError):
+                load_any(p)
+            json.dump({"base_scene": os.path.join(d, "missing_scene.usda"), "objects": []}, open(p, "w"))
+            with self.assertRaises(FileNotFoundError):
+                load_any(p)
+            json.dump({"objects": []}, open(p, "w"))
+            sc = load_any(p)                                              # nothing declared: a synthetic slab, and it says so
+            self.assertIn("synthetic_table", sc.meta)
+
+    def test_settled_check_sees_a_toppled_body(self):
+        from simready.cli import settled_check
+        from types import SimpleNamespace
+        a = box("a", (0.05, 0.05, 0.2), (0.0, 0.0, 0.1))
+        sc = table_scene(a)
+        prog = parse_program("program\n  on_support(a, table)\n  upright(a)")
+        # the body ends lying on its side: rotated 90 degrees about x, its centre 2.5 cm above the table
+        r = SimpleNamespace(final_pose={"a": (np.array([0.0, 0.0, 0.025]), np.array([math.cos(math.pi / 4), math.sin(math.pi / 4), 0.0, 0.0]))})
+        out = settled_check(sc, r, prog)
+        self.assertIn("upright(a)", out["failed_predicates"])
+        self.assertNotIn("on_support(a,table)", out["failed_predicates"])
+        # rocked by 5 degrees on a hull facet, resting 4 mm high: still upright and on the table at the settle tolerances
+        r2 = SimpleNamespace(final_pose={"a": (np.array([0.0, 0.0, 0.104]), np.array([math.cos(math.radians(2.5)), math.sin(math.radians(2.5)), 0.0, 0.0]))})
+        self.assertEqual(settled_check(sc, r2, prog)["failed_predicates"], [])
+
     def test_export_loads_in_mujoco_and_usd(self):
         try:
             import mujoco

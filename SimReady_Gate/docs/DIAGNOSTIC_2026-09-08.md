@@ -167,6 +167,20 @@ a nested pair is reported as containment only when the point-in-mesh test says s
 is counted over the same pairs as `pen_after`; a missing file or an unreadable stage is exit
 code 2 like any other invalid input.
 
+A third external audit of the pushed code added five defects and two gaps, all fixed: two bodies
+whose names differed only by a `_p0` suffix could share an export file (files are now named by
+the body's index and every path is checked before writing); a fixed vertical sheet was dropped
+from the export as if it were the ground (only a horizontal sheet at the ground height, or one
+tagged `ground`, is; any other sheet is written as a 1 cm solid); a layout that declared a table
+file which did not exist was quietly given a synthetic slab (now an error; the slab is used only
+when nothing is declared, and the certificate says so); the recovery tail after a failed
+continuation was not labelled (the result now carries `continuation.complete`,
+`last_accepted_scale` and `termination`); OSQP 1.x reports an inaccurate primal infeasibility as
+status 4, which the solver read as a failure rather than as infeasibility. The certificate now
+binds the hashes of every asset file the bodies were read from, so a changed mesh invalidates it;
+the settle report evaluates the program's predicates on the settled poses, and `--hold-predicates`
+makes them part of the verdict.
+
 ## Fixes the reruns of 2026-09-08 depended on
 - Evaluator: contact normals oriented by probing (the center-line heuristic pushed bodies into
   concave fixtures); bodies wholly inside another body counted as penetrating; FCL's coplanar-touch
