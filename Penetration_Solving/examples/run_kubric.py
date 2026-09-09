@@ -52,6 +52,8 @@ def main() -> None:
 
     # The solver returns the resolved poses; write them back and re-score
     # with the shared evaluator so the report is independent of the solver.
+    # res["status"] is 'converged' only when the continuation reached full
+    # scale and the solver's own full-scale check found no penetrating pair.
     for o, c in zip(objs, centers):
         o.center = np.asarray(c, dtype=float)
     if args.solver == "cpu" and res.get("final_rotations") is not None:
@@ -59,7 +61,7 @@ def main() -> None:
             o.rotation = np.asarray(R, dtype=float)
     final = evaluate_mesh_object_scene(objs)
     print(f"[final] penetrating pairs = {final.pen_pairs}   "
-          f"RMSD = {res['rmsd']:.4f}   solve = {dt:.2f}s")
+          f"RMSD = {res['rmsd']:.4f}   solve = {dt:.2f}s   status = {res['status']}")
 
 
 if __name__ == "__main__":

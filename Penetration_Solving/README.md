@@ -37,6 +37,7 @@ scenes for downstream robot policy training.</sub></p>
 
 ## 📢 Updates
 
+* [September 2026] Solver revision. Every run now reports an explicit outcome (`status`, `continuation_complete`, `native_converged`) and is scored on the full-size bodies even when the continuation stops early. The broad phase uses a bound that depends only on the world geometry and covers the d_hat band; contact directions come from the witness geometry instead of the centroid line, which pointed the wrong way inside cavities; the GPU oracle casts every edge against the other surface, so a crossing between its samples is still certified, and the GPU pipeline ends with an exact FCL re-check; container walls and joints are carried by every solve path; the SO(3) refinement pushed toward neighbours and now pushes away; coincident centroids are separated until the starting scale is admissible; OSQP's `solved inaccurate` status is recognised. Regression tests live in [`tests/`](tests/); the tables below were re-measured.
 * [September 2026] Two clips at the top of this page: 48 YCB objects spawned in interpenetration, resolved by S4R and settled, then a Franka arm picking from the repaired scene.
 * [September 2026] **SimReady Gate** — an agentic, language-driven layer on top of S4R that turns generated RoboLab and RoboCasa scenes into certified simulation-ready ones: a request becomes a typed constraint program, S4R repairs under it in scale-space, a probed mesh-level evaluator and a MuJoCo settle decide, and a certificate with provenance is written. Measured on RoboLab's 68 shipped scenes, on layouts from RoboLab's own placement solver, and on RoboCasa's counter regions with RoboCasa's own placement test. A separate project in this repository: [`../SimReady_Gate/`](../SimReady_Gate/).
 * [September 2026] Timing tables extended to N = 2000 and 3000 on both the CPU and the GPU solver, with the hardware noted.
@@ -49,7 +50,7 @@ scenes for downstream robot policy training.</sub></p>
 * [SimReady Gate](#simready-gate)
 * [Layout](#layout)
 * [Getting started](#getting-started)
-   * [Setup](#setup) · [CPU solver at more sizes](#cpu-solver-at-more-sizes) · [GPU solver](#gpu-solver) · [Upright-on-plane repair with rotation](#upright-on-plane-repair-with-rotation)
+   * [Setup](#setup) · [Outcome of a run](#outcome-of-a-run) · [CPU solver at more sizes](#cpu-solver-at-more-sizes) · [GPU solver](#gpu-solver) · [Upright-on-plane repair with rotation](#upright-on-plane-repair-with-rotation)
 * [Data](#data)
 * [Citation](#citation)
 * [License](#license)
@@ -132,6 +133,7 @@ Penetration_Solving/
 │   ├── kubric_pool/         40 watertight household meshes (19 MB)
 │   └── hy3d_processed/      300 generated volume meshes, decimated to ≤1500 faces (175 MB)
 ├── examples/            end-to-end demos (run_kubric.py, run_upright.py)
+├── tests/               regression tests (python -m unittest discover tests)
 └── requirements.txt
 ```
 
@@ -155,13 +157,43 @@ Expected output on the bundled Kubric pool:
 
 ```
 [init]  N=40 seed=42  penetrating pairs = 30
-[final] penetrating pairs = 0   RMSD = 0.0379   solve = <1s
+[final] penetrating pairs = 0   RMSD = 0.0400   solve = <1s   status = converged
 ```
 
 Scenes are deterministic in `(dataset, N, seed)`. The benchmark seeds in
 the paper are 42, 123 and 456; `--dataset hy3d` uses the bundled
 generated-mesh pool, and `--dataset thingi` streams meshes through the
 `thingi10k` package on first use.
+
+### Outcome of a run
+
+Both solvers return a dictionary with an explicit outcome.
+`continuation_complete` says whether the scale reached 1;
+`native_converged` whether the solver's own full-scale tail test found no
+penetrating pair (`tail_stop_reason` gives its exit); `status` is
+`converged` only when the continuation is complete, the poses are finite,
+the shared mesh evaluator finds no penetrating pair on the full-size
+bodies, and any container walls or joints are satisfied. Otherwise it
+names the reason (`max_steps`, `qp_failure`, `numerical_failure`,
+`container_infeasible`, `residual_penetration`, `wall_violation`,
+`joint_violation`). Penetration statistics are always taken on the
+full-size bodies at the returned poses, whatever scale the continuation
+reached, so a run that stopped early is never reported as clean.
+
+The GPU pipeline detects contacts with a sampled oracle (vertices, edge
+samples and edge-ray crossings on a winding-number SDF). At full scale it
+re-checks the result with the exact FCL oracle (triangle crossings and
+containment) and, if that check still finds a penetrating pair, runs
+correction iterations with the exact contacts before scoring
+(`fcl_verified`).
+
+The regression tests cover these contracts, the broad-phase bound, the
+witness directions, nested bodies, the starting-scale separation and the
+OSQP status handling:
+
+```bash
+python -m unittest discover tests      # GPU tests skip without a CUDA device
+```
 
 All timings below were measured on an Intel Xeon E5-2680 v4 CPU
 (2.40 GHz) and an NVIDIA GeForce RTX 2080 Ti GPU.
@@ -176,12 +208,18 @@ python examples/run_kubric.py --N 1000 --seed 42
 
 | N | init pen. | final pen. | RMSD | solve |
 |---|---|---|---|---|
-| 40 | 30 | 0 | 0.0379 | 0.27 s |
-| 100 | 80 | 0 | 0.0333 | 0.62 s |
-| 500 | 371 | 0 | 0.0344 | 4.5 s |
-| 1000 | 759 | 0 | 0.0348 | 13.1 s |
-| 2000 | 1587 | 0 | 0.0371 | 32.5 s |
-| 3000 | 2423 | 0 | 0.0372 | 66.3 s |
+| 40 | 30 | 0 | 0.0400 | 0.32 s |
+| 100 | 80 | 0 | 0.0366 | 0.82 s |
+| 500 | 371 | 0 | 0.0359 | 5.3 s |
+| 1000 | 759 | 0 | 0.0365 | 14.5 s |
+| 2000 | 1587 | 0 | 0.0380 | 34.0 s |
+| 3000 | 2423 | 0 | 0.0388 | 72.7 s |
+
+Every run ends with `status = converged`. The RMSD values are a few
+percent above those of the previous revision because the broad phase now
+keeps every pair within the d_hat band, so the tail refinement also
+restores the d_hat clearance between neighbours instead of only
+separating the pairs whose bounding boxes overlapped.
 
 ### GPU solver
 
@@ -196,12 +234,15 @@ python examples/run_kubric.py --N 1000 --seed 42 --solver gpu
 
 | N | init pen. | final pen. | RMSD | total |
 |---|---|---|---|---|
-| 40 | 30 | 0 | 0.0372 | 6.4 s |
-| 100 | 80 | 0 | 0.0347 | 6.7 s |
-| 500 | 371 | 0 | 0.0343 | 9.6 s |
-| 1000 | 759 | 0 | 0.0341 | 15.7 s |
-| 2000 | 1587 | 0 | 0.0354 | 34.6 s |
-| 3000 | 2423 | 0 | 0.0359 | 65.8 s |
+| 40 | 30 | 0 | 0.0372 | 7.4 s |
+| 100 | 80 | 0 | 0.0356 | 7.8 s |
+| 500 | 371 | 0 | 0.0346 | 13.4 s |
+| 1000 | 759 | 0 | 0.0346 | 16.5 s |
+| 2000 | 1587 | 0 | 0.0358 | 31.1 s |
+| 3000 | 2423 | 0 | 0.0362 | 50.7 s |
+
+Every run ends with `status = converged` and `fcl_verified = True`; the
+totals include the exact FCL re-check at full scale.
 
 The GPU pipeline is also callable directly:
 

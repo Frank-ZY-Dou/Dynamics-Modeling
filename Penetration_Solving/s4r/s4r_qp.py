@@ -1,21 +1,609 @@
-"""S4R-QP: Progressive scaling + QP displacement correction (6-DOF).
+"""S4R-QP: progressive scaling with QP displacement correction (3- or 6-DOF).
 
-Each step: compute exact push (translation + rotation) via QP, then inflate.
-No CCD, no Newton, no iteration — one QP solve per scale step.
+Every scale step detects the contacts that the next inflation would
+activate, solves one QP for the minimum-norm translation (optionally with
+rotation) that keeps each active pair at least d_hat apart after the
+inflation, applies it and inflates. No CCD, no Newton: one QP per step.
+
+Result contract of ``solve_s4r_qp`` (all keys documented at the return
+statement): the returned poses are scored at FULL scale; ``status``,
+``continuation_complete`` and ``native_converged`` state whether the
+continuation reached full scale and whether the tail refinement found a
+penetration-free state on its own. A run that stops early (step budget,
+QP failure, infeasible container) is reported as such and never as a
+success.
 """
 import os
+import sys
+import time
+
 import numpy as np
 import trimesh
-import time
 import scipy.sparse as sp
+import scipy.sparse.linalg as spla
 import osqp
 from scipy.spatial.transform import Rotation as RotLib
 
-import sys, os as _os
-_HERE = _os.path.dirname(_os.path.abspath(__file__))
+_HERE = os.path.dirname(os.path.abspath(__file__))
 if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 from mesh_collision import _contains_points as _mesh_contains_points  # noqa: E402
+from mesh_collision import _signed_volume  # noqa: E402
+
+
+# ─────────────────────────────────────────────────────────────────────
+# OSQP helpers
+# ─────────────────────────────────────────────────────────────────────
+
+def qp_status_ok(result) -> bool:
+    """True when OSQP returned a usable primal solution.
+
+    OSQP reports ``'solved'`` and ``'solved inaccurate'`` (with a space; the
+    enum is OSQP_SOLVED_INACCURATE). Everything else (maximum iterations,
+    primal/dual infeasible, non-convex, interrupted) has no solution the
+    caller may apply.
+    """
+    status = str(getattr(result.info, 'status', ''))
+    status = status.strip().lower().replace('_', ' ')
+    return status in ('solved', 'solved inaccurate')
+
+
+def osqp_solve(P, q, A, l, u, x0=None, **settings):
+    """Set up and solve one OSQP problem; returns the OSQP result object.
+
+    Accepts the 1.x setting names (``polishing``, ``warm_starting``) and
+    falls back to the 0.6 names (``polish``, ``warm_start``) when the
+    installed OSQP rejects them, so either version in requirements.txt works.
+    """
+    solver = osqp.OSQP()
+    try:
+        solver.setup(P, q, A, l, u, **settings)
+    except Exception:
+        legacy = {'polishing': 'polish', 'warm_starting': 'warm_start'}
+        solver = osqp.OSQP()
+        solver.setup(P, q, A, l, u,
+                     **{legacy.get(k, k): v for k, v in settings.items()})
+    if x0 is not None:
+        solver.warm_start(x=np.asarray(x0, dtype=np.float64))
+    try:
+        return solver.solve(raise_error=False)
+    except TypeError:
+        return solver.solve()
+
+
+_OSQP_STEP = dict(verbose=False, eps_abs=1e-6, eps_rel=1e-6,
+                  max_iter=4000, polishing=True, warm_starting=True)
+_OSQP_TAIL = dict(verbose=False, eps_abs=1e-7, eps_rel=1e-7,
+                  max_iter=8000, polishing=True)
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Starting-scale admissibility (coincident or near-coincident centroids)
+# ─────────────────────────────────────────────────────────────────────
+
+def _spread_direction(k: int) -> np.ndarray:
+    """Deterministic unit vector for the k-th exactly coincident pair.
+
+    Consecutive k give well-separated directions (golden-angle spiral on
+    the sphere), so three or more bodies sharing one centroid fan out
+    instead of being stacked along a single axis.
+    """
+    if k == 0:
+        return np.array([1.0, 0.0, 0.0])
+    z = 1.0 - 2.0 * ((k * 0.6180339887498949) % 1.0)
+    r = np.sqrt(max(0.0, 1.0 - z * z))
+    a = 2.399963229728653 * k
+    v = np.array([r * np.cos(a), r * np.sin(a), z])
+    n = float(np.linalg.norm(v))
+    return v / n if n > 1e-12 else np.array([1.0, 0.0, 0.0])
+
+
+def _admissibility_violations(C, target_fn, block=1024):
+    """Pairs (i, j, d_ij) with ||c_i - c_j|| < target(i, j), lexicographic,
+    computed block-wise so the memory stays O(block * N)."""
+    N = len(C)
+    out = []
+    for a in range(0, N, block):
+        b = min(N, a + block)
+        d = np.linalg.norm(C[a:b, None, :] - C[None, :, :], axis=2)  # (b-a, N)
+        tgt = target_fn(np.arange(a, b)[:, None], np.arange(N)[None, :])
+        rows, cols = np.nonzero(d < tgt)
+        for r, c in zip(rows.tolist(), cols.tolist()):
+            i = a + r
+            if c > i:
+                out.append((i, c, float(d[r, c])))
+    return out
+
+
+def separate_coincident_centroids(centers, radii, d_hat, s_min,
+                                  eps=1e-6, max_passes=100, verbose=False):
+    """Move centroid pairs apart until the starting scale is admissible.
+
+    The continuation may only start at a scale s_min at which no two bodies
+    are already within d_hat of each other, i.e. for every pair
+
+        ||c_i - c_j|| >= d_hat + s_min (r_i + r_j) + eps,
+
+    with r the bounding-sphere radius about the scaling centre. Violating
+    pairs (typically exactly coincident centroids) are split symmetrically
+    along their centre line, or along a deterministic per-pair direction
+    when the centroids coincide. Passes repeat until no pair is violated,
+    because splitting one pair can shorten another one that was already
+    fine; a single pass does not establish the condition.
+
+    Modifies ``centers`` in place. Returns (passes_used, remaining_violations).
+    """
+    C = np.asarray(centers, dtype=np.float64)
+    R = np.asarray(radii, dtype=np.float64)
+    N = len(C)
+    if N < 2:
+        return 0, 0
+
+    def target(ii, jj):
+        return d_hat + s_min * (R[ii] + R[jj]) + eps
+
+    # Bodies that share a centroid exactly first receive a distinct
+    # infinitesimal offset each (one direction per body, spread over the
+    # sphere), so the pair pushes below act in three dimensions. Without
+    # this, the first split defines the only axis of a coincident cluster
+    # and every later push stays on that line, which converges slowly.
+    tie = _admissibility_violations(C, lambda ii, jj: np.full(np.broadcast(ii, jj).shape, 1e-12))
+    if tie:
+        tied = sorted({b for (i, j, _) in tie for b in (i, j)})
+        seed = 1e-6 * float(d_hat + s_min * R.max() + eps)
+        for b in tied:
+            C[b] = C[b] + seed * _spread_direction(b)
+
+    k_coincident = 0
+    for p in range(max_passes):
+        viol = _admissibility_violations(C, target)
+        if not viol:
+            return p, 0
+        for (i, j, d) in viol:
+            axis = C[j] - C[i]
+            n = float(np.linalg.norm(axis))
+            if n < 1e-12:
+                axis = _spread_direction(k_coincident)
+                k_coincident += 1
+            else:
+                axis = axis / n
+            # Overshoot the target by a hair so rounding cannot leave the
+            # pair a few ulp below it and flag it again next pass.
+            gap = float(target(i, j)) - n + 1e-9
+            if gap <= 0.0:
+                continue
+            C[j] = C[j] + 0.5 * gap * axis
+            C[i] = C[i] - 0.5 * gap * axis
+            if verbose:
+                print(f"    jitter pair ({i},{j}) by ±{0.5 * gap:.5f}")
+    return max_passes, len(_admissibility_violations(C, target))
+
+
+def _one_sided_support(model_verts, rot, direction) -> float:
+    """max_v n^T R v over the (scale-1) model vertices, clamped at zero:
+    how far the body reaches from its scaling centre along ``direction``.
+    A further conservative bound; the closure coefficient only needs the
+    support to dominate the true reach."""
+    projs = model_verts @ (rot.T @ direction)
+    return float(max(projs.max(), 0.0))
+
+
+def _projected_width(model_verts, rot, direction) -> float:
+    projs = model_verts @ (rot.T @ direction)
+    return float(projs.max() - projs.min())
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Exact FCL contact oracle on unit-scale BVHs (the benchmark backend)
+# ─────────────────────────────────────────────────────────────────────
+
+class PrebuiltFCLOracle:
+    """FCL contact oracle that builds one unit-scale BVH per body and reuses
+    it at every scale.
+
+    Change of variable u = x / s: at scale s a body with model vertices
+    M_i = nf_i * v_i and centre c_i occupies s * R_i M_i + c_i in world
+    space, which is R_i M_i + c_i / s in u-space. One BVH built on M_i
+    therefore serves every scale; only the FCL transform (R_i, c_i / s)
+    changes. u-space distances and points scale by s back to world units;
+    directions are scale-invariant.
+
+    Per candidate pair the query is exact for closed triangle meshes:
+
+    * separated: FCL ``distance`` with nearest points; the witness direction
+      is the segment between the two nearest points.
+    * surfaces crossing: FCL ``collide``; the deepest triangle pair's normal
+      is the outward normal of the crossed triangle, i.e. the local exit
+      direction of the crossing body. That direction is also right inside
+      the cavity of a non-convex body, where the centroid line points the
+      wrong way, so it is used as reported (the BVHs are built with outward
+      winding: a mesh with negative signed volume is flipped once here).
+    * one body entirely inside the other: neither FCL query reports it (no
+      surface intersection, positive distance), so pairs whose u-space AABBs
+      nest are checked with a point-containment test and reported as a
+      penetration whose depth is the surface gap plus the inner body's width
+      along the exit direction (a depth for the correction rows, not the
+      minimal freeing translation).
+
+    Broadphase: pairs are candidates when the Euclidean gap between their
+    u-space AABBs is at most (ds (E_i + E_j) + d_hat) / s, with E the
+    bounding-sphere radius about the scaling centre. The AABB gap bounds
+    the true distance from below and the narrow filter keeps a pair when
+    its signed distance is below ds (e_i + e_j) + d_hat with e <= E the
+    one-sided support along the contact normal, so no pair the filter would
+    keep can be pruned, and the candidate set depends only on the world
+    geometry (not on how a mesh splits its size between vertices and
+    normalize_factor). A SOI cull removes pairs whose bounding spheres
+    cannot touch before scale (s + ds) / 0.9.
+    """
+
+    def __init__(self, nfs, mverts, mfaces, d_hat):
+        import fcl
+        self._fcl = fcl
+        self.N = len(nfs)
+        self.d_hat = float(d_hat)
+        self.nfs = [float(v) for v in nfs]
+        self.model_verts = []
+        self.faces = []
+        self.bvh = []
+        self.max_extents = np.zeros(self.N)
+        self._model_mesh = [None] * self.N
+        self._inc = None
+        for i in range(self.N):
+            Mi = (self.nfs[i] * np.asarray(mverts[i], dtype=np.float64))
+            Fi = np.asarray(mfaces[i], dtype=np.int32)
+            if len(Fi) and _signed_volume(Mi, Fi) < 0.0:
+                Fi = np.ascontiguousarray(Fi[:, ::-1])
+            self.model_verts.append(Mi)
+            self.faces.append(Fi)
+            self.max_extents[i] = float(np.max(np.linalg.norm(Mi, axis=1))) if len(Mi) else 0.0
+            m = fcl.BVHModel()
+            m.beginModel(len(Mi), len(Fi))
+            m.addSubModel(Mi, Fi)
+            m.endModel()
+            self.bvh.append(m)
+
+    def support(self, i, rot, direction) -> float:
+        return _one_sided_support(self.model_verts[i], rot, direction)
+
+    def _contains_model_point(self, i, p_local) -> bool:
+        """Ray-parity containment of a point given in body i's model frame."""
+        if self._model_mesh[i] is None:
+            self._model_mesh[i] = trimesh.Trimesh(
+                vertices=self.model_verts[i], faces=self.faces[i], process=False)
+        return bool(_mesh_contains_points(self._model_mesh[i],
+                                          np.asarray(p_local, dtype=np.float64)[None, :])[0])
+
+    def find_contacts(self, s, ds, centers, rots, extra_margin=0.0,
+                      all_contacts=False, incremental=False):
+        """Contacts at scale s that the inflation by ds may activate.
+
+        Returns a list of (i, j, d_signed, n, e_i, e_j, cp_on_i, cp_on_j) in
+        world units: d_signed < 0 is a penetration depth, n points so that
+        moving j along +n (and i along -n) separates the pair, e are the
+        one-sided supports along n at scale 1, cp are the witness points.
+
+        ``incremental=True`` reuses the previous call when it had the same
+        s, ds and margin and the rotations are unchanged (the tail
+        refinement: translation-only steps at fixed scale). A body's
+        distance to any other body changes by at most the length of its
+        move, so a pair whose cached distance minus the two moves is still
+        above the pair's margin cannot be a contact and is not queried; a
+        pair of two unmoved bodies keeps its previous result. The candidate
+        set is refreshed only for pairs involving a moved body. The result
+        is identical to a full detection.
+        """
+        fcl = self._fcl
+        N = self.N
+        inv_s = 1.0 / s
+        d_hat = self.d_hat
+        C = np.asarray(centers, dtype=np.float64)
+        contacts = []
+        if N < 2:
+            return contacts
+
+        lo = np.empty((N, 3)); hi = np.empty((N, 3))
+        for i in range(N):
+            Vw = (rots[i] @ self.model_verts[i].T).T + C[i] * inv_s
+            lo[i] = Vw.min(axis=0); hi[i] = Vw.max(axis=0)
+
+        fcl_objs = [fcl.CollisionObject(
+            self.bvh[i],
+            fcl.Transform(np.asarray(rots[i], dtype=np.float64),
+                          (C[i] * inv_s).astype(np.float64))) for i in range(N)]
+
+        E = self.max_extents
+        key = (float(s), float(ds), float(extra_margin), bool(all_contacts))
+        state = self._incremental_state(key, rots) if incremental else None
+
+        def _pair_margin_world(ei, ej):
+            return ds * (ei + ej) + d_hat + extra_margin
+
+        if state is None:
+            ii, jj = np.triu_indices(N, k=1)
+            ci, cj = self._broadphase_pairs(ii, jj, C, lo, hi, s, ds, extra_margin)
+            move = np.zeros(N)
+            d_cache = {}
+        else:
+            C_prev = state['centers']
+            move = np.linalg.norm(C - C_prev, axis=1)
+            moved = move > 0.0
+            ci_prev, cj_prev = state['cand']
+            keep = ~moved[ci_prev] & ~moved[cj_prev]
+            parts_i = [ci_prev[keep]]
+            parts_j = [cj_prev[keep]]
+            others = np.arange(N)
+            for m in np.nonzero(moved)[0]:
+                js = others[others != m]
+                a = np.minimum(m, js); b = np.maximum(m, js)
+                pi, pj = self._broadphase_pairs(a, b, C, lo, hi, s, ds, extra_margin)
+                parts_i.append(pi); parts_j.append(pj)
+            ci = np.concatenate(parts_i); cj = np.concatenate(parts_j)
+            if len(ci):
+                codes = np.unique(ci.astype(np.int64) * N + cj.astype(np.int64))
+                ci = (codes // N).astype(np.int64); cj = (codes % N).astype(np.int64)
+            d_cache = state['d']
+
+        new_cache = {}
+        for k in range(len(ci)):
+            i = int(ci[k]); j = int(cj[k])
+            if state is not None:
+                prev = d_cache.get((i, j))
+                if prev is not None:
+                    d_old, tup = prev
+                    delta = move[i] + move[j]
+                    if delta == 0.0:
+                        new_cache[(i, j)] = prev
+                        if tup is not None:
+                            contacts.append(tup)
+                        continue
+                    bound = d_old - delta
+                    if bound >= _pair_margin_world(E[i], E[j]):
+                        new_cache[(i, j)] = (bound, None)
+                        continue
+
+            req = fcl.DistanceRequest(enable_nearest_points=True,
+                                      enable_signed_distance=True)
+            res = fcl.DistanceResult()
+            d_u = fcl.distance(fcl_objs[i], fcl_objs[j], req, res)
+
+            if d_u > 0.0:
+                cp_i_u = np.asarray(res.nearest_points[0], dtype=np.float64)
+                cp_j_u = np.asarray(res.nearest_points[1], dtype=np.float64)
+                nested = self._nested_contact(i, j, cp_i_u, cp_j_u, d_u, s, lo, hi, C, rots)
+                if nested is not None:
+                    d_signed, n_raw, cp_on_a, cp_on_b = nested
+                else:
+                    n_raw = cp_j_u - cp_i_u
+                    d_signed = d_u * s
+                    cp_on_a = cp_i_u * s
+                    cp_on_b = cp_j_u * s
+            else:
+                creq = fcl.CollisionRequest(num_max_contacts=16,
+                                            enable_contact=True)
+                cres = fcl.CollisionResult()
+                fcl.collide(fcl_objs[i], fcl_objs[j], creq, cres)
+                if not cres.is_collision or not cres.contacts:
+                    new_cache[(i, j)] = (0.0, None)
+                    continue
+                if all_contacts:
+                    # Diagnostic ablation: every reported triangle contact
+                    # becomes its own constraint row instead of the single
+                    # deepest witness.
+                    for c_k in cres.contacts:
+                        depth_world = float(c_k.penetration_depth) * s
+                        n_raw = np.asarray(c_k.normal, dtype=np.float64)
+                        nn = np.linalg.norm(n_raw)
+                        if nn < 1e-12:
+                            continue
+                        n_k = n_raw / nn
+                        pos_world = np.asarray(c_k.pos, dtype=np.float64) * s
+                        contacts.append((i, j, -depth_world, n_k,
+                                         self.support(i, rots[i], n_k),
+                                         self.support(j, rots[j], -n_k),
+                                         pos_world.copy(),
+                                         pos_world + n_k * depth_world))
+                    continue
+                c_best = max(cres.contacts, key=lambda c: c.penetration_depth)
+                depth_world = float(c_best.penetration_depth) * s
+                n_raw = np.asarray(c_best.normal, dtype=np.float64)
+                pos_world = np.asarray(c_best.pos, dtype=np.float64) * s
+                cp_on_a = pos_world.copy()
+                cp_on_b = pos_world + n_raw * depth_world
+                d_signed = -depth_world
+
+            nn = np.linalg.norm(n_raw)
+            if nn < 1e-12:
+                n_raw = C[j] - C[i]
+                nn = np.linalg.norm(n_raw)
+            if nn < 1e-12:
+                new_cache[(i, j)] = (d_signed, None)
+                continue
+            n = n_raw / nn
+            ext_i = self.support(i, rots[i], n)
+            ext_j = self.support(j, rots[j], -n)
+            if d_signed < ds * (ext_i + ext_j) + d_hat:
+                tup = (i, j, d_signed, n, ext_i, ext_j, cp_on_a, cp_on_b)
+                contacts.append(tup)
+                new_cache[(i, j)] = (d_signed, tup)
+            else:
+                new_cache[(i, j)] = (d_signed, None)
+
+        if incremental and not all_contacts:
+            self._inc = {'key': key, 'centers': C.copy(),
+                         'rots': [np.array(R, dtype=np.float64, copy=True) for R in rots],
+                         'cand': (np.asarray(ci, dtype=np.int64), np.asarray(cj, dtype=np.int64)),
+                         'd': new_cache}
+        else:
+            self._inc = None
+        return contacts
+
+    def _broadphase_pairs(self, ii, jj, C, lo, hi, s, ds, extra_margin):
+        """Candidate pairs among the given (ii, jj) index arrays: SOI cull on
+        bounding spheres, then Euclidean u-space AABB gap against the
+        conservative margin."""
+        E = self.max_extents
+        inv_s = 1.0 / s
+        d_ij = np.linalg.norm(C[ii] - C[jj], axis=1)
+        s_contact = np.maximum(0.0, (d_ij - self.d_hat) / (E[ii] + E[jj] + 1e-12))
+        soi_keep = (s + ds) >= (s_contact * 0.9)
+        margin_u = (ds * (E[ii] + E[jj]) + self.d_hat + extra_margin) * inv_s
+        gap_axis = np.maximum(np.maximum(lo[ii] - hi[jj], lo[jj] - hi[ii]), 0.0)
+        near = np.einsum('ij,ij->i', gap_axis, gap_axis) <= margin_u * margin_u
+        keep = soi_keep & near
+        return np.asarray(ii)[keep], np.asarray(jj)[keep]
+
+    def _incremental_state(self, key, rots):
+        st = getattr(self, '_inc', None)
+        if st is None or st['key'] != key or len(st['rots']) != self.N:
+            return None
+        for i in range(self.N):
+            if not np.array_equal(st['rots'][i], rots[i]):
+                return None
+        return st
+
+    def _nested_contact(self, i, j, cp_i_u, cp_j_u, d_u, s, lo, hi, C, rots):
+        """Containment check for a separated-by-FCL pair whose AABBs nest.
+
+        Returns (d_signed, n, cp_on_i, cp_on_j) in world units when one body
+        lies entirely inside the other, else None. n follows the i->j
+        convention: moving j along +n (i along -n) carries the inner body
+        toward the outer surface; |d_signed| is the surface gap plus the
+        inner body's width along n.
+        """
+        j_in_i = bool(np.all(lo[j] >= lo[i] - 1e-12) and np.all(hi[j] <= hi[i] + 1e-12))
+        i_in_j = bool(np.all(lo[i] >= lo[j] - 1e-12) and np.all(hi[i] <= hi[j] + 1e-12))
+        if not (j_in_i or i_in_j):
+            return None
+        inv_s = 1.0 / s
+        if j_in_i:
+            outer, inner, q_u = i, j, cp_j_u
+        else:
+            outer, inner, q_u = j, i, cp_i_u
+        p_local = rots[outer].T @ (q_u - C[outer] * inv_s)
+        if not self._contains_model_point(outer, p_local):
+            return None
+        n_raw = cp_i_u - cp_j_u
+        nn = np.linalg.norm(n_raw)
+        if nn < 1e-12:
+            return None
+        n = n_raw / nn
+        width = s * _projected_width(self.model_verts[inner], rots[inner], n)
+        d_signed = -(d_u * s + width)
+        return d_signed, n, cp_i_u * s, cp_j_u * s
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Per-step constraint assembly shared by the main step, the rotation-locked
+# retry and the tail refinement, so every solve path carries the same
+# hard constraints (contacts, rotation clamp, container walls, joints).
+# ─────────────────────────────────────────────────────────────────────
+
+def _skew(v):
+    return np.array([[0.0, -v[2], v[1]],
+                     [v[2], 0.0, -v[0]],
+                     [-v[1], v[0], 0.0]])
+
+
+def _assemble_constraints(active, ds, d_hat, centers, rots, active_bodies,
+                          body_map, dof, max_omega, box, joints, s_next,
+                          lock_rotation=False):
+    """Stack the hard constraints of one solve over the variables
+    (Δp_b, [ω_b]) of ``active_bodies``.
+
+    Rows in order:
+      contacts   n·(Δp_j − Δp_i) + (y_j×n)·ω_j − (y_i×n)·ω_i ≥ ds(e_i+e_j) + d_hat − d
+      rotation   −max_omega ≤ ω ≤ max_omega  (ω = 0 when lock_rotation)
+      walls      lo + s_next·sup⁻ ≤ c + Δp ≤ hi − s_next·sup⁺ per axis
+      joints     Δp_i − Δp_j − [a_i]×ω_i + [a_j]×ω_j = (p_j − p_i) + (a_j − a_i)
+
+    Returns (A csc, l, u, b_contact, walls_infeasible). ``walls_infeasible``
+    is True when some wall bound inverts (l > u): no position keeps that
+    body inside the container at s_next, so the QP is genuinely infeasible.
+    """
+    n_b = len(active_bodies)
+    n_vars = dof * n_b
+    rows, cols, vals = [], [], []
+    l_parts, u_parts = [], []
+    r = 0
+
+    n_c = len(active)
+    b_c = np.zeros(n_c)
+    for ci, (i, j, d_curr, n_ij, ext_i, ext_j, cp_i, cp_j) in enumerate(active):
+        ii = body_map[i]; jj = body_map[j]
+        for a in range(3):
+            rows += [ci, ci]
+            cols += [dof * ii + a, dof * jj + a]
+            vals += [-float(n_ij[a]), float(n_ij[a])]
+        if dof == 6:
+            cross_i = np.cross(cp_i - centers[i], n_ij)
+            cross_j = np.cross(cp_j - centers[j], n_ij)
+            for a in range(3):
+                rows += [ci, ci]
+                cols += [dof * ii + 3 + a, dof * jj + 3 + a]
+                vals += [-float(cross_i[a]), float(cross_j[a])]
+        b_c[ci] = ds * (ext_i + ext_j) + d_hat - d_curr
+    l_parts.append(b_c); u_parts.append(np.full(n_c, np.inf))
+    r = n_c
+
+    if dof == 6:
+        bound = 0.0 if lock_rotation else float(max_omega)
+        for idx in range(n_b):
+            for a in range(3):
+                rows.append(r); cols.append(dof * idx + 3 + a); vals.append(1.0)
+                r += 1
+        l_parts.append(np.full(3 * n_b, -bound)); u_parts.append(np.full(3 * n_b, bound))
+
+    walls_infeasible = False
+    if box is not None:
+        box_lo, box_hi, sup_plus, sup_minus = box
+        lw = np.empty(3 * n_b); uw = np.empty(3 * n_b)
+        for idx, b_orig in enumerate(active_bodies):
+            for a in range(3):
+                rows.append(r); cols.append(dof * idx + a); vals.append(1.0)
+                r += 1
+                c_a = centers[b_orig][a]
+                uw[3 * idx + a] = box_hi[a] - s_next * sup_plus[b_orig][a] - c_a
+                lw[3 * idx + a] = box_lo[a] + s_next * sup_minus[b_orig][a] - c_a
+        if np.any(lw > uw + 1e-9):
+            walls_infeasible = True
+        l_parts.append(lw); u_parts.append(uw)
+
+    if joints:
+        for (bi, bj, a_i, a_j) in joints:
+            if bi not in body_map or bj not in body_map:
+                continue
+            ii = body_map[bi]; jj = body_map[bj]
+            a_iw = rots[bi] @ np.asarray(a_i, dtype=np.float64)
+            a_jw = rots[bj] @ np.asarray(a_j, dtype=np.float64)
+            rhs = (centers[bj] - centers[bi]) + (a_jw - a_iw)
+            Si = _skew(a_iw); Sj = _skew(a_jw)
+            for a in range(3):
+                rows += [r, r]
+                cols += [dof * ii + a, dof * jj + a]
+                vals += [1.0, -1.0]
+                if dof == 6:
+                    for c in range(3):
+                        if Si[a, c] != 0.0:
+                            rows.append(r); cols.append(dof * ii + 3 + c); vals.append(-float(Si[a, c]))
+                        if Sj[a, c] != 0.0:
+                            rows.append(r); cols.append(dof * jj + 3 + c); vals.append(float(Sj[a, c]))
+                r += 1
+            l_parts.append(rhs); u_parts.append(rhs)
+
+    A = sp.csc_matrix((np.asarray(vals, dtype=np.float64),
+                       (np.asarray(rows, dtype=np.int64), np.asarray(cols, dtype=np.int64))),
+                      shape=(r, n_vars))
+    l = np.concatenate(l_parts) if l_parts else np.zeros(0)
+    u = np.concatenate(u_parts) if u_parts else np.zeros(0)
+    return A, l, u, b_c, walls_infeasible
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Main solver
+# ─────────────────────────────────────────────────────────────────────
+
+_BACKENDS = ('trimesh', 'fcl', 'fcl_prebuilt', 'warp')
 
 
 def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
@@ -28,14 +616,62 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
                   perturb_rot_deg=0.0, perturb_seed=None,
                   box_bounds=None, joints=None,
                   profile=False):
-    """
-    S4R with QP-based displacement correction (6-DOF: translation + rotation).
+    """S4R with QP-based displacement correction (3-DOF, or 6-DOF with
+    ``enable_rotation``).
 
-    At each step:
-    1. Find active contacts (pairs that would collide after inflation by ds)
-    2. Solve QP: min ||Δp||² + β||ω||²  s.t. linearized contact constraints
-    3. Apply displacement + rotation + inflate
+    At each scale step:
+    1. find the pairs that would come within d_hat after inflating by ds;
+    2. solve  min ||Δp||² (+ β||ω||²)  s.t. the linearised contact rows and
+       every other hard constraint of the scene (container walls, joints);
+    3. apply the displacement, inflate.
+
+    Hard constraints are assembled by one builder for every solve path
+    (main step, rotation-locked retry, tail refinement), so no path drops
+    them. ``use_dual`` solves the contact-only translation QP in contact
+    force space and therefore rejects rotation, walls, joints and attraction.
+
+    Contact backends: ``'fcl'`` and ``'fcl_prebuilt'`` are the same exact
+    oracle (:class:`PrebuiltFCLOracle`, unit-scale BVHs built once);
+    ``'warp'`` is the GPU oracle in ``s4r_gpu``; ``'trimesh'`` is a
+    dependency-free vertex-sampling fallback that can miss crossings
+    between samples and is not a certificate.
+
+    Returns a dict. Poses (``final_centers``, ``final_rotations``) are
+    always scored at full scale: ``pen``/``max_pen`` come from the shared
+    mesh evaluator at s = 1 regardless of where the continuation stopped.
+    ``continuation_complete`` says whether scale 1 was reached;
+    ``native_converged`` whether the tail's own feasibility test passed at
+    full scale (``tail_stop_reason`` gives its exit: ``'feasible'``,
+    ``'tail_stagnation'``, ``'tail_iter_cap'``, ``'tail_qp_failure'``,
+    ``'tail_disabled'``, ``'not_run'``); ``status`` is ``'converged'`` only
+    when the continuation is complete, the poses are finite, the evaluator
+    finds no penetrating pair on the full-size bodies and the walls/joints
+    hold, otherwise it names the failure (``'max_steps'``,
+    ``'qp_failure'``, ``'numerical_failure'``, ``'container_infeasible'``,
+    ``'residual_penetration'``, ``'wall_violation'``,
+    ``'joint_violation'``). The same rule is used by the GPU driver.
     """
+    if contact_backend not in _BACKENDS:
+        raise ValueError(f"contact_backend must be one of {_BACKENDS}, got {contact_backend!r}")
+    if not (np.isfinite(ds_max) and ds_max > 0.0):
+        raise ValueError(f"ds_max must be a positive finite scale step, got {ds_max}")
+    if not (np.isfinite(d_hat) and d_hat >= 0.0):
+        raise ValueError(f"d_hat must be a non-negative finite distance, got {d_hat}")
+    if int(max_steps) < 1:
+        raise ValueError("max_steps must be at least 1")
+    if int(revalidate_interval) < 1:
+        raise ValueError("revalidate_interval must be at least 1")
+    if use_dual and (enable_rotation or box_bounds is not None or joints
+                     or target_centers is not None):
+        raise ValueError(
+            "use_dual solves the contact-only translation QP; rotation, "
+            "container walls, joints and attraction need the primal solver "
+            "(use_dual=False)")
+    if joints and not enable_rotation:
+        raise ValueError(
+            "joints need enable_rotation=True: with translation only a "
+            "joint row welds the two links instead of letting them swing")
+
     def _sync_backend():
         if contact_backend == 'warp':
             import warp as wp
@@ -45,29 +681,34 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
     _sync_backend()
     method_t0 = time.perf_counter()
     N = len(objects)
-    centers = np.array([o.center for o in objects], dtype=np.float64)
+    centers = np.array([o.center for o in objects], dtype=np.float64).reshape(N, 3)
     centers0 = centers.copy()
-    rots = [o.rotation.copy() for o in objects]
-    nfs = [o.normalize_factor for o in objects]
-    mverts = [o.collision_verts_model.copy() for o in objects]
-    mfaces = [o.collision_faces.copy() for o in objects]
+    rots = [np.asarray(o.rotation, dtype=np.float64).copy() for o in objects]
+    nfs = [float(o.normalize_factor) for o in objects]
+    mverts = [np.asarray(o.collision_verts_model, dtype=np.float64).copy() for o in objects]
+    mfaces = [np.asarray(o.collision_faces, dtype=np.int32).copy() for o in objects]
+    if N and not np.all(np.isfinite(centers)):
+        raise ValueError("object centers contain NaN or Inf")
+    for i in range(N):
+        if rots[i].shape != (3, 3) or not np.all(np.isfinite(rots[i])):
+            raise ValueError(f"object {i}: rotation must be a finite 3x3 matrix")
+        if not np.all(np.isfinite(mverts[i])) or not np.isfinite(nfs[i]):
+            raise ValueError(f"object {i}: mesh vertices / normalize_factor must be finite")
+    notes = []
 
     # Phase-time accumulators (only populated when profile=True).
     _phase_times = {'contact': 0.0, 'qp': 0.0, 'tail': 0.0}
-    # Initial scale s_min: must satisfy eq:smin_safe (§3.1.1):
-    #     s_min < min_{i≠j} (||c_i - c_j|| - d_hat) / (R_i + R_j)
-    # The fixed default 0.01 is verified against this bound at the top of
-    # the solve and a warning is printed if it is violated.
-    scale = 0.01  # global scale (s_min)
+    # Initial scale s_min: must satisfy eq:smin_safe,
+    #     s_min < min_{i≠j} (||c_i - c_j|| - d_hat) / (R_i + R_j).
+    # The fixed default 0.01 is checked against this bound below and the
+    # centroids are separated deterministically when it is violated.
+    scale = 0.01
 
     # ── Optional one-time stochastic SO(3) re-orientation at s_min ───────
-    # "Shake the rice bag": at the shrunk, collision-free state, randomly
-    # perturb each body's orientation, then let the 6-DOF QP re-optimize
-    # rotation as bodies re-inflate. On packing-limited scenes this can
-    # escape a loose local packing and settle into a denser one (lower
-    # centroid RMSD). Rotation-only: writes rots[i] about the body's own
-    # pivot centers[i], so the RMSD reference centers0 (line above) is
-    # untouched. Uses a SEPARATE rng so it never desyncs the scene seed.
+    # At the shrunk, collision-free state, randomly perturb each body's
+    # orientation and let the 6-DOF QP re-optimise rotation as bodies
+    # re-inflate. Rotation-only about the body's own pivot, so the RMSD
+    # reference centers0 is untouched. Separate rng: never desyncs the seed.
     if enable_rotation and perturb_rot_deg and perturb_rot_deg > 0.0:
         _prng = np.random.default_rng(perturb_seed)
         _ang = np.deg2rad(float(perturb_rot_deg))
@@ -76,460 +717,167 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
             nrm = np.linalg.norm(axis)
             if nrm < 1e-12:
                 continue
-            rvec = (axis / nrm) * _ang
-            rots[i] = RotLib.from_rotvec(rvec).as_matrix() @ rots[i]
+            rots[i] = RotLib.from_rotvec((axis / nrm) * _ang).as_matrix() @ rots[i]
 
-    # Pre-compute max extent per body (for rotation weight normalization)
-    max_extents = np.array([nfs[i] * np.max(np.linalg.norm(mverts[i], axis=1))
+    # Bounding-sphere radius about the scaling centre, at scale 1.
+    max_extents = np.array([nfs[i] * (np.max(np.linalg.norm(mverts[i], axis=1)) if len(mverts[i]) else 0.0)
                             for i in range(N)])
-    max_extent_all = max_extents.max()
+    max_extent_all = float(max_extents.max()) if N else 0.0
 
     # ── Optional box-confinement (container) constraints ──────────────────
-    # When box_bounds=((lo_x,lo_y,lo_z),(hi_x,hi_y,hi_z)) is given, every body
-    # must stay inside the axis-aligned container box at each scale step. This
-    # is a demonstration of adding hard scene-structure constraints (walls of a
-    # container) to the per-step QP, beyond the single support plane of
-    # Sec. upright-on-plane. box_bounds=None (default) leaves the solver's
-    # behaviour bit-identical to the unconstrained version.
+    # box_bounds=((lo_x,lo_y,lo_z),(hi_x,hi_y,hi_z)): every body must stay
+    # inside the axis-aligned container at each scale step. The walls are
+    # hard rows of every QP (main step, retry, tail), including steps without
+    # any pair contact. box_bounds=None leaves the solver unchanged.
+    walls = None
     if box_bounds is not None:
         box_lo = np.asarray(box_bounds[0], dtype=np.float64)
         box_hi = np.asarray(box_bounds[1], dtype=np.float64)
-        # Per-body, per-axis support half-extents at full scale (s=1), under the
-        # body's fixed rotation: offset of the extreme vertex from the centroid
-        # along +axis (sup_plus) and -axis (sup_minus).
-        # NOTE: these support half-extents are computed once at the INITIAL
-        # rotation. box_bounds is therefore exact for the translation-only
-        # (default) path used in the container experiment. If enable_rotation
-        # is combined with box_bounds in future use, recompute these per step
-        # from the current rots[i]; otherwise a rotating body could protrude.
+        # Per-body, per-axis support half-extents at full scale under the
+        # body's INITIAL rotation. Exact for the translation-only path; with
+        # enable_rotation a rotating body could protrude, which the final
+        # full-scale wall check reports.
         box_sup_plus = np.zeros((N, 3))
         box_sup_minus = np.zeros((N, 3))
         for i in range(N):
-            wv = nfs[i] * (mverts[i] @ rots[i].T)   # world-frame vertex offsets at s=1
+            wv = nfs[i] * (mverts[i] @ rots[i].T)
             box_sup_plus[i] = wv.max(axis=0)
             box_sup_minus[i] = -wv.min(axis=0)
-        if box_bounds is not None and enable_rotation:
+        if enable_rotation:
             import warnings as _w
             _w.warn("box_bounds support extents are fixed at the initial rotation; "
-                    "exact only for translation-only. Recompute per-step for 6-DOF.")
+                    "exact only for translation-only. The final wall check is exact.")
+        walls = (box_lo, box_hi, box_sup_plus, box_sup_minus)
+
+    joints = [(int(bi), int(bj), np.asarray(a_i, dtype=np.float64),
+               np.asarray(a_j, dtype=np.float64)) for (bi, bj, a_i, a_j) in (joints or [])]
+    joint_bodies = set()
+    for (bi, bj, _, _) in joints:
+        joint_bodies.add(bi); joint_bodies.add(bj)
 
     if rotation_weight is None:
-        # β = R_max^2 so that β||ω||^2 matches ||Δp||^2 in length^2 units
-        # (surface arc displacement from rotation ω is R||ω||).  Previous
-        # versions of this file used the dimensionally inverted form
-        # 1/R_max^2; the small-angle box ||ω||_∞ <= ω_max keeps both forms
-        # in the same operating regime, but only β = R_max^2 makes the
-        # objective penalty units consistent (cf. §3 of the paper).
+        # β = R_max² so that β||ω||² matches ||Δp||² in length² units
+        # (surface arc displacement from rotation ω is R||ω||).
         rotation_weight = (max_extent_all ** 2)
 
-    # Pre-compute first-contact scale for broadphase acceleration
-    # and simultaneously verify the eq:smin_safe bound on the chosen s_min.
-    # this is S4R-specific algorithmic work (SOI
-    # schedule), so it is (a) vectorized — the old Python double loop was
-    # O(N^2) interpreter work — and (b) charged to S4R's reported solver
-    # time via _soi_pre_elapsed below (baselines are not billed for it, so
-    # S4R must not get it for free either).
-    _soi_pre_t0 = time.time()
-    _ii, _jj = np.triu_indices(N, k=1)
-    _C = np.asarray(centers, dtype=np.float64)
-    _E = np.asarray(max_extents, dtype=np.float64)
-    _d = np.linalg.norm(_C[_ii] - _C[_jj], axis=1)
-    _sc = np.minimum(np.maximum(0.0, (_d - d_hat) / (_E[_ii] + _E[_jj] + 1e-12)), 2.0)
-    pair_first_contact = dict(zip(zip(_ii.tolist(), _jj.tolist()), _sc.tolist()))
-    s_min_safe = float(_sc.min()) if len(_sc) else float('inf')
-    _soi_pre_elapsed = time.time() - _soi_pre_t0
+    # ── Starting-scale admissibility and SOI event schedule ──────────────
+    # Vectorised pairwise first-contact scales (bounding spheres). The
+    # events feed the adaptive schedule; the minimum is the eq:smin_safe
+    # bound the fixed s_min must respect.
+    if N >= 2:
+        _ii, _jj = np.triu_indices(N, k=1)
+        _d = np.linalg.norm(centers[_ii] - centers[_jj], axis=1)
+        _sc = np.minimum(np.maximum(0.0, (_d - d_hat) / (max_extents[_ii] + max_extents[_jj] + 1e-12)), 2.0)
+        s_min_safe = float(_sc.min())
+        event_scales = np.unique(np.minimum(_sc[_sc <= 1.0 + 0.1], 1.0)).tolist()
+        del _ii, _jj, _d
+    else:
+        _sc = np.zeros(0)
+        s_min_safe = float('inf')
+        event_scales = []
     if verbose:
         print(f"  [s_min check] eq:smin_safe bound = {s_min_safe:.4f}, "
               f"using s_min = {scale:.4f}  "
-              f"({'OK' if scale < s_min_safe else 'TOO LARGE; will jitter'})")
+              f"({'OK' if scale < s_min_safe else 'TOO LARGE; separating centroids'})")
     if scale >= s_min_safe:
-        # Some pair violates the s_min bound (coincident or near-coincident
-        # centroids). Deterministically perturb the pair apart along their
-        # center axis until  ||c_i - c_j|| >= d_hat + s_min*(r_i+r_j) + eps,
-        # which is exactly what Eq. (smin_safe) needs for the fixed s_min to
-        # be admissible. (Jittering by d_hat alone is NOT enough: for
-        # exactly-coincident centroids it leaves the Eq. numerator at zero,
-        # so no positive s_min exists.) For an exactly-coincident pair the
-        # separation axis is chosen deterministically (+x).
-        for (i, j), sc in pair_first_contact.items():
-            if sc < scale:
-                axis = centers[j] - centers[i]
-                n = float(np.linalg.norm(axis))
-                if n < 1e-12:
-                    axis = np.array([1.0, 0.0, 0.0])
-                else:
-                    axis = axis / n
-                ext_sum = max_extents[i] + max_extents[j]
-                target = d_hat + scale * ext_sum + 1e-6
-                gap = max(0.0, target - n)
-                shift = gap * axis
-                centers[j] = centers[j] + 0.5 * shift
-                centers[i] = centers[i] - 0.5 * shift
-                if verbose:
-                    print(f"    jitter pair ({i},{j}) by ±{0.5 * gap:.5f} "
-                          f"(to ||c_i-c_j||={target:.5f})")
+        passes, remaining = separate_coincident_centroids(
+            centers, max_extents, d_hat, scale, verbose=verbose)
+        notes.append(f"starting-scale admissibility restored in {passes} passes "
+                     f"({remaining} pairs still violating)")
+        if remaining:
+            raise RuntimeError("could not separate coincident centroids to an "
+                               "admissible starting scale")
+        # Event schedule from the separated centroids.
+        _ii, _jj = np.triu_indices(N, k=1)
+        _d = np.linalg.norm(centers[_ii] - centers[_jj], axis=1)
+        _sc = np.minimum(np.maximum(0.0, (_d - d_hat) / (max_extents[_ii] + max_extents[_jj] + 1e-12)), 2.0)
+        event_scales = np.unique(np.minimum(_sc[_sc <= 1.0 + 0.1], 1.0)).tolist()
+        del _ii, _jj, _d
+    if not event_scales or event_scales[-1] < 1.0:
+        event_scales.append(1.0)
 
     def world_verts(i, s=None):
-        if s is None: s = scale
+        if s is None:
+            s = scale
         return s * nfs[i] * (rots[i] @ mverts[i].T).T + centers[i]
 
     def build_mesh(i, s=None):
         return trimesh.Trimesh(vertices=world_verts(i, s), faces=mfaces[i], process=False)
 
     def compute_extent(i, direction):
-        """One-sided support of body i along direction (world frame),
-        about the scaling center: max_v n^T R_i vbar (Prop. assumption (v)).
-        Clamped below at zero — a further conservative bound; the closure
-        coefficient only needs E >= c. (UNIFY-SUPPORT: was full projected
-        width max-min, which under-estimates the support when the scaling
-        center lies outside the hull slab along n.)"""
-        local_dir = rots[i].T @ direction
-        projs = nfs[i] * (mverts[i] @ local_dir)
-        return max(projs.max(), 0.0)
+        return _one_sided_support(nfs[i] * mverts[i], rots[i], direction)
 
-    # Cache for the FCL backend: rebuilt per find_contacts call at
-    # the current scale (we can't express uniform scaling via FCL
-    # Transform alone because FCL rotation must be orthonormal).
-    fcl_objs_cache = [None]
+    # ── Contact oracles ───────────────────────────────────────────────────
+    _fcl_oracle = [None]
 
-    def _build_fcl_objs(s_now):
-        import fcl
-        fcl_list = []
-        for i in range(N):
-            v_world = world_verts(i, s_now)
-            m = fcl.BVHModel()
-            m.beginModel(len(v_world), len(mfaces[i]))
-            m.addSubModel(v_world.astype(np.float64),
-                          mfaces[i].astype(np.int32))
-            m.endModel()
-            fcl_list.append(fcl.CollisionObject(m, fcl.Transform()))
-        return fcl_list
+    def _get_fcl_oracle():
+        if _fcl_oracle[0] is None:
+            _fcl_oracle[0] = PrebuiltFCLOracle(nfs, mverts, mfaces, d_hat)
+        return _fcl_oracle[0]
 
-    # ------------------------------------------------------------------
-    # fcl_prebuilt backend: build BVHs ONCE at scale=1 and reuse.
-    # Trick: change of variable u = x / s. The scale-s body has world
-    # vertices s * M[i] + centers[i] where M[i] = nfs[i] * rots[i] @ mverts[i].
-    # Equivalently, in u-space: M[i] + centers[i]/s. So we build BVH on
-    # M[i] once and query with translation centers[i]/s. FCL distances
-    # in u-space are (d_world / s); multiply by s to recover world units.
-    # Contact normals are scale-invariant (uniform scaling preserves
-    # directions). Contact points in u-space → multiply by s.
-    # ------------------------------------------------------------------
-    # Rotation-free, scale-1 BVH cache shared by translation oracle
-    # (_find_contacts_fcl_prebuilt) and SO(3) refinement loop
-    # (optimize_rotations_on_manifold). Built on nfs[i]*mverts[i]; rotation
-    # is applied via fcl.Transform(rots[i], centers[i]/s) per query so the
-    # cache stays valid as 6-DOF refinement mutates rots[i].
-    _prebuilt_bvh: list = []       # fcl.BVHModel per body
-    _prebuilt_M: list = []         # nfs[i] * mverts[i]  (model frame)
-
-    def _init_prebuilt_fcl():
-        """Build unit-scale, rotation-FREE BVHs and model-space cache.
-
-        We build BVHs on ``nfs[i] * mverts[i]`` (model frame, scale-1, no
-        rotation baked in) and let ``fcl.Transform(rots[i], centers[i]/s)``
-        apply rotation per query. This keeps the BVH valid even when
-        ``rots[i]`` mutates mid-solve (6-DOF path); for 3-DOF it is
-        semantically identical to baking rotation into the BVH.
-
-        World AABBs are pose-dependent and recomputed per call in
-        ``_find_contacts_fcl_prebuilt`` (cheap: ~N·V flops in numpy).
-        """
-        import fcl
-        _prebuilt_bvh.clear()
-        _prebuilt_M.clear()
-        for i in range(N):
-            Mi = (nfs[i] * mverts[i]).astype(np.float64)  # model-space, scale-1
-            _prebuilt_M.append(Mi)
-            m = fcl.BVHModel()
-            faces_i = mfaces[i].astype(np.int32)
-            m.beginModel(len(Mi), len(faces_i))
-            m.addSubModel(Mi, faces_i)
-            m.endModel()
-            _prebuilt_bvh.append(m)
-
-    # Warp GPU oracle (lazily initialised; we don't pay the wp.init cost
-    # unless the user actually requests it).
     _warp_oracle = [None]
 
     def _init_warp_oracle():
         if _warp_oracle[0] is None:
-            # The released Warp GPU oracle lives in ``s4r_gpu/``. Add that
-            # directory to the path and import the template-shared V3 oracle
-            # (the only Warp oracle shipped; requires an NVIDIA GPU +
-            # ``warp-lang``). The import is deferred to here so the default
-            # CPU backends never pay the ``warp`` import cost.
-            _gpu_dir = _os.path.join(_os.path.dirname(_HERE), "s4r_gpu")
+            # The Warp GPU oracle lives in ``s4r_gpu``; imported lazily so the
+            # CPU backends never pay the warp import.
+            _gpu_dir = os.path.join(os.path.dirname(_HERE), "s4r_gpu")
             if _gpu_dir not in sys.path:
                 sys.path.insert(0, _gpu_dir)
-            from warp_pair_contact_v3 import (
-                S4RWarpContactOracleV3 as S4RWarpContactOracle,
-            )
-            # Build a thin shim so the oracle has the .normalize_factor,
-            # .collision_verts_model and .collision_faces it expects.
+            from warp_pair_contact_v3 import S4RWarpContactOracleV3
+
             class _ObjShim:
-                __slots__ = ("normalize_factor", "collision_verts_model",
-                             "collision_faces")
+                __slots__ = ("normalize_factor", "collision_verts_model", "collision_faces")
+
                 def __init__(self, nf, v, f):
                     self.normalize_factor = nf
                     self.collision_verts_model = v
                     self.collision_faces = f
-            shims = [_ObjShim(nfs[i], mverts[i], mfaces[i])
-                     for i in range(N)]
-            _warp_oracle[0] = S4RWarpContactOracle(shims, d_hat=d_hat)
+            shims = [_ObjShim(nfs[i], mverts[i], mfaces[i]) for i in range(N)]
+            _warp_oracle[0] = S4RWarpContactOracleV3(shims, d_hat=d_hat)
         return _warp_oracle[0]
 
-    def _find_contacts_warp(s, ds):
-        oracle = _init_warp_oracle()
-        return oracle.find_contacts(s, ds, centers, rots)
+    _all_contacts = os.environ.get('S4R_ALL_CONTACTS', '0') == '1'
 
     def find_contacts(s, ds, bidirectional=True):
-        """Find pairs needing attention. Returns list of:
-        (i, j, d_signed, normal, extent_i, extent_j, cp_on_i, cp_on_j)
-
-        Dispatches to `contact_backend` ∈
-        {"trimesh", "fcl", "fcl_prebuilt", "warp"}. All paths return the
-        same tuple shape and sign convention:
-          - d_signed < 0 means penetration (depth = -d_signed)
-          - d_signed > 0 means a gap
-          - `normal` points roughly from i toward j (positive component
-            along centers[j] - centers[i]), matching the QP constraint
-            n · (Δp_j - Δp_i) ≥ b.
-
-        `bidirectional` is kept as a kwarg for backwards compatibility
-        (ignored by fcl; trimesh path is always bidirectional now).
+        """Pairs needing attention at scale s for an inflation by ds:
+        (i, j, d_signed, normal, extent_i, extent_j, cp_on_i, cp_on_j).
+        d_signed < 0 is a penetration depth; ``normal`` points so that
+        moving j along +normal separates the pair (QP row n·(Δp_j-Δp_i) ≥ b).
+        ``bidirectional`` is kept for backwards compatibility (ignored).
         """
         if contact_backend == 'warp':
-            return _find_contacts_warp(s, ds)
-        if contact_backend == 'fcl_prebuilt':
-            return _find_contacts_fcl_prebuilt(s, ds)
-        if contact_backend == 'fcl':
-            return _find_contacts_fcl(s, ds)
+            return _init_warp_oracle().find_contacts(s, ds, centers, rots)
+        if contact_backend in ('fcl', 'fcl_prebuilt'):
+            return _get_fcl_oracle().find_contacts(s, ds, centers, rots,
+                                                   all_contacts=_all_contacts)
         return _find_contacts_trimesh(s, ds)
 
-    def find_contacts_margin(s, ds, extra_margin):
-        """find_contacts with an explicit broadphase margin (world units).
-
-        Needed by the E3 safe-margin tail: with ds=0 the prebuilt broadphase
-        margin is 0, so SEPARATED pairs with gap < target are invisible to
-        the default query (fine for the pen<0 exit, blind for a margin
-        target). extra_margin=0.0 is bit-identical to find_contacts.
-        Only the paper's 'fcl_prebuilt' backend supports it.
-        """
+    def find_contacts_margin(s, ds, extra_margin, incremental=False):
+        """find_contacts with an extra broadphase margin (world units), for a
+        tail that targets a clearance above zero. extra_margin=0 is
+        identical to find_contacts. ``incremental`` lets the FCL oracle
+        reuse its previous call (same scale, translation-only moves)."""
+        if contact_backend in ('fcl', 'fcl_prebuilt'):
+            return _get_fcl_oracle().find_contacts(s, ds, centers, rots,
+                                                   extra_margin=extra_margin,
+                                                   all_contacts=_all_contacts,
+                                                   incremental=incremental)
         if extra_margin <= 0.0:
             return find_contacts(s, ds)
-        if contact_backend != 'fcl_prebuilt':
-            raise NotImplementedError(
-                "S4R_TAIL_TARGET_MARGIN requires contact_backend='fcl_prebuilt'")
-        return _find_contacts_fcl_prebuilt(s, ds, extra_margin)
-
-    def _find_contacts_fcl_prebuilt(s, ds, extra_margin=0.0):
-        """Variant of _find_contacts_fcl that reuses prebuilt scale-1 BVHs.
-
-        Uses the change-of-variable u = x/s: in u-space the body is
-        unit-scale at position centers[i]/s. FCL distance in u-space
-        times s recovers world distance; contact points in u-space times
-        s recover world points; normals are scale-invariant.
-
-        BVHs are built on rotation-FREE model verts and rotation is
-        applied via ``fcl.Transform(rots[i], centers[i]/s)`` per query,
-        so the cache stays valid when 6-DOF rotation refinement mutates
-        ``rots[i]`` between calls. The world AABB used for the broadphase
-        is therefore pose-dependent and recomputed per call.
-        """
-        import fcl
-        if not _prebuilt_bvh:
-            _init_prebuilt_fcl()
-        contacts = []
-        inv_s = 1.0 / s
-
-        # Per-call world AABB in u-space: rotate model verts and translate
-        # by centers[i]/s. Cheap: ~N·V flops, negligible vs FCL calls.
-        u_aabb_min = []; u_aabb_max = []
-        for i in range(N):
-            Vw = (rots[i] @ _prebuilt_M[i].T).T + centers[i] * inv_s
-            u_aabb_min.append(Vw.min(axis=0))
-            u_aabb_max.append(Vw.max(axis=0))
-
-        # Pre-wrap CollisionObjects with current rotation (cheap: shares BVH).
-        fcl_objs = [fcl.CollisionObject(
-            _prebuilt_bvh[i],
-            fcl.Transform(rots[i].astype(np.float64),
-                          (centers[i] * inv_s).astype(np.float64))
-        ) for i in range(N)]
-
-        # Vectorized broadphase over all N(N-1)/2 pairs,
-        # replacing the O(N^2) Python per-pair loop (~8M np.linalg.norm/dot calls
-        # at N=1000, the top hot spot). Same candidate set as the loop (SOI-cull
-        # + u-space AABB overlap), so contacts are IDENTICAL — only faster. This
-        # is the S4R analogue of the C1 fix applied to the baseline MeshOracle,
-        # so both sides get the same detection optimization (fair comparison).
-        C = np.asarray(centers, dtype=np.float64)
-        ext_a = np.asarray(max_extents, dtype=np.float64)
-        nf_a = np.asarray(nfs, dtype=np.float64)
-        lo = np.asarray(u_aabb_min, dtype=np.float64)   # (N,3)
-        hi = np.asarray(u_aabb_max, dtype=np.float64)   # (N,3)
-        ii, jj = np.triu_indices(N, k=1)
-        d_ij = np.linalg.norm(C[ii] - C[jj], axis=1)
-        s_contact = np.maximum(0.0,
-                               (d_ij - d_hat) / (ext_a[ii] + ext_a[jj] + 1e-12))
-        soi_keep = (s + ds) >= (s_contact * 0.9)
-        margin_u = ((ds * np.maximum(nf_a[ii], nf_a[jj]) * 0.2
-                     + extra_margin) * inv_s)[:, None]
-        overlap = np.all((lo[ii] - margin_u <= hi[jj]) &
-                         (lo[jj] - margin_u <= hi[ii]), axis=1)
-        cand = np.nonzero(soi_keep & overlap)[0]
-
-        for _k in cand:
-            i = int(ii[_k]); j = int(jj[_k])
-            # Distance query in u-space.
-            req = fcl.DistanceRequest(enable_nearest_points=True,
-                                      enable_signed_distance=True)
-            res = fcl.DistanceResult()
-            d_u = fcl.distance(fcl_objs[i], fcl_objs[j], req, res)
-
-            if d_u > 0.0:
-                cp_i_u = np.asarray(res.nearest_points[0], dtype=np.float64)
-                cp_j_u = np.asarray(res.nearest_points[1], dtype=np.float64)
-                n_raw = cp_j_u - cp_i_u        # direction is scale-invariant
-                d_signed = d_u * s              # u → world distance
-                cp_on_a = cp_i_u * s
-                cp_on_b = cp_j_u * s
-            else:
-                creq = fcl.CollisionRequest(num_max_contacts=16,
-                                            enable_contact=True)
-                cres = fcl.CollisionResult()
-                fcl.collide(fcl_objs[i], fcl_objs[j], creq, cres)
-                if not cres.is_collision or not cres.contacts:
-                    continue
-                # Diagnostic (multi-contact ablation): S4R_ALL_CONTACTS=1 keeps
-                # EVERY returned contact as its own constraint row instead of
-                # the single deepest witness. Default (0) = deployed behavior.
-                if os.environ.get('S4R_ALL_CONTACTS', '0') == '1':
-                    for c_k in cres.contacts:
-                        depth_u = float(c_k.penetration_depth)
-                        depth_world = depth_u * s
-                        n_raw = np.asarray(c_k.normal, dtype=np.float64)
-                        if np.dot(n_raw, centers[j] - centers[i]) < 0.0:
-                            n_raw = -n_raw
-                        nn = np.linalg.norm(n_raw)
-                        if nn < 1e-12:
-                            continue
-                        n_k = n_raw / nn
-                        pos_world = np.asarray(c_k.pos, dtype=np.float64) * s
-                        ext_i_k = compute_extent(i, n_k)
-                        ext_j_k = compute_extent(j, -n_k)
-                        contacts.append((i, j, -depth_world, n_k, ext_i_k,
-                                         ext_j_k, pos_world.copy(),
-                                         pos_world + n_k * depth_world))
-                    continue
-                c_best = max(cres.contacts,
-                             key=lambda c: c.penetration_depth)
-                depth_u = float(c_best.penetration_depth)
-                depth_world = depth_u * s       # u → world depth
-                n_raw = np.asarray(c_best.normal, dtype=np.float64)
-                if np.dot(n_raw, centers[j] - centers[i]) < 0.0:
-                    n_raw = -n_raw
-                pos_u = np.asarray(c_best.pos, dtype=np.float64)
-                pos_world = pos_u * s
-                cp_on_a = pos_world.copy()
-                cp_on_b = pos_world + n_raw * depth_world
-                d_signed = -depth_world
-
-            nn = np.linalg.norm(n_raw)
-            if nn < 1e-12:
-                n_raw = centers[j] - centers[i]
-                nn = np.linalg.norm(n_raw)
-            if nn < 1e-12:
-                continue
-            n = n_raw / nn
-
-            ext_i = compute_extent(i, n)
-            ext_j = compute_extent(j, -n)
-            gap_needed = ds * (ext_i + ext_j)
-            if d_signed < gap_needed + d_hat:
-                contacts.append((i, j, d_signed, n, ext_i, ext_j,
-                                 cp_on_a, cp_on_b))
-        return contacts
-
-    def _find_contacts_fcl(s, ds):
-        import fcl
-        contacts = []
-        fcl_objs = _build_fcl_objs(s)
-        meshes_trim = [build_mesh(i, s) for i in range(N)]  # for broadphase AABBs
-        for i in range(N):
-            ai0, ai1 = meshes_trim[i].bounds
-            for j in range(i + 1, N):
-                d_ij_now = float(np.linalg.norm(centers[i] - centers[j]))
-                s_contact_now = max(
-                    0.0,
-                    (d_ij_now - d_hat) / (max_extents[i] + max_extents[j] + 1e-12),
-                )
-                if s + ds < s_contact_now * 0.9:
-                    continue
-                aj0, aj1 = meshes_trim[j].bounds
-                margin = ds * max(nfs[i], nfs[j]) * 0.2
-                if not (np.all(ai0 - margin <= aj1) and np.all(aj0 - margin <= ai1)):
-                    continue
-
-                # Distance query first.
-                req = fcl.DistanceRequest(enable_nearest_points=True,
-                                          enable_signed_distance=True)
-                res = fcl.DistanceResult()
-                d = fcl.distance(fcl_objs[i], fcl_objs[j], req, res)
-
-                if d > 0.0:
-                    cp_i = np.asarray(res.nearest_points[0], dtype=np.float64)
-                    cp_j = np.asarray(res.nearest_points[1], dtype=np.float64)
-                    n_raw = cp_j - cp_i
-                    d_signed = d
-                    cp_on_a, cp_on_b = cp_i, cp_j
-                else:
-                    # Overlap — collision detection for penetration info.
-                    creq = fcl.CollisionRequest(num_max_contacts=16,
-                                                enable_contact=True)
-                    cres = fcl.CollisionResult()
-                    fcl.collide(fcl_objs[i], fcl_objs[j], creq, cres)
-                    if not cres.is_collision or not cres.contacts:
-                        continue
-                    c_best = max(cres.contacts,
-                                 key=lambda c: c.penetration_depth)
-                    depth = float(c_best.penetration_depth)
-                    n_raw = np.asarray(c_best.normal, dtype=np.float64)
-                    # Align normal so its component points from i toward j.
-                    if np.dot(n_raw, centers[j] - centers[i]) < 0.0:
-                        n_raw = -n_raw
-                    pos = np.asarray(c_best.pos, dtype=np.float64)
-                    cp_on_a = pos.copy()
-                    cp_on_b = pos + n_raw * depth
-                    d_signed = -depth
-
-                nn = np.linalg.norm(n_raw)
-                if nn < 1e-12:
-                    n_raw = centers[j] - centers[i]
-                    nn = np.linalg.norm(n_raw)
-                if nn < 1e-12:
-                    continue
-                n = n_raw / nn
-
-                ext_i = compute_extent(i, n)
-                ext_j = compute_extent(j, -n)
-                gap_needed = ds * (ext_i + ext_j)
-                if d_signed < gap_needed + d_hat:
-                    contacts.append((i, j, d_signed, n, ext_i, ext_j,
-                                     cp_on_a, cp_on_b))
-        return contacts
+        raise NotImplementedError(
+            "S4R_TAIL_TARGET_MARGIN requires the FCL contact backend")
 
     def _find_contacts_trimesh(s, ds):
+        """Dependency-free fallback: bidirectional vertex sampling with a
+        ray-cast inside test. A crossing between samples is not seen, so
+        this backend is a contact generator, not a certificate."""
         contacts = []
         meshes = [build_mesh(i, s) for i in range(N)]
         for i in range(N):
             vi = np.asarray(meshes[i].vertices)
             ai0, ai1 = vi.min(0), vi.max(0)
-            fn_i = meshes[i].face_normals
             for j in range(i + 1, N):
-                # Recompute first-contact scale from CURRENT centroids.
-                # (Pre-computed value assumed initial centers; drift invalidates it.)
                 d_ij_now = float(np.linalg.norm(centers[i] - centers[j]))
                 s_contact_now = max(
                     0.0,
@@ -539,67 +887,42 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
                     continue
                 vj = np.asarray(meshes[j].vertices)
                 aj0, aj1 = vj.min(0), vj.max(0)
-                margin = ds * max(nfs[i], nfs[j]) * 0.2
+                margin = ds * (max_extents[i] + max_extents[j]) + d_hat
                 if not (np.all(ai0 - margin <= aj1) and np.all(aj0 - margin <= ai1)):
                     continue
 
-                # Bidirectional closest-point queries.
-                cl_ji, d_ji, fidx_i = trimesh.proximity.closest_point(meshes[i], vj)
-                cl_ij, d_ij, fidx_j = trimesh.proximity.closest_point(meshes[j], vi)
+                cl_ji, d_ji, _ = trimesh.proximity.closest_point(meshes[i], vj)
+                cl_ij, d_ij, _ = trimesh.proximity.closest_point(meshes[j], vi)
 
-                # Inside flags via the SAME routine the evaluator uses
-                # (trimesh.contains with face-normal fallback). Optimization:
-                # only the subset of vj that lies within mesh_i's AABB (plus
-                # a d_hat margin) can possibly be inside; the rest are
-                # guaranteed outside, so we skip the expensive ray-cast.
                 inside_ji = np.zeros(len(vj), dtype=bool)
-                mask_j_in_ai = np.all(
-                    (vj >= ai0 - d_hat) & (vj <= ai1 + d_hat), axis=1
-                )
+                mask_j_in_ai = np.all((vj >= ai0 - d_hat) & (vj <= ai1 + d_hat), axis=1)
                 if mask_j_in_ai.any():
-                    inside_ji[mask_j_in_ai] = _mesh_contains_points(
-                        meshes[i], vj[mask_j_in_ai]
-                    )
-
+                    inside_ji[mask_j_in_ai] = _mesh_contains_points(meshes[i], vj[mask_j_in_ai])
                 inside_ij = np.zeros(len(vi), dtype=bool)
-                mask_i_in_aj = np.all(
-                    (vi >= aj0 - d_hat) & (vi <= aj1 + d_hat), axis=1
-                )
+                mask_i_in_aj = np.all((vi >= aj0 - d_hat) & (vi <= aj1 + d_hat), axis=1)
                 if mask_i_in_aj.any():
-                    inside_ij[mask_i_in_aj] = _mesh_contains_points(
-                        meshes[j], vi[mask_i_in_aj]
-                    )
+                    inside_ij[mask_i_in_aj] = _mesh_contains_points(meshes[j], vi[mask_i_in_aj])
 
-                # Signed distances: + gap, - depth
                 sd_ji = np.where(inside_ji, -d_ji, d_ji)
                 sd_ij = np.where(inside_ij, -d_ij, d_ij)
-
-                # Pick the most "critical" sample (smallest signed distance,
-                # i.e. deepest pen or smallest gap) across both directions.
                 min_ji = sd_ji.min()
                 min_ij = sd_ij.min()
                 if min_ji <= min_ij:
                     k = int(np.argmin(sd_ji))
                     d_signed = float(sd_ji[k])
                     if inside_ji[k]:
-                        # vj inside i: push vj outward (cl is on i's surface, exit direction)
                         n = cl_ji[k] - vj[k]
                         cp_on_a, cp_on_b = vj[k].copy(), cl_ji[k].copy()
                     else:
-                        # vj outside i: gap; push j in +(vj - cl) direction
                         n = vj[k] - cl_ji[k]
                         cp_on_a, cp_on_b = cl_ji[k].copy(), vj[k].copy()
                 else:
                     k = int(np.argmin(sd_ij))
                     d_signed = float(sd_ij[k])
                     if inside_ij[k]:
-                        # vi inside j: push vi outward (cl on j's surface)
-                        # We flip to keep `n` pointing i→j in the QP convention.
                         n = -(cl_ij[k] - vi[k])
                         cp_on_a, cp_on_b = cl_ij[k].copy(), vi[k].copy()
                     else:
-                        # vi outside j: gap; push i in -(vi - cl) direction,
-                        # equivalently j in +(vi - cl)
                         n = -(vi[k] - cl_ij[k])
                         cp_on_a, cp_on_b = vi[k].copy(), cl_ij[k].copy()
 
@@ -610,33 +933,19 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
                 if nn < 1e-12:
                     continue
                 n = n / nn
-
                 ext_i = compute_extent(i, n)
                 ext_j = compute_extent(j, -n)
-                gap_needed = ds * (ext_i + ext_j)
-
-                # Trigger if signed distance is below the safety band.
-                # d_signed < 0 (penetration) is ALWAYS included.
-                if d_signed < gap_needed + d_hat:
-                    contacts.append((i, j, d_signed, n, ext_i, ext_j,
-                                     cp_on_a, cp_on_b))
-
+                if d_signed < ds * (ext_i + ext_j) + d_hat:
+                    contacts.append((i, j, d_signed, n, ext_i, ext_j, cp_on_a, cp_on_b))
         return contacts
 
-    # ── Pre-compute contact event schedule ──────────────────────────
-    _soi_pre_t1 = time.time()
-    event_scales = sorted(set(
-        min(s, 1.0) for s in pair_first_contact.values() if s <= 1.0 + 0.1
-    ))
-    if not event_scales or event_scales[-1] < 1.0:
-        event_scales.append(1.0)
-    _soi_pre_elapsed += time.time() - _soi_pre_t1
-
-    # Unified timing policy v1: everything from function entry to here ---
-    # including the (vectorized) SOI-schedule precompute above and the BVH /
-    # backend construction --- is setup_time; the continuation loop below is
-    # solve_time; the reported `time` = setup + solve. This subsumes the
-    # earlier back-dating fix that charged only the SOI precompute.
+    # Unified timing policy: everything from function entry to here (event
+    # schedule, backend construction) is setup_time; the continuation, tail
+    # and cleanup are solve_time; the reported `time` is their sum.
+    if contact_backend in ('fcl', 'fcl_prebuilt'):
+        _get_fcl_oracle()
+    elif contact_backend == 'warp':
+        _init_warp_oracle()
     _sync_backend()
     setup_time = time.perf_counter() - method_t0
     solve_t0 = time.perf_counter()
@@ -647,19 +956,13 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
     prev_dof_per_body = None
 
     # ── Audit: evaluator-equivalent check at every iteration ─────────
-    # Uses trimesh.contains-based signed distance (same path as the
-    # final evaluator) to detect pairs the solver's unsigned
-    # `find_contacts` may have missed or mis-oriented.
     audit_log = []
     if audit:
         from mesh_collision import evaluate_world_collision_meshes
 
         def _audit_pairs_at(s_now):
-            """Per-pair signed-distance scan. Returns (pen_pairs,
-            max_pen, min_sd, pen_pair_set)."""
             ms = [build_mesh(i, s_now) for i in range(N)]
             stats = evaluate_world_collision_meshes(ms)
-            # Identify *which* pairs are penetrating, for overlap analysis.
             pen_set = set()
             bounds = [m.bounds for m in ms]
             for i in range(N):
@@ -680,61 +983,80 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
                         pen_set.add((i, j))
             return stats.pen_pairs, stats.max_penetration, stats.min_signed_distance, pen_set
 
-    # Analytical update state
-    cached_contacts = None  # full detection result
-    ds_retry_cap = float('inf')  # shrunk by the QP-failure retry; reset on accept
+    # ── Frozen-witness cache state ────────────────────────────────────
+    # cached_contacts holds the last detection, advanced analytically on the
+    # steps in between by the displacement that was actually applied
+    # (last_dp) and the inflation that actually happened (last_ds_applied):
+    #     d~^{k+1} = d~^k + n·(Δp_j − Δp_i) − ds_k (e_i + e_j).
+    # Every accepted step records its own (Δp, ds), including steps that
+    # moved nothing, so the update never reuses an older displacement. A
+    # rotation update invalidates the cache (the update above is
+    # translation-only) and forces a fresh detection.
+    cached_contacts = None
+    cache_propagated = False
+    ds_retry_cap = float('inf')
     steps_since_detection = 999
-    last_dp = None
+    last_dp = np.zeros((N, 3))
+    last_ds_applied = 0.0
+    cache_err_max = 0.0
+    truth_set = set()
+    missed = set()
+    truth_pen = truth_maxp = truth_minsd = 0
 
     def _snapshot_verts():
-        """Gather world-space verts for every body at current (centers, rots, scale)."""
         return [world_verts(i, scale).astype(np.float32) for i in range(N)]
 
     def _snapshot_verts_at(s_now):
         return [world_verts(i, s_now).astype(np.float32) for i in range(N)]
 
     if trajectory_dumper is not None:
-        # set_bodies wants a reference verts list; using the *full-scale*
-        # sample so bounds captured at registration cover the real scene.
         trajectory_dumper.set_bodies(
             faces_list=[f.astype(np.int32) for f in mfaces],
             verts_list=_snapshot_verts_at(1.0),
         )
-        # Pre-solve: the unresolved deep-penetration configuration at full
-        # scale. This is what the user sees before S4R starts shrinking.
-        trajectory_dumper.add_frame(
-            step=-2, sub=0, scale=1.0, verts_list=_snapshot_verts_at(1.0),
-        )
-        # Start of progressive scaling (bodies just shrunk to scale_min).
-        trajectory_dumper.add_frame(
-            step=-1, sub=0, scale=float(scale), verts_list=_snapshot_verts(),
-        )
+        trajectory_dumper.add_frame(step=-2, sub=0, scale=1.0, verts_list=_snapshot_verts_at(1.0))
+        trajectory_dumper.add_frame(step=-1, sub=0, scale=float(scale), verts_list=_snapshot_verts())
 
     def _dump_frame(step_idx: int):
         if trajectory_dumper is None:
             return
         if step_idx != 0 and step_idx % dump_every != 0 and step_idx != max_steps - 1:
             return
-        trajectory_dumper.add_frame(
-            step=step_idx, sub=0, scale=float(scale), verts_list=_snapshot_verts(),
-        )
+        trajectory_dumper.add_frame(step=step_idx, sub=0, scale=float(scale), verts_list=_snapshot_verts())
 
-    # Set True if the container walls (box_bounds) become mutually infeasible at
-    # some scale: no translation keeps every body inside the box at that scale.
-    # The container walls are HARD constraints, so we report infeasibility rather
-    # than silently relaxing them (which would return a wall-violating "success").
+    def _apply_attraction_only(max_frac=1.0):
+        """Attraction-only predictor when no contact pushes: pull bodies
+        toward target_centers. Closed-form minimiser of ½‖Δ‖² + ½α‖c+Δ−t‖²
+        is Δ = −α/(1+α)·(c−t), capped by a fraction of the scale step.
+        Returns the applied displacement (N,3) or None."""
+        if target_centers is None or attraction_alpha is None:
+            return None
+        raw = attraction_alpha(scale) if callable(attraction_alpha) else attraction_alpha
+        a = float(np.asarray(raw).max())
+        if a <= 1e-8:
+            return None
+        err = centers - target_centers
+        delta = -a / (1.0 + a) * err
+        cap = max_frac * ds * float(max_extent_all + 1e-9)
+        norms = np.linalg.norm(delta, axis=1, keepdims=True)
+        delta = delta * np.minimum(1.0, cap / np.clip(norms, 1e-9, None))
+        centers[:] += delta
+        return delta
+
+    # Set when the container walls become mutually infeasible at some scale:
+    # no translation keeps every body inside the box. The walls are HARD, so
+    # the run reports infeasibility instead of relaxing them.
     container_infeasible = False
+    stop_reason = None
+    steps_used = 0
+    ds = ds_max
 
     for step in range(max_steps):
         if scale >= 1.0 - 1e-6:
             break
-
-                # applied in the previous iteration; the analytic cache update must
-        # advance d by THAT inflation (paper Eq. cache_update), not by the
-        # upcoming step's ds, which differs on truncated/extended strides.
-        prev_ds = ds if step > 0 else 0.0
-        # the QP-failure retry below halves ds; without this cap
-        # the halving was overwritten here and never took effect.
+        steps_used = step + 1
+        # The QP-failure retry halves ds; the cap keeps the halving alive
+        # across the schedule below.
         ds = min(ds_max, 1.0 - scale, ds_retry_cap)
 
         # ── Event-driven scheduling ──────────────────────────────────
@@ -744,24 +1066,25 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
                 ds_to_event = next_events[0] - scale
                 if ds_to_event > ds_max:
                     ds = min(ds_to_event, 3.0 * ds_max)
-            if step > 0 and not diagnostics[-1].get('had_contacts', True):
+            if step > 0 and diagnostics and not diagnostics[-1].get('had_contacts', True):
                 ds = min(2.0 * ds_max, 1.0 - scale)
-            # The event/skip extensions above reassign ds, so re-apply the
-            # retry cap here or a halved step would be undone right away.
             ds = min(ds, ds_retry_cap)
 
-        # ── Full detection or analytical update? ─────────────────────
-        # with `>= revalidate_interval` the step right after a
-        # detection (steps_since_detection=0) already fell through to the cache,
-        # so interval=1 detected only every 2nd step. Use `- 1` so interval=M
-        # detects every M steps (interval=1 => re-detect every step, as stated).
+        # ── Full detection or analytical update ──────────────────────
+        # interval=M detects every M steps (interval=1: every step).
         if cached_contacts is None or steps_since_detection >= revalidate_interval - 1:
-            # Full detection: bidirectional only at final step for precision
             is_final = (scale + ds >= 1.0 - 1e-6)
             _t_contact = time.time() if profile else 0.0
             contacts = find_contacts(scale, ds, bidirectional=is_final)
-            if profile: _phase_times['contact'] += time.time() - _t_contact
-            # Audit: evaluator's ground-truth pen at current scale
+            if profile:
+                _phase_times['contact'] += time.time() - _t_contact
+            step_cache_err = None
+            if cache_propagated and cached_contacts:
+                prop = {(c[0], c[1]): c[2] for c in cached_contacts}
+                errs = [abs(c[2] - prop[(c[0], c[1])]) for c in contacts if (c[0], c[1]) in prop]
+                if errs:
+                    step_cache_err = float(max(errs))
+                    cache_err_max = max(cache_err_max, step_cache_err)
             if audit:
                 truth_pen, truth_maxp, truth_minsd, truth_set = _audit_pairs_at(scale)
                 solver_set = set((min(i, j), max(i, j)) for (i, j, *_) in contacts)
@@ -774,670 +1097,417 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
                       f"min_sd={truth_minsd:.4f}")
                 if missed:
                     print(f"        missed pairs: {sorted(missed)[:5]}"
-                          f"{'...' if len(missed)>5 else ''}")
+                          f"{'...' if len(missed) > 5 else ''}")
             cached_contacts = contacts
+            cache_propagated = False
             steps_since_detection = 0
         else:
-            # Analytical distance update: advance by the
-            # PREVIOUS step's inflation prev_ds — the stride over which
-            # last_dp was applied — matching d~^{k} = d~^{k-1} + n·Δp^{k-1}
-            # - ds_{k-1}(e_i+e_j).
-            if last_dp is not None and cached_contacts:
+            if cached_contacts:
                 cached_contacts = [
-                    (i, j, d + n.dot(last_dp[j] - last_dp[i]) - prev_ds * (ei + ej),
-                     n, ei, ej, cpi, cpj)
+                    (i, j, d + n.dot(last_dp[j] - last_dp[i]) - last_ds_applied * (ei + ej),
+                     n, ei, ej, cpi + last_dp[i], cpj + last_dp[j])
                     for i, j, d, n, ei, ej, cpi, cpj in cached_contacts
                 ]
+                cache_propagated = True
             contacts = cached_contacts
             steps_since_detection += 1
+            step_cache_err = None
 
-        # Optional attraction-only predictor: when no active contacts are
-        # pushing, still pull bodies toward target_centers so the shape-
-        # matching viz keeps moving. Closed-form minimiser of
-        # ½‖Δ‖² + ½α‖c+Δ−t‖² is Δ = −α/(1+α)·(c−t); we cap by a fraction of
-        # the current scale step so velocity stays bounded.
-        def _apply_attraction_only(max_frac=1.0):
-            if target_centers is None or attraction_alpha is None:
-                return False
-            raw = attraction_alpha(scale) if callable(attraction_alpha) else attraction_alpha
-            a = float(np.asarray(raw).max())
-            if a <= 1e-8:
-                return False
-            err = centers - target_centers
-            delta = -a / (1.0 + a) * err
-            # cap the per-step motion at max_frac * ds in body-extent units
-            cap = max_frac * ds * float(max_extent_all + 1e-9)
-            norms = np.linalg.norm(delta, axis=1, keepdims=True)
-            scale_dn = np.minimum(1.0, cap / np.clip(norms, 1e-9, None))
-            delta = delta * scale_dn
-            centers[:] += delta
-            return True
+        # Pairs that need pushing this step.
+        active = [c for c in contacts if ds * (c[4] + c[5]) + d_hat - c[2] > 0]
+        n_pen = sum(1 for c in contacts if c[2] < -1e-6)
 
-        if not contacts:
-            _apply_attraction_only()
+        # A step without active contacts needs no solve unless container
+        # walls are present (a body next to a wall inflates into it even
+        # without any pair contact, so the wall rows are solved every step)
+        # or an attraction term would move jointed bodies (the QP carries
+        # the joint rows; the closed-form attraction step does not).
+        attraction_on = target_centers is not None and attraction_alpha is not None
+        if not active and walls is None and not (joints and attraction_on):
+            delta = _apply_attraction_only()
+            last_dp = delta if delta is not None else np.zeros((N, 3))
+            last_ds_applied = ds
             scale += ds
-            ds_retry_cap = float('inf')  # step accepted
+            ds_retry_cap = float('inf')
             diagnostics.append({'step': step, 'scale': scale, 'ds': ds,
-                               'n_active': 0, 'n_pen': 0, 'had_contacts': False})
-            _dump_frame(step)
-            continue
-
-        # Filter to contacts that actually need pushing
-        active = [(i, j, d, n, ei, ej, cpi, cpj)
-                  for i, j, d, n, ei, ej, cpi, cpj in contacts
-                  if ds * (ei + ej) + d_hat - d > 0]
-        if not active:
-            n_pen_noactive = sum(1 for c in contacts if c[2] < -1e-6)
-            _apply_attraction_only()
-            scale += ds
-            ds_retry_cap = float('inf')  # step accepted
-            diagnostics.append({'step': step, 'scale': scale, 'ds': ds,
-                               'n_active': 0, 'n_pen': n_pen_noactive,
-                               'had_contacts': True})
+                                'n_active': 0, 'n_pen': n_pen,
+                                'had_contacts': bool(contacts)})
             _dump_frame(step)
             continue
 
         n_active = len(active)
-        # Penetrating pairs at the current scale (d_signed < 0) — written
-        # to diagnostics so the caller can plot pen-vs-step curves.
-        n_pen = sum(1 for c in contacts if c[2] < -1e-6)
 
-        # ── Identify active bodies (contact graph sparsity) ──────────
-        # With box_bounds, EVERY body must carry a wall constraint every step
-        # (a body with no contact still inflates with the scale and would poke
-        # through a wall if left out of the QP), so sparsity is disabled here.
-        if contact_sparsity and box_bounds is None:
-            active_set = set()
-            for (i, j, *_) in active:
-                active_set.add(i)
-                active_set.add(j)
+        # ── Active bodies (contact-graph sparsity) ────────────────────
+        # With walls every body carries a wall row every step, so sparsity
+        # is disabled; joint endpoints are always in the QP so a joint row is
+        # never dropped because one end had no contact.
+        if contact_sparsity and walls is None:
+            active_set = {b for c in active for b in (c[0], c[1])} | joint_bodies
             active_bodies = sorted(active_set)
-            body_map = {b: idx for idx, b in enumerate(active_bodies)}
-            n_bodies_qp = len(active_bodies)
         else:
             active_bodies = list(range(N))
-            body_map = {b: b for b in range(N)}
-            n_bodies_qp = N
-
+        body_map = {b: idx for idx, b in enumerate(active_bodies)}
+        n_bodies_qp = len(active_bodies)
         dof_per_body = 6 if enable_rotation else 3
         n_vars = dof_per_body * n_bodies_qp
 
-        # ── Build QP ─────────────────────────────────────────────────
-        # Objective: min (1/2) x^T P x
-        # Optional attraction to target_centers: adds α/2 ‖c + Δp − t‖² to the
-        # objective, which expands to α on P's translation diagonal and
-        # α(c−t) on q (translation slice). α can be a scalar, (N,) array,
-        # or a callable α(scale)→scalar|(N,) array. Only used when
-        # target_centers is supplied.
+        # ── Objective ────────────────────────────────────────────────
+        # min ½ xᵀPx + qᵀx; optional attraction α/2‖c + Δp − t‖² adds α to
+        # the translation diagonal and α(c − t) to q.
         alpha_tr = None
         if target_centers is not None and attraction_alpha is not None:
             raw = attraction_alpha(scale) if callable(attraction_alpha) else attraction_alpha
             raw = np.asarray(raw, dtype=np.float64)
-            if raw.ndim == 0:
-                alpha_tr = np.full(N, float(raw))
-            else:
-                alpha_tr = raw.reshape(-1)
-
-        if enable_rotation:
-            diag = []
-            for b in active_bodies:
-                a_b = float(alpha_tr[b]) if alpha_tr is not None else 0.0
-                diag.extend([1.0 + a_b, 1.0 + a_b, 1.0 + a_b])  # translation
-                rw = rotation_weight
-                diag.extend([rw, rw, rw])  # rotation weight
-            P = sp.diags(diag, format='csc')
-        elif alpha_tr is not None:
-            diag = []
-            for b in active_bodies:
-                a_b = float(alpha_tr[b])
-                diag.extend([1.0 + a_b, 1.0 + a_b, 1.0 + a_b])
-            P = sp.diags(diag, format='csc')
-        else:
-            P = sp.eye(n_vars, format='csc')
-
+            alpha_tr = np.full(N, float(raw)) if raw.ndim == 0 else raw.reshape(-1)
+        diag = []
         q = np.zeros(n_vars)
-        if alpha_tr is not None:
-            for idx, b in enumerate(active_bodies):
-                a_b = float(alpha_tr[b])
-                if a_b > 0.0:
-                    q[dof_per_body * idx: dof_per_body * idx + 3] = a_b * (
-                        centers[b] - target_centers[b])
-
-        # Constraints
-        A = np.zeros((n_active, n_vars))
-        l = np.zeros(n_active)
-
-        for ci, (i, j, d_curr, n_ij, ext_i, ext_j, cp_i, cp_j) in enumerate(active):
-            b = ds * (ext_i + ext_j) + d_hat - d_curr
-            ii = body_map[i]
-            jj = body_map[j]
-
-            # Translation part: n · (Δp_j - Δp_i) ≥ b
-            A[ci, dof_per_body * ii: dof_per_body * ii + 3] = -n_ij
-            A[ci, dof_per_body * jj: dof_per_body * jj + 3] = n_ij
-
+        for idx, b in enumerate(active_bodies):
+            a_b = float(alpha_tr[b]) if alpha_tr is not None else 0.0
+            diag.extend([1.0 + a_b] * 3)
             if enable_rotation:
-                # Moment arms: y_i = cp_on_i - center_i, y_j = cp_on_j - center_j
-                y_i = cp_i - centers[i]
-                y_j = cp_j - centers[j]
-                # Cross products: (y × n) gives the rotation-to-displacement coupling
-                cross_i = np.cross(y_i, n_ij)
-                cross_j = np.cross(y_j, n_ij)
-                # Rotation part: (y_j × n)·ω_j - (y_i × n)·ω_i
-                A[ci, dof_per_body * ii + 3: dof_per_body * ii + 6] = -cross_i
-                A[ci, dof_per_body * jj + 3: dof_per_body * jj + 6] = cross_j
+                diag.extend([rotation_weight] * 3)
+            if a_b > 0.0:
+                q[dof_per_body * idx: dof_per_body * idx + 3] = a_b * (centers[b] - target_centers[b])
+        P = sp.diags(diag, format='csc')
 
-            l[ci] = b
+        # ── Constraints ──────────────────────────────────────────────
+        A_full, l_full, u_full, b_c, walls_infeasible = _assemble_constraints(
+            active, ds, d_hat, centers, rots, active_bodies, body_map,
+            dof_per_body, max_omega, walls, joints, scale + ds)
+        if walls_infeasible:
+            container_infeasible = True
+            stop_reason = 'container_infeasible'
+            if verbose:
+                print(f"  Step {step + 1}: container infeasible at "
+                      f"scale={scale + ds:.3f} (walls cannot bound all "
+                      f"bodies inside the box). Stopping.")
+            break
 
-        # Add rotation clamp as box constraints
-        if enable_rotation:
-            n_box = 3 * n_bodies_qp  # one bound per rotation component
-            A_box = np.zeros((n_box, n_vars))
-            l_box = np.full(n_box, -max_omega)
-            u_box = np.full(n_box, max_omega)
-            for idx in range(n_bodies_qp):
-                for d in range(3):
-                    row = idx * 3 + d
-                    A_box[row, dof_per_body * idx + 3 + d] = 1.0
-            # Stack: original constraints + box constraints
-            A_full = np.vstack([A, A_box])
-            l_full = np.concatenate([l, l_box])
-            u_full = np.concatenate([np.full(n_active, np.inf), u_box])
-        else:
-            A_full = A
-            l_full = l
-            u_full = np.full(n_active, np.inf)
-
-        # ── Box-confinement (container wall) constraints ──────────────────
-        # For every body in this QP, on each world axis a, keep the body inside
-        # the container at the end of this step (scale s_next = scale + ds):
-        #   lo[a] + s_next*sup_minus[i,a] <= center_i[a] + Δp_i[a] <= hi[a] - s_next*sup_plus[i,a]
-        # i.e. a two-sided bound on the single translational variable Δp_i[a].
-        if box_bounds is not None:
-            s_next = scale + ds
-            n_wall = 3 * n_bodies_qp
-            A_wall = np.zeros((n_wall, n_vars))
-            l_wall = np.empty(n_wall)
-            u_wall = np.empty(n_wall)
-            for orig_b in active_bodies:
-                idx = body_map[orig_b]
-                for a in range(3):
-                    row = idx * 3 + a
-                    A_wall[row, dof_per_body * idx + a] = 1.0
-                    ci_a = centers[orig_b][a]
-                    u_wall[row] = box_hi[a] - s_next * box_sup_plus[orig_b][a] - ci_a
-                    l_wall[row] = box_lo[a] + s_next * box_sup_minus[orig_b][a] - ci_a
-            # If the box is too tight at this scale the two-sided bound inverts
-            # (l > u): there is NO body position that stays inside the container,
-            # so the hard-constrained QP is genuinely infeasible. We report this
-            # (no wall-violating "success") and stop the continuation — the box
-            # constraint cannot be satisfied at a scale below the target, so no
-            # continuous scale path reaches a collision-free in-box full-scale
-            # state. (Tolerance guards against float round-off at equality.)
-            if np.any(l_wall > u_wall + 1e-9):
-                container_infeasible = True
-                if verbose:
-                    print(f"  Step {step + 1}: container infeasible at "
-                          f"scale={scale + ds:.3f} (walls cannot bound all "
-                          f"bodies inside the box). Stopping.")
-                break
-            A_full = np.vstack([A_full, A_wall])
-            l_full = np.concatenate([l_full, l_wall])
-            u_full = np.concatenate([u_full, u_wall])
-
-        # ── Articulated-joint (hinge) equality constraints ────────────────
-        # Each joint (i, j, anchor_i, anchor_j) pins a point on body i to a
-        # point on body j (a hinge/ball anchor). anchor_* are full-scale world
-        # offsets from each centroid at the current rotation; they scale with s
-        # and rotate with the per-step ω. Keeping the two anchors coincident at
-        # s_next is a 3-row linear equality (l==u) in (Δp, ω) of both bodies:
-        #   Δp_i - Δp_j - s*[anchor_i]_× ω_i + s*[anchor_j]_× ω_j
-        #        = (p_j - p_i) + s*(anchor_j - anchor_i).
-        # Requires the 6-DOF solve so links can swing about the hinge to
-        # separate; demonstrates resolving interpenetration on articulated
-        # bodies without breaking their joints.
-        if joints and enable_rotation:
-            def _skew(v):
-                return np.array([[0.0, -v[2], v[1]],
-                                 [v[2], 0.0, -v[0]],
-                                 [-v[1], v[0], 0.0]])
-            # The hinge anchors are pinned at their FULL-SCALE offsets (coeff 1,
-            # NOT scaled by s): a link shrinks toward its own centroid for
-            # collision avoidance, but its joint point stays fixed relative to
-            # the centroid so the articulation topology is preserved throughout
-            # the continuation and exactly satisfied at s=1.
-            j_rows = []
-            j_rhs = []
-            for (bi, bj, a_i, a_j) in joints:
-                if bi not in body_map or bj not in body_map:
-                    continue
-                ii = body_map[bi]; jj = body_map[bj]
-                a_iw = rots[bi] @ np.asarray(a_i, dtype=np.float64)
-                a_jw = rots[bj] @ np.asarray(a_j, dtype=np.float64)
-                rhs = (centers[bj] - centers[bi]) + (a_jw - a_iw)
-                block = np.zeros((3, n_vars))
-                block[:, dof_per_body * ii: dof_per_body * ii + 3] = np.eye(3)
-                block[:, dof_per_body * jj: dof_per_body * jj + 3] = -np.eye(3)
-                block[:, dof_per_body * ii + 3: dof_per_body * ii + 6] = -_skew(a_iw)
-                block[:, dof_per_body * jj + 3: dof_per_body * jj + 6] = _skew(a_jw)
-                j_rows.append(block); j_rhs.append(rhs)
-            if j_rows:
-                A_j = np.vstack(j_rows); b_j = np.concatenate(j_rhs)
-                A_full = np.vstack([A_full, A_j])
-                l_full = np.concatenate([l_full, b_j])
-                u_full = np.concatenate([u_full, b_j])
-
-        A_sparse = sp.csc_matrix(A_full)
-
-        # ── Predictor: use ODE sensitivity from previous step ─────────
-        # dq*/ds = -A_active^+ (∂d/∂s) where ∂d/∂s = -(ext_i + ext_j)
-        # If active set matches previous step, predict directly
+        # ── Predictor: ODE sensitivity from the previous step ─────────
         x0 = np.zeros(n_vars)
         used_predictor = False
-
         if (prev_sensitivity is not None and prev_active_bodies is not None
                 and dof_per_body == prev_dof_per_body
                 and len(prev_sensitivity) == n_vars
                 and prev_active_bodies == set(active_bodies)):
-            # Exact same active set → full ODE prediction
             x0 = ds * prev_sensitivity
             used_predictor = True
         elif (prev_sensitivity is not None and prev_active_bodies is not None
                 and dof_per_body == prev_dof_per_body
-                and len(prev_sensitivity) == n_vars):
-            # Active set changed but same dimension → use sensitivity as hint
-            # Scale by overlap ratio
-            overlap = prev_active_bodies & set(active_bodies)
-            if len(overlap) > len(active_bodies) * 0.5:
-                x0 = ds * prev_sensitivity * 0.5  # dampened prediction
-                used_predictor = True
-            else:
-                for idx, b in enumerate(active_bodies):
-                    if b in warm_cache:
-                        cached = warm_cache[b]
-                        copy_len = min(len(cached), dof_per_body)
-                        x0[dof_per_body * idx: dof_per_body * idx + copy_len] = cached[:copy_len]
+                and len(prev_sensitivity) == n_vars
+                and len(prev_active_bodies & set(active_bodies)) > len(active_bodies) * 0.5):
+            x0 = ds * prev_sensitivity * 0.5
+            used_predictor = True
         else:
-            # Fall back to warm cache
             for idx, b in enumerate(active_bodies):
                 if b in warm_cache:
                     cached = warm_cache[b]
                     copy_len = min(len(cached), dof_per_body)
                     x0[dof_per_body * idx: dof_per_body * idx + copy_len] = cached[:copy_len]
 
-        # ── Solve QP ──────────────────────────────────────────────────
+        # ── Solve ────────────────────────────────────────────────────
         t_qp = time.time()
         qp_iters = 0
-
-        if use_dual and not enable_rotation:
-            # Dual QP: solve in contact force space (dimension = n_active)
-            P_diag = np.ones(n_vars)  # P = I for translation-only
-            dual_result = solve_dual_qp(A, l, P_diag, n_vars)
-            if dual_result is not None:
-                result_x = dual_result[0]
-                qp_iters = dual_result[2]
-                qp_solved = True
-            else:
-                qp_solved = False
-        elif use_dual and enable_rotation:
-            # Dual QP with weighted P
-            P_diag = np.array([
-                val for b in active_bodies
-                for val in [1.0, 1.0, 1.0, rotation_weight, rotation_weight, rotation_weight]
-            ])
-            dual_result = solve_dual_qp(A, l, P_diag, n_vars)
-            if dual_result is not None:
-                result_x = dual_result[0]
-                qp_iters = dual_result[2]
-                qp_solved = True
-            else:
-                qp_solved = False
-        else:
-            # Primal QP (original)
-            _t_qp = time.time() if profile else 0.0
-            solver = osqp.OSQP()
-            solver.setup(P, q, A_sparse, l_full, u_full,
-                         verbose=False, eps_abs=1e-6, eps_rel=1e-6,
-                         max_iter=4000, polish=True, warm_starting=True)
-            solver.warm_start(x=x0)
-            result = solver.solve()
-            if profile: _phase_times['qp'] += time.time() - _t_qp
-            qp_solved = result.info.status in ('solved', 'solved_inaccurate')
+        result_x = None
+        fallback_used = False
+        _t_qp = time.time() if profile else 0.0
+        if use_dual:
+            dual_result = solve_dual_qp(A_full, l_full, np.ones(n_vars), n_vars)
+            qp_solved = dual_result is not None
             if qp_solved:
-                result_x = result.x
-                qp_iters = result.info.iter
-
+                result_x, qp_iters = dual_result[0], dual_result[2]
+        else:
+            result = osqp_solve(P, q, A_full, l_full, u_full, x0=x0, **_OSQP_STEP)
+            qp_solved = qp_status_ok(result)
+            if qp_solved:
+                result_x, qp_iters = result.x, result.info.iter
+            elif enable_rotation:
+                # Rotation-locked retry: identical rows (contacts, walls,
+                # joints) with ω fixed at zero, so the fallback keeps every
+                # hard constraint of the requested problem.
+                A_lock, l_lock, u_lock, _, _ = _assemble_constraints(
+                    active, ds, d_hat, centers, rots, active_bodies, body_map,
+                    dof_per_body, max_omega, walls, joints, scale + ds,
+                    lock_rotation=True)
+                result = osqp_solve(P, q, A_lock, l_lock, u_lock, x0=None, **_OSQP_STEP)
+                qp_solved = qp_status_ok(result)
+                if qp_solved:
+                    result_x, qp_iters = result.x, result.info.iter
+                    fallback_used = True
+        if profile:
+            _phase_times['qp'] += time.time() - _t_qp
         qp_time = time.time() - t_qp
 
-        if qp_solved:
-            x = result_x.reshape(n_bodies_qp, dof_per_body)
-            dp = x[:, :3]
-
-            # Cache solution for warm-starting next step
-            for idx, b in enumerate(active_bodies):
-                warm_cache[b] = x[idx].copy()
-
-            # ── Compute sensitivity dq*/ds for predictor ─────────────
-            # Active set: constraints where QP solution is binding
-            # Use the contact constraints (first n_active rows of A_full)
-            # ∂d/∂s for each active contact = -(ext_i + ext_j)
-            dd_ds = np.array([-(ei + ej) for _, _, _, _, ei, ej, _, _ in active])
-            # A_active = first n_active rows of A (contact part only)
-            A_contact = A[:n_active]
-            # Identify binding constraints: where residual ≈ 0
-            residuals = A_contact @ result_x - l[:n_active]
-            binding = residuals < 1e-4  # approximately active
-            if binding.any():
-                A_bind = A_contact[binding]
-                dd_bind = dd_ds[binding]
-                # dq*/ds = -A_bind^+ @ dd_bind = -A_bind^T (A_bind A_bind^T)^{-1} dd_bind
-                try:
-                    G = A_bind @ A_bind.T  # |binding| × |binding|
-                    dλ = np.linalg.solve(G + 1e-8 * np.eye(G.shape[0]), dd_bind)
-                    prev_sensitivity = -A_bind.T @ dλ
-                except np.linalg.LinAlgError:
-                    prev_sensitivity = None
-            else:
-                prev_sensitivity = None
-            prev_active_bodies = set(active_bodies)
-            prev_dof_per_body = dof_per_body
-
-            # Apply translation
-            dp_full = np.zeros((N, 3))
-            for idx, b in enumerate(active_bodies):
-                centers[b] += dp[idx]
-                dp_full[b] = dp[idx]
-            last_dp = dp_full
-
-            # do NOT apply Delta-p to the cache here. The analytic
-            # branch already applies `last_dp` (this same Delta-p) plus the
-            # inflation term at the start of the next step, so updating here too
-            # double-counted the QP displacement. The cache equation
-            #   d~^{k+1} = d~^k + n.Delta-p - ds(e_i+e_j)
-            # is now applied exactly once per step (in the analytic branch).
-
-            # Apply rotation
-            max_rot_applied = 0.0
-            if enable_rotation:
-                omega = x[:, 3:6]
-                for idx, b in enumerate(active_bodies):
-                    w = omega[idx]
-                    nw = np.linalg.norm(w)
-                    max_rot_applied = max(max_rot_applied, nw)
-                    if nw > 1e-12:
-                        rots[b] = RotLib.from_rotvec(w).as_matrix() @ rots[b]
-
-            # ── Step B: Rotation manifold optimization ────────────────
-            # After translation QP, optimize rotations on SO(3) for each body.
-            # Reuses the same rotation-free, scale-1 BVH cache as the
-            # translation oracle (built once on first contact query).
-            rot_total = 0.0
-            if enable_rotation and n_active >= 3:
-                if not _prebuilt_bvh:
-                    _init_prebuilt_fcl()
-                rot_total = optimize_rotations_on_manifold(
-                    centers, rots, nfs, mverts, mfaces, N, d_hat, scale + ds,
-                    contact_backend=contact_backend,
-                    bvh_cache=_prebuilt_bvh,
-                    model_verts_cache=_prebuilt_M)
-
-            scale += ds
-            ds_retry_cap = float('inf')  # step accepted
-            _dump_frame(step)
-
-            diagnostics.append({
-                'step': step, 'scale': scale, 'ds': ds,
-                'n_active': n_active, 'n_pen': n_pen,
-                'had_contacts': True,
-                'qp_time_ms': qp_time * 1000,
-                'qp_iters': qp_iters,
-                'max_disp': float(np.max(np.linalg.norm(dp, axis=1))),
-                'max_rot': max_rot_applied,
-                'n_vars': n_vars,
-                'used_predictor': used_predictor,
-            })
-
-            # Audit: ground-truth pen after applying QP displacement + inflation
-            if audit:
-                post_pen, post_maxp, post_minsd, post_set = _audit_pairs_at(scale)
-                new_pen = post_set - (truth_set if 'truth_set' in dir() else set())
-                print(f"        post-step: scale={scale:.4f}  "
-                      f"pen_after={post_pen:3d}  max_pen={post_maxp:.4f}  "
-                      f"new_pen_this_step={len(new_pen)}")
-                audit_log.append({
-                    'step': step, 'scale_before': scale - ds, 'scale_after': scale,
-                    'solver_contacts': n_active,
-                    'evaluator_pen_before': truth_pen,
-                    'evaluator_pen_after': post_pen,
-                    'max_pen_before': truth_maxp,
-                    'max_pen_after': post_maxp,
-                    'missed_by_solver_before': len(missed) if 'missed' in dir() else 0,
-                    'new_pen_this_step': len(new_pen),
-                })
-
-            if verbose and (step + 1) % 5 == 0:
-                rmsd = float(np.sqrt(np.mean(np.sum((centers - centers0) ** 2, axis=1))))
-                rot_str = f" max_rot={max_rot_applied:.4f}" if enable_rotation else ""
-                print(f"  Step {step + 1}: scale={scale:.3f} contacts={n_active} "
-                      f"pen={n_pen} "
-                      f"max_push={np.max(np.linalg.norm(dp, axis=1)):.4f} "
-                      f"RMSD={rmsd:.4f}{rot_str}")
-        else:
-            if enable_rotation:
-                # Fallback: try translation-only
-                result_fb = solve_s4r_qp_step_translation_only(
-                    N, active, ds, d_hat, centers, body_map, active_bodies,
-                    contact_sparsity)
-                if result_fb is not None:
-                    centers += result_fb
-                    scale += ds
-                    ds_retry_cap = float('inf')  # step accepted
-                    _dump_frame(step)
-                    diagnostics.append({
-                        'step': step, 'scale': scale, 'ds': ds,
-                        'n_active': n_active, 'n_pen': n_pen,
-                        'had_contacts': True,
-                        'fallback': True,
-                    })
-                    continue
-
-            # Reduce ds and retry
+        if not qp_solved or result_x is None or not np.all(np.isfinite(result_x)):
+            # Reduce ds and retry with a fresh detection: the cache was
+            # already propagated for this failed attempt.
             ds *= 0.5
             ds_retry_cap = ds
-            # Force a full detection on the retry: the cache was already
-            # propagated for this failed attempt, and propagating it again
-            # would advance it by an inflation that never happened.
             steps_since_detection = 999
+            cache_propagated = False
             if ds < 1e-6:
+                stop_reason = 'qp_failure'
                 if verbose:
                     print(f"  Step {step + 1}: QP infeasible, ds too small. Stopping.")
                 break
             continue
 
-    # ── Tail refinement: correction QPs at scale=1 with ds=0 ─────────
-    # Residual linearization error can leave a handful of pairs with
-    # d_signed < 0 at scale=1. Run correction QPs with ds=0 using the
-    # same active-contact set as the main loop (penetrating AND near-
-    # contact pairs), so pushing one pair does not flip a neighbor.
-    # Stop as soon as no penetrating pair remains, or when max_pen
-    # stagnates / rebounds.
-    max_tail_iters = int(os.environ.get('S4R_MAX_TAIL_ITERS', 20))
-    # Stagnation check: stop when max_pen hasn't improved for this many
-    # consecutive iterations. Default 3 (matches tab:main). Bump higher
-    # for dense sphere-packed scenes where max_pen oscillates between
-    # competing contacts even while pen_pair_count steadily decreases.
-    stagnation_cap = int(os.environ.get('S4R_TAIL_STAGNATION_CAP', 3))
-    # E3 safe-margin variant (default 0.0 = published behavior, bit-identical:
-    # selection sd<0 and deficit=-sd). When >0, the tail keeps iterating until
-    # every near pair clears the target margin (its correction QP already
-    # pushes toward the full d_hat clearance; only this exit test stopped at
-    # evaluator-level pen=0). 'deficit' below = target - sd.
-    tail_margin = float(os.environ.get('S4R_TAIL_TARGET_MARGIN', '0.0'))
-    prev_max_pen = float('inf')
-    prev_pen_pairs = None
-    stagnation = 0
-    _t_tail_start = time.time() if profile else 0.0
-    tail_stop_reason = 'iter_cap'
-    for tail in range(max_tail_iters):
-        contacts_tail = find_contacts_margin(scale, 0.0, tail_margin)
-        pen_pairs_tail = [c for c in contacts_tail if c[2] < tail_margin]
-        if not pen_pairs_tail:
-            tail_stop_reason = 'feasible'
-            if audit:
-                print(f"[TAIL] iter={tail} pen=0 (margin target {tail_margin}), converged")
-            break
+        x = result_x.reshape(n_bodies_qp, dof_per_body)
+        dp = x[:, :3]
+        for idx, b in enumerate(active_bodies):
+            warm_cache[b] = x[idx].copy()
 
-        max_pen_now = max(tail_margin - c[2] for c in pen_pairs_tail)
-        n_pen_now = len(pen_pairs_tail)
-        # Stagnation = neither max_pen nor pen_pair_count has dropped.
-        # This protects against the dense-scene failure mode where
-        # max_pen oscillates between contacts but pair count is still
-        # falling.
-        pair_dropped = prev_pen_pairs is None or n_pen_now < prev_pen_pairs
-        if max_pen_now >= prev_max_pen - 1e-5 and not pair_dropped:
-            stagnation += 1
-            if stagnation >= stagnation_cap:
-                tail_stop_reason = 'tail_stagnation'
-                if audit:
-                    print(f"[TAIL] iter={tail} stagnated at max_pen={max_pen_now:.4f} pairs={n_pen_now}, stopping")
-                break
-        else:
-            stagnation = 0
-        prev_max_pen = max_pen_now
-        prev_pen_pairs = n_pen_now
+        # ── Sensitivity dq*/ds for the predictor ─────────────────────
+        # Binding contact rows: dq*/ds = −A_bindᵀ (A_bind A_bindᵀ)⁻¹ ∂b/∂s,
+        # with ∂d/∂s = −(e_i + e_j) per contact.
+        prev_sensitivity = None
+        if n_active:
+            dd_ds = np.array([-(c[4] + c[5]) for c in active])
+            A_c = A_full.tocsr()[:n_active]
+            residuals = A_c @ result_x - b_c
+            binding = residuals < 1e-4
+            if binding.any():
+                A_bind = A_c[binding]
+                dd_bind = dd_ds[binding]
+                try:
+                    G = (A_bind @ A_bind.T).tocsc() + 1e-8 * sp.identity(int(binding.sum()), format='csc')
+                    d_lambda = spla.spsolve(G, dd_bind)
+                    sens = -(A_bind.T @ d_lambda)
+                    if np.all(np.isfinite(sens)):
+                        prev_sensitivity = np.asarray(sens).reshape(-1)
+                except Exception:
+                    prev_sensitivity = None
+        prev_active_bodies = set(active_bodies)
+        prev_dof_per_body = dof_per_body
+
+        # ── Apply translation ────────────────────────────────────────
+        dp_full = np.zeros((N, 3))
+        for idx, b in enumerate(active_bodies):
+            centers[b] += dp[idx]
+            dp_full[b] = dp[idx]
+        last_dp = dp_full
+        last_ds_applied = ds
+
+        # ── Apply rotation ───────────────────────────────────────────
+        max_rot_applied = 0.0
+        rot_total = 0.0
+        if enable_rotation:
+            omega = x[:, 3:6]
+            for idx, b in enumerate(active_bodies):
+                w = omega[idx]
+                nw = np.linalg.norm(w)
+                max_rot_applied = max(max_rot_applied, nw)
+                if nw > 1e-12:
+                    rots[b] = RotLib.from_rotvec(w).as_matrix() @ rots[b]
+            # Step B: SO(3) refinement. Skipped when walls or joints are
+            # present: it rotates bodies about their own centroids without
+            # those rows and would break them.
+            if n_active >= 3 and walls is None and not joints:
+                oracle = _get_fcl_oracle() if contact_backend in ('fcl', 'fcl_prebuilt') else None
+                rot_total = optimize_rotations_on_manifold(
+                    centers, rots, nfs, mverts, mfaces, N, d_hat, scale + ds,
+                    contact_backend=contact_backend,
+                    bvh_cache=oracle.bvh if oracle is not None else None,
+                    model_verts_cache=oracle.model_verts if oracle is not None else None)
+            if max_rot_applied > 1e-12 or rot_total > 0.0:
+                # The analytic cache update is translation-only.
+                steps_since_detection = 999
+
+        scale += ds
+        ds_retry_cap = float('inf')
+        _dump_frame(step)
+
+        diag_entry = {
+            'step': step, 'scale': scale, 'ds': ds,
+            'n_active': n_active, 'n_pen': n_pen,
+            'had_contacts': True,
+            'qp_time_ms': qp_time * 1000,
+            'qp_iters': qp_iters,
+            'max_disp': float(np.max(np.linalg.norm(dp, axis=1))) if n_bodies_qp else 0.0,
+            'max_rot': max_rot_applied,
+            'n_vars': n_vars,
+            'used_predictor': used_predictor,
+        }
+        if fallback_used:
+            diag_entry['fallback'] = True
+        if step_cache_err is not None:
+            diag_entry['cache_err'] = step_cache_err
+        diagnostics.append(diag_entry)
 
         if audit:
-            print(f"[TAIL] iter={tail} scale={scale:.4f} "
-                  f"pen_pairs={len(pen_pairs_tail)} "
-                  f"active_total={len(contacts_tail)} "
-                  f"max_pen={max_pen_now:.4f}")
+            post_pen, post_maxp, post_minsd, post_set = _audit_pairs_at(scale)
+            new_pen = post_set - truth_set
+            print(f"        post-step: scale={scale:.4f}  "
+                  f"pen_after={post_pen:3d}  max_pen={post_maxp:.4f}  "
+                  f"new_pen_this_step={len(new_pen)}")
+            audit_log.append({
+                'step': step, 'scale_before': scale - ds, 'scale_after': scale,
+                'solver_contacts': n_active,
+                'evaluator_pen_before': truth_pen,
+                'evaluator_pen_after': post_pen,
+                'max_pen_before': truth_maxp,
+                'max_pen_after': post_maxp,
+                'missed_by_solver_before': len(missed),
+                'new_pen_this_step': len(new_pen),
+            })
 
-        # Build correction QP using ALL active contacts (pen + near-contact)
-        # so pushing a pen pair doesn't flip a near-contact neighbor.
-        if contact_sparsity and box_bounds is None:
-            active_set_t = set()
-            for (i, j, *_) in contacts_tail:
-                active_set_t.add(i); active_set_t.add(j)
-            active_bodies_t = sorted(active_set_t)
-            body_map_t = {b: idx for idx, b in enumerate(active_bodies_t)}
-        else:
-            active_bodies_t = list(range(N))
-            body_map_t = {b: b for b in range(N)}
-        n_b_t = len(active_bodies_t)
-        n_vars_t = 3 * n_b_t
-        n_c_t = len(contacts_tail)
+        if verbose and (step + 1) % 5 == 0:
+            rmsd = float(np.sqrt(np.mean(np.sum((centers - centers0) ** 2, axis=1))))
+            rot_str = f" max_rot={max_rot_applied:.4f}" if enable_rotation else ""
+            print(f"  Step {step + 1}: scale={scale:.3f} contacts={n_active} "
+                  f"pen={n_pen} max_push={diag_entry['max_disp']:.4f} "
+                  f"RMSD={rmsd:.4f}{rot_str}")
 
-        P_t = sp.eye(n_vars_t, format='csc')
-        q_t = np.zeros(n_vars_t)
-        A_t = np.zeros((n_c_t, n_vars_t))
-        l_t = np.zeros(n_c_t)
-        for ci, (i, j, d_s, n_ij, ext_i, ext_j, _, _) in enumerate(contacts_tail):
-            b_t = d_hat - d_s  # ds = 0; negative for far gaps (constraint inactive)
-            ii = body_map_t[i]; jj = body_map_t[j]
-            A_t[ci, 3*ii:3*ii+3] = -n_ij
-            A_t[ci, 3*jj:3*jj+3] =  n_ij
-            l_t[ci] = b_t
+    continuation_complete = bool(scale >= 1.0 - 1e-6)
+    if not continuation_complete and stop_reason is None:
+        stop_reason = 'max_steps'
+    if continuation_complete:
+        scale = 1.0
 
-        A_t_full = A_t; l_t_full = l_t; u_t_full = np.full(n_c_t, np.inf)
-        # Box-confinement walls also apply during tail refinement (at s=1), so
-        # the residual-cleanup push cannot eject a body from the container.
-        if box_bounds is not None:
-            n_wall_t = 3 * n_b_t
-            A_wall_t = np.zeros((n_wall_t, n_vars_t))
-            l_wall_t = np.empty(n_wall_t); u_wall_t = np.empty(n_wall_t)
-            for orig_b in active_bodies_t:
-                idx = body_map_t[orig_b]
-                for a in range(3):
-                    row = idx * 3 + a
-                    A_wall_t[row, 3 * idx + a] = 1.0
-                    ci_a = centers[orig_b][a]
-                    u_wall_t[row] = box_hi[a] - box_sup_plus[orig_b][a] - ci_a
-                    l_wall_t[row] = box_lo[a] + box_sup_minus[orig_b][a] - ci_a
-            # Hard walls: an inverted bound at s=1 means the container cannot
-            # hold every body — report infeasible instead of relaxing.
-            if np.any(l_wall_t > u_wall_t + 1e-9):
-                container_infeasible = True
-                if verbose:
-                    print(f"  Tail: container infeasible at s=1 "
-                          f"(walls cannot bound all bodies inside the box).")
+    # ── Tail refinement: correction QPs at scale 1 with ds = 0 ────────
+    # Residual linearisation error can leave a few pairs with d < 0 at full
+    # scale. Correction QPs use the same active set as the main loop
+    # (penetrating and near-contact pairs) plus the walls and joints, so
+    # pushing one pair does not flip a neighbour or break a constraint.
+    # Only run when the continuation actually reached full scale: a tail at
+    # a shrunken scale would say nothing about the delivered scene.
+    max_tail_iters = int(os.environ.get('S4R_MAX_TAIL_ITERS', 20))
+    stagnation_cap = int(os.environ.get('S4R_TAIL_STAGNATION_CAP', 3))
+    tail_margin = float(os.environ.get('S4R_TAIL_TARGET_MARGIN', '0.0'))
+    if tail_margin > d_hat:
+        raise ValueError("S4R_TAIL_TARGET_MARGIN must not exceed d_hat: the "
+                         "correction rows push pairs to the d_hat clearance")
+    tail_stop_reason = 'not_run'
+    _t_tail_start = time.time() if profile else 0.0
+    if continuation_complete:
+        tail_stop_reason = 'tail_iter_cap' if max_tail_iters > 0 else 'tail_disabled'
+        prev_max_pen = float('inf')
+        prev_pen_pairs = None
+        stagnation = 0
+        def _joint_residual_now():
+            res = 0.0
+            for (bi, bj, a_i, a_j) in joints:
+                gap = (centers[bi] + rots[bi] @ a_i) - (centers[bj] + rots[bj] @ a_j)
+                res = max(res, float(np.linalg.norm(gap)))
+            return res
+
+        for tail in range(max_tail_iters):
+            _t_td = time.time() if profile else 0.0
+            contacts_tail = find_contacts_margin(1.0, 0.0, tail_margin, incremental=True)
+            if profile:
+                _phase_times['tail_contact'] = _phase_times.get('tail_contact', 0.0) + time.time() - _t_td
+            pen_pairs_tail = [c for c in contacts_tail if c[2] < tail_margin]
+            # The 6-DOF steps satisfy the joint rows to first order in ω; the
+            # translation-only correction below restores them exactly, so a
+            # residual above tolerance is corrected even without penetration.
+            joint_off = _joint_residual_now() > 1e-9 if joints else False
+            if not pen_pairs_tail and not joint_off:
+                tail_stop_reason = 'feasible'
+                if audit:
+                    print(f"[TAIL] iter={tail} pen=0 (margin target {tail_margin}), converged")
                 break
-            A_t_full = np.vstack([A_t, A_wall_t])
-            l_t_full = np.concatenate([l_t, l_wall_t])
-            u_t_full = np.concatenate([u_t_full, u_wall_t])
 
-        solver_t = osqp.OSQP()
-        solver_t.setup(P_t, q_t, sp.csc_matrix(A_t_full), l_t_full,
-                       u_t_full,
-                       verbose=False, eps_abs=1e-7, eps_rel=1e-7,
-                       max_iter=8000, polish=True)
-        res_t = solver_t.solve()
-        if res_t.info.status not in ('solved', 'solved_inaccurate'):
+            if pen_pairs_tail:
+                max_pen_now = max(tail_margin - c[2] for c in pen_pairs_tail)
+                n_pen_now = len(pen_pairs_tail)
+                pair_dropped = prev_pen_pairs is None or n_pen_now < prev_pen_pairs
+                if max_pen_now >= prev_max_pen - 1e-5 and not pair_dropped:
+                    stagnation += 1
+                    if stagnation >= stagnation_cap:
+                        tail_stop_reason = 'tail_stagnation'
+                        if audit:
+                            print(f"[TAIL] iter={tail} stagnated at max_pen={max_pen_now:.4f} pairs={n_pen_now}, stopping")
+                        break
+                else:
+                    stagnation = 0
+                prev_max_pen = max_pen_now
+                prev_pen_pairs = n_pen_now
+            else:
+                max_pen_now = 0.0
+                n_pen_now = 0
             if audit:
-                print(f"[TAIL] iter={tail} QP status={res_t.info.status}, stopping")
-            break
+                print(f"[TAIL] iter={tail} scale={scale:.4f} pen_pairs={n_pen_now} "
+                      f"active_total={len(contacts_tail)} max_pen={max_pen_now:.4f}")
 
-        # Damp the step to stay within the linearization radius.
-        # Use alpha = min(1, d_hat / max_disp_predicted) so no body moves
-        # more than d_hat per iteration (the scale at which the linear
-        # constraint is accurate).
-        dp_t = res_t.x.reshape(n_b_t, 3)
-        max_disp_pred = float(np.max(np.linalg.norm(dp_t, axis=1)))
-        alpha = 1.0 if max_disp_pred <= d_hat else (d_hat / max_disp_pred)
+            if contact_sparsity and walls is None:
+                active_bodies_t = sorted({b for c in contacts_tail for b in (c[0], c[1])} | joint_bodies)
+            else:
+                active_bodies_t = list(range(N))
+            body_map_t = {b: idx for idx, b in enumerate(active_bodies_t)}
+            n_b_t = len(active_bodies_t)
+            n_vars_t = 3 * n_b_t
+            A_t, l_t, u_t, _, walls_infeasible_t = _assemble_constraints(
+                contacts_tail, 0.0, d_hat, centers, rots, active_bodies_t,
+                body_map_t, 3, max_omega, walls, joints, 1.0)
+            if walls_infeasible_t:
+                container_infeasible = True
+                tail_stop_reason = 'container_infeasible'
+                if verbose:
+                    print("  Tail: container infeasible at s=1 (walls cannot bound all bodies).")
+                break
+            _t_tq = time.time() if profile else 0.0
+            res_t = osqp_solve(sp.identity(n_vars_t, format='csc'), np.zeros(n_vars_t),
+                               A_t, l_t, u_t, **_OSQP_TAIL)
+            if profile:
+                _phase_times['tail_qp'] = _phase_times.get('tail_qp', 0.0) + time.time() - _t_tq
+            if not qp_status_ok(res_t) or not np.all(np.isfinite(res_t.x)):
+                tail_stop_reason = 'tail_qp_failure'
+                if audit:
+                    print(f"[TAIL] iter={tail} QP status={res_t.info.status}, stopping")
+                break
 
-        for idx, b in enumerate(active_bodies_t):
-            centers[b] += alpha * dp_t[idx]
-
-        diagnostics.append({
-            'step': 'tail', 'tail_iter': tail,
-            'pen_pairs': len(pen_pairs_tail),
-            'active_total': len(contacts_tail),
-            'max_pen_before': max_pen_now,
-            'max_disp_pred': max_disp_pred,
-            'alpha': alpha,
-        })
-
+            # Damp the step to the linearisation radius: no body moves more
+            # than d_hat per iteration.
+            dp_t = res_t.x.reshape(n_b_t, 3)
+            max_disp_pred = float(np.max(np.linalg.norm(dp_t, axis=1)))
+            alpha = 1.0 if max_disp_pred <= d_hat else (d_hat / max_disp_pred)
+            # Bodies with only inactive rows get a numerically-zero step
+            # from OSQP; leaving them exactly in place lets the next
+            # detection reuse their pair results.
+            for idx, b in enumerate(active_bodies_t):
+                step_b = alpha * dp_t[idx]
+                if float(np.linalg.norm(step_b)) > 1e-10:
+                    centers[b] += step_b
+            diagnostics.append({
+                'step': 'tail', 'tail_iter': tail,
+                'pen_pairs': n_pen_now,
+                'active_total': len(contacts_tail),
+                'max_pen_before': max_pen_now,
+                'max_disp_pred': max_disp_pred,
+                'alpha': alpha,
+            })
     if profile:
         _phase_times['tail'] = time.time() - _t_tail_start
 
     # ── Penalty cleanup pass ────────────────────────────────────────────
-    # The QP-based tail can stagnate on extreme-density scenes where
-    # pushing one pair micro-collides another. For each residual pen
-    # pair, apply a direct mass-balanced Jacobi push of size
-    # (|depth| + epsilon) along the contact normal — AVBD-style overshoot,
-    # applied ONLY to the stuck pairs so the global RMSD barely moves.
-    # Iterate K times with re-detection. Disabled with
-    # S4R_DISABLE_PENALTY_CLEANUP=1.
-    #
-    # Note: this fallback is NOT the QP-based tail-refinement above; it is
-    # a simple pairwise penalty push retained only for extreme-density
-    # corner cases where the tail QP stagnates. It is disabled in every
-    # result reported in the paper. `cleanup_iters_used` (returned below)
-    # records the number of cleanup iterations that actually ran (0 == the pass
-    # was entered but the scene was already pen-free, i.e. no push applied;
-    # None == the pass was disabled via S4R_DISABLE_PENALTY_CLEANUP=1), so that
-    # zero-trigger claim is self-verifiable from each run's JSON.
+    # Pairwise mass-balanced pushes (|depth| + ε along the contact normal)
+    # for residual pairs on which the tail QP stagnates; applied only to
+    # those pairs so the global RMSD barely moves. It maintains no wall or
+    # joint rows, so it is skipped when those constraints are present, and
+    # it is disabled in every result reported in the paper.
+    # cleanup_iters_used: number of iterations that applied a push (0 = the
+    # pass ran but the scene was already free; None = disabled or skipped).
     cleanup_iters_used = None
-    if not int(os.environ.get('S4R_DISABLE_PENALTY_CLEANUP', 0)):
+    cleanup_enabled = not int(os.environ.get('S4R_DISABLE_PENALTY_CLEANUP', 0))
+    if cleanup_enabled and continuation_complete and (walls is not None or joints):
+        notes.append("penalty cleanup skipped: container walls / joints are hard constraints it cannot maintain")
+        cleanup_enabled = False
+    if cleanup_enabled and continuation_complete:
         cleanup_iters_used = 0
         max_cleanup_iters = int(os.environ.get('S4R_MAX_CLEANUP_ITERS', 200))
         cleanup_eps = float(os.environ.get('S4R_CLEANUP_EPS', d_hat * 0.1))
-        cleanup_eps_init = cleanup_eps
         prev_pen_n = None
         stagnant = 0
-        gauss_seidel = False  # switch to Gauss-Seidel after Jacobi stalls
+        gauss_seidel = False
         for ci in range(max_cleanup_iters):
-            cleanup_contacts = find_contacts(scale, 0.0, bidirectional=True)
+            cleanup_contacts = find_contacts(1.0, 0.0, bidirectional=True)
             cleanup_pen = [c for c in cleanup_contacts if c[2] < 0.0]
             if not cleanup_pen:
                 if audit:
                     print(f"[CLEANUP] iter={ci} pen=0, converged")
                 break
-            # A residual pen pair exists AND we are about to apply a push:
-            # count this as one cleanup iteration that actually did work.
             cleanup_iters_used += 1
             n_pen_now = len(cleanup_pen)
-            # Stagnation heuristic: bump eps and switch Jacobi→Gauss-Seidel
-            # so we don't undershoot. Cycle-detection (pen grew) shrinks eps.
             if prev_pen_n is not None:
                 if n_pen_now > prev_pen_n:
                     cleanup_eps *= 0.5
@@ -1454,18 +1524,11 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
                 print(f"[CLEANUP] iter={ci} pen_pairs={n_pen_now} "
                       f"eps={cleanup_eps:.5f} mode={'GS' if gauss_seidel else 'J'}")
             if gauss_seidel:
-                # Apply pair-by-pair with re-detection between iterations
-                # (not strictly GS — true GS would re-detect every pair,
-                # which is expensive — but we re-query after each cleanup
-                # iter so consecutive iters see updated state).
-                # Within one iter, deepest-first order to prioritise the
-                # worst pen pairs.
-                cleanup_pen.sort(key=lambda c: c[2])  # most-negative first
+                cleanup_pen.sort(key=lambda c: c[2])
             push = np.zeros_like(centers)
             for (i, j, d_signed, n_ij, _ei, _ej, _cpa, _cpb) in cleanup_pen:
                 magnitude = (-d_signed) + cleanup_eps
                 if gauss_seidel:
-                    # Apply each push immediately to centers (sequential).
                     centers[i] -= 0.5 * magnitude * n_ij
                     centers[j] += 0.5 * magnitude * n_ij
                 else:
@@ -1478,32 +1541,62 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
     solve_time = time.perf_counter() - solve_t0
     method_total_time = setup_time + solve_time
 
-    # ── Final evaluation ──────────────────────────────────────────────
+    # ── Final evaluation at FULL scale ─────────────────────────────────
+    # The delivered scene is the full-size bodies at the final poses, so the
+    # score is taken at s = 1 whatever scale the continuation reached.
     eval_t0 = time.perf_counter()
-    meshes = [build_mesh(i) for i in range(N)]
     from mesh_collision import evaluate_world_collision_meshes
+    meshes = [build_mesh(i, 1.0) for i in range(N)]
     stats = evaluate_world_collision_meshes(meshes)
-    rmsd = float(np.sqrt(np.mean(np.sum((centers - centers0) ** 2, axis=1))))
+    rmsd = float(np.sqrt(np.mean(np.sum((centers - centers0) ** 2, axis=1)))) if N else 0.0
+    poses_finite = bool(np.all(np.isfinite(centers)) and all(np.all(np.isfinite(R)) for R in rots))
+    wall_violation = 0.0
+    if walls is not None:
+        for m in meshes:
+            v = np.asarray(m.vertices)
+            wall_violation = max(wall_violation,
+                                 float(np.max(box_lo - v.min(axis=0))),
+                                 float(np.max(v.max(axis=0) - box_hi)))
+        wall_violation = max(0.0, wall_violation)
+    joint_residual = 0.0
+    for (bi, bj, a_i, a_j) in joints:
+        gap = (centers[bi] + rots[bi] @ a_i) - (centers[bj] + rots[bj] @ a_j)
+        joint_residual = max(joint_residual, float(np.linalg.norm(gap)))
     evaluation_time = time.perf_counter() - eval_t0
 
+    native_converged = bool(continuation_complete and tail_stop_reason == 'feasible'
+                            and not container_infeasible)
+    if not continuation_complete:
+        status = stop_reason
+    elif not poses_finite:
+        status = 'numerical_failure'
+    elif container_infeasible:
+        status = 'container_infeasible'
+    elif stats.pen_pairs > 0:
+        status = 'residual_penetration'
+    elif wall_violation > 1e-6:
+        status = 'wall_violation'
+    elif joint_residual > 1e-6:
+        status = 'joint_violation'
+    else:
+        status = 'converged'
+
     if profile:
-        _phase_times['other'] = max(0.0, solve_time - sum(_phase_times.values()))
+        _phase_times['other'] = max(0.0, solve_time - _phase_times['contact']
+                                    - _phase_times['qp'] - _phase_times['tail'])
 
     if trajectory_dumper is not None:
-        # Final frame at whatever scale we stopped at.
-        trajectory_dumper.add_frame(
-            step=(step if 'step' in dir() else 0) + 1,
-            sub=0,
-            scale=float(scale),
-            verts_list=_snapshot_verts(),
-        )
+        trajectory_dumper.add_frame(step=steps_used + 1, sub=0, scale=float(scale),
+                                    verts_list=_snapshot_verts())
         out_path = trajectory_dumper.write()
         print(f"  Trajectory dumped to {out_path}  "
               f"({len(trajectory_dumper._frames)} frames)")
 
     return {
+        # Scored at full scale by the shared mesh evaluator.
         "pen": stats.pen_pairs,
         "max_pen": stats.max_penetration,
+        "evaluated_at_scale": 1.0,
         "rmsd": rmsd,
         "timing_policy": "per_scene_setup_plus_solve_v1",
         "setup_time": setup_time,
@@ -1513,49 +1606,55 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
         "solver_internal_time": solve_time,
         "time": method_total_time,
         "scale": scale,
-        "steps": step if 'step' in dir() else 0,
-        # Number of penalty-cleanup iterations that actually applied a push.
-        # 0  => fallback enabled but never needed (the paper's main-table claim);
-        # None => fallback disabled via S4R_DISABLE_PENALTY_CLEANUP=1.
-        "cleanup_iters_used": cleanup_iters_used,
-        # Auditability (same fields the baseline wrappers export): why the
-        # tail loop ended, and whether it ended on its own feasibility test.
-        "stop_reason": tail_stop_reason,
-        "native_converged": tail_stop_reason == 'feasible',
-        "final_centers": centers.copy(),
-        "final_rotations": np.stack(rots, axis=0),
+        "steps": steps_used,
+        # Outcome contract.
+        "status": status,
+        "continuation_complete": continuation_complete,
+        "stop_reason": tail_stop_reason if continuation_complete else stop_reason,
+        "tail_stop_reason": tail_stop_reason,
+        "native_converged": native_converged,
         "container_infeasible": container_infeasible,
+        "wall_violation": wall_violation,
+        "joint_residual": joint_residual,
+        "poses_finite": poses_finite,
+        "cleanup_iters_used": cleanup_iters_used,
+        # Largest discrepancy between an analytically advanced cached
+        # distance and the following fresh detection (cache accuracy).
+        "cache_error_max": cache_err_max,
+        "notes": notes,
+        "final_centers": centers.copy(),
+        "final_rotations": np.stack(rots, axis=0) if N else np.zeros((0, 3, 3)),
         "diagnostics": diagnostics,
         "audit_log": audit_log,
         "phase_times": _phase_times if profile else None,
     }
 
 
+# ─────────────────────────────────────────────────────────────────────
+# SO(3) refinement (6-DOF path)
+# ─────────────────────────────────────────────────────────────────────
+
 def optimize_rotations_on_manifold(centers, rots, nfs, mverts, mfaces, N,
                                      d_hat, scale, max_rot_iters=3,
                                      contact_backend='fcl',
                                      bvh_cache=None,
                                      model_verts_cache=None):
-    """Step B of alternating minimization: optimize rotation for each body on SO(3).
+    """Step B of the alternating minimisation: rotate each body on SO(3) to
+    open its near contacts while staying close to its current rotation.
 
-    For each body i with neighbors, find rotation that maximizes minimum distance
-    to neighbors while minimizing deviation from current rotation.
+    Geodesic gradient step R_new = exp(ω) R_old with ω the summed
+    repulsive torque. For a contact on body i at lever arm r (contact point
+    minus centroid) with unit direction n from i's surface toward the
+    neighbour, rotating by ω moves the contact point by ω × r, so the gap
+    along n changes by −n·(ω × r) = −ω·(r × n). Repulsion means the point
+    moves away from the neighbour, i.e. along −n, so the torque is
+    r × (−f n) with f = max(0, d_hat − d). A neighbour point lying inside
+    body i (negative distance) is treated with the reversed direction, so
+    the surface sweeps past it.
 
-    Uses geodesic gradient descent on SO(3): R_new = exp(α ω) @ R_old
-    where ω = Σ_j (torque from contact j).
-
-    Two backends:
-      - 'fcl' / 'fcl_prebuilt' : build BVHs ONCE on rotation-FREE model verts
-        ``nfs[i] * mverts[i]`` and reuse via ``fcl.Transform(R_i, c_i/s)``.
-        Rotation updates are then a Transform swap (free), with no BVH rebuild.
-        Uses change-of-variable u = x/s so the BVHs stay unit-scale across the
-        S4R schedule.
-      - 'trimesh' : legacy Python BVH + ``trimesh.proximity.closest_point``.
-        Kept as fallback for environments without python-fcl.
-
-    `bvh_cache` / `model_verts_cache` may be passed by the outer solver
-    (``solve_s4r_qp``) to skip the per-call BVH build. They are mutable lists
-    that this function populates on first use and reads thereafter.
+    Backends: 'fcl' / 'fcl_prebuilt' reuse the unit-scale BVHs through
+    ``bvh_cache``/``model_verts_cache`` (populated on first use);
+    'trimesh' is the dependency-free closest-point path.
     """
     use_fcl = contact_backend in ('fcl', 'fcl_prebuilt')
     if use_fcl:
@@ -1563,7 +1662,6 @@ def optimize_rotations_on_manifold(centers, rots, nfs, mverts, mfaces, N,
             import fcl  # noqa: F401
         except ImportError:
             use_fcl = False
-
     if use_fcl:
         return _optimize_rotations_fcl(centers, rots, nfs, mverts, mfaces, N,
                                         d_hat, scale, max_rot_iters,
@@ -1573,39 +1671,35 @@ def optimize_rotations_on_manifold(centers, rots, nfs, mverts, mfaces, N,
                                         d_hat, scale, max_rot_iters)
 
 
+def _repulsive_torque(r_i, n_ij, force_mag):
+    """Torque on body i that moves its contact point (lever arm r_i) away
+    from the neighbour along −n_ij (see optimize_rotations_on_manifold)."""
+    return np.cross(r_i, -force_mag * n_ij)
+
+
 def _optimize_rotations_fcl(centers, rots, nfs, mverts, mfaces, N,
                              d_hat, scale, max_rot_iters,
                              bvh_cache=None, model_verts_cache=None):
-    """FCL-backed rotation optimization.
-
-    Change-of-variable trick: in u-space (u = x/s) a body at world scale `s`
-    is unit-scale at translation ``centers[i]/s``. The body's rotation is
-    applied identically in both spaces (R commutes with uniform scale), so a
-    single unit-scale BVH built on ``nfs[i] * mverts[i]`` works for every
-    scale step — only the Transform changes when rotation/translation update.
-
-    Distances/contact points come back in u-space; multiply by `s` to
-    recover world units. Normals are scale-invariant.
-    """
+    """FCL-backed rotation refinement in u-space (u = x / s): one
+    unit-scale BVH per body, rotation applied through the FCL transform."""
     import fcl
 
     inv_s = 1.0 / scale
 
-    # BVH cache: build once on rotation-free model verts ``nfs[i]*mverts[i]``
-    # and reuse across every call to this function for the rest of the solve.
-    # The caller passes mutable lists so the BVHs survive across scale steps.
     if bvh_cache is not None and len(bvh_cache) == N:
         bvh_models = bvh_cache
         model_verts_scaled = model_verts_cache
     else:
         bvh_models = [] if bvh_cache is None else bvh_cache
         model_verts_scaled = [] if model_verts_cache is None else model_verts_cache
-        bvh_models.clear() if hasattr(bvh_models, 'clear') else None
-        model_verts_scaled.clear() if hasattr(model_verts_scaled, 'clear') else None
+        bvh_models.clear()
+        model_verts_scaled.clear()
         for i in range(N):
             Vi = (nfs[i] * mverts[i]).astype(np.float64)
+            faces_i = np.asarray(mfaces[i], dtype=np.int32)
+            if len(faces_i) and _signed_volume(Vi, faces_i) < 0.0:
+                faces_i = np.ascontiguousarray(faces_i[:, ::-1])
             model_verts_scaled.append(Vi)
-            faces_i = mfaces[i].astype(np.int32)
             m = fcl.BVHModel()
             m.beginModel(len(Vi), len(faces_i))
             m.addSubModel(Vi, faces_i)
@@ -1613,7 +1707,6 @@ def _optimize_rotations_fcl(centers, rots, nfs, mverts, mfaces, N,
             bvh_models.append(m)
 
     def _world_aabb_u(i):
-        """AABB of body i in u-space at the current rots/centers."""
         Vw = (rots[i] @ model_verts_scaled[i].T).T + centers[i] * inv_s
         v_min = Vw.min(axis=0); v_max = Vw.max(axis=0)
         return (float(v_min[0]), float(v_min[1]), float(v_min[2]),
@@ -1627,76 +1720,56 @@ def _optimize_rotations_fcl(centers, rots, nfs, mverts, mfaces, N,
         )
 
     fcl_objs = [_make_fcl_obj(i) for i in range(N)]
-    aabbs = [_world_aabb_u(i) for i in range(N)]  # 6-tuple per body
-    d_hat_u = d_hat * inv_s
+    aabbs = [_world_aabb_u(i) for i in range(N)]
     near_thresh_u = d_hat * 1.5 * inv_s
-    margin = 2.0 * d_hat_u
+    margin = 2.0 * d_hat * inv_s
 
     total_rot = 0.0
-    for rot_iter in range(max_rot_iters):
+    for _ in range(max_rot_iters):
         any_updated = False
         for i in range(N):
             ax0, ay0, az0, ax1, ay1, az1 = aabbs[i]
             torque = np.zeros(3)
             n_contacts = 0
-
             for j in range(N):
                 if j == i:
                     continue
                 bx0, by0, bz0, bx1, by1, bz1 = aabbs[j]
-                # Scalar AABB filter (~10x faster than np.all on 3-element arrays)
                 if (ax0 - margin > bx1 or ay0 - margin > by1 or az0 - margin > bz1 or
-                    bx0 - margin > ax1 or by0 - margin > ay1 or bz0 - margin > az1):
+                        bx0 - margin > ax1 or by0 - margin > ay1 or bz0 - margin > az1):
                     continue
-
                 req = fcl.DistanceRequest(enable_nearest_points=True,
                                           enable_signed_distance=True)
                 res = fcl.DistanceResult()
                 d_u = fcl.distance(fcl_objs[i], fcl_objs[j], req, res)
-
                 if d_u > near_thresh_u:
                     continue
-
                 if d_u > 0.0:
                     cp_i_u = np.asarray(res.nearest_points[0], dtype=np.float64)
                     cp_j_u = np.asarray(res.nearest_points[1], dtype=np.float64)
-                    # Push direction from i's surface toward the closest point on j.
-                    n_raw = cp_j_u - cp_i_u
-                    cl_world = cp_i_u * scale       # contact on i's surface, world
-                    p_other = cp_j_u * scale        # nearest point on j, world
+                    n_raw = cp_j_u - cp_i_u          # from i's surface toward j
+                    cl_world = cp_i_u * scale
                     d_min_world = d_u * scale
                 else:
-                    # Overlap: collision query for contact info.
-                    creq = fcl.CollisionRequest(num_max_contacts=8,
-                                                enable_contact=True)
+                    creq = fcl.CollisionRequest(num_max_contacts=8, enable_contact=True)
                     cres = fcl.CollisionResult()
                     fcl.collide(fcl_objs[i], fcl_objs[j], creq, cres)
                     if not cres.is_collision or not cres.contacts:
                         continue
-                    c_best = max(cres.contacts,
-                                 key=lambda c: c.penetration_depth)
-                    depth_u = float(c_best.penetration_depth)
+                    c_best = max(cres.contacts, key=lambda c: c.penetration_depth)
+                    # The reported normal is the exit direction of body j
+                    # (second argument) through the crossed triangle.
                     n_raw = np.asarray(c_best.normal, dtype=np.float64)
-                    if np.dot(n_raw, centers[j] - centers[i]) < 0.0:
-                        n_raw = -n_raw
-                    pos_u = np.asarray(c_best.pos, dtype=np.float64)
-                    cl_world = pos_u * scale
-                    p_other = (pos_u + n_raw * depth_u) * scale
-                    d_min_world = -depth_u * scale
-
+                    cl_world = np.asarray(c_best.pos, dtype=np.float64) * scale
+                    d_min_world = -float(c_best.penetration_depth) * scale
                 nn = np.linalg.norm(n_raw)
                 if nn < 1e-12:
                     continue
                 n_ij = n_raw / nn
-
-                # Lever arm from center of i to contact point on i's surface
-                r_i = cl_world - centers[i]
-                # Torque: r × F, where F magnitude grows with penetration depth
                 force_mag = max(0.0, d_hat - d_min_world)
                 if force_mag <= 0.0:
                     continue
-                tau = np.cross(r_i, force_mag * n_ij)
-                torque += tau
+                torque += _repulsive_torque(cl_world - centers[i], n_ij, force_mag)
                 n_contacts += 1
 
             if n_contacts > 0 and np.linalg.norm(torque) > 1e-8:
@@ -1706,24 +1779,20 @@ def _optimize_rotations_fcl(centers, rots, nfs, mverts, mfaces, N,
                 if nw > max_step:
                     omega *= max_step / nw
                     nw = max_step
-
                 rots[i] = RotLib.from_rotvec(omega).as_matrix() @ rots[i]
                 total_rot += nw
                 any_updated = True
-
-                # Refresh i's FCL Transform + AABB (cheap: just a Transform swap).
                 fcl_objs[i] = _make_fcl_obj(i)
                 aabbs[i] = _world_aabb_u(i)
-
         if not any_updated:
             break
-
     return total_rot
 
 
 def _optimize_rotations_trimesh(centers, rots, nfs, mverts, mfaces, N,
                                   d_hat, scale, max_rot_iters):
-    """Legacy trimesh.proximity.closest_point path (slow but no FCL dep)."""
+    """Dependency-free closest-point path (vertex samples of the neighbour
+    against body i's surface)."""
     import trimesh
 
     def world_verts_i(i):
@@ -1732,15 +1801,13 @@ def _optimize_rotations_trimesh(centers, rots, nfs, mverts, mfaces, N,
     total_rot = 0.0
     meshes = [trimesh.Trimesh(vertices=world_verts_i(i), faces=mfaces[i], process=False)
               for i in range(N)]
-
-    for rot_iter in range(max_rot_iters):
+    for _ in range(max_rot_iters):
         any_updated = False
         for i in range(N):
             vi = np.asarray(meshes[i].vertices)
             ai0, ai1 = vi.min(0), vi.max(0)
             torque = np.zeros(3)
             n_contacts = 0
-
             for j in range(N):
                 if j == i:
                     continue
@@ -1748,23 +1815,28 @@ def _optimize_rotations_trimesh(centers, rots, nfs, mverts, mfaces, N,
                 aj0, aj1 = vj.min(0), vj.max(0)
                 if not (np.all(ai0 - d_hat * 2 <= aj1) and np.all(aj0 - d_hat * 2 <= ai1)):
                     continue
-
-                cl, dists, fidx = trimesh.proximity.closest_point(meshes[i], vj)
-                k = np.argmin(dists)
-                d_min = dists[k]
-
+                cl, dists, _ = trimesh.proximity.closest_point(meshes[i], vj)
+                near = dists < d_hat * 1.5
+                if not near.any():
+                    continue
+                inside = np.zeros(len(vj), dtype=bool)
+                inside[near] = _mesh_contains_points(meshes[i], vj[near])
+                sd = np.where(inside, -dists, dists)
+                k = int(np.argmin(sd))
+                d_min = float(sd[k])
                 if d_min < d_hat * 1.5:
-                    n_ij = vj[k] - cl[k]
+                    n_ij = vj[k] - cl[k]            # from i's surface toward j
+                    if inside[k]:
+                        n_ij = -n_ij                # neighbour point inside i
                     nn = np.linalg.norm(n_ij)
                     if nn < 1e-12:
                         continue
                     n_ij = n_ij / nn
-                    r_i = cl[k] - centers[i]
                     force_mag = max(0.0, d_hat - d_min)
-                    tau = np.cross(r_i, force_mag * n_ij)
-                    torque += tau
+                    if force_mag <= 0.0:
+                        continue
+                    torque += _repulsive_torque(cl[k] - centers[i], n_ij, force_mag)
                     n_contacts += 1
-
             if n_contacts > 0 and np.linalg.norm(torque) > 1e-8:
                 omega = 0.5 * torque / n_contacts
                 nw = np.linalg.norm(omega)
@@ -1772,107 +1844,53 @@ def _optimize_rotations_trimesh(centers, rots, nfs, mverts, mfaces, N,
                 if nw > max_step:
                     omega *= max_step / nw
                     nw = max_step
-
                 rots[i] = RotLib.from_rotvec(omega).as_matrix() @ rots[i]
                 total_rot += nw
                 any_updated = True
-
-                meshes[i] = trimesh.Trimesh(
-                    vertices=world_verts_i(i), faces=mfaces[i], process=False)
-
+                meshes[i] = trimesh.Trimesh(vertices=world_verts_i(i), faces=mfaces[i], process=False)
         if not any_updated:
             break
-
     return total_rot
 
 
+# ─────────────────────────────────────────────────────────────────────
+# Dual (contact-force space) QP
+# ─────────────────────────────────────────────────────────────────────
+
 def solve_dual_qp(A_contact, b_contact, P_diag, n_vars):
-    """Solve QP in dual (contact force) space.
+    """Solve the contact-only QP in dual (contact force) space.
 
-    Primal: min (1/2) x^T P x  s.t.  A x >= b
-    Dual:   min (1/2) λ^T G λ - b^T λ  s.t.  λ >= 0
-    where G = A P^{-1} A^T, and x* = P^{-1} A^T λ*
+    Primal: min ½ xᵀPx  s.t.  A x ≥ b
+    Dual:   min ½ λᵀGλ − bᵀλ  s.t.  λ ≥ 0,   G = A P⁻¹ Aᵀ,   x* = P⁻¹ Aᵀ λ*.
 
-    Returns (x_primal, lambda_dual, qp_iters) or None if infeasible.
+    Only one-sided contact rows are representable here; the caller rejects
+    walls, joints, rotation clamps and attraction terms before reaching this
+    path. Returns (x_primal, lambda, qp_iters) or None when OSQP fails.
     """
-    n_constraints = A_contact.shape[0]
-    # P^{-1} is diagonal with entries 1/P_diag
-    P_inv_diag = 1.0 / P_diag
-    # G = A @ diag(P_inv) @ A^T
-    A_scaled = A_contact * P_inv_diag[np.newaxis, :]  # A @ P^{-1}
-    G = A_scaled @ A_contact.T  # (n_constraints × n_constraints)
-
-    # Dual QP: min (1/2) λ^T G λ - b^T λ  s.t.  λ >= 0
-    G_sparse = sp.csc_matrix(G)
-    q_dual = -b_contact
-
-    # Constraints: 0 ≤ λ (box constraint)
-    A_dual = sp.eye(n_constraints, format='csc')
+    A = sp.csr_matrix(A_contact)
+    n_constraints = A.shape[0]
+    P_inv = sp.diags(1.0 / np.asarray(P_diag, dtype=np.float64), format='csr')
+    G = (A @ P_inv @ A.T).tocsc()
+    q_dual = -np.asarray(b_contact, dtype=np.float64)
+    A_dual = sp.identity(n_constraints, format='csc')
     l_dual = np.zeros(n_constraints)
     u_dual = np.full(n_constraints, np.inf)
-
-    solver = osqp.OSQP()
-    solver.setup(G_sparse, q_dual, A_dual, l_dual, u_dual,
-                 verbose=False, eps_abs=1e-6, eps_rel=1e-6,
-                 max_iter=4000, polish=True)
-    result = solver.solve()
-
-    if result.info.status not in ('solved', 'solved_inaccurate'):
+    result = osqp_solve(G, q_dual, A_dual, l_dual, u_dual, verbose=False,
+                        eps_abs=1e-6, eps_rel=1e-6, max_iter=4000, polishing=True)
+    if not qp_status_ok(result) or not np.all(np.isfinite(result.x)):
         return None
-
-    lam = np.maximum(result.x, 0.0)  # ensure non-negative
-    # Recover primal: x* = P^{-1} A^T λ*
-    x_primal = P_inv_diag * (A_contact.T @ lam)
-    return x_primal, lam, result.info.iter
-
-
-def solve_s4r_qp_step_translation_only(N, active, ds, d_hat, centers,
-                                         body_map, active_bodies, contact_sparsity):
-    """Fallback: translation-only QP for a single step."""
-    n_bodies_qp = len(active_bodies)
-    n_vars = 3 * n_bodies_qp
-    n_active = len(active)
-
-    P = sp.eye(n_vars, format='csc')
-    q = np.zeros(n_vars)
-    A = np.zeros((n_active, n_vars))
-    l = np.zeros(n_active)
-
-    for ci, (i, j, d_curr, n_ij, ext_i, ext_j, cp_i, cp_j) in enumerate(active):
-        b = ds * (ext_i + ext_j) + d_hat - d_curr
-        ii = body_map[i]
-        jj = body_map[j]
-        A[ci, 3 * ii: 3 * ii + 3] = -n_ij
-        A[ci, 3 * jj: 3 * jj + 3] = n_ij
-        l[ci] = b
-
-    A_sparse = sp.csc_matrix(A)
-    u = np.full(n_active, np.inf)
-
-    solver = osqp.OSQP()
-    solver.setup(P, q, A_sparse, l, u,
-                 verbose=False, eps_abs=1e-6, eps_rel=1e-6,
-                 max_iter=4000, polish=True)
-    result = solver.solve()
-
-    if result.info.status in ('solved', 'solved_inaccurate'):
-        dp_compact = result.x.reshape(n_bodies_qp, 3)
-        dp_full = np.zeros((N, 3))
-        for idx, b in enumerate(active_bodies):
-            dp_full[b] = dp_compact[idx]
-        return dp_full
-    return None
+    lam = np.maximum(result.x, 0.0)
+    x_primal = P_inv @ (A.T @ lam)
+    return np.asarray(x_primal).reshape(-1), lam, result.info.iter
 
 
 if __name__ == "__main__":
     import argparse
 
-    # The canonical scene generators live in ../scenes (kubric/hy3d/thingi).
-    # Add both this package and ../scenes to the path so this module is
-    # runnable directly, e.g.:
+    # The canonical scene generators live in ../scenes (kubric/hy3d/thingi):
     #   python s4r/s4r_qp.py --dataset kubric --n-objects 40 --seed 42
     sys.path.insert(0, _HERE)
-    sys.path.insert(0, _os.path.join(_os.path.dirname(_HERE), "scenes"))
+    sys.path.insert(0, os.path.join(os.path.dirname(_HERE), "scenes"))
 
     parser = argparse.ArgumentParser(
         description="S4R-QP: Progressive Scaling + QP Solver")
@@ -1887,14 +1905,14 @@ if __name__ == "__main__":
     parser.add_argument('--ds-max', type=float, default=0.05, help='Max scale step')
     parser.add_argument('--contact-backend', choices=['trimesh', 'fcl', 'fcl_prebuilt', 'warp'],
                         default='fcl_prebuilt',
-                        help='Collision backend (fcl_prebuilt reuses scale-1 BVHs; warp = NVIDIA Warp GPU)')
+                        help='Collision backend (fcl/fcl_prebuilt = exact FCL oracle; warp = NVIDIA Warp GPU)')
     parser.add_argument('--M', type=int, default=3,
                         help='Revalidation interval: full collision detection every M steps '
                              '(benchmark default M=3; M=1 detects every step)')
     parser.add_argument('--max-steps', type=int, default=200)
     parser.add_argument('--rotation', action='store_true',
-                        help='Enable rotation DOFs (6-DOF QP + SO(3) optimization, slower)')
-    parser.add_argument('--dual', action='store_true', help='Use dual QP formulation')
+                        help='Enable rotation DOFs (6-DOF QP + SO(3) refinement, slower)')
+    parser.add_argument('--dual', action='store_true', help='Use the dual QP formulation')
     parser.add_argument('--verbose', '-v', action='store_true')
     args = parser.parse_args()
 
@@ -1904,8 +1922,8 @@ if __name__ == "__main__":
     dual_str = "+dual" if args.dual else ""
     print(f"=== S4R-QP {rot_str}{dual_str} M={args.M} | "
           f"{args.dataset}(N={args.n_objects}) ===")
-    print(f"{'seed':<7} {'pen':>4} {'RMSD':>8} {'time':>7} {'scale':>6}")
-    print("-" * 38)
+    print(f"{'seed':<7} {'pen':>4} {'RMSD':>8} {'time':>7} {'scale':>6}  status")
+    print("-" * 50)
 
     for seed in args.seed:
         objects, _sxz, _sy = make_scene(args.dataset, args.n_objects, seed, 1.0)
@@ -1917,6 +1935,5 @@ if __name__ == "__main__":
             use_dual=args.dual,
             revalidate_interval=args.M,
             contact_backend=args.contact_backend)
-
         print(f"{seed:<7} {r['pen']:>4} {r['rmsd']:>8.4f} "
-              f"{r['time']:>6.2f}s {r['scale']:>6.4f}")
+              f"{r['time']:>6.2f}s {r['scale']:>6.4f}  {r['status']}")

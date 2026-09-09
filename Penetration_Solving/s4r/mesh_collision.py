@@ -113,6 +113,26 @@ def load_Kubric_object(
     return _load_Kubric_object_cached(str(Path(obj_dir)), float(target_size))
 
 
+def _signed_volume(verts, faces) -> float:
+    """Signed volume of a closed triangle mesh (positive for outward winding)."""
+    v = np.asarray(verts, dtype=np.float64)
+    f = np.asarray(faces, dtype=np.int64)
+    if len(f) == 0:
+        return 0.0
+    a, b, c = v[f[:, 0]], v[f[:, 1]], v[f[:, 2]]
+    return float(np.einsum('ij,ij->i', a, np.cross(b, c)).sum() / 6.0)
+
+
+def outward_faces(verts, faces) -> np.ndarray:
+    """Face array with outward winding: flipped when the signed volume is
+    negative. FCL's contact normals and depths, the winding-number sign
+    and the containment test all assume outward winding."""
+    f = np.asarray(faces, dtype=np.int32)
+    if _signed_volume(verts, f) < 0.0:
+        return np.ascontiguousarray(f[:, ::-1])
+    return f
+
+
 def _safe_normalize(v: np.ndarray) -> np.ndarray:
     n = np.linalg.norm(v)
     if n < 1e-12:
@@ -224,20 +244,61 @@ def _pair_signed_distance_from_samples(
     return min_i, direction
 
 
-def _fcl_pair_signed_distance(fcl_mod, bvh_i, bvh_j) -> float:
+def _aabb_nested(bounds_inner: np.ndarray, bounds_outer: np.ndarray, tol: float = 1e-12) -> bool:
+    return bool(np.all(bounds_inner[0] >= bounds_outer[0] - tol)
+                and np.all(bounds_inner[1] <= bounds_outer[1] + tol))
+
+
+def _nested_signed_distance(mesh_i, mesh_j, cp_i, cp_j, d):
+    """Containment check for a pair FCL reports as separated by ``d``.
+
+    Two closed surfaces that do not intersect are either disjoint or one
+    body lies entirely inside the other; FCL sees only the surfaces and
+    returns a positive distance in both cases. When the AABBs nest, one
+    surface point of the inner body is tested for containment in the
+    outer one (ray parity). Returns a negative signed distance whose
+    magnitude is the surface gap plus the inner body's width along the
+    exit direction (a depth for the correction rows, not the minimal
+    freeing translation), or None when the bodies are disjoint.
+    """
+    if _aabb_nested(mesh_j.bounds, mesh_i.bounds):
+        outer, inner, q = mesh_i, mesh_j, cp_j
+    elif _aabb_nested(mesh_i.bounds, mesh_j.bounds):
+        outer, inner, q = mesh_j, mesh_i, cp_i
+    else:
+        return None
+    if not _contains_points(outer, np.asarray(q, dtype=np.float64)[None, :])[0]:
+        return None
+    n = np.asarray(cp_i, dtype=np.float64) - np.asarray(cp_j, dtype=np.float64)
+    nn = np.linalg.norm(n)
+    if nn < 1e-12:
+        return -float(d)
+    n = n / nn
+    proj = np.asarray(inner.vertices, dtype=np.float64) @ n
+    return -float(d + (proj.max() - proj.min()))  # gap plus the inner width along n
+
+
+def _fcl_pair_signed_distance(fcl_mod, bvh_i, bvh_j, mesh_i=None, mesh_j=None) -> float:
     """FCL signed distance between two BVHs whose verts are already in world
-    coords. Mirrors MeshOracle._precise_pair_query: distance() when separated,
-    collide() when overlapping (for precise penetration depth).
+    coords: distance() when the surfaces are apart, collide() when they
+    cross (exact triangle-pair penetration depth). When the trimesh objects
+    are given, a pair whose surfaces are apart but whose AABBs nest is also
+    checked for one body lying entirely inside the other.
     """
     ident3 = np.eye(3)
     zero3 = np.zeros(3)
     o_i = fcl_mod.CollisionObject(bvh_i, fcl_mod.Transform(ident3, zero3))
     o_j = fcl_mod.CollisionObject(bvh_j, fcl_mod.Transform(ident3, zero3))
-    req = fcl_mod.DistanceRequest(enable_nearest_points=False,
+    req = fcl_mod.DistanceRequest(enable_nearest_points=True,
                                    enable_signed_distance=True)
     res = fcl_mod.DistanceResult()
     d = fcl_mod.distance(o_i, o_j, req, res)
     if d > 0.0:
+        if mesh_i is not None and mesh_j is not None:
+            nested = _nested_signed_distance(
+                mesh_i, mesh_j, res.nearest_points[0], res.nearest_points[1], d)
+            if nested is not None:
+                return nested
         return float(d)
     # Overlap: use collide() to extract exact penetration depth.
     creq = fcl_mod.CollisionRequest(num_max_contacts=16, enable_contact=True)
@@ -260,7 +321,7 @@ def _build_fcl_bvhs(meshes: List[trimesh.Trimesh]):
     bvhs = []
     for mesh in meshes:
         verts = np.asarray(mesh.vertices, dtype=np.float64)
-        faces = np.asarray(mesh.faces, dtype=np.int32)
+        faces = outward_faces(verts, mesh.faces)
         m = _fcl.BVHModel()
         m.beginModel(len(verts), len(faces))
         m.addSubModel(verts, faces)
@@ -276,9 +337,10 @@ def evaluate_world_collision_meshes(
     """Evaluate penetrating pairs and min signed distance for world-space meshes.
 
     Default backend is FCL (EVAL_USE_FCL), matching the solver's narrowphase so
-    solver/oracle/evaluator agree. Falls back to trimesh.proximity when FCL is
-    unavailable or when ``use_fcl=False`` is requested (e.g. for regression
-    testing against the legacy numbers).
+    solver/oracle/evaluator agree: surface crossings through collide(), and a
+    body lying entirely inside another (invisible to both FCL queries) through
+    a containment test on AABB-nested pairs. Falls back to trimesh.proximity
+    when FCL is unavailable or when ``use_fcl=False`` is requested.
     """
     if use_fcl is None:
         use_fcl = EVAL_USE_FCL
@@ -318,7 +380,7 @@ def evaluate_world_collision_meshes(
             for k in overlap_pair_idx:
                 i, j = int(idx_i[k]), int(idx_j[k])
                 signed_distances[k] = _fcl_pair_signed_distance(
-                    fcl_mod, fcl_bvh[i], fcl_bvh[j])
+                    fcl_mod, fcl_bvh[i], fcl_bvh[j], meshes[i], meshes[j])
         else:
             centroids = [np.asarray(m.centroid, dtype=np.float64) for m in meshes]
             for k in overlap_pair_idx:
@@ -373,11 +435,14 @@ class MeshOracle:
         self._local_aabb_min: List[np.ndarray] = []
         self._local_aabb_max: List[np.ndarray] = []
 
+        self._faces: List[np.ndarray] = []
         for obj in objects:
             scaled = obj.normalize_factor * obj.collision_verts_model
             rotated = (obj.rotation @ scaled.T).T
             self._rotated_verts.append(rotated)
-            mesh = trimesh.Trimesh(vertices=rotated, faces=obj.collision_faces, process=True)
+            faces = outward_faces(rotated, obj.collision_faces)
+            self._faces.append(faces)
+            mesh = trimesh.Trimesh(vertices=rotated, faces=faces, process=True)
             self._meshes.append(mesh)
             self._local_aabb_min.append(rotated.min(axis=0))
             self._local_aabb_max.append(rotated.max(axis=0))
@@ -389,9 +454,8 @@ class MeshOracle:
             try:
                 import fcl as _fcl  # noqa: F401
                 self._fcl = _fcl
-                for obj, verts_rot in zip(objects, self._rotated_verts):
+                for faces, verts_rot in zip(self._faces, self._rotated_verts):
                     m = _fcl.BVHModel()
-                    faces = np.asarray(obj.collision_faces, dtype=np.int32)
                     m.beginModel(len(verts_rot), len(faces))
                     m.addSubModel(verts_rot.astype(np.float64), faces)
                     m.endModel()
@@ -480,6 +544,25 @@ class MeshOracle:
                                            direction_ij=direction))
         return out
 
+    def _nested_signed_distance(self, i, j, ci, cj, cp_i, cp_j, d):
+        lo_i = self._local_aabb_min[i] + ci; hi_i = self._local_aabb_max[i] + ci
+        lo_j = self._local_aabb_min[j] + cj; hi_j = self._local_aabb_max[j] + cj
+        if _aabb_nested(np.stack([lo_j, hi_j]), np.stack([lo_i, hi_i])):
+            outer, c_out, inner, q = i, ci, j, cp_j
+        elif _aabb_nested(np.stack([lo_i, hi_i]), np.stack([lo_j, hi_j])):
+            outer, c_out, inner, q = j, cj, i, cp_i
+        else:
+            return None
+        if not _contains_points(self._meshes[outer], (np.asarray(q, dtype=np.float64) - c_out)[None, :])[0]:
+            return None
+        n = np.asarray(cp_i, dtype=np.float64) - np.asarray(cp_j, dtype=np.float64)
+        nn = np.linalg.norm(n)
+        if nn < 1e-12:
+            return -float(d)
+        n = n / nn
+        proj = self._rotated_verts[inner] @ n
+        return -float(d + (proj.max() - proj.min()))
+
     def _precise_pair_query(
         self, i: int, j: int,
         ci: np.ndarray, cj: np.ndarray,
@@ -511,9 +594,19 @@ class MeshOracle:
                 cp_i = np.asarray(res.nearest_points[0], dtype=np.float64)
                 cp_j = np.asarray(res.nearest_points[1], dtype=np.float64)
                 raw = cp_j - cp_i
+                # Surfaces apart: disjoint, or one body entirely inside the
+                # other. Only AABB-nested pairs can nest; those are checked
+                # by containment in the body-local meshes (no rebuild).
+                nested = self._nested_signed_distance(i, j, ci, cj, cp_i, cp_j, d)
+                if nested is not None:
+                    return float(nested), _safe_normalize(cp_i - cp_j if np.linalg.norm(raw) > 1e-12
+                                                          else cj - ci)
                 return float(d), _safe_normalize(raw if np.linalg.norm(raw) > 1e-12
                                                  else cj - ci)
-            # Overlap: get penetration info.
+            # Overlap: get penetration info. The reported normal is the exit
+            # direction of the second body through the crossed triangle and
+            # is used as is (aligning it to the centroid line would flip it
+            # inside a cavity of a non-convex body).
             creq = fcl.CollisionRequest(num_max_contacts=16, enable_contact=True)
             cres = fcl.CollisionResult()
             fcl.collide(o_i, o_j, creq, cres)
@@ -523,8 +616,8 @@ class MeshOracle:
             c_best = max(cres.contacts, key=lambda c: c.penetration_depth)
             depth = float(c_best.penetration_depth)
             raw = np.asarray(c_best.normal, dtype=np.float64)
-            if np.dot(raw, cj - ci) < 0.0:
-                raw = -raw
+            if np.linalg.norm(raw) < 1e-12:
+                raw = cj - ci
             return -depth, _safe_normalize(raw)
 
         # ---------- Fallback: trimesh + ray-cast inside test ----------

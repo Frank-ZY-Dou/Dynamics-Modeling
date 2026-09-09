@@ -330,18 +330,21 @@ class DualAPGD:
 
     # ── Lipschitz constant of AAᵀ ──
     #
-    # We use the Gershgorin row-sum upper bound, which for our QP is
-    # closed-form: every row of AAᵀ has diagonal = 2 (unit normals,
-    # contributions from body i and j), and off-diagonal entries bounded
-    # in magnitude by 1 (any |n_k·n_l| ≤ 1). Counting other contacts that
-    # share a body with k gives row-sum ≤ deg(i_k) + deg(j_k), where
-    # deg(b) := |{k : i_k=b or j_k=b}|.
+    # FISTA on the dual needs a step 1/L with L ≥ ‖AAᵀ‖₂. Two certified
+    # upper bounds are available; both come from the Gershgorin disc
+    # theorem on the symmetric PSD matrix G = AAᵀ:
     #
-    # This is O(K + N) on the host, always an upper bound on ‖AAᵀ‖₂
-    # (so FISTA is provably stable), and on our contact graphs is within
-    # a small constant factor of the true spectral norm. Power iteration
-    # is faster-converging only in pathological clustered-spectrum cases
-    # we never see in S4R.
+    #   degree bound   L = max_k (deg(i_k) + deg(j_k)): every |G_kl| ≤ 1
+    #                  for contacts sharing one body (unit normals) and the
+    #                  diagonal is 2; O(K + N) on the host, no normals needed;
+    #   row-sum bound  L = max_k Σ_l |G_kl| with the actual normals: tighter
+    #                  (misaligned normals give small |n_k·n_l|), a sparse
+    #                  product with ~Σ deg² non-zeros, well under a
+    #                  millisecond at K ~ 10³.
+    #
+    # A finite number of power iterations gives a Rayleigh quotient, which is
+    # a LOWER bound on ‖G‖₂; scaling it by a constant does not make it an
+    # upper bound, so it is not used for the step size.
     def _gershgorin_L(self, contact_i_np: np.ndarray,
                       contact_j_np: np.ndarray, K: int, N: int) -> float:
         deg = np.zeros(N, dtype=np.int64)
@@ -351,79 +354,33 @@ class DualAPGD:
                     + deg[contact_j_np.astype(np.int64)])
         return float(max(int(row_sums.max()), 2))
 
-    def _tight_L(self, contact_i_np: np.ndarray,
-                 contact_j_np: np.ndarray, K: int, N: int,
-                 power_iters: int = 6) -> float:
-        """Gershgorin floor + power iteration refinement.
-
-        Gershgorin gives an upper bound (safe for FISTA convergence)
-        that is typically 2–4× larger than the true spectral norm of
-        AAᵀ on shallow-contact graphs. Power iteration tightens it,
-        cutting the FISTA iter count roughly in half.
-
-        Implementation: CPU power iteration on the small explicit AAᵀ
-        (K × K matrix is too big for K~10⁴ but the contact pattern is
-        sparse, so we run power iter via two SpMVs in numpy — at
-        K~10³ this is < 1ms total).
-        """
-        L_floor = self._gershgorin_L(contact_i_np, contact_j_np, K, N)
-        if power_iters <= 0 or K <= 4:
-            return L_floor
-
+    def _certified_L(self, contact_i_np: np.ndarray, contact_j_np: np.ndarray,
+                     contact_n_np: np.ndarray, K: int, N: int) -> float:
+        """Gershgorin row-sum bound on AAᵀ from the actual (float32) normals,
+        never above the degree bound and never below ‖AAᵀ‖₂."""
+        L_deg = self._gershgorin_L(contact_i_np, contact_j_np, K, N)
+        if K <= 1:
+            return L_deg
+        try:
+            import scipy.sparse as sp
+        except ImportError:
+            return L_deg
         ci = np.asarray(contact_i_np, dtype=np.int64)
         cj = np.asarray(contact_j_np, dtype=np.int64)
-        n_np = np.asarray(self.cn.numpy()[:3 * K], dtype=np.float32) \
-            .reshape(K, 3).astype(np.float64)
-        # We can't access cn here yet (called before upload). Pass
-        # normals through the caller instead — handled below.
-        return L_floor  # see overload helper used by solve_graph
-
-    def _tight_L_from_normals(self, contact_i_np: np.ndarray,
-                              contact_j_np: np.ndarray,
-                              contact_n_np: np.ndarray,
-                              K: int, N: int,
-                              power_iters: int = 5) -> float:
-        """Gershgorin floor + scipy-sparse power iteration on AAᵀ.
-
-        scipy CSR SpMV is ~100× faster than ``np.add.at``-style scatter
-        at our K~10³ size, so power iteration costs ~0.1 ms instead of
-        ~1 ms — enough to leave room under OSQP's ~1.3 ms wall.
-        """
-        L_floor = self._gershgorin_L(contact_i_np, contact_j_np, K, N)
-        if power_iters <= 0 or K <= 4:
-            return L_floor
-
-        import scipy.sparse as sp
-        ci = np.asarray(contact_i_np, dtype=np.int64)
-        cj = np.asarray(contact_j_np, dtype=np.int64)
-        n_d = np.asarray(contact_n_np, dtype=np.float64).reshape(K, 3)
-
-        # A: K × 3N sparse, exactly 6 nonzeros per row.
+        n_d = np.asarray(contact_n_np, dtype=np.float32).reshape(K, 3).astype(np.float64)
         rows = np.repeat(np.arange(K, dtype=np.int64), 6)
         cols = np.empty(6 * K, dtype=np.int64)
         data = np.empty(6 * K, dtype=np.float64)
-        cols[0::6] = 3 * ci + 0; data[0::6] = -n_d[:, 0]
-        cols[1::6] = 3 * ci + 1; data[1::6] = -n_d[:, 1]
-        cols[2::6] = 3 * ci + 2; data[2::6] = -n_d[:, 2]
-        cols[3::6] = 3 * cj + 0; data[3::6] = +n_d[:, 0]
-        cols[4::6] = 3 * cj + 1; data[4::6] = +n_d[:, 1]
-        cols[5::6] = 3 * cj + 2; data[5::6] = +n_d[:, 2]
+        for a in range(3):
+            cols[a::6] = 3 * ci + a; data[a::6] = -n_d[:, a]
+            cols[3 + a::6] = 3 * cj + a; data[3 + a::6] = n_d[:, a]
         A = sp.csr_matrix((data, (rows, cols)), shape=(K, 3 * N))
-        AT = A.T.tocsr()
-
-        rng = np.random.default_rng(0)
-        v = rng.standard_normal(K)
-        v /= max(float(np.linalg.norm(v)), 1e-20)
-        for _ in range(power_iters):
-            w = A @ (AT @ v)
-            nrm = float(np.linalg.norm(w))
-            if nrm < 1e-20:
-                return L_floor
-            v = w / nrm
-        L_power = float(v @ (A @ (AT @ v)))
-        # Bump by 1.10 to stay safely above true spectrum even if power
-        # iteration hasn't fully converged.
-        return max(L_power * 1.10, 1e-6)
+        G = A @ A.T
+        row_abs = np.asarray(abs(G).sum(axis=1)).reshape(-1)
+        L_row = float(row_abs.max()) if row_abs.size else L_deg
+        if not np.isfinite(L_row) or L_row <= 0.0:
+            return L_deg
+        return float(min(L_row, L_deg))
 
     # ── public solve ──
 
@@ -448,6 +405,7 @@ class DualAPGD:
             return np.zeros((n_bodies, 3), dtype=np.float32), {
                 "iters": 0, "K": 0, "primal_viol": 0.0, "comp_viol": 0.0,
                 "L": 0.0, "lam": np.zeros(0, dtype=np.float32),
+                "finite": True,
             }
         self._grow(K, n_bodies)
 
@@ -471,8 +429,8 @@ class DualAPGD:
         self.lam.assign(lam0)
         self.lam_prev.assign(lam0)
 
-        # Lipschitz constant of AAᵀ (Gershgorin row-sum bound).
-        L = self._gershgorin_L(contact_i, contact_j, K, n_bodies) * L_safety
+        # Lipschitz constant of AAᵀ (certified Gershgorin bound).
+        L = self._certified_L(contact_i, contact_j, contact_n, K, n_bodies) * L_safety
         inv_L = 1.0 / L
 
         info = {"K": K, "L": L, "iters": max_iter}
@@ -525,6 +483,7 @@ class DualAPGD:
         info["primal_viol"] = final_pv
         info["comp_viol"] = final_cv
         info["lam"] = self.lam.numpy()[:K].copy()
+        info["finite"] = bool(np.all(np.isfinite(dp_host)))
         return dp_host, info
 
     # ────────────────────────────────────────────────────────────────
@@ -630,6 +589,7 @@ class DualAPGD:
             return np.zeros((n_bodies, 3), dtype=np.float32), {
                 "iters": 0, "K": 0, "primal_viol": 0.0, "comp_viol": 0.0,
                 "L": 0.0, "lam": np.zeros(0, dtype=np.float32),
+                "finite": True,
             }
 
         # Grow capacity if needed (this invalidates the graph).
@@ -658,9 +618,9 @@ class DualAPGD:
         self.lam.assign(lam0)
         self.lam_prev.assign(lam0)
 
-        # Lipschitz: Gershgorin floor + 6-iter power refinement.
-        L = self._tight_L_from_normals(contact_i, contact_j, contact_n,
-                                       K, n_bodies, power_iters=6) * L_safety
+        # Lipschitz constant (certified Gershgorin bound; a power-iteration
+        # estimate would be a lower bound and could make the replay diverge).
+        L = self._certified_L(contact_i, contact_j, contact_n, K, n_bodies) * L_safety
 
         # Meta buffers — these change per-call, the captured graph reads them.
         self._meta_K.assign(np.array([K], dtype=np.int32))
@@ -695,4 +655,5 @@ class DualAPGD:
             "primal_viol": pv_max,
             "comp_viol": cv_max,
             "lam": self.lam.numpy()[:K].copy(),
+            "finite": bool(np.all(np.isfinite(dp_host))),
         }

@@ -21,7 +21,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
-import osqp
 import scipy.sparse as sp
 import trimesh
 
@@ -29,7 +28,8 @@ import trimesh
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "s4r"))
 
-from mesh_collision import MeshObject, evaluate_mesh_object_scene  # noqa: E402
+from mesh_collision import MeshObject, evaluate_mesh_object_scene, outward_faces  # noqa: E402
+from s4r_qp import osqp_solve, qp_status_ok  # noqa: E402
 
 DEFAULT_ASSET_DIR = HERE.parent / "data" / "kubric_pool"
 
@@ -85,7 +85,8 @@ def tilt_schedule(scale: float) -> float:
 def load_asset(path: Path, target_size: float) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
     mesh = trimesh.load(str(path), process=True, force="mesh")
     verts = np.asarray(mesh.vertices, dtype=np.float64)
-    faces = np.asarray(mesh.faces, dtype=np.int32)
+    # FCL's contact normals assume outward winding.
+    faces = outward_faces(verts, mesh.faces)
     bbox_min = verts.min(axis=0)
     bbox_max = verts.max(axis=0)
     bbox_center = 0.5 * (bbox_min + bbox_max)
@@ -204,18 +205,18 @@ def fcl_contacts(
                     normal = normal / max(np.linalg.norm(normal), 1e-12)
                     signed = 0.0
                 else:
+                    # The reported normal is the exit direction of body j
+                    # through the crossed triangle; it is kept as is (the
+                    # centroid line points the wrong way inside a cavity).
                     c_best = max(cres.contacts, key=lambda c: c.penetration_depth)
                     signed = -float(c_best.penetration_depth)
                     normal = np.asarray(c_best.normal, dtype=np.float64)
-                    if np.dot(normal, centers[j] - centers[i]) < 0.0:
-                        normal = -normal
+                    if np.linalg.norm(normal) < 1e-12:
+                        normal = centers[j] - centers[i]
                     normal = normal / max(np.linalg.norm(normal), 1e-12)
                     pos = np.asarray(c_best.pos, dtype=np.float64)
                     cp_i = pos
                     cp_j = pos
-
-            if np.dot(normal, centers[j] - centers[i]) < 0.0:
-                normal = -normal
 
             # Full-scale extents along the current contact normal.  The ds term
             # multiplies these, so scale is intentionally omitted here.
@@ -229,7 +230,15 @@ def fcl_contacts(
     return contacts
 
 
-def solve_step(instances, xy, yaw, roll, pitch, scale, tilt_factor, ds, d_hat, yaw_weight, max_yaw_step, tail=False):
+def solve_step(instances, xy, yaw, roll, pitch, scale, tilt_factor, ds, d_hat, yaw_weight, max_yaw_step, tail=False, max_xy=None):
+    """One scale step: returns (xy, yaw, n_active, n_pen, solved).
+
+    The in-plane trust region (|Δx|, |Δy| ≤ max_xy) and the yaw clamp are
+    rows of the QP, so an accepted step satisfies every contact row it was
+    solved with; a step is never clipped after the solve. ``solved`` is
+    False when OSQP finds no solution (the caller then retries with a
+    smaller ds, or a wider trust region in the tail).
+    """
     contacts = fcl_contacts(instances, xy, yaw, roll, pitch, scale, tilt_factor)
     active = []
     for c in contacts:
@@ -239,7 +248,7 @@ def solve_step(instances, xy, yaw, roll, pitch, scale, tilt_factor, ds, d_hat, y
             active.append(c + (rhs,))
 
     if not active:
-        return xy, yaw, 0, sum(1 for c in contacts if c[2] < 0.0)
+        return xy, yaw, 0, sum(1 for c in contacts if c[2] < 0.0), True
 
     active_bodies = sorted({idx for c in active for idx in (c[0], c[1])})
     body_map = {b: k for k, b in enumerate(active_bodies)}
@@ -282,37 +291,36 @@ def solve_step(instances, xy, yaw, roll, pitch, scale, tilt_factor, ds, d_hat, y
                 data.append(val)
         lower.append(float(rhs))
 
-    # Small-angle yaw trust region.
+    # Trust region as QP rows: |Δx|, |Δy| ≤ max_xy and |Δyaw| ≤ max_yaw_step
+    # per body, one identity row per variable.
+    if max_xy is None:
+        max_xy = 0.018 if tail else 0.03
     box_start = n_rows
+    upper = [np.inf] * n_rows
     for k in range(len(active_bodies)):
-        row = box_start + k
-        rows.append(row)
-        cols.append(3 * k + 2)
-        data.append(1.0)
-        lower.append(-max_yaw_step)
+        for d_idx, bound in ((0, max_xy), (1, max_xy), (2, max_yaw_step)):
+            rows.append(box_start + 3 * k + d_idx)
+            cols.append(3 * k + d_idx)
+            data.append(1.0)
+            lower.append(-bound)
+            upper.append(bound)
 
-    A = sp.csc_matrix((data, (rows, cols)), shape=(n_rows + len(active_bodies), n_vars))
+    A = sp.csc_matrix((data, (rows, cols)), shape=(n_rows + 3 * len(active_bodies), n_vars))
     l = np.asarray(lower, dtype=np.float64)
-    u = np.concatenate([np.full(n_rows, np.inf), np.full(len(active_bodies), max_yaw_step)])
+    u = np.asarray(upper, dtype=np.float64)
 
-    solver = osqp.OSQP()
-    solver.setup(P, q, A, l, u, verbose=False, eps_abs=1e-6, eps_rel=1e-6, max_iter=8000, polish=True)
-    result = solver.solve()
-    if result.info.status not in ("solved", "solved_inaccurate"):
-        return xy, yaw, len(active), sum(1 for c in contacts if c[2] < 0.0)
+    result = osqp_solve(P, q, A, l, u, verbose=False, eps_abs=1e-6, eps_rel=1e-6,
+                        max_iter=8000, polishing=True)
+    if not qp_status_ok(result) or not np.all(np.isfinite(result.x)):
+        return xy, yaw, len(active), sum(1 for c in contacts if c[2] < 0.0), False
 
     step = result.x.reshape(len(active_bodies), 3)
     xy_new = xy.copy()
     yaw_new = yaw.copy()
-    max_xy = 0.018 if tail else 0.03
     for local_idx, body in enumerate(active_bodies):
-        dxy = step[local_idx, :2]
-        norm = float(np.linalg.norm(dxy))
-        if norm > max_xy:
-            dxy *= max_xy / norm
-        xy_new[body] += dxy
+        xy_new[body] += step[local_idx, :2]
         yaw_new[body] += float(step[local_idx, 2])
-    return xy_new, yaw_new, len(active), sum(1 for c in contacts if c[2] < 0.0)
+    return xy_new, yaw_new, len(active), sum(1 for c in contacts if c[2] < 0.0), True
 
 
 def snapshot(instances, xy, yaw, roll, pitch, scale, tilt_factor):
@@ -392,13 +400,27 @@ def main() -> None:
     yaw_weight = args.target_size ** 2
     t0 = time.time()
 
+    ds_cap = float("inf")
+    failures = 0
     while scale < 1.0 - 1e-9:
         next_targets = [target - scale for target in render_targets.values() if target > scale + 1e-9]
-        ds = min([args.ds_max, 1.0 - scale] + next_targets)
+        ds = min([args.ds_max, 1.0 - scale, ds_cap] + next_targets)
         tilt_factor = tilt_schedule(scale)
-        xy, yaw, n_active, n_pen = solve_step(
+        xy_new, yaw_new, n_active, n_pen, solved = solve_step(
             instances, xy, yaw, roll0, pitch0, scale, tilt_factor, ds, args.d_hat, yaw_weight, max_yaw_step=0.08, tail=False
         )
+        if not solved:
+            # The bounded step QP has no solution at this ds: retry the same
+            # scale with a smaller inflation instead of advancing.
+            failures += 1
+            ds_cap = 0.5 * ds
+            if failures > 6:
+                raise RuntimeError(f"step QP failed repeatedly at scale {scale:.3f}")
+            print(f"scale={scale:.3f}: step QP failed, retrying with ds={ds_cap:.4f}")
+            continue
+        xy, yaw = xy_new, yaw_new
+        ds_cap = float("inf")
+        failures = 0
         scale += ds
         for tag, target in render_targets.items():
             if tag not in snapshots and abs(scale - target) < 1e-8:
@@ -407,14 +429,24 @@ def main() -> None:
                 snapshot_stats[tag] = stats(instances, xy, yaw, roll0, pitch0, scale, cur_tilt)
         print(f"scale={scale:.2f} active={n_active} pen_at_scale={n_pen}")
 
+    tail_xy = 0.018
     for it in range(60):
         cur = stats(instances, xy, yaw, roll0, pitch0, 1.0, 0.0)
         print(f"tail={it:02d} pen={cur['pen']} max={cur['max_pen']:.6f}")
         if cur["pen"] == 0:
             break
-        xy, yaw, _n_active, _n_pen = solve_step(
-            instances, xy, yaw, roll0, pitch0, 1.0, 0.0, 0.0, args.d_hat, yaw_weight, max_yaw_step=0.04, tail=True
+        xy, yaw, _n_active, _n_pen, solved = solve_step(
+            instances, xy, yaw, roll0, pitch0, 1.0, 0.0, 0.0, args.d_hat, yaw_weight, max_yaw_step=0.04, tail=True, max_xy=tail_xy
         )
+        if not solved:
+            # A correction larger than the trust region: widen it and retry.
+            if tail_xy < 0.1:
+                tail_xy *= 2.0
+                print(f"tail={it:02d}: correction QP infeasible, widening the trust region to {tail_xy:.3f}")
+                continue
+            print(f"tail={it:02d}: correction QP failed, stopping")
+            break
+        tail_xy = 0.018
 
     final = snapshot(instances, xy, yaw, roll0, pitch0, 1.0, 0.0)
     final_stats = stats(instances, xy, yaw, roll0, pitch0, 1.0, 0.0)

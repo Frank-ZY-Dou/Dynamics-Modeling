@@ -1,39 +1,52 @@
-"""S4R-Warp contact oracle v3 — template-shared wp.Mesh.
+"""S4R-Warp contact oracle v3: template-shared wp.Mesh.
 
-Builds on v2 (edge-sampled MTV, no FCL). Key change: each unique mesh
-template gets ONE wp.Mesh (with a single BVH built once on the
-template's local-frame verts). Per body we keep only (template_id, R,
-R_T, center_u). The kernel transforms each query point from u-space
-into the target body's template-local frame before traversing the BVH.
+Each unique mesh template gets ONE wp.Mesh (a single BVH built once on the
+template's local-frame vertices). Per body only (template_id, R, Rᵀ,
+center_u) is kept; the kernels transform every query point from u-space
+into the target body's template frame before traversing its BVH.
 
-Wins at large N:
-- Construction: 41 wp.Mesh built once (~0.2s) vs 30k built per scene
-  (~150s). Saves ~5 min at N=30000.
-- Per-step: no per-body `wp.Mesh.points.assign + refit` loop (was
-  ~150s per scene at N=30000). BVHs are static; only the small per-body
-  pose arrays update each step.
-- GPU memory: O(unique templates) wp.Mesh objects instead of O(N).
+Narrow phase per candidate pair (i, j), both directions:
 
-Public API identical to V1/V2: ``find_contacts(s, ds, centers, rotations)``
-returns the same 8-tuple list.
+* vertex samples of j against the winding-number SDF of i;
+* five interior samples per triangle edge of j against the SDF of i;
+* every edge of j cast as a ray against the surface of i. A hit is a
+  surface crossing and certifies the pair as penetrating even when no
+  vertex or edge sample lies inside i; interior points of the crossing
+  edge are then sampled to measure a depth.
+
+The reported normal is derived from the winning witness: the sample point
+q, its closest surface point cp on the other body, and the SDF sign, so
+that moving body j along +n (and i along −n) opens that witness. It is
+not aligned to the centroid line, which points the wrong way inside the
+cavity of a non-convex body.
+
+Public API: ``find_contacts(s, ds, centers, rotations)`` returns a list of
+(i, j, d_signed, n, e_i, e_j, cp_on_i, cp_on_j) in world units.
 """
 from __future__ import annotations
 import hashlib
+import os
+import sys
 from typing import List
 
 import numpy as np
 import warp as wp
 
+_S4R_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "s4r")
+if _S4R_DIR not in sys.path:
+    sys.path.insert(0, _S4R_DIR)
+from mesh_collision import outward_faces  # noqa: E402
+
 wp.init()
 _DEVICE = "cuda:0"
-EDGE_SAMPLES = 5
+EDGE_SAMPLES = 5      # interior samples per edge for the SDF pass
+CROSS_SAMPLES = 3     # interior samples per crossing edge for the depth
 
 
 def _template_key(v_model: np.ndarray, f: np.ndarray, nf: float) -> str:
-    """Cheap content hash used to detect duplicate mesh templates across
-    bodies. We include nf because two callers could pass the same
-    (verts, faces) but different normalize_factor; treat those as
-    distinct templates."""
+    """Content hash used to detect duplicate mesh templates across bodies;
+    nf is included because the same (verts, faces) with a different
+    normalize_factor is a different template."""
     h = hashlib.blake2b(digest_size=16)
     h.update(v_model.tobytes())
     h.update(f.tobytes())
@@ -41,15 +54,22 @@ def _template_key(v_model: np.ndarray, f: np.ndarray, nf: float) -> str:
     return h.hexdigest()
 
 
+@wp.func
+def _witness_normal(dir_sign: wp.float32, sd_sign: wp.float32,
+                    q_u: wp.vec3, cp_u: wp.vec3) -> wp.vec3:
+    """Separation direction in the i->j convention for a sample q with
+    closest surface point cp on the other body. dir_sign is +1 when q
+    belongs to body j (queried against i) and -1 when q belongs to body i
+    (queried against j); sd_sign is the SDF sign of q (+1 outside)."""
+    n_u = q_u - cp_u
+    ln = wp.length(n_u)
+    if ln > 1e-12:
+        return n_u * (dir_sign * sd_sign / ln)
+    return wp.vec3(0.0, 0.0, 0.0)
+
+
 # ─────────────────────────────────────────────────────────────────────
-# Kernel A: vertex SDF on per-template BVH with per-body pose transform.
-# Per (pair_k, vert_in_tpl_j) thread:
-#   1. Read template_j vert v_local (template-local frame, nf-scaled).
-#   2. Transform j's vert to u-space: q_u = R_j @ v_local + center_j_u.
-#   3. Transform q_u into body i's template-local frame:
-#        p_i_local = R_i_T @ (q_u - center_i_u).
-#   4. Query body i's template BVH at p_i_local.
-#   5. atomic_min the signed distance; record cp/normal in u-space.
+# Kernel A: vertex SDF on the per-template BVH with per-body pose.
 # ─────────────────────────────────────────────────────────────────────
 @wp.kernel
 def _pair_min_distance_kernel_v3(
@@ -66,7 +86,8 @@ def _pair_min_distance_kernel_v3(
     n_pairs: wp.int32,
     max_verts_per_template: wp.int32,
     max_dist_u: wp.float32,
-    # ── deterministic argmin ──
+    dir_sign: wp.float32,
+    # deterministic argmin
     launch_offset: wp.int32,
     quant_scale: wp.float32,
     max_dist_off: wp.float32,
@@ -105,18 +126,16 @@ def _pair_min_distance_kernel_v3(
 
     i_tpl = body_template_id[i_body]
     mesh_i = template_mesh_ids[i_tpl]
-    query = wp.mesh_query_point_sign_winding_number(
-        mesh_i, p_i_local, max_dist_u, 2.0,
-    )
+    query = wp.mesh_query_point_sign_winding_number(mesh_i, p_i_local, max_dist_u, 2.0)
     if not query.result:
         return
     cp_local = wp.mesh_eval_position(mesh_i, query.face, query.u, query.v)
     sd = wp.length(p_i_local - cp_local) * query.sign
 
-    # Packed deterministic key: quantized distance (high bits, order-preserving)
-    # | per-feature tag (low bits, unique across the 4 launches). atomic_min on
-    # this int64 picks the SAME (min-distance, min-tag) feature regardless of
-    # thread order — fixing the racy "last writer wins" normal write (§8.4).
+    # Packed deterministic key: quantised distance (high bits, order
+    # preserving) | per-feature tag (low bits, unique across launches).
+    # atomic_min on this int64 picks the same (min-distance, min-tag)
+    # feature regardless of thread order.
     qd = wp.int64((sd + max_dist_off) * quant_scale)
     if qd < wp.int64(0):
         qd = wp.int64(0)
@@ -126,36 +145,27 @@ def _pair_min_distance_kernel_v3(
     key = (qd << wp.int64(tag_shift)) | tag
 
     if write_phase == 0:
-        # Reduce phase: establish the true min distance and the winning key.
         wp.atomic_min(pair_sd, k, sd)
         wp.atomic_min(pair_key, k, key)
         return
 
-    # Write phase: exactly the unique argmin feature writes companion data.
     if key != pair_key[k]:
         return
     cp_u = body_R[i_body] @ cp_local + body_center_u[i_body]
-    n_u = q_u - cp_u
-    ln = wp.length(n_u)
-    if ln > 1e-12:
-        inv = 1.0 / ln
-        pair_nx[k] = n_u.x * inv
-        pair_ny[k] = n_u.y * inv
-        pair_nz[k] = n_u.z * inv
-    else:
-        pair_nx[k] = 0.0
-        pair_ny[k] = 0.0
-        pair_nz[k] = 0.0
-    pair_cp_ax[k] = cp_u.x
-    pair_cp_ay[k] = cp_u.y
-    pair_cp_az[k] = cp_u.z
-    pair_cp_bx[k] = q_u.x
-    pair_cp_by[k] = q_u.y
-    pair_cp_bz[k] = q_u.z
+    n = _witness_normal(dir_sign, query.sign, q_u, cp_u)
+    pair_nx[k] = n[0]
+    pair_ny[k] = n[1]
+    pair_nz[k] = n[2]
+    pair_cp_ax[k] = cp_u[0]
+    pair_cp_ay[k] = cp_u[1]
+    pair_cp_az[k] = cp_u[2]
+    pair_cp_bx[k] = q_u[0]
+    pair_cp_by[k] = q_u[1]
+    pair_cp_bz[k] = q_u[2]
 
 
 # ─────────────────────────────────────────────────────────────────────
-# Kernel A': edge-sampled SDF on per-template BVH (same transform pattern).
+# Kernel A': edge-sampled SDF (same transform pattern).
 # ─────────────────────────────────────────────────────────────────────
 @wp.kernel
 def _pair_min_distance_edge_kernel_v3(
@@ -176,7 +186,7 @@ def _pair_min_distance_edge_kernel_v3(
     max_edges_per_template: wp.int32,
     n_samples: wp.int32,
     max_dist_u: wp.float32,
-    # ── deterministic argmin ──
+    dir_sign: wp.float32,
     launch_offset: wp.int32,
     quant_scale: wp.float32,
     max_dist_off: wp.float32,
@@ -196,14 +206,11 @@ def _pair_min_distance_edge_kernel_v3(
     pair_cp_bz: wp.array(dtype=wp.float32),
 ):
     tid = wp.tid()
-    samples_per_edge = n_samples
-    edges_per_pair = max_edges_per_template
-    threads_per_pair = edges_per_pair * samples_per_edge
-
+    threads_per_pair = max_edges_per_template * n_samples
     k = tid // threads_per_pair
     rem = tid % threads_per_pair
-    e_local = rem // samples_per_edge
-    s_local = rem % samples_per_edge
+    e_local = rem // n_samples
+    s_local = rem % n_samples
     if k >= n_pairs:
         return
 
@@ -220,35 +227,26 @@ def _pair_min_distance_edge_kernel_v3(
     p0_local = template_verts_flat[v_off + ev0]
     p1_local = template_verts_flat[v_off + ev1]
 
-    t = wp.float32(s_local + 1) / wp.float32(samples_per_edge + 1)
+    t = wp.float32(s_local + 1) / wp.float32(n_samples + 1)
     p_sample_j_local = p0_local * (1.0 - t) + p1_local * t
-
-    # Body j's sample point in u-space.
     q_u = body_R[j] @ p_sample_j_local + body_center_u[j]
 
-    # Transform to body i's template-local frame.
     i_body = pair_i[k]
     p_i_local = body_R_T[i_body] @ (q_u - body_center_u[i_body])
-
     i_tpl = body_template_id[i_body]
     mesh_i = template_mesh_ids[i_tpl]
-    query = wp.mesh_query_point_sign_winding_number(
-        mesh_i, p_i_local, max_dist_u, 2.0,
-    )
+    query = wp.mesh_query_point_sign_winding_number(mesh_i, p_i_local, max_dist_u, 2.0)
     if not query.result:
         return
     cp_local = wp.mesh_eval_position(mesh_i, query.face, query.u, query.v)
     sd = wp.length(p_i_local - cp_local) * query.sign
 
-    # Same deterministic-argmin scheme as the vertex kernel. The per-pair
-    # feature tag here is (edge, sample) flattened, offset by launch_offset so
-    # it never collides with the vertex launches sharing pair_key.
     qd = wp.int64((sd + max_dist_off) * quant_scale)
     if qd < wp.int64(0):
         qd = wp.int64(0)
     if qd > q_max:
         qd = q_max
-    tag = wp.int64(launch_offset + e_local * samples_per_edge + s_local)
+    tag = wp.int64(launch_offset + e_local * n_samples + s_local)
     key = (qd << wp.int64(tag_shift)) | tag
 
     if write_phase == 0:
@@ -259,28 +257,150 @@ def _pair_min_distance_edge_kernel_v3(
     if key != pair_key[k]:
         return
     cp_u = body_R[i_body] @ cp_local + body_center_u[i_body]
-    n_u = q_u - cp_u
-    ln = wp.length(n_u)
-    if ln > 1e-12:
-        inv = 1.0 / ln
-        pair_nx[k] = n_u.x * inv
-        pair_ny[k] = n_u.y * inv
-        pair_nz[k] = n_u.z * inv
-    else:
-        pair_nx[k] = 0.0
-        pair_ny[k] = 0.0
-        pair_nz[k] = 0.0
-    pair_cp_ax[k] = cp_u.x
-    pair_cp_ay[k] = cp_u.y
-    pair_cp_az[k] = cp_u.z
-    pair_cp_bx[k] = q_u.x
-    pair_cp_by[k] = q_u.y
-    pair_cp_bz[k] = q_u.z
+    n = _witness_normal(dir_sign, query.sign, q_u, cp_u)
+    pair_nx[k] = n[0]
+    pair_ny[k] = n[1]
+    pair_nz[k] = n[2]
+    pair_cp_ax[k] = cp_u[0]
+    pair_cp_ay[k] = cp_u[1]
+    pair_cp_az[k] = cp_u[2]
+    pair_cp_bx[k] = q_u[0]
+    pair_cp_by[k] = q_u[1]
+    pair_cp_bz[k] = q_u[2]
 
 
 # ─────────────────────────────────────────────────────────────────────
-# Extent kernel: body-local frame projection onto contact normal.
-# Identical to v2; uses template verts since they're shared per body.
+# Kernel A'': edge crossing. Every edge of j is cast as a ray against the
+# surface of i. A hit certifies a surface intersection; interior points
+# of the crossing segment are then sampled through the SDF so the pair
+# gets a measured depth and witness like every other sample.
+# ─────────────────────────────────────────────────────────────────────
+@wp.kernel
+def _pair_edge_crossing_kernel_v3(
+    template_mesh_ids: wp.array(dtype=wp.uint64),
+    body_template_id: wp.array(dtype=wp.int32),
+    body_R: wp.array(dtype=wp.mat33),
+    body_R_T: wp.array(dtype=wp.mat33),
+    body_center_u: wp.array(dtype=wp.vec3),
+    pair_i: wp.array(dtype=wp.int32),
+    pair_j: wp.array(dtype=wp.int32),
+    template_vert_offset: wp.array(dtype=wp.int32),
+    template_edge_offset: wp.array(dtype=wp.int32),
+    template_edge_count: wp.array(dtype=wp.int32),
+    template_edges_v0_flat: wp.array(dtype=wp.int32),
+    template_edges_v1_flat: wp.array(dtype=wp.int32),
+    template_verts_flat: wp.array(dtype=wp.vec3),
+    n_pairs: wp.int32,
+    max_edges_per_template: wp.int32,
+    n_samples: wp.int32,
+    max_dist_u: wp.float32,
+    dir_sign: wp.float32,
+    launch_offset: wp.int32,
+    quant_scale: wp.float32,
+    max_dist_off: wp.float32,
+    tag_shift: wp.int32,
+    q_max: wp.int64,
+    write_phase: wp.int32,
+    pair_key: wp.array(dtype=wp.int64),
+    pair_cross: wp.array(dtype=wp.int32),
+    pair_sd: wp.array(dtype=wp.float32),
+    pair_nx: wp.array(dtype=wp.float32),
+    pair_ny: wp.array(dtype=wp.float32),
+    pair_nz: wp.array(dtype=wp.float32),
+    pair_cp_ax: wp.array(dtype=wp.float32),
+    pair_cp_ay: wp.array(dtype=wp.float32),
+    pair_cp_az: wp.array(dtype=wp.float32),
+    pair_cp_bx: wp.array(dtype=wp.float32),
+    pair_cp_by: wp.array(dtype=wp.float32),
+    pair_cp_bz: wp.array(dtype=wp.float32),
+):
+    tid = wp.tid()
+    k = tid // max_edges_per_template
+    e_local = tid % max_edges_per_template
+    if k >= n_pairs:
+        return
+    j = pair_j[k]
+    j_tpl = body_template_id[j]
+    e_off = template_edge_offset[j_tpl]
+    e_cnt = template_edge_count[j_tpl]
+    if e_local >= e_cnt:
+        return
+
+    ev0 = template_edges_v0_flat[e_off + e_local]
+    ev1 = template_edges_v1_flat[e_off + e_local]
+    v_off = template_vert_offset[j_tpl]
+    p0_u = body_R[j] @ template_verts_flat[v_off + ev0] + body_center_u[j]
+    p1_u = body_R[j] @ template_verts_flat[v_off + ev1] + body_center_u[j]
+
+    i_body = pair_i[k]
+    c_i = body_center_u[i_body]
+    a = body_R_T[i_body] @ (p0_u - c_i)
+    b = body_R_T[i_body] @ (p1_u - c_i)
+    seg = b - a
+    L = wp.length(seg)
+    if L < 1e-12:
+        return
+    d = seg / L
+    i_tpl = body_template_id[i_body]
+    mesh_i = template_mesh_ids[i_tpl]
+    r = wp.mesh_query_ray(mesh_i, a, d, L)
+    if not r.result:
+        return
+    # A hit at the very start or end of the edge is a touching face, not a
+    # crossing (the point samples cover it as a zero gap).
+    if r.t <= 1.0e-6 * L or r.t >= (1.0 - 1.0e-6) * L:
+        return
+    if write_phase == 0:
+        wp.atomic_max(pair_cross, k, 1)
+
+    # Interior segment of the edge inside body i.
+    t0 = wp.float32(0.0)
+    t1 = r.t
+    if r.sign > 0.0:
+        # Entering: interior runs from the hit to the next exit (or the
+        # end of the edge).
+        t0 = r.t
+        t1 = L
+        skip = r.t + 1.0e-5 * L
+        if skip < L:
+            r2 = wp.mesh_query_ray(mesh_i, a + d * skip, d, L - skip)
+            if r2.result:
+                t1 = skip + r2.t
+
+    for s_local in range(n_samples):
+        f = wp.float32(s_local + 1) / wp.float32(n_samples + 1)
+        q_loc = a + d * (t0 + f * (t1 - t0))
+        query = wp.mesh_query_point_sign_winding_number(mesh_i, q_loc, max_dist_u, 2.0)
+        if query.result:
+            cp_local = wp.mesh_eval_position(mesh_i, query.face, query.u, query.v)
+            sd = wp.length(q_loc - cp_local) * query.sign
+            qd = wp.int64((sd + max_dist_off) * quant_scale)
+            if qd < wp.int64(0):
+                qd = wp.int64(0)
+            if qd > q_max:
+                qd = q_max
+            tag = wp.int64(launch_offset + e_local * n_samples + s_local)
+            key = (qd << wp.int64(tag_shift)) | tag
+            if write_phase == 0:
+                wp.atomic_min(pair_sd, k, sd)
+                wp.atomic_min(pair_key, k, key)
+            elif key == pair_key[k]:
+                q_u = body_R[i_body] @ q_loc + c_i
+                cp_u = body_R[i_body] @ cp_local + c_i
+                n = _witness_normal(dir_sign, query.sign, q_u, cp_u)
+                pair_nx[k] = n[0]
+                pair_ny[k] = n[1]
+                pair_nz[k] = n[2]
+                pair_cp_ax[k] = cp_u[0]
+                pair_cp_ay[k] = cp_u[1]
+                pair_cp_az[k] = cp_u[2]
+                pair_cp_bx[k] = q_u[0]
+                pair_cp_by[k] = q_u[1]
+                pair_cp_bz[k] = q_u[2]
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Extent kernel: one-sided support of a body along the contact normal.
 # ─────────────────────────────────────────────────────────────────────
 @wp.kernel
 def _extent_kernel_v3(
@@ -322,9 +442,7 @@ def _extent_kernel_v3(
 # Oracle class.
 # ─────────────────────────────────────────────────────────────────────
 class S4RWarpContactOracleV3:
-    """Template-shared variant of the FCL-free Warp contact oracle.
-
-    Drop-in for v1/v2 via the same ``find_contacts`` signature."""
+    """Template-shared Warp contact oracle (no FCL)."""
 
     DEBUG = False
 
@@ -332,27 +450,27 @@ class S4RWarpContactOracleV3:
         self.N = len(mesh_objects)
         self.d_hat = float(d_hat)
 
-        # ── Detect unique templates ──
         key_to_tpl_id: dict[str, int] = {}
         self.tpl_v_local: List[np.ndarray] = []
         self.tpl_faces: List[np.ndarray] = []
         self.tpl_max_extent: List[float] = []
         body_template_id_host = np.empty(self.N, dtype=np.int32)
-        self.nfs: List[float] = []  # per-body nf (== per-template nf)
-        self.max_extents: List[float] = []  # per-body max_extent (== template's)
+        self.nfs: List[float] = []
+        self.max_extents: List[float] = []
 
         for i, m in enumerate(mesh_objects):
             nf = float(getattr(m, "normalize_factor", 1.0))
             v_model = np.asarray(m.collision_verts_model, dtype=np.float64)
-            f = np.asarray(m.collision_faces, dtype=np.int32)
+            # Outward winding: the winding-number sign, the ray sign and the
+            # witness direction all assume it.
+            f = outward_faces(v_model, m.collision_faces)
             self.nfs.append(nf)
             max_ext = float(nf * np.max(np.linalg.norm(v_model, axis=1)))
             self.max_extents.append(max_ext)
-
             key = _template_key(v_model, f, nf)
             if key not in key_to_tpl_id:
                 key_to_tpl_id[key] = len(self.tpl_v_local)
-                self.tpl_v_local.append(nf * v_model)  # template local frame
+                self.tpl_v_local.append(nf * v_model)
                 self.tpl_faces.append(f)
                 self.tpl_max_extent.append(max_ext)
             body_template_id_host[i] = key_to_tpl_id[key]
@@ -360,7 +478,6 @@ class S4RWarpContactOracleV3:
         self.n_templates = len(self.tpl_v_local)
         self.max_extents_arr = np.asarray(self.max_extents, dtype=np.float64)
 
-        # ── Build per-template wp.Mesh (static BVH) + edges ──
         self.template_meshes: List[wp.Mesh] = []
         tpl_vert_offsets = [0]
         tpl_vert_counts = []
@@ -373,17 +490,14 @@ class S4RWarpContactOracleV3:
         local_aabb_hi = np.empty((self.n_templates, 3))
 
         for t, (v_local, f) in enumerate(zip(self.tpl_v_local, self.tpl_faces)):
-            points = wp.array(v_local.astype(np.float32),
-                              dtype=wp.vec3, device=_DEVICE)
+            points = wp.array(v_local.astype(np.float32), dtype=wp.vec3, device=_DEVICE)
             indices = wp.array(f.flatten(), dtype=int, device=_DEVICE)
             self.template_meshes.append(wp.Mesh(points=points, indices=indices))
-
             tpl_vert_offsets.append(tpl_vert_offsets[-1] + len(v_local))
             tpl_vert_counts.append(len(v_local))
             local_aabb_lo[t] = v_local.min(axis=0)
             local_aabb_hi[t] = v_local.max(axis=0)
             all_tpl_verts.append(v_local)
-
             e_v0 = np.concatenate([f[:, 0], f[:, 1], f[:, 2]])
             e_v1 = np.concatenate([f[:, 1], f[:, 2], f[:, 0]])
             all_tpl_edges_v0.append(e_v0.astype(np.int32))
@@ -391,10 +505,8 @@ class S4RWarpContactOracleV3:
             tpl_edge_offsets.append(tpl_edge_offsets[-1] + len(e_v0))
             tpl_edge_counts.append(len(e_v0))
 
-        # ── Host & device template constants ──
         self.body_template_id_host = body_template_id_host
-        self.body_template_id_dev = wp.array(body_template_id_host,
-                                              dtype=wp.int32, device=_DEVICE)
+        self.body_template_id_dev = wp.array(body_template_id_host, dtype=wp.int32, device=_DEVICE)
         self.tpl_vert_offset_host = np.asarray(tpl_vert_offsets[:-1], dtype=np.int32)
         self.tpl_vert_count_host = np.asarray(tpl_vert_counts, dtype=np.int32)
         self.max_verts_per_template = int(self.tpl_vert_count_host.max())
@@ -403,58 +515,52 @@ class S4RWarpContactOracleV3:
         self.max_edges_per_template = int(self.tpl_edge_count_host.max())
         self.local_aabb_lo = local_aabb_lo
         self.local_aabb_hi = local_aabb_hi
-        # Per-body local AABBs (template AABB indexed by template_id).
         self.body_aabb_lo_local = local_aabb_lo[body_template_id_host]
         self.body_aabb_hi_local = local_aabb_hi[body_template_id_host]
 
-        self.tpl_vert_offset_dev = wp.array(self.tpl_vert_offset_host,
-                                             dtype=wp.int32, device=_DEVICE)
-        self.tpl_vert_count_dev = wp.array(self.tpl_vert_count_host,
-                                            dtype=wp.int32, device=_DEVICE)
-        self.tpl_edge_offset_dev = wp.array(self.tpl_edge_offset_host,
-                                             dtype=wp.int32, device=_DEVICE)
-        self.tpl_edge_count_dev = wp.array(self.tpl_edge_count_host,
-                                            dtype=wp.int32, device=_DEVICE)
+        self.tpl_vert_offset_dev = wp.array(self.tpl_vert_offset_host, dtype=wp.int32, device=_DEVICE)
+        self.tpl_vert_count_dev = wp.array(self.tpl_vert_count_host, dtype=wp.int32, device=_DEVICE)
+        self.tpl_edge_offset_dev = wp.array(self.tpl_edge_offset_host, dtype=wp.int32, device=_DEVICE)
+        self.tpl_edge_count_dev = wp.array(self.tpl_edge_count_host, dtype=wp.int32, device=_DEVICE)
         tpl_verts_flat = np.concatenate(all_tpl_verts, axis=0).astype(np.float32)
-        self.tpl_verts_flat_dev = wp.array(tpl_verts_flat, dtype=wp.vec3,
-                                            device=_DEVICE)
-        edges_v0_flat = np.concatenate(all_tpl_edges_v0).astype(np.int32)
-        edges_v1_flat = np.concatenate(all_tpl_edges_v1).astype(np.int32)
-        self.tpl_edges_v0_dev = wp.array(edges_v0_flat, dtype=wp.int32,
-                                          device=_DEVICE)
-        self.tpl_edges_v1_dev = wp.array(edges_v1_flat, dtype=wp.int32,
-                                          device=_DEVICE)
+        self.tpl_verts_flat_dev = wp.array(tpl_verts_flat, dtype=wp.vec3, device=_DEVICE)
+        self.tpl_edges_v0_dev = wp.array(np.concatenate(all_tpl_edges_v0).astype(np.int32), dtype=wp.int32, device=_DEVICE)
+        self.tpl_edges_v1_dev = wp.array(np.concatenate(all_tpl_edges_v1).astype(np.int32), dtype=wp.int32, device=_DEVICE)
+        tpl_ids = np.asarray([m.id for m in self.template_meshes], dtype=np.uint64)
+        self.template_mesh_ids_dev = wp.array(tpl_ids, dtype=wp.uint64, device=_DEVICE)
 
-        tpl_ids = np.asarray([m.id for m in self.template_meshes],
-                              dtype=np.uint64)
-        self.template_mesh_ids_dev = wp.array(tpl_ids, dtype=wp.uint64,
-                                                device=_DEVICE)
-
-        # Per-body pose buffers (updated each find_contacts call).
+        # Per-body pose buffers (updated on every find_contacts call).
         self.body_R_dev = wp.zeros(self.N, dtype=wp.mat33, device=_DEVICE)
         self.body_R_T_dev = wp.zeros(self.N, dtype=wp.mat33, device=_DEVICE)
         self.body_center_u_dev = wp.zeros(self.N, dtype=wp.vec3, device=_DEVICE)
 
+    # ── broadphase margin shared by V3 (host) and V4 (device) ──
+    def broadphase_margin_world(self, ds: float, idx_i, idx_j) -> np.ndarray:
+        """Per-pair AABB enlargement (world units): the inflation by ds can
+        close at most ds (E_i + E_j) of gap (E = bounding-sphere radius
+        about the scaling centre) and the narrow filter keeps pairs up to
+        d_hat beyond that, so any pair with a smaller AABB gap must be a
+        candidate. The bound depends only on the world geometry."""
+        E = self.max_extents_arr
+        return ds * (E[idx_i] + E[idx_j]) + self.d_hat
+
     def find_contacts(self, s: float, ds: float,
                       centers: np.ndarray, rotations: List[np.ndarray]):
         inv_s = 1.0 / s
-
-        # ── Update per-body pose (small N-sized buffers; no per-body BVH refit!) ──
-        R_host = np.empty((self.N, 3, 3), dtype=np.float32)
-        R_T_host = np.empty((self.N, 3, 3), dtype=np.float32)
-        center_u_host = np.empty((self.N, 3), dtype=np.float32)
-        world_aabb_lo = np.empty((self.N, 3))
-        world_aabb_hi = np.empty((self.N, 3))
-        for i in range(self.N):
+        N = self.N
+        R_host = np.empty((N, 3, 3), dtype=np.float32)
+        R_T_host = np.empty((N, 3, 3), dtype=np.float32)
+        center_u_host = np.empty((N, 3), dtype=np.float32)
+        world_aabb_lo = np.empty((N, 3))
+        world_aabb_hi = np.empty((N, 3))
+        for i in range(N):
             R = np.asarray(rotations[i], dtype=np.float64)
             R_host[i] = R.astype(np.float32)
             R_T_host[i] = R.T.astype(np.float32)
             center_u = centers[i] * inv_s
             center_u_host[i] = center_u.astype(np.float32)
-            # AABB in u-space: template AABB rotated by R, translated by center_u.
             lo_local = self.body_aabb_lo_local[i]
             hi_local = self.body_aabb_hi_local[i]
-            # Conservative world AABB: enumerate 8 rotated corners.
             corners = np.array([
                 [lo_local[0], lo_local[1], lo_local[2]],
                 [hi_local[0], lo_local[1], lo_local[2]],
@@ -472,39 +578,36 @@ class S4RWarpContactOracleV3:
         self.body_R_T_dev.assign(R_T_host.reshape(-1))
         self.body_center_u_dev.assign(center_u_host.reshape(-1))
 
-        # ── Broad-phase (CPU, vectorized) — identical to v2 ──
-        N = self.N
+        # ── Broad phase (CPU, vectorised) ──
         idx_i, idx_j = np.triu_indices(N, k=1)
-        margin_world = ds * max(self.nfs) * 0.2
-        margin_u = margin_world * inv_s
-        ovlp = np.all(
-            (world_aabb_lo[idx_i] - margin_u <= world_aabb_hi[idx_j])
-            & (world_aabb_lo[idx_j] - margin_u <= world_aabb_hi[idx_i]),
-            axis=1,
-        )
-        c_i = centers[idx_i]
-        c_j = centers[idx_j]
-        d_ij_now = np.linalg.norm(c_i - c_j, axis=1)
+        margin_u = self.broadphase_margin_world(ds, idx_i, idx_j) * inv_s
+        # Euclidean AABB gap (a lower bound on the body distance) against
+        # the conservative margin.
+        gap_axis = np.maximum(np.maximum(world_aabb_lo[idx_i] - world_aabb_hi[idx_j],
+                                         world_aabb_lo[idx_j] - world_aabb_hi[idx_i]), 0.0)
+        ovlp = np.einsum('ij,ij->i', gap_axis, gap_axis) <= margin_u * margin_u
+        d_ij_now = np.linalg.norm(centers[idx_i] - centers[idx_j], axis=1)
         denom = self.max_extents_arr[idx_i] + self.max_extents_arr[idx_j] + 1e-12
         s_contact_now = np.maximum(0.0, (d_ij_now - self.d_hat) / denom)
         ovlp &= (s + ds >= s_contact_now * 0.9)
         idx_i = idx_i[ovlp]; idx_j = idx_j[ovlp]
-        K = len(idx_i)
-        if K == 0:
+        if len(idx_i) == 0:
             return []
+        return self._narrow_phase(s, ds, idx_i, idx_j, centers)
 
-        # ── Narrow phase: vertex + edge kernels (both directions) ──
-        p_i = np.ascontiguousarray(idx_i, dtype=np.int32)
-        p_j = np.ascontiguousarray(idx_j, dtype=np.int32)
-        p_i_dev = wp.array(p_i, dtype=wp.int32, device=_DEVICE)
-        p_j_dev = wp.array(p_j, dtype=wp.int32, device=_DEVICE)
+    def _narrow_phase(self, s: float, ds: float, idx_i: np.ndarray,
+                      idx_j: np.ndarray, centers: np.ndarray):
+        """Vertex, edge-sample and edge-crossing passes in both directions
+        over the candidate pairs; expects the pose buffers to be current."""
+        inv_s = 1.0 / s
+        K = len(idx_i)
+        p_i_dev = wp.array(np.ascontiguousarray(idx_i, dtype=np.int32), dtype=wp.int32, device=_DEVICE)
+        p_j_dev = wp.array(np.ascontiguousarray(idx_j, dtype=np.int32), dtype=wp.int32, device=_DEVICE)
         max_ext_world = float(self.max_extents_arr.max())
-        max_dist_world = max(2.0 * max_ext_world,
-                              ds * 2.0 * max_ext_world + self.d_hat)
+        max_dist_world = max(2.0 * max_ext_world, ds * 2.0 * max_ext_world + self.d_hat)
         max_dist_u = float(max_dist_world * inv_s)
 
-        sd = wp.array(np.full(K, max_dist_u, dtype=np.float32),
-                      dtype=wp.float32, device=_DEVICE)
+        sd = wp.array(np.full(K, max_dist_u, dtype=np.float32), dtype=wp.float32, device=_DEVICE)
         nx = wp.zeros(K, dtype=wp.float32, device=_DEVICE)
         ny = wp.zeros(K, dtype=wp.float32, device=_DEVICE)
         nz = wp.zeros(K, dtype=wp.float32, device=_DEVICE)
@@ -514,29 +617,27 @@ class S4RWarpContactOracleV3:
         cpbx = wp.zeros(K, dtype=wp.float32, device=_DEVICE)
         cpby = wp.zeros(K, dtype=wp.float32, device=_DEVICE)
         cpbz = wp.zeros(K, dtype=wp.float32, device=_DEVICE)
+        pair_cross = wp.zeros(K, dtype=wp.int32, device=_DEVICE)
 
-        # ── Deterministic-argmin bookkeeping (§8.5) ──
-        # All four narrow-phase launches reduce into a single packed int64 key
-        # per pair; a second (write) pass lets only the unique winning feature
-        # write the contact normal/closest-points. This makes find_contacts
-        # bit-for-bit deterministic and identical across V3/V4 oracles, killing
-        # the racy "last writer wins" normal write.
-        pair_key = wp.array(
-            np.full(K, np.iinfo(np.int64).max, dtype=np.int64),
-            dtype=wp.int64, device=_DEVICE)
-        edge_threads = K * self.max_edges_per_template * EDGE_SAMPLES
+        # Deterministic argmin: all six launches reduce into one packed
+        # int64 key per pair; a second pass lets only the winning feature
+        # write its normal and witness points.
+        pair_key = wp.array(np.full(K, np.iinfo(np.int64).max, dtype=np.int64),
+                            dtype=wp.int64, device=_DEVICE)
         feat_stride = max(self.max_verts_per_template,
-                          self.max_edges_per_template * EDGE_SAMPLES) + 1
+                          self.max_edges_per_template * EDGE_SAMPLES,
+                          self.max_edges_per_template * CROSS_SAMPLES) + 1
         TAG_SHIFT = 28
-        assert 4 * feat_stride < (1 << TAG_SHIFT), (
-            f"feature tag space overflow: 4*{feat_stride} >= 2^{TAG_SHIFT}")
-        Q_MAX = (1 << 34) - 1   # (Q_MAX << TAG_SHIFT) stays < int64 max
+        assert 6 * feat_stride < (1 << TAG_SHIFT), (
+            f"feature tag space overflow: 6*{feat_stride} >= 2^{TAG_SHIFT}")
+        Q_MAX = (1 << 34) - 1
         max_dist_off = float(max_dist_u)
         quant_scale = float(Q_MAX) / (2.0 * max_dist_u)
-        off_v0, off_v1 = 0, feat_stride
-        off_e0, off_e1 = 2 * feat_stride, 3 * feat_stride
+        offsets = [t * feat_stride for t in range(6)]
+        edge_threads = K * self.max_edges_per_template * EDGE_SAMPLES
+        cross_threads = K * self.max_edges_per_template
 
-        def _launch_vert(p_a, p_b, cax, cay, caz, cbx, cby, cbz, offset, phase):
+        def _launch_vert(p_a, p_b, dir_sign, cax, cay, caz, cbx, cby, cbz, offset, phase):
             wp.launch(
                 kernel=_pair_min_distance_kernel_v3,
                 dim=K * self.max_verts_per_template,
@@ -546,7 +647,7 @@ class S4RWarpContactOracleV3:
                     p_a, p_b,
                     self.tpl_vert_offset_dev, self.tpl_vert_count_dev,
                     self.tpl_verts_flat_dev,
-                    K, self.max_verts_per_template, max_dist_u,
+                    K, self.max_verts_per_template, max_dist_u, float(dir_sign),
                     offset, quant_scale, max_dist_off, TAG_SHIFT, Q_MAX, phase,
                     pair_key,
                     sd, nx, ny, nz, cax, cay, caz, cbx, cby, cbz,
@@ -554,7 +655,7 @@ class S4RWarpContactOracleV3:
                 device=_DEVICE,
             )
 
-        def _launch_edge(p_a, p_b, cax, cay, caz, cbx, cby, cbz, offset, phase):
+        def _launch_edge(p_a, p_b, dir_sign, cax, cay, caz, cbx, cby, cbz, offset, phase):
             wp.launch(
                 kernel=_pair_min_distance_edge_kernel_v3,
                 dim=edge_threads,
@@ -566,7 +667,7 @@ class S4RWarpContactOracleV3:
                     self.tpl_edge_offset_dev, self.tpl_edge_count_dev,
                     self.tpl_edges_v0_dev, self.tpl_edges_v1_dev,
                     self.tpl_verts_flat_dev,
-                    K, self.max_edges_per_template, EDGE_SAMPLES, max_dist_u,
+                    K, self.max_edges_per_template, EDGE_SAMPLES, max_dist_u, float(dir_sign),
                     offset, quant_scale, max_dist_off, TAG_SHIFT, Q_MAX, phase,
                     pair_key,
                     sd, nx, ny, nz, cax, cay, caz, cbx, cby, cbz,
@@ -574,59 +675,78 @@ class S4RWarpContactOracleV3:
                 device=_DEVICE,
             )
 
-        # Phase 0 (all four) reduces sd + key; phase 1 (all four) writes the
-        # winner's companion data. Same-stream launches serialize, so every
-        # phase-0 reduce completes before any phase-1 read of pair_key.
+        def _launch_cross(p_a, p_b, dir_sign, cax, cay, caz, cbx, cby, cbz, offset, phase):
+            wp.launch(
+                kernel=_pair_edge_crossing_kernel_v3,
+                dim=cross_threads,
+                inputs=[
+                    self.template_mesh_ids_dev, self.body_template_id_dev,
+                    self.body_R_dev, self.body_R_T_dev, self.body_center_u_dev,
+                    p_a, p_b,
+                    self.tpl_vert_offset_dev,
+                    self.tpl_edge_offset_dev, self.tpl_edge_count_dev,
+                    self.tpl_edges_v0_dev, self.tpl_edges_v1_dev,
+                    self.tpl_verts_flat_dev,
+                    K, self.max_edges_per_template, CROSS_SAMPLES, max_dist_u, float(dir_sign),
+                    offset, quant_scale, max_dist_off, TAG_SHIFT, Q_MAX, phase,
+                    pair_key, pair_cross,
+                    sd, nx, ny, nz, cax, cay, caz, cbx, cby, cbz,
+                ],
+                device=_DEVICE,
+            )
+
+        # Phase 0 reduces sd + key (and the crossing flag); phase 1 writes
+        # the winner's companion data. The "a" buffers always hold the
+        # witness on body i, the "b" buffers the sample on body j, so the
+        # swapped launches swap the buffer roles.
         for phase in (0, 1):
-            # Vertex passes (j-verts vs i-mesh, then i-verts vs j-mesh).
-            _launch_vert(p_i_dev, p_j_dev,
-                         cpax, cpay, cpaz, cpbx, cpby, cpbz, off_v0, phase)
-            _launch_vert(p_j_dev, p_i_dev,
-                         cpbx, cpby, cpbz, cpax, cpay, cpaz, off_v1, phase)
-            # Edge passes (j-edges vs i-mesh, then i-edges vs j-mesh).
-            _launch_edge(p_i_dev, p_j_dev,
-                         cpax, cpay, cpaz, cpbx, cpby, cpbz, off_e0, phase)
-            _launch_edge(p_j_dev, p_i_dev,
-                         cpbx, cpby, cpbz, cpax, cpay, cpaz, off_e1, phase)
+            _launch_vert(p_i_dev, p_j_dev, +1.0, cpax, cpay, cpaz, cpbx, cpby, cpbz, offsets[0], phase)
+            _launch_vert(p_j_dev, p_i_dev, -1.0, cpbx, cpby, cpbz, cpax, cpay, cpaz, offsets[1], phase)
+            _launch_edge(p_i_dev, p_j_dev, +1.0, cpax, cpay, cpaz, cpbx, cpby, cpbz, offsets[2], phase)
+            _launch_edge(p_j_dev, p_i_dev, -1.0, cpbx, cpby, cpbz, cpax, cpay, cpaz, offsets[3], phase)
+            _launch_cross(p_i_dev, p_j_dev, +1.0, cpax, cpay, cpaz, cpbx, cpby, cpbz, offsets[4], phase)
+            _launch_cross(p_j_dev, p_i_dev, -1.0, cpbx, cpby, cpbz, cpax, cpay, cpaz, offsets[5], phase)
         wp.synchronize()
 
         sd_h = sd.numpy()
+        cross_h = pair_cross.numpy() > 0
         nx_h = nx.numpy(); ny_h = ny.numpy(); nz_h = nz.numpy()
         cpa_h = np.stack([cpax.numpy(), cpay.numpy(), cpaz.numpy()], axis=1)
         cpb_h = np.stack([cpbx.numpy(), cpby.numpy(), cpbz.numpy()], axis=1)
 
-        hit = sd_h < max_dist_u - 1e-7
+        hit = (sd_h < max_dist_u - 1e-7) | cross_h
         if not np.any(hit):
             return []
         idx_i = idx_i[hit]; idx_j = idx_j[hit]
-        sd_h = sd_h[hit] * s          # u → world
-        nx_h = nx_h[hit]; ny_h = ny_h[hit]; nz_h = nz_h[hit]
+        sd_h = sd_h[hit]; cross_h = cross_h[hit]
+        # A crossing edge is a surface intersection whatever the samples
+        # say: report at least a vanishing penetration so the pair is
+        # constrained and re-detected.
+        sd_h = np.where(cross_h & (sd_h >= 0.0), -1e-9, sd_h)
+        sd_h = sd_h * s
+        n_h = np.stack([nx_h[hit], ny_h[hit], nz_h[hit]], axis=1).astype(np.float64)
         cpa_h = cpa_h[hit] * s
         cpb_h = cpb_h[hit] * s
         K = len(idx_i)
 
-        n_h = np.stack([nx_h, ny_h, nz_h], axis=1)
-        cdir = centers[idx_j] - centers[idx_i]
-        flip = (n_h * cdir).sum(axis=1) < 0
-        n_h[flip] = -n_h[flip]
-        ln = np.linalg.norm(n_h, axis=1, keepdims=True)
-        ln = np.where(ln < 1e-12, 1.0, ln)
-        n_h = n_h / ln
+        # Degenerate witness (coincident sample and surface point): fall
+        # back to the centre line, which is well defined for such a pair.
+        ln = np.linalg.norm(n_h, axis=1)
+        bad = ln < 1e-6
+        if np.any(bad):
+            cdir = centers[idx_j[bad]] - centers[idx_i[bad]]
+            cl = np.linalg.norm(cdir, axis=1, keepdims=True)
+            n_h[bad] = cdir / np.where(cl < 1e-12, 1.0, cl)
+            ln = np.linalg.norm(n_h, axis=1)
+        n_h = n_h / np.where(ln < 1e-12, 1.0, ln)[:, None]
 
-        # Extents via template-local kernel.
         def _extents_for(which_pair: np.ndarray, sign: float) -> np.ndarray:
-            b_dev = wp.array(np.ascontiguousarray(which_pair, dtype=np.int32),
-                             dtype=wp.int32, device=_DEVICE)
-            nx_d = wp.array(np.ascontiguousarray(n_h[:, 0], dtype=np.float32),
-                            dtype=wp.float32, device=_DEVICE)
-            ny_d = wp.array(np.ascontiguousarray(n_h[:, 1], dtype=np.float32),
-                            dtype=wp.float32, device=_DEVICE)
-            nz_d = wp.array(np.ascontiguousarray(n_h[:, 2], dtype=np.float32),
-                            dtype=wp.float32, device=_DEVICE)
-            minp = wp.array(np.full(K, 1e30, dtype=np.float32),
-                            dtype=wp.float32, device=_DEVICE)
-            maxp = wp.array(np.full(K, -1e30, dtype=np.float32),
-                            dtype=wp.float32, device=_DEVICE)
+            b_dev = wp.array(np.ascontiguousarray(which_pair, dtype=np.int32), dtype=wp.int32, device=_DEVICE)
+            nx_d = wp.array(np.ascontiguousarray(n_h[:, 0], dtype=np.float32), dtype=wp.float32, device=_DEVICE)
+            ny_d = wp.array(np.ascontiguousarray(n_h[:, 1], dtype=np.float32), dtype=wp.float32, device=_DEVICE)
+            nz_d = wp.array(np.ascontiguousarray(n_h[:, 2], dtype=np.float32), dtype=wp.float32, device=_DEVICE)
+            minp = wp.array(np.full(K, 1e30, dtype=np.float32), dtype=wp.float32, device=_DEVICE)
+            maxp = wp.array(np.full(K, -1e30, dtype=np.float32), dtype=wp.float32, device=_DEVICE)
             wp.launch(
                 kernel=_extent_kernel_v3,
                 dim=K * self.max_verts_per_template,
@@ -641,16 +761,13 @@ class S4RWarpContactOracleV3:
                 device=_DEVICE,
             )
             wp.synchronize()
-            # UNIFY-SUPPORT: one-sided support max_v n^T R vbar (clamped at 0),
-            # not full width — matches Prop. assumption (v); certified since
-            # the closure coefficient only needs E >= c.
+            # One-sided support max_v n^T R v (clamped at 0).
             return np.maximum(maxp.numpy(), 0.0)
 
         ext_i = _extents_for(idx_i, +1.0)
         ext_j = _extents_for(idx_j, -1.0)
 
-        gap_needed = ds * (ext_i + ext_j)
-        keep = sd_h < gap_needed + self.d_hat
+        keep = sd_h < ds * (ext_i + ext_j) + self.d_hat
         if not np.any(keep):
             return []
         idx_i = idx_i[keep]; idx_j = idx_j[keep]
