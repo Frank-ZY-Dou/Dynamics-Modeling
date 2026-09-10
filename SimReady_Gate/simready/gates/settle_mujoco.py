@@ -131,8 +131,15 @@ def settle_and_measure(scene: Scene, seconds: float = 2.0, timestep: float = 2e-
                 # express the slab in the body's frame: verts_local = R^T (world - center)
                 wv = px.world_vertices()
                 parts = [((b.rotation.T @ (wv - b.center).T).T, px.faces)]
-            if parts is None and b.fixed and ("ground" in b.tags or np.linalg.matrix_rank(b.verts - b.verts.mean(0), tol=1e-6) < 3):
-                continue        # a ground plane or a flat sheet: no convex hull (the floor plane below the supports stands in)
+            if parts is None and b.fixed and "ground" in b.tags:
+                continue        # the ground: the floor plane below the supports stands in
+            if parts is None and b.fixed and np.linalg.matrix_rank(b.verts - b.verts.mean(0), tol=1e-6) < 3:
+                from ..io.export import SHEET_THICKNESS, ground_height, plane_normal, thicken
+                normal = plane_normal(b.verts)
+                horizontal = normal is not None and abs(float((b.rotation @ normal)[2])) > 0.99
+                if normal is None or (horizontal and float(b.world_aabb()[0][2]) <= ground_height(scene) + 0.01):
+                    continue    # a horizontal sheet at the ground height (the floor plane stands in), or a degenerate one
+                parts = [thicken(b.verts, b.faces, normal, SHEET_THICKNESS)]   # a wall or a shelf: a thin solid, as in export
             if parts is None and decompose_free and not b.fixed:
                 parts, used_hull = coacd_pieces_info(b)
                 if used_hull:
@@ -188,6 +195,7 @@ def settle_and_measure(scene: Scene, seconds: float = 2.0, timestep: float = 2e-
     nonfinite = 0
     for step in range(n_steps):
         mujoco.mj_step(model, data)
+        mujoco.mj_kinematics(model, data); mujoco.mj_comPos(model, data); mujoco.mj_comVel(model, data)   # poses and velocities of the state just integrated
         done += 1
         if record_every and (step + 1) % record_every == 0:
             traj.append((float(data.time), {n: (data.xpos[bid[n]].copy(), data.xquat[bid[n]].copy()) for n in free}))

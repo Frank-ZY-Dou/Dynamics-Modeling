@@ -115,6 +115,22 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
             tmesh[k] = trimesh.Trimesh(verts[k], bodies[k].faces, process=False)
         return tmesh[k]
 
+    pieces = {}
+
+    def pieces_of(k):
+        """Vertex index arrays of body k's connected pieces (one array for a connected mesh)."""
+        if k not in pieces:
+            import trimesh
+            f = np.asarray(bodies[k].faces)
+            if len(f) == 0:
+                pieces[k] = []
+            else:
+                edges = np.vstack([f[:, [0, 1]], f[:, [1, 2]], f[:, [2, 0]]])
+                labels = trimesh.graph.connected_component_labels(edges, node_count=len(verts[k]))
+                used = np.zeros(len(verts[k]), dtype=bool); used[f.ravel()] = True
+                pieces[k] = [np.nonzero((labels == lab) & used)[0] for lab in np.unique(labels[used])]
+        return pieces[k]
+
     out = []
     for i in range(n):
         for j in range(i + 1, n):
@@ -143,6 +159,24 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
                         signed = -(signed + ext)
                         wi = wj = verts[inner].mean(0)
                         inside = True
+                    else:
+                        # a body made of several closed pieces can have one piece inside the other
+                        # body while the bodies' AABBs do not nest: test the pieces one by one
+                        for a, b in ((j, i), (i, j)):
+                            if inside or len(pieces_of(a)) < 2:
+                                continue
+                            for idx in pieces_of(a):
+                                cv = verts[a][idx]
+                                if (np.all(cv.min(axis=0) >= lo[b] - 1e-9) and np.all(cv.max(axis=0) <= hi[b] + 1e-9)
+                                        and _contained(cv, mesh_of(b))):
+                                    cen = cv.mean(0)
+                                    d = (cen - ci) if a == j else (cj - cen)
+                                    nrm = d / max(np.linalg.norm(d), 1e-12)
+                                    proj = cv @ nrm
+                                    signed = -(signed + float(proj.max() - proj.min()))
+                                    wi = wj = cen
+                                    inside = True
+                                    break
             elif nrm is None:
                 # touching without contact points: probe whether it is a resting contact
                 wi = 0.5 * (ci + cj); wj = wi.copy()

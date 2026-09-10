@@ -29,21 +29,21 @@
   }
  },
  "n_free": 20,
- "pen_raw": 80,
+ "pen_raw": 82,
  "max_pen_raw_mm": 15.20577600166273,
- "pen_raw_obj_obj": 80,
+ "pen_raw_obj_obj": 82,
  "pen_rep": 0,
- "rmsd": 0.3278160630477374,
- "steps": 40,
- "repair_s": 28.53206968307495,
+ "rmsd": 0.3255718951752328,
+ "steps": 44,
+ "repair_s": 29.566227912902832,
  "fails": [],
  "off_support": [],
  "route_s": 0.0,
  "g5": {
   "raw": {
    "hull": {
-    "vmax": 4.900897852061171,
-    "dmax": 2.2232969754760386,
+    "vmax": 4.8126341303970595,
+    "dmax": 1.9515920818543226,
     "left": [
      "pineapple_slices_can",
      "bbq_sauce_bottle",
@@ -53,13 +53,14 @@
      "orange_02",
      "pitcher",
      "whitepackerbottle_a02",
+     "whitepackerbottle_a01",
      "bin_b02",
      "orange_01"
     ]
    },
    "coacd": {
-    "vmax": 3.7672703950749926,
-    "dmax": 0.8879731119717583,
+    "vmax": 3.7573674391167646,
+    "dmax": 0.8879712474364421,
     "left": [
      "orange_02"
     ]
@@ -67,13 +68,13 @@
   },
   "rep": {
    "hull": {
-    "vmax": 0.8552680046241165,
-    "dmax": 0.12281200538345032,
+    "vmax": 0.35404580682526504,
+    "dmax": 0.05296126358155525,
     "left": []
    },
    "coacd": {
-    "vmax": 0.8393060156979364,
-    "dmax": 0.11941115594401754,
+    "vmax": 0.2877265814715383,
+    "dmax": 0.05808104322978885,
     "left": []
    }
   }

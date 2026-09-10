@@ -40,7 +40,7 @@ layouts are committed).
 
 - Object-object penetration in 26 / 68 scenes (>= 1 mm in 12; the largest score 9.86 mm in
   `workdesk_snacks`: keyboard/smartphone). Sub-millimeter resting penetration into fixtures in
-  64 / 68 (median 0.27 mm). The point-in-mesh test for a body wholly inside another (invisible to
+  60 / 68 (median 0.27 mm). The point-in-mesh test for a body wholly inside another (invisible to
   a surface test) fires in none of the 68 scenes; the four cases the first pass listed as
   containment (`cooking_table`, spoon in the plates; `front_of_shelf`, cutlery in the rack;
   `ladle_pot`, fork in a plate; `tools_picking`, clamp in a bin) are surface intersections that
@@ -103,7 +103,7 @@ timestep). Pass = no body off the table and peak speed <= 1.0 m/s and peak displ
 | 0.5x0.5 m, sampler | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 |
 | 0.5x0.5 m, gate | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 |
 
-- RoboCasa's box test is conservative and reliable: none of its 70 accepted layouts carries mesh
+- RoboCasa's box test is conservative and reliable: none of its 64 accepted layouts carries mesh
   penetration on the collision geometry, and the collision meshes do not extend below the
   `reg_bbox` bottom (0 of 1594 objects), so its z rule does not sink objects into the counter.
   Its cost appears only in the tight 0.3 m region at N >= 8, where it gives up and the gate still

@@ -223,6 +223,8 @@ class Gates(unittest.TestCase):
             assets = {asset: sha16(asset)}
             cert = {"provenance": {"scene": {"sha256": sha16(scene)}, "program": {"sha256": sha16(prog)}, "assets": assets}, "written_sha256": sha16(out)}
             self.assertTrue(certificate_bound(cert, out, prog, assets))
+            self.assertFalse(certificate_bound(cert, out, prog, None))                 # the asset check cannot be skipped
+            self.assertFalse(certificate_bound(cert, out, prog, {asset: None}))        # nor passed with an unreadable asset
             self.assertFalse(certificate_bound(cert, scene, prog, assets))   # the scene the repair read is not the repaired scene
             self.assertFalse(certificate_bound(cert, out, None, assets))     # a settle without the program judges by other thresholds
             open(asset, "w").write("#usda 1.0\n# changed\n")
@@ -638,3 +640,102 @@ class RestOrientation(unittest.TestCase):
         from simready.io.asset_rest import rest_dims, rest_rotation
         d = rest_dims(c["dims"], rest_rotation("remote_control"))
         self.assertLess(d[2], 0.03)
+
+
+def write_op_order_usda(path):
+    """A Z-up scene whose free bodies author their xform ops in orders other than translate,
+    orient, scale: a scale applied after the rotation (which reads as shear in the local map) and a
+    rotation authored after the translation."""
+    def mesh(extents, indent="        "):
+        m = trimesh.creation.box(extents=extents)
+        pts = ", ".join(f"({x:.4f}, {y:.4f}, {z:.4f})" for x, y, z in m.vertices)
+        idx = ", ".join(str(int(i)) for i in m.faces.reshape(-1))
+        return (f'{indent}def Mesh "geo" {{\n{indent}    point3f[] points = [{pts}]\n'
+                f'{indent}    int[] faceVertexCounts = [{", ".join(["3"] * len(m.faces))}]\n'
+                f'{indent}    int[] faceVertexIndices = [{idx}]\n{indent}}}\n')
+    c, s = math.cos(math.radians(20.0) / 2), math.sin(math.radians(20.0) / 2)
+    text = ('#usda 1.0\n(\n    defaultPrim = "World"\n    metersPerUnit = 1\n    upAxis = "Z"\n)\n\ndef Xform "World" {\n'
+            '    def Xform "table" {\n        double3 xformOp:translate = (0, 0, -0.025)\n'
+            '        uniform token[] xformOpOrder = ["xformOp:translate"]\n' + mesh((1.0, 1.0, 0.05)) + "    }\n"
+            '    def Xform "scaled_after_turn" {\n        double3 xformOp:translate = (0.2, 0, 0.05)\n'
+            f'        quatf xformOp:orient = ({c:.7f}, 0, 0, {s:.7f})\n        float3 xformOp:scale = (2, 1, 1)\n'
+            '        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale", "xformOp:orient"]\n' + mesh((0.1, 0.1, 0.1)) + "    }\n"
+            '    def Xform "turned_after_move" {\n        double3 xformOp:translate = (-0.2, 0.1, 0.05)\n'
+            f'        quatf xformOp:orient = ({c:.7f}, 0, 0, {s:.7f})\n'
+            '        uniform token[] xformOpOrder = ["xformOp:orient", "xformOp:translate"]\n' + mesh((0.1, 0.1, 0.1)) + "    }\n}\n")
+    open(path, "w").write(text)
+
+
+class PiecesSheetsAndFrames(unittest.TestCase):
+    def test_piece_of_a_body_inside_another_body_is_contained(self):
+        # a body made of two closed pieces, one at the bin's centre and one 3 m away: the bodies'
+        # AABBs do not nest and the surfaces are apart, only the piece-wise test can see the inner one
+        bin_ = box("bin", (2.0, 2.0, 2.0), (0.0, 0.0, 1.0), fixed=True, tags=("fixture",))
+        two = trimesh.util.concatenate([trimesh.creation.box(extents=(0.2, 0.2, 0.2)).apply_translation([-1.5, 0, 0]),
+                                        trimesh.creation.box(extents=(0.2, 0.2, 0.2)).apply_translation([1.5, 0, 0])])
+        body = Body.from_mesh("two", two.vertices, two.faces, center=np.array([1.5, 0.0, 1.0]))
+        pairs = pair_signed_distances([bin_, body])
+        self.assertEqual(len(pairs), 1)
+        self.assertLess(pairs[0][2], 0.0)
+        self.assertTrue(pairs[0].contained)
+        outside = Body.from_mesh("two", two.vertices, two.faces, center=np.array([4.0, 0.0, 1.0]))
+        self.assertFalse(any(p[2] < 0.0 for p in pair_signed_distances([bin_, outside])))
+
+    def test_turned_sheet_is_a_wall_not_the_ground(self):
+        from simready.io.export import export_scene
+        from simready.gates.settle_mujoco import settle_and_measure
+        # a square authored in its local xy plane, stood upright by its pose: a wall on the table
+        v = np.array([[-1.0, -1.0, 0.0], [1.0, -1.0, 0.0], [1.0, 1.0, 0.0], [-1.0, 1.0, 0.0]]); f = np.array([[0, 1, 2], [0, 2, 3]])
+        Ry = np.array([[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [-1.0, 0.0, 0.0]])
+        wall = Body.from_mesh("wall", v, f, center=np.array([0.5, 0.0, 1.0]), rotation=Ry, fixed=True, tags={"fixture"})
+        sc = table_scene(wall, box("a", (0.05, 0.05, 0.05), (0.5, 0.0, 2.025)))   # a small cube standing on the wall's top edge
+        with tempfile.TemporaryDirectory() as d:
+            m = export_scene(sc, d)
+            entry = next(b for b in m["bodies"] if b["name"] == "wall")
+            self.assertFalse(entry["flat"]); self.assertAlmostEqual(entry["thickened_m"], 0.01)
+        r = settle_and_measure(sc, seconds=0.3, timestep=0.002)
+        self.assertLess(r.peak_disp, 0.2)          # the wall holds the cube up; without it the cube falls 0.44 m
+
+    def test_settle_measures_the_state_it_integrated(self):
+        from simready.gates.settle_mujoco import settle_and_measure
+        sc = table_scene(box("a", (0.1, 0.1, 0.1), (0.0, 0.0, 1.0)))      # a cube 1 m above the table
+        r = settle_and_measure(sc, seconds=0.002, timestep=0.002)
+        self.assertGreater(r.peak_speed, 0.015)    # one step of free fall: g dt
+        self.assertGreater(r.peak_disp, 0.0)
+
+    def test_layout_keeps_the_base_scene_unresolved_children(self):
+        from simready.cli import load_any
+        with tempfile.TemporaryDirectory() as d:
+            base = os.path.join(d, "base.usda"); write_usda(base, ghost=True)
+            layout = os.path.join(d, "layout.json")
+            json.dump({"base_scene": base, "objects": []}, open(layout, "w"))
+            sc = load_any(layout)
+            self.assertEqual(sc.meta.get("dropped"), ["ghost"])
+            self.assertEqual(sc.meta.get("base_scene"), base)
+
+    def test_object_usd_frame_is_checked(self):
+        from simready.io.usd_io import body_from_object_usd
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "cube.usda"); write_usda(path, meters_per_unit=0.01, ghost=False)
+            with self.assertRaises(ValueError):
+                body_from_object_usd("cube", path, (0, 0, 0))
+
+    def test_written_pose_keeps_the_geometry_for_other_op_orders(self):
+        from simready.io.usd_io import load_scene_usda, write_scene_poses
+        with tempfile.TemporaryDirectory() as d:
+            src = os.path.join(d, "ops.usda"); write_op_order_usda(src)
+            sc = load_scene_usda(src)
+            yaw = math.radians(30.0)
+            Rz = np.array([[math.cos(yaw), -math.sin(yaw), 0.0], [math.sin(yaw), math.cos(yaw), 0.0], [0.0, 0.0, 1.0]])
+            want = {}
+            for b in sc.free():
+                b.rotation = Rz @ b.rotation
+                b.center = b.center + np.array([0.03, -0.02, 0.0])
+                want[b.name] = b.world_vertices()
+            out = os.path.join(d, "moved.usda")
+            write_scene_poses(sc, src, out)
+            back = load_scene_usda(out)
+            self.assertEqual(sorted(want), sorted(b.name for b in back.free()))
+            for name, w in want.items():
+                got = back[name].world_vertices()
+                np.testing.assert_allclose(np.sort(got, axis=0), np.sort(w, axis=0), atol=1e-6, err_msg=name)

@@ -28,6 +28,7 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 from mesh_collision import _contains_points as _mesh_contains_points  # noqa: E402
+from mesh_collision import _vertex_components, _nested_component_contact, _piece_layout, _piece_boxes, _any_piece_nested  # noqa: E402
 from mesh_collision import _signed_volume  # noqa: E402
 
 
@@ -248,6 +249,8 @@ class PrebuiltFCLOracle:
         self.bvh = []
         self.max_extents = np.zeros(self.N)
         self._model_mesh = [None] * self.N
+        self._pieces = [None] * self.N
+        self._layout = [None] * self.N
         self._inc = None
         for i in range(self.N):
             Mi = (self.nfs[i] * np.asarray(mverts[i], dtype=np.float64))
@@ -266,12 +269,26 @@ class PrebuiltFCLOracle:
     def support(self, i, rot, direction) -> float:
         return _one_sided_support(self.model_verts[i], rot, direction)
 
-    def _contains_model_point(self, i, p_local) -> bool:
-        """Ray-parity containment of a point given in body i's model frame."""
+    def _model_trimesh(self, i):
         if self._model_mesh[i] is None:
             self._model_mesh[i] = trimesh.Trimesh(
                 vertices=self.model_verts[i], faces=self.faces[i], process=False)
-        return bool(_mesh_contains_points(self._model_mesh[i],
+        return self._model_mesh[i]
+
+    def _components(self, i):
+        """Vertex index arrays of body i's closed pieces (one for a connected mesh)."""
+        if self._pieces[i] is None:
+            self._pieces[i] = _vertex_components(self.faces[i], len(self.model_verts[i]))
+        return self._pieces[i]
+
+    def _piece_layout(self, i):
+        if self._layout[i] is None:
+            self._layout[i] = _piece_layout(self._components(i))
+        return self._layout[i]
+
+    def _contains_model_point(self, i, p_local) -> bool:
+        """Ray-parity containment of a point given in body i's model frame."""
+        return bool(_mesh_contains_points(self._model_trimesh(i),
                                           np.asarray(p_local, dtype=np.float64)[None, :])[0])
 
     def find_contacts(self, s, ds, centers, rots, extra_margin=0.0,
@@ -303,9 +320,12 @@ class PrebuiltFCLOracle:
             return contacts
 
         lo = np.empty((N, 3)); hi = np.empty((N, 3))
+        piece_boxes = {}      # u-space AABB per closed piece, for bodies made of several pieces
         for i in range(N):
             Vw = (rots[i] @ self.model_verts[i].T).T + C[i] * inv_s
             lo[i] = Vw.min(axis=0); hi[i] = Vw.max(axis=0)
+            if len(self._components(i)) > 1:
+                piece_boxes[i] = _piece_boxes(Vw, self._piece_layout(i))
 
         fcl_objs = [fcl.CollisionObject(
             self.bvh[i],
@@ -370,7 +390,7 @@ class PrebuiltFCLOracle:
             if d_u > 0.0:
                 cp_i_u = np.asarray(res.nearest_points[0], dtype=np.float64)
                 cp_j_u = np.asarray(res.nearest_points[1], dtype=np.float64)
-                nested = self._nested_contact(i, j, cp_i_u, cp_j_u, d_u, s, lo, hi, C, rots)
+                nested = self._nested_contact(i, j, cp_i_u, cp_j_u, d_u, s, lo, hi, C, rots, piece_boxes)
                 if nested is not None:
                     d_signed, n_raw, cp_on_a, cp_on_b = nested
                 else:
@@ -462,35 +482,64 @@ class PrebuiltFCLOracle:
                 return None
         return st
 
-    def _nested_contact(self, i, j, cp_i_u, cp_j_u, d_u, s, lo, hi, C, rots):
-        """Containment check for a separated-by-FCL pair whose AABBs nest.
+    def _nested_contact(self, i, j, cp_i_u, cp_j_u, d_u, s, lo, hi, C, rots, piece_boxes):
+        """Containment check for a separated-by-FCL pair: the whole body when
+        the AABBs nest, or one closed piece of a multi-piece body inside the
+        other body (the bodies' AABBs need not nest then).
 
-        Returns (d_signed, n, cp_on_i, cp_on_j) in world units when one body
-        lies entirely inside the other, else None. n follows the i->j
-        convention: moving j along +n (i along -n) carries the inner body
-        toward the outer surface; |d_signed| is the surface gap plus the
-        inner body's width along n.
+        Returns (d_signed, n, cp_on_i, cp_on_j) in world units, else None.
+        n follows the i->j convention: moving j along +n (i along -n)
+        carries the inner body toward the outer surface; |d_signed| is the
+        surface gap plus the inner body's (or piece's) width along n.
         """
+        inv_s = 1.0 / s
         j_in_i = bool(np.all(lo[j] >= lo[i] - 1e-12) and np.all(hi[j] <= hi[i] + 1e-12))
         i_in_j = bool(np.all(lo[i] >= lo[j] - 1e-12) and np.all(hi[i] <= hi[j] + 1e-12))
-        if not (j_in_i or i_in_j):
+        if j_in_i or i_in_j:
+            if j_in_i:
+                outer, inner, q_u = i, j, cp_j_u
+            else:
+                outer, inner, q_u = j, i, cp_i_u
+            p_local = rots[outer].T @ (q_u - C[outer] * inv_s)
+            if self._contains_model_point(outer, p_local):
+                n_raw = cp_i_u - cp_j_u
+                nn = np.linalg.norm(n_raw)
+                if nn < 1e-12:
+                    return None
+                n = n_raw / nn
+                width = s * _projected_width(self.model_verts[inner], rots[inner], n)
+                d_signed = -(d_u * s + width)
+                return d_signed, n, cp_i_u * s, cp_j_u * s
+        # a piece can only be inside the other body when its box nests in that body's box
+        if not (_any_piece_nested(piece_boxes.get(j), lo[i], hi[i]) or _any_piece_nested(piece_boxes.get(i), lo[j], hi[j])):
             return None
-        inv_s = 1.0 / s
-        if j_in_i:
-            outer, inner, q_u = i, j, cp_j_u
-        else:
-            outer, inner, q_u = j, i, cp_i_u
-        p_local = rots[outer].T @ (q_u - C[outer] * inv_s)
-        if not self._contains_model_point(outer, p_local):
+        comps_i = self._components(i)
+        comps_j = self._components(j)
+        Vi = (rots[i] @ self.model_verts[i].T).T + C[i] * inv_s
+        Vj = (rots[j] @ self.model_verts[j].T).T + C[j] * inv_s
+
+        def contains(k):
+            return lambda p: self._contains_model_point(k, rots[k].T @ (p - C[k] * inv_s))
+
+        def closest(k):
+            def f(pts):
+                p_local = (rots[k].T @ (pts - C[k] * inv_s).T).T
+                q, dist, _ = trimesh.proximity.closest_point(self._model_trimesh(k), p_local)
+                return (rots[k] @ np.asarray(q, dtype=np.float64).T).T + C[k] * inv_s, dist
+            return f
+
+        hit = _nested_component_contact(Vi, comps_i, Vj, comps_j,
+                                        contains(i), contains(j), closest(i), closest(j))
+        if hit is None:
             return None
-        n_raw = cp_i_u - cp_j_u
-        nn = np.linalg.norm(n_raw)
-        if nn < 1e-12:
-            return None
-        n = n_raw / nn
-        width = s * _projected_width(self.model_verts[inner], rots[inner], n)
-        d_signed = -(d_u * s + width)
-        return d_signed, n, cp_i_u * s, cp_j_u * s
+        d_u2, n, cpi_u, cpj_u = hit
+        if n is None:
+            n_raw = cp_i_u - cp_j_u
+            nn = np.linalg.norm(n_raw)
+            if nn < 1e-12:
+                return None
+            n = n_raw / nn
+        return d_u2 * s, n, cpi_u * s, cpj_u * s
 
 
 # ─────────────────────────────────────────────────────────────────────

@@ -105,7 +105,7 @@ def export_scene(scene: Scene, out_dir, decompose: bool = False, max_hull_verts:
     for k, (b, pn) in enumerate(zip(scene.bodies, names)):
         stem = f"{k:04d}_{pn}"
         normal = plane_normal(b.verts) if b.fixed else None
-        horizontal = normal is not None and abs(float(normal[2])) > 0.99
+        horizontal = normal is not None and abs(float((b.rotation @ normal)[2])) > 0.99   # the normal in the world
         at_ground = horizontal and float(b.world_aabb()[0][2]) <= z_floor + 0.01
         flat = bool(b.fixed and ("ground" in b.tags or at_ground))
         verts, faces, thickness = b.verts, b.faces, 0.0

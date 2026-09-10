@@ -231,6 +231,30 @@ class OracleContracts(unittest.TestCase):
         self.assertEqual(stats.pen_pairs, 1)
         self.assertGreater(stats.max_penetration, 0.3)
 
+    def test_piece_of_a_body_inside_another_body_is_a_penetration(self):
+        # A body made of two closed pieces one unit apart, placed so that one
+        # piece sits inside the big cube (0.1 from its +x face) and the other
+        # far outside. The bodies' AABBs do not nest and the surfaces are
+        # apart, so only a piece-wise containment check can see it.
+        big = mesh_object(trimesh.creation.box(extents=[1, 1, 1]), [0, 0, 0])
+        two = trimesh.util.concatenate([
+            trimesh.creation.box(extents=[0.2] * 3).apply_translation([-1.0, 0, 0]),
+            trimesh.creation.box(extents=[0.2] * 3).apply_translation([1.0, 0, 0])])
+        pieces = mesh_object(two, [1.3, 0, 0])
+        c = self.contacts([big, pieces], 1.0, 0.0)
+        self.assertEqual([(x[0], x[1]) for x in c], [(0, 1)])
+        self.assertAlmostEqual(c[0][2], -0.3, places=6)   # gap 0.1 to the +x face plus the piece's width 0.2
+        self.assertGreater(c[0][3][0], 0.99)              # exit through the nearest face: +x
+        stats = evaluate_mesh_object_scene([big, pieces])
+        self.assertEqual(stats.pen_pairs, 1)
+        self.assertAlmostEqual(stats.max_penetration, 0.3, places=6)
+        # the far piece alone is not a contact
+        outside = mesh_object(two, [2.0, 0, 0])
+        self.assertEqual(self.contacts([big, outside], 1.0, 0.0), [])
+        self.assertEqual(evaluate_mesh_object_scene([big, outside]).pen_pairs, 0)
+        res = solve([big, pieces], d_hat=0.02, ds_max=0.05, max_steps=200, adaptive_ds=True)
+        self.assertEqual(res["status"], "converged")
+
     def test_cavity_normal_points_out_of_the_wall(self):
         ring = trimesh.creation.annulus(r_min=1.0, r_max=2.0, height=0.4, sections=32)
         # Separated box inside the hole: the witness direction for the box

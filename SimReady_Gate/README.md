@@ -26,7 +26,7 @@
 <td><img src="docs/media/pile_n20_settle.gif" width="960" alt="MuJoCo settle of the heap (left) and of the repaired layout (right)" /></td>
 </tr>
 <tr>
-<td><sub><b>Settle as certification.</b> The heap and the repaired layout simulated in MuJoCo with CoACD proxies: the heap reaches 3.8 m/s and throws a body off the table; the repaired scene peaks at 0.83 m/s with nothing leaving the table. Every clip in this repository is rendered from the solver's own meshes with the assets' textures, without overlays.</sub></td>
+<td><sub><b>Settle as certification.</b> The heap and the repaired layout simulated in MuJoCo with CoACD proxies: the heap reaches 3.8 m/s and throws a body off the table; the repaired scene peaks at 0.29 m/s with nothing leaving the table. Every clip in this repository is rendered from the solver's own meshes with the assets' textures, without overlays.</sub></td>
 </tr>
 </table>
 </div>
@@ -66,9 +66,9 @@ supports. SimReady Gate is the layer between a scene generator and the simulator
 - **Reads the scenes robotics pipelines actually produce.** RoboLab USD scenes (payloads, instance proxies, gprims, MDL materials) through `usd-core`, no Isaac Sim needed; RoboCasa / robosuite MJCF objects compiled by MuJoCo itself, so the geometry is exactly what the simulator collides with.
 - **Measures interpenetration on the meshes, not on proxies.** An FCL evaluator with probed contact normals, a containment test and a resting-contact test: which pairs interpenetrate, which body sits inside another, which body nothing supports.
 - **Repairs with S4R under a typed constraint program.** Bodies shrink about their reference center, grow back through minimum-norm QPs, stay upright on their support, and obey the program: regions, left/right/front/back relations, distances, soft target poses.
-- **Lets a language model lay the scene out in scale-space.** At the shrunken scale nothing touches; the model places bodies into a semantic arrangement (`place`), and the continuation restores full scale while resolving what overlaps.
+- **Lets a language model lay the scene out in scale-space.** At the shrunken scale the bodies come apart (pairs that share a reference center excepted); the model places bodies into a semantic arrangement (`place`), and the continuation restores full scale while resolving what overlaps.
 - **Certifies by settling.** The repaired scene is simulated in MuJoCo with the proxies an engine would use (convex hulls, CoACD pieces); peak speed, displacement and bodies that leave their support are measured against the program's own thresholds.
-- **Leaves a certificate with provenance.** Program text and JSON, scene hash, git commit, library versions, every tolerance, every predicate value, the settle report.
+- **Leaves a certificate with provenance.** Program text and JSON, scene hash, git commit, library versions, the tolerances, every predicate value, the settle report.
 - **Runs as an agent loop.** An agent following the skill in `skills/` (or the Anthropic SDK backend) writes and edits the program and acts on exit codes; it never overrides a number.
 
 ## Demos
@@ -125,7 +125,7 @@ the repaired scene.*
 The agent reads this; it never looks at geometry itself.
 
 ```
-$ python -m simready.cli summarize assets/scenes/workdesk_snacks.usda
+$ python -m simready.cli summarize "$ROBOLAB_DIR/assets/scenes/workdesk_snacks.usda"
 - table: FIXED fixture,support; size 0.70x1.00x0.70 m; at (0.55, -0.00, -0.35); top rect x[0.20, 0.90] y[-0.50, 0.50] at z=0.003
 - franka_table: FIXED fixture,support; size 0.90x0.76x0.79 m; at (-0.36, 0.00, -0.40); ...
 - ceramic_mug: object; size 0.10x0.13x0.08 m; at (0.56, 0.40, 0.04)
@@ -160,7 +160,7 @@ justify it):
 region with no room stop here with exit code 2.
 
 ```
-$ python -m simready.cli check assets/scenes/workdesk_snacks.usda program.json
+$ python -m simready.cli check "$ROBOLAB_DIR/assets/scenes/workdesk_snacks.usda" program.json
 {"ok": true, "statements": 9, "rows": 27, "predicates": 40, ...}
 ```
 
@@ -170,7 +170,7 @@ S4R runs on decimated proxies, verifies on the full meshes, checks every predica
 poses into a copy of the USD and reads it back:
 
 ```
-$ python -m simready.cli repair assets/scenes/workdesk_snacks.usda program.json --out workdesk_repaired.usda
+$ python -m simready.cli repair "$ROBOLAB_DIR/assets/scenes/workdesk_snacks.usda" program.json --out workdesk_repaired.usda
 {"ok": true, "pen_before": 12, "pen_after": 0, "rmsd_xy": 0.033, "time_s": 45.9,
  "failed_predicates": [], "written_pose_error_m": 1.2e-06,
  "certificate": "workdesk_repaired.certificate.json"}
@@ -197,7 +197,7 @@ $ python -m simready.cli settle workdesk_repaired.usda --program program.json
 
 `workdesk_repaired.certificate.json` records the outcome with its provenance: the program text and
 JSON, the hashes of the scene read and the scene written and of every asset file the bodies came
-from, the git commit, library versions, every tolerance, the predicate values, the settle report.
+from, the git commit, library versions, the tolerances, the predicate values, the settle report.
 `settle` adds its report to the certificate only when the scene it was given hashes to the one the
 repair wrote, the program to the one the repair used and every asset to what the repair read, and
 then sets `ready`: the repair's `ok` and the settle's `pass`. Any other certificate is left as it
@@ -219,7 +219,7 @@ Twenty catalog objects are dropped into a 13 cm radius on RoboLab's `table_oak` 
 > upright on the table, at least 2 cm from the edge, nothing interpenetrating, and do not move
 > anything further than necessary.*
 
-The model's program has 46 statements: the usual guards, one `place` target per object chosen
+The model's first program has 46 statements (the certified second one has 45, without the hammer's exact target): the usual guards, one `place` target per object chosen
 from the table rectangle and the object sizes (the placement step in scale-space), and the
 relations that make the request checkable:
 
@@ -275,7 +275,7 @@ through relations, regions and `place` targets, and S4R decides what is feasible
 ### Scale-space editing
 
 S4R makes a scene an editable scale-space: once every body is shrunk about its reference center,
-nothing touches, and a body can be moved anywhere. `place(a, x, y, yaw)` is that move, issued by
+bodies with distinct reference centers come apart, and a body can be moved anywhere. `place(a, x, y, yaw)` is that move, issued by
 the model from its understanding of the request; restoring the scale then resolves whatever still
 overlaps, with the target kept as a soft pull. The pipeline is shrink, arrange, restore.
 
@@ -304,8 +304,8 @@ gate
 | `place(a, x, y, yaw)` | a's pose at the shrunken scale, and a soft pull while the scale is restored |
 | `gate` | thresholds for the verifier and the settle test, not the QP |
 
-Every statement also becomes a predicate that the final scene is checked against, and a line of
-the certificate.
+Every statement that constrains a pose also becomes a predicate that the final scene is checked
+against, and a line of the certificate.
 
 ## Getting started
 
@@ -331,7 +331,7 @@ repository holds a credential, and `.env` files are ignored); Blender 3.6 for th
 | `python -m simready.cli check <scene> program.json` | validate, parse and compile the program | the program is usable |
 | `python -m simready.cli verify <scene>` | the mesh-level evaluator on the scene as is | no penetrating pair |
 | `python -m simready.cli repair <scene> program.json --out <file>` | S4R under the program, full-mesh verification, write-back, certificate | pen 0, every predicate holds and, with a `G2: min_gap` gate, every pair keeps that clearance |
-| `python -m simready.cli settle <scene> --program program.json` | the MuJoCo settle test, thresholds from the program's gate | the scene stays at rest (and keeps `min_gap` when the gate sets one) |
+| `python -m simready.cli settle <scene> --program program.json` | the MuJoCo settle test, thresholds from the program's gate | the scene stays at rest (with a `G2: min_gap` gate, the scene as given is also checked for that clearance) |
 | `python -m simready.cli export <scene> --out <dir>` | meshes, manifest, MJCF and USD for MuJoCo, Genesis and Isaac Sim | the files were written |
 
 Exit code 1 means the outcome does not hold; exit code 2 means the program or an input is invalid,
@@ -372,7 +372,7 @@ Genesis and Isaac Sim from left to right, rendered from the same assets as the o
 <td><img src="docs/media/pile_n20_engines.gif" width="960" alt="the certified twenty-object layout simulated for 2 s in MuJoCo, Genesis and Isaac Sim, left to right" /></td>
 </tr>
 <tr>
-<td><sub>Left to right: MuJoCo 3.10, Genesis 1.2.3, Isaac Sim 4.5, 2 s of simulation in real time. In every engine the round fruit rolls a little (an orange by 9 cm in MuJoCo, 3 cm in Genesis, 2 cm in Isaac Sim); nothing tips over and no body leaves the table.</sub></td>
+<td><sub>Left to right: MuJoCo 3.10, Genesis 1.2.3, Isaac Sim 4.5, 2 s of simulation in real time. In every engine the round fruit rolls a little (an orange by 9 cm in MuJoCo, 5 cm in Genesis, 3 cm in Isaac Sim); nothing tips over and no body leaves the table.</sub></td>
 </tr>
 </table>
 
@@ -382,8 +382,8 @@ per body), and Isaac Sim's stage asks PhysX for a convex decomposition:
 
 | engine | peak displacement of a free body | bodies below the ground |
 |---|---|---|
-| MuJoCo 3.10 | 0.050 m (an orange rolling, as in the settle test) | none |
-| Genesis 1.2.3, GPU, conjugate-gradient solver | 0.089 m with its decomposition, 0.053 m with one hull per body | none |
+| MuJoCo 3.10 | 0.089 m (an orange rolling, as in the settle test) | none |
+| Genesis 1.2.3, GPU, conjugate-gradient solver | 0.053 m with its decomposition, 0.050 m with one hull per body | none |
 | Isaac Sim 4.5 (PhysX) | 0.029 m | none |
 
 A flat fixed sheet such as RoboLab's ground plane has no volume to hull; it is marked `flat` in

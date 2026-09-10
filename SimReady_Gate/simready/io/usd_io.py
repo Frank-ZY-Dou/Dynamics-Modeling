@@ -122,6 +122,21 @@ def child_source(child, scene_path):
     return srcpath, payload_targets
 
 
+def _stage_frame(stage, path):
+    """(metersPerUnit, upAxis) as authored, None for each the stage does not author. Every stage
+    read here works in metres, Z up: one that says otherwise is refused rather than read as if it
+    were, one that says nothing is taken as metres, Z up (RoboLab authors both). GetMetadata would
+    return the schema fallback, centimetres and Y up, for a stage that authors nothing, so only
+    authored values are judged."""
+    mpu = stage.GetMetadata("metersPerUnit") if stage.HasAuthoredMetadata("metersPerUnit") else None
+    if mpu is not None and abs(float(mpu) - 1.0) > 1e-9:
+        raise ValueError(f"{path}: stage metersPerUnit={mpu}; only stages authored in metres are supported")
+    up_axis = stage.GetMetadata("upAxis") if stage.HasAuthoredMetadata("upAxis") else None
+    if up_axis is not None and str(up_axis) != "Z":
+        raise ValueError(f"{path}: stage upAxis={up_axis}; only Z-up stages are supported")
+    return mpu, up_axis
+
+
 def load_scene_usda(path, fixture_key: str = "fixtures", world_prim: str | None = None,
                     support_names=("table", "franka_table", "island", "counter")) -> Scene:
     from pxr import Usd, UsdGeom
@@ -132,16 +147,7 @@ def load_scene_usda(path, fixture_key: str = "fixtures", world_prim: str | None 
         raise ValueError(f"cannot open USD stage {path}: {e}") from e
     if stage is None:
         raise ValueError(f"cannot open USD stage {path}")
-    # The scene layer works in metres, Z up. A stage that says otherwise is refused rather than
-    # read as if it were; a stage that says nothing is taken as metres, Z up (RoboLab authors both).
-    # (GetMetadata returns the schema fallback, centimetres and Y up, for a stage that authors
-    # nothing, so only authored values are judged.)
-    mpu = stage.GetMetadata("metersPerUnit") if stage.HasAuthoredMetadata("metersPerUnit") else None
-    if mpu is not None and abs(float(mpu) - 1.0) > 1e-9:
-        raise ValueError(f"{path}: stage metersPerUnit={mpu}; only stages authored in metres are supported")
-    up_axis = stage.GetMetadata("upAxis") if stage.HasAuthoredMetadata("upAxis") else None
-    if up_axis is not None and str(up_axis) != "Z":
-        raise ValueError(f"{path}: stage upAxis={up_axis}; only Z-up stages are supported")
+    mpu, up_axis = _stage_frame(stage, path)
     root = stage.GetPrimAtPath(world_prim) if world_prim else stage.GetDefaultPrim()
     if not root or not root.IsValid():
         root = stage.GetPseudoRoot().GetChildren()[0]
@@ -204,7 +210,10 @@ def load_scene_usda(path, fixture_key: str = "fixtures", world_prim: str | None 
     if dropped:
         import warnings
         warnings.warn(f"{path}: {len(dropped)} referenced children without geometry (unresolved payloads?): {dropped}")
-    return Scene(bodies, meta={"path": path, "root": str(root.GetPath()), "dropped": dropped,
+    layers = sorted({os.path.abspath(lay.realPath) for lay in stage.GetUsedLayers()
+                     if getattr(lay, "realPath", "") and os.path.isfile(lay.realPath)
+                     and os.path.abspath(lay.realPath) != os.path.abspath(path)})
+    return Scene(bodies, meta={"path": path, "root": str(root.GetPath()), "dropped": dropped, "layers": layers,
                                "meters_per_unit": None if mpu is None else float(mpu), "up_axis": None if up_axis is None else str(up_axis)})
 
 
@@ -255,23 +264,40 @@ def write_scene_poses(scene: Scene, src_path, out_path, world_prim: str | None =
         S_old = R_old.T @ R_old_aff
         R_authored = b.rotation @ np.asarray(b.meta.get("rest_rotation", np.eye(3)), dtype=np.float64)
         t_new_w = b.center - b.rotation @ c_model
-        # express in the parent's frame
-        P_aff, P_t = _matrix_np(cache.GetLocalToWorldTransform(prim.GetParent()))
+        # express in the parent's frame (a prim that resets the xform stack ignores its parent)
+        xf = UsdGeom.Xformable(prim)
+        reset = bool(xf.GetResetXformStack())
+        if reset:
+            P_aff, P_t = np.eye(3), np.zeros(3)
+        else:
+            P_aff, P_t = _matrix_np(cache.GetLocalToWorldTransform(prim.GetParent()))
         P_inv = np.linalg.inv(P_aff)
         t_loc = P_inv @ (t_new_w - P_t)
         M_loc = P_inv @ (R_authored @ S_old)
         R_loc = _rotation_from_affine(M_loc)
         S_loc = R_loc.T @ M_loc
         scale = np.diag(S_loc)
-        xf = UsdGeom.Xformable(prim)
-        ops = xf.GetOrderedXformOps()
-        names = [op.GetOpName() for op in ops]
-        simple = all(n in ("xformOp:translate", "xformOp:orient", "xformOp:scale") for n in names)
-        if not simple or np.abs(S_loc - np.diag(scale)).max() > 1e-9:
-            # rotateXYZ / transform / pivot stacks: replace by translate, orient, scale
+        if np.abs(S_loc - np.diag(scale)).max() > 1e-9:
+            # the local map has shear (a scale authored after the rotation, or a non-uniform parent
+            # scale under a rotation): translate, orient and scale cannot express it; one matrix op does
+            xf.ClearXformOpOrder()
+            M4 = np.eye(4)
+            M4[:3, :3] = M_loc.T                 # Gf matrices act on row vectors
+            M4[3, :3] = t_loc
+            xf.AddTransformOp().Set(Gf.Matrix4d(*[float(x) for x in M4.ravel()]))
+            xf.SetResetXformStack(reset)
+            continue
+        names = [op.GetOpName() for op in xf.GetOrderedXformOps()]
+        canonical = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
+        # the authored ops are reused only when they compose as translate, orient, scale in that
+        # order, which is what the pose is decomposed into
+        simple = all(n in canonical for n in names) and names == [c for c in canonical if c in names]
+        if not simple:
+            # rotateXYZ / transform / pivot stacks or another op order: replace by translate, orient, scale
             xf.ClearXformOpOrder()
             tr = xf.AddTranslateOp(); orient = xf.AddOrientOp(); sc = xf.AddScaleOp()
             sc.Set(Gf.Vec3f(*[float(x) for x in scale]))
+            xf.SetResetXformStack(reset)
         else:
             ops = {op.GetOpName(): op for op in xf.GetOrderedXformOps()}
             tr = ops.get("xformOp:translate") or xf.AddTranslateOp()
@@ -325,6 +351,7 @@ def load_object_usd(path):
         raise ValueError(f"cannot open object USD {path}: {e}") from e
     if stage is None:
         raise ValueError(f"cannot open object USD {path}")
+    _stage_frame(stage, path)
     root = stage.GetDefaultPrim()
     cache = UsdGeom.XformCache()
     V, F, off = [], [], 0

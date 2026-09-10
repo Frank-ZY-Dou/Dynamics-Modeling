@@ -9,6 +9,7 @@ Provides SignedDistanceOracle and PenetrationDepthOracle interfaces.
 from __future__ import annotations
 
 import functools
+import hashlib
 import json
 import os
 import re
@@ -167,7 +168,19 @@ def build_world_collision_mesh(
     scaled = obj.normalize_factor * obj.collision_verts_model
     rotated = (obj.rotation @ scaled.T).T
     verts_world = rotated + obj.center[None, :]
-    return trimesh.Trimesh(vertices=verts_world, faces=obj.collision_faces, process=process)
+    mesh = trimesh.Trimesh(vertices=verts_world, faces=obj.collision_faces, process=process)
+    if not process:
+        # the closed pieces of the mesh, computed once per object (bodies of one template
+        # share the result) and carried by the world mesh for the containment test
+        pieces = getattr(obj, "_s4r_pieces", None)
+        if pieces is None:
+            pieces = _vertex_components(obj.collision_faces, len(obj.collision_verts_model))
+            try:
+                obj._s4r_pieces = pieces
+            except Exception:
+                pass
+        mesh._s4r_components = pieces
+    return mesh
 
 
 def build_world_collision_meshes(
@@ -249,33 +262,169 @@ def _aabb_nested(bounds_inner: np.ndarray, bounds_outer: np.ndarray, tol: float 
                 and np.all(bounds_inner[1] <= bounds_outer[1] + tol))
 
 
+_COMPONENT_CACHE: dict = {}
+
+
+def _vertex_components(faces, n_verts: int) -> list:
+    """Vertex index arrays of the connected components of a face set (edge
+    connectivity); a connected mesh gives one array. Cached on the content
+    of the face array, so the bodies of one template share one
+    computation."""
+    F = np.ascontiguousarray(faces)
+    key = (hashlib.blake2b(F.tobytes(), digest_size=16).digest(), F.shape, int(n_verts))
+    hit = _COMPONENT_CACHE.get(key)
+    if hit is not None:
+        return hit
+    if len(F) == 0:
+        comps = []
+    else:
+        edges = np.vstack([F[:, [0, 1]], F[:, [1, 2]], F[:, [2, 0]]])
+        labels = trimesh.graph.connected_component_labels(edges, node_count=n_verts)
+        used = np.zeros(n_verts, dtype=bool)
+        used[F.ravel()] = True
+        comps = [np.nonzero((labels == lab) & used)[0] for lab in np.unique(labels[used])]
+    if len(_COMPONENT_CACHE) >= 4096:
+        _COMPONENT_CACHE.clear()
+    _COMPONENT_CACHE[key] = comps
+    return comps
+
+
+def _piece_layout(comps: list):
+    """(perm, starts) such that verts[perm][starts[k]:starts[k+1]] are the
+    vertices of piece k: the per-piece bounds of a vertex array then come
+    from one reduceat call."""
+    perm = np.concatenate(comps) if comps else np.zeros(0, dtype=np.int64)
+    starts = np.cumsum([0] + [len(c) for c in comps[:-1]]).astype(np.int64) if comps else np.zeros(0, dtype=np.int64)
+    return perm, starts
+
+
+def _piece_boxes(verts: np.ndarray, layout):
+    """Per-piece AABBs (lo (P,3), hi (P,3)) of a vertex array."""
+    perm, starts = layout
+    V = verts[perm]
+    return np.minimum.reduceat(V, starts, axis=0), np.maximum.reduceat(V, starts, axis=0)
+
+
+def _any_piece_nested(boxes, lo_o, hi_o, tol: float = 1e-12) -> bool:
+    """Whether some piece box lies inside the box (lo_o, hi_o)."""
+    if boxes is None:
+        return False
+    plo, phi = boxes
+    return bool(np.any(np.all((plo >= lo_o - tol) & (phi <= hi_o + tol), axis=1)))
+
+
+def _mesh_piece_boxes(mesh: trimesh.Trimesh):
+    """Piece boxes of a world mesh with several pieces, cached on the mesh; None for one piece."""
+    boxes = getattr(mesh, "_s4r_piece_boxes", False)
+    if boxes is False:
+        comps = _mesh_components(mesh)
+        boxes = _piece_boxes(np.asarray(mesh.vertices, dtype=np.float64), _piece_layout(comps)) if len(comps) > 1 else None
+        try:
+            mesh._s4r_piece_boxes = boxes
+        except Exception:
+            pass
+    return boxes
+
+
+def _mesh_components(mesh: trimesh.Trimesh) -> list:
+    comps = getattr(mesh, "_s4r_components", None)
+    if comps is None:
+        comps = _vertex_components(mesh.faces, len(mesh.vertices))
+        try:
+            mesh._s4r_components = comps
+        except Exception:
+            pass
+    return comps
+
+
+def _nested_component_contact(verts_i, comps_i, verts_j, comps_j,
+                              contains_i, contains_j, closest_i, closest_j,
+                              tol: float = 1e-12):
+    """Containment of one connected component of a body inside the other
+    body, for a pair whose surfaces FCL reports as apart. A body made of
+    several closed pieces can have one piece inside the other body while the
+    bodies' AABBs do not nest, which the whole-body test cannot see; only
+    bodies with more than one component are examined here.
+
+    ``contains_k(p)`` tests one point against body k; ``closest_k(pts)``
+    returns (closest points on body k's surface, distances). Returns
+    (d_signed, n, cp_i, cp_j) or None: d_signed is minus the surface gap
+    plus the component's width along n, and n follows the i->j convention
+    (moving j along +n carries the inner component toward the outer
+    surface); n is None when the witness points coincide.
+    """
+    lo_i, hi_i = verts_i.min(axis=0), verts_i.max(axis=0)
+    lo_j, hi_j = verts_j.min(axis=0), verts_j.max(axis=0)
+    for comps, verts, lo_o, hi_o, contains, closest, inner_is_j in (
+            (comps_j, verts_j, lo_i, hi_i, contains_i, closest_i, True),
+            (comps_i, verts_i, lo_j, hi_j, contains_j, closest_j, False)):
+        if len(comps) < 2:
+            continue
+        for idx in comps:
+            cv = verts[idx]
+            if not (np.all(cv.min(axis=0) >= lo_o - tol) and np.all(cv.max(axis=0) <= hi_o + tol)):
+                continue
+            if not contains(cv[0]):   # surfaces apart: one vertex inside means the piece is inside
+                continue
+            q, dist = closest(cv)
+            k = int(np.argmin(dist))
+            gap = float(dist[k])
+            q_k = np.asarray(q[k], dtype=np.float64)
+            cp_i, cp_j = (q_k, cv[k]) if inner_is_j else (cv[k], q_k)
+            n = cp_i - cp_j
+            nn = np.linalg.norm(n)
+            if nn < 1e-12:
+                return -gap, None, cp_i, cp_j
+            n = n / nn
+            proj = cv @ n
+            return -float(gap + (proj.max() - proj.min())), n, cp_i, cp_j
+    return None
+
+
 def _nested_signed_distance(mesh_i, mesh_j, cp_i, cp_j, d):
     """Containment check for a pair FCL reports as separated by ``d``.
 
     Two closed surfaces that do not intersect are either disjoint or one
-    body lies entirely inside the other; FCL sees only the surfaces and
-    returns a positive distance in both cases. When the AABBs nest, one
-    surface point of the inner body is tested for containment in the
-    outer one (ray parity). Returns a negative signed distance whose
-    magnitude is the surface gap plus the inner body's width along the
-    exit direction (a depth for the correction rows, not the minimal
-    freeing translation), or None when the bodies are disjoint.
+    lies inside the other; FCL sees only the surfaces and returns a
+    positive distance in both cases. When the AABBs nest, one surface
+    point of the inner body is tested for containment in the outer one
+    (ray parity); a body made of several closed pieces is also checked
+    piece by piece, since one piece can sit inside the other body while
+    the bodies' AABBs do not nest. Returns a negative signed distance
+    whose magnitude is the surface gap plus the inner body's (or piece's)
+    width along the exit direction (a depth for the correction rows, not
+    the minimal freeing translation), or None when the bodies are
+    disjoint.
     """
+    outer = None
     if _aabb_nested(mesh_j.bounds, mesh_i.bounds):
         outer, inner, q = mesh_i, mesh_j, cp_j
     elif _aabb_nested(mesh_i.bounds, mesh_j.bounds):
         outer, inner, q = mesh_j, mesh_i, cp_i
-    else:
+    if outer is not None and _contains_points(outer, np.asarray(q, dtype=np.float64)[None, :])[0]:
+        n = np.asarray(cp_i, dtype=np.float64) - np.asarray(cp_j, dtype=np.float64)
+        nn = np.linalg.norm(n)
+        if nn < 1e-12:
+            return -float(d)
+        n = n / nn
+        proj = np.asarray(inner.vertices, dtype=np.float64) @ n
+        return -float(d + (proj.max() - proj.min()))  # gap plus the inner width along n
+    comps_i = _mesh_components(mesh_i)
+    comps_j = _mesh_components(mesh_j)
+    if len(comps_i) < 2 and len(comps_j) < 2:
         return None
-    if not _contains_points(outer, np.asarray(q, dtype=np.float64)[None, :])[0]:
+    # a piece can only be inside the other body when its box nests in that body's box
+    if not (_any_piece_nested(_mesh_piece_boxes(mesh_j), mesh_i.bounds[0], mesh_i.bounds[1])
+            or _any_piece_nested(_mesh_piece_boxes(mesh_i), mesh_j.bounds[0], mesh_j.bounds[1])):
         return None
-    n = np.asarray(cp_i, dtype=np.float64) - np.asarray(cp_j, dtype=np.float64)
-    nn = np.linalg.norm(n)
-    if nn < 1e-12:
-        return -float(d)
-    n = n / nn
-    proj = np.asarray(inner.vertices, dtype=np.float64) @ n
-    return -float(d + (proj.max() - proj.min()))  # gap plus the inner width along n
+    hit = _nested_component_contact(
+        np.asarray(mesh_i.vertices, dtype=np.float64), comps_i,
+        np.asarray(mesh_j.vertices, dtype=np.float64), comps_j,
+        lambda p: bool(_contains_points(mesh_i, p[None, :])[0]),
+        lambda p: bool(_contains_points(mesh_j, p[None, :])[0]),
+        lambda pts: trimesh.proximity.closest_point(mesh_i, pts)[:2],
+        lambda pts: trimesh.proximity.closest_point(mesh_j, pts)[:2])
+    return None if hit is None else hit[0]
 
 
 def _fcl_pair_signed_distance(fcl_mod, bvh_i, bvh_j, mesh_i=None, mesh_j=None) -> float:
@@ -545,23 +694,49 @@ class MeshOracle:
         return out
 
     def _nested_signed_distance(self, i, j, ci, cj, cp_i, cp_j, d):
+        """Containment for a pair whose surfaces are apart: the whole body
+        (nested AABBs) or one closed piece of a multi-piece body. Returns
+        (signed distance, direction i->j or None) or None."""
         lo_i = self._local_aabb_min[i] + ci; hi_i = self._local_aabb_max[i] + ci
         lo_j = self._local_aabb_min[j] + cj; hi_j = self._local_aabb_max[j] + cj
+        outer = None
         if _aabb_nested(np.stack([lo_j, hi_j]), np.stack([lo_i, hi_i])):
             outer, c_out, inner, q = i, ci, j, cp_j
         elif _aabb_nested(np.stack([lo_i, hi_i]), np.stack([lo_j, hi_j])):
             outer, c_out, inner, q = j, cj, i, cp_i
-        else:
+        if outer is not None and _contains_points(self._meshes[outer], (np.asarray(q, dtype=np.float64) - c_out)[None, :])[0]:
+            n = np.asarray(cp_i, dtype=np.float64) - np.asarray(cp_j, dtype=np.float64)
+            nn = np.linalg.norm(n)
+            if nn < 1e-12:
+                return -float(d), None
+            n = n / nn
+            proj = self._rotated_verts[inner] @ n
+            return -float(d + (proj.max() - proj.min())), n
+        mi, mj = self._meshes[i], self._meshes[j]
+        comps_i = _mesh_components(mi)
+        comps_j = _mesh_components(mj)
+        if len(comps_i) < 2 and len(comps_j) < 2:
             return None
-        if not _contains_points(self._meshes[outer], (np.asarray(q, dtype=np.float64) - c_out)[None, :])[0]:
+        # a piece can only be inside the other body when its box nests in that body's box
+        # (the oracle's meshes sit at the origin: shift the other body's box instead)
+        if not (_any_piece_nested(_mesh_piece_boxes(mj), lo_i - cj, hi_i - cj)
+                or _any_piece_nested(_mesh_piece_boxes(mi), lo_j - ci, hi_j - ci)):
             return None
-        n = np.asarray(cp_i, dtype=np.float64) - np.asarray(cp_j, dtype=np.float64)
-        nn = np.linalg.norm(n)
-        if nn < 1e-12:
-            return -float(d)
-        n = n / nn
-        proj = self._rotated_verts[inner] @ n
-        return -float(d + (proj.max() - proj.min()))
+
+        def contains(m, c):
+            return lambda p: bool(_contains_points(m, (p - c)[None, :])[0])
+
+        def closest(m, c):
+            def f(pts):
+                q, dist, _ = trimesh.proximity.closest_point(m, pts - c)
+                return q + c, dist
+            return f
+
+        hit = _nested_component_contact(
+            np.asarray(mi.vertices, dtype=np.float64) + ci, comps_i,
+            np.asarray(mj.vertices, dtype=np.float64) + cj, comps_j,
+            contains(mi, ci), contains(mj, cj), closest(mi, ci), closest(mj, cj))
+        return None if hit is None else (hit[0], hit[1])
 
     def _precise_pair_query(
         self, i: int, j: int,
@@ -599,8 +774,10 @@ class MeshOracle:
                 # by containment in the body-local meshes (no rebuild).
                 nested = self._nested_signed_distance(i, j, ci, cj, cp_i, cp_j, d)
                 if nested is not None:
-                    return float(nested), _safe_normalize(cp_i - cp_j if np.linalg.norm(raw) > 1e-12
-                                                          else cj - ci)
+                    sd, n = nested
+                    if n is None:
+                        n = _safe_normalize(cp_i - cp_j if np.linalg.norm(raw) > 1e-12 else cj - ci)
+                    return float(sd), n
                 return float(d), _safe_normalize(raw if np.linalg.norm(raw) > 1e-12
                                                  else cj - ci)
             # Overlap: get penetration info. The reported normal is the exit

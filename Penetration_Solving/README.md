@@ -206,18 +206,18 @@ python examples/run_kubric.py --N 1000 --seed 42
 
 | N | init pen. | final pen. | RMSD | solve |
 |---|---|---|---|---|
-| 40 | 30 | 0 | 0.0400 | 0.32 s |
-| 100 | 80 | 0 | 0.0366 | 0.82 s |
-| 500 | 371 | 0 | 0.0359 | 5.3 s |
-| 1000 | 759 | 0 | 0.0365 | 14.5 s |
-| 2000 | 1587 | 0 | 0.0380 | 34.0 s |
-| 3000 | 2423 | 0 | 0.0388 | 72.7 s |
+| 40 | 30 | 0 | 0.0400 | 0.35 s |
+| 100 | 80 | 0 | 0.0366 | 0.98 s |
+| 500 | 371 | 0 | 0.0359 | 6.0 s |
+| 1000 | 759 | 0 | 0.0365 | 15.7 s |
+| 2000 | 1587 | 0 | 0.0380 | 37.2 s |
+| 3000 | 2423 | 0 | 0.0388 | 79.1 s |
 
 Every run ends with `status = converged`. The RMSD values are a few
 percent above those of the previous revision because the broad phase now
-keeps every pair within the d_hat band, so the tail refinement also
-restores the d_hat clearance between neighbours instead of only
-separating the pairs whose bounding boxes overlapped.
+keeps every pair within the d_hat band available to the correction QP.
+The tail stops at zero penetration: a pair may end with a positive gap
+smaller than d_hat, and no clearance is guaranteed.
 
 ### GPU solver
 
@@ -232,12 +232,12 @@ python examples/run_kubric.py --N 1000 --seed 42 --solver gpu
 
 | N | init pen. | final pen. | RMSD | total |
 |---|---|---|---|---|
-| 40 | 30 | 0 | 0.0372 | 7.4 s |
-| 100 | 80 | 0 | 0.0356 | 7.8 s |
-| 500 | 371 | 0 | 0.0346 | 13.4 s |
-| 1000 | 759 | 0 | 0.0346 | 16.5 s |
-| 2000 | 1587 | 0 | 0.0358 | 31.1 s |
-| 3000 | 2423 | 0 | 0.0362 | 50.7 s |
+| 40 | 30 | 0 | 0.0372 | 6.7 s |
+| 100 | 80 | 0 | 0.0356 | 7.1 s |
+| 500 | 371 | 0 | 0.0346 | 10.7 s |
+| 1000 | 759 | 0 | 0.0346 | 17.0 s |
+| 2000 | 1587 | 0 | 0.0358 | 31.2 s |
+| 3000 | 2423 | 0 | 0.0362 | 54.4 s |
 
 Every run ends with `status = converged` and `fcl_verified = True`; the
 totals include the exact FCL re-check at full scale.

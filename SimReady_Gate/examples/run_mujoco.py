@@ -42,6 +42,7 @@ def main():
         snapshot(0)
     for k in range(1, steps + 1):
         mujoco.mj_step(model, data)
+        mujoco.mj_kinematics(model, data); mujoco.mj_comPos(model, data); mujoco.mj_comVel(model, data)   # the state just integrated
         for n, i in ids.items():
             peak_v = max(peak_v, float(np.linalg.norm(data.cvel[i][3:])))
             peak_d[n] = max(peak_d[n], float(np.linalg.norm(data.xpos[i] - p0[n])))

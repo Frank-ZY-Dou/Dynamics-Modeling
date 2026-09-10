@@ -11,7 +11,8 @@ you write a constraint program, then call the tools and read their numbers.
 Exit codes of every tool: 0 = the requested outcome holds, 1 = it does not (read the JSON),
 2 = the program or an input is invalid (fix the program: every number must be finite, every field
 must belong to its statement, every gate line must parse) or a geometric query could not be
-evaluated (report it; do not retry the same command). Reports are JSON on stdout.
+evaluated (report it; do not retry the same command). `check`, `repair`, `settle` and `verify` print a JSON
+report on stdout; `summarize` and `prompt` print text.
 
 ## Procedure
 1. Load or build the scene:
@@ -25,7 +26,7 @@ evaluated (report it; do not retry the same command). Reports are JSON on stdout
    no room). `check` compiles the program exactly as `repair` will.
 4. Verify and repair: `python -m simready.cli repair <scene> program.json --out <scene_repaired.usda>`
    (the `--out` extension must match the input kind: `.usda` for USD scenes, `.json` for layouts;
-   a USD `--out` must sit in the scene's directory). Read `pen_after`, `failed_predicates`,
+   a USD `--out` may be written to another directory; asset references are re-anchored). Read `pen_after`, `failed_predicates`,
    `rmsd_xy`; exit 0 means pen 0, every predicate satisfied and, when the gate sets `min_gap`,
    every pair at that clearance (`clearance.violations` lists the pairs that are not). An
    `on_support` predicate whose value is `null` means the body's bottom is over no part of that

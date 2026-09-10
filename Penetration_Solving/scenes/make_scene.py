@@ -124,10 +124,9 @@ def main() -> None:
     if audit_mode:
         audit = r.get("audit_log", [])
         if audit:
-            mb = sum(int(a.get("missed_by_solver", 0)) for a in audit)
-            fa = sum(int(a.get("false_active", 0)) for a in audit)
-            out["audit_missed_by_solver_total"] = mb
-            out["audit_false_active_total"] = fa
+            # missed_by_solver_before: evaluator-penetrating pairs absent from the
+            # solver contact set at the step start (the only audit count the solver records)
+            out["audit_missed_by_solver_total"] = sum(int(a["missed_by_solver_before"]) for a in audit)
             out["audit_steps"] = len(audit)
             out["audit_max_pen_before_max"] = max(
                 (a.get("max_pen_before", 0.0) for a in audit), default=0.0,

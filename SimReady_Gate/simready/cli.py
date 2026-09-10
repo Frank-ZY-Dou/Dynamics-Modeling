@@ -62,7 +62,11 @@ def load_any(path: str) -> Scene:
             if not os.path.exists(L["base_scene"]):
                 raise FileNotFoundError(f"the layout's base scene does not exist: {L['base_scene']}")
             from .io.usd_io import load_scene_usda
-            bodies.extend(load_scene_usda(L["base_scene"]).bodies)
+            base = load_scene_usda(L["base_scene"])
+            bodies.extend(base.bodies)
+            meta["base_scene"] = L["base_scene"]
+            meta["dropped"] = list(base.meta.get("dropped", []))      # unresolved children of the base scene
+            meta["layers"] = list(base.meta.get("layers", []))
         else:                                   # the layout declares no support: a synthetic slab, recorded as such
             import trimesh
             slab = trimesh.creation.box(extents=(0.8, 1.0, 0.04))
@@ -144,6 +148,15 @@ def asset_hashes(scene: Scene) -> dict:
             continue
         if portable(src) not in out:
             out[portable(src)] = sha16(src)
+    extra = list(scene.meta.get("layers", []))              # every layer the USD stage composed (references, payloads)
+    if scene.meta.get("base_scene"):
+        extra.append(scene.meta["base_scene"])                # a layout's base scene
+    for src in extra:
+        if src and (not own or os.path.abspath(src) != own) and portable(src) not in out:
+            out[portable(src)] = sha16(src)
+    if any("rest_rotation" in b.meta for b in scene.bodies):
+        from .io.asset_rest import TABLE_PATH                   # the resting frames the bodies were loaded in
+        out["simready/data/asset_rest_orientations.json"] = sha16(str(TABLE_PATH))
     if scene.meta.get("synthetic_table"):
         out["<synthetic table>"] = scene.meta["synthetic_table"]
     return out
@@ -177,7 +190,9 @@ def certificate_bound(cert: dict, scene_path: str, program_path: str | None, ass
     written = cert.get("written_sha256")
     scene_ok = written is not None and sha16(scene_path) == written
     cert_program = (prov.get("program") or {}).get("sha256")
-    if "assets" not in prov or (assets is not None and prov["assets"] != assets):
+    if assets is None or "assets" not in prov or prov["assets"] != assets:
+        return False
+    if any(v is None for v in assets.values()):      # an asset that could not be hashed is not bound
         return False
     if program_path is None:
         return scene_ok and cert_program is None
@@ -241,6 +256,7 @@ def cmd_repair(a):
     t0 = time.time()
     tops = {sup: min(h for b, h in spec.supports.items() if spec.support_of.get(b) == sup) for sup in set(spec.support_of.values())}
     solver_notes = []
+    xy_start = {b.name: b.center[:2].copy() for b in sc.free()}
     with quiet_stdout():
         with MeshProxy(sc, faces=a.proxy_faces, slab_tops=tops):   # repair on decimated meshes + support slabs; verify on full meshes
             res = repair_upright(sc, spec, verbose=a.verbose)
@@ -252,6 +268,8 @@ def cmd_repair(a):
             reseat_on_supports(sc, spec); res.steps += res2.steps; solver_notes += res2.notes
             after = verify_scene(sc)
     preds = check_predicates(prog, sc)
+    moved = [float(np.sum((b.center[:2] - xy_start[b.name]) ** 2)) for b in sc.free()]
+    rmsd_xy = float(np.sqrt(np.mean(moved))) if moved else 0.0    # over the whole run, the full-mesh polish included
     ok = after.pen_pairs == 0 and all(p[1] for p in preds)
     clearance = None
     if "min_gap" in prog.gate.get("G2", {}):
@@ -264,7 +282,7 @@ def cmd_repair(a):
     params = {"s_min": a.s_min, "ds_max": a.ds_max, "tail_iters": a.tail, "proxy_faces": a.proxy_faces}
     report = {"ok": ok, "scene": a.scene, "program": a.program, "pen_before": before.pen_pairs, "pen_after": after.pen_pairs,
               "min_score_after": after.min_signed, "contained_after": after.contained, "floating_after": after.floating,
-              "rmsd_xy": res.rmsd, "steps": res.steps, "time_s": round(time.time() - t0, 2),
+              "rmsd_xy": rmsd_xy, "steps": res.steps, "time_s": round(time.time() - t0, 2),
               "predicates": [(n, bool(okp), None if v is None else float(v)) for n, okp, v in preds],
               "failed_predicates": [n for n, okp, _ in preds if not okp],
               "clearance": clearance, "notes": notes, "solver_notes": solver_notes, "dropped_children": dropped,
