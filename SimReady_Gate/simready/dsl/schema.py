@@ -255,7 +255,8 @@ objectives over named bodies. Output ONLY a JSON object matching the schema belo
 Rules:
 - Use only bodies listed in the scene. `*` means every free body.
 - Every free body that should rest on a surface gets on_support(a=<body>, b=<support>) and, if it
-  should stand up, upright(a=<body>).
+  should keep its resting orientation (no roll or pitch; an asset that rests lying flat, such as a
+  remote control, stays flat), upright(a=<body>).
 - Frame convention (RoboLab): left_of(a,b) means a.y >= b.y + gap; in_front_of(a,b) means a.x >= b.x + gap
   (the robot looks along +x). Distances in metres.
 - place(a, x, y, yaw) is a placement in the shrunken scale-space: it puts body a's reference centre at

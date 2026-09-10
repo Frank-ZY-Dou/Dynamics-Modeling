@@ -6,7 +6,7 @@
   "pen_seated": 0,
   "pen_rep": 0,
   "rmsd_xy": 0.03130782186229734,
-  "repair_s": 3.639137029647827,
+  "repair_s": 3.774062156677246,
   "raw_hull": {
    "vmax": 0.29176000020219944,
    "dmax": 0.015807216579882565,
@@ -69,10 +69,10 @@
   "pen_seated": 0,
   "pen_rep": 0,
   "rmsd_xy": 0.0,
-  "repair_s": 3.1053435802459717,
+  "repair_s": 3.1845295429229736,
   "raw_hull": {
    "vmax": 1.8246599999999984,
-   "dmax": 0.1830556810528791,
+   "dmax": 0.18305568105287906,
    "left": [],
    "worst_body": "utilityjug_a03",
    "worst_v": 1.8246599999999984,
@@ -89,40 +89,40 @@
    "pass": false
   },
   "seated_hull": {
-   "vmax": 1.0306941813394452,
-   "dmax": 0.1172041626267711,
+   "vmax": 0.1061681317761767,
+   "dmax": 0.002776896944278694,
    "left": [],
    "worst_body": "remote_control",
-   "worst_v": 1.0306941813394452,
+   "worst_v": 0.1061681317761767,
    "engine_warnings": {},
-   "pass": false
+   "pass": true
   },
   "seated_coacd": {
-   "vmax": 1.034372896678536,
-   "dmax": 0.11790204287205641,
+   "vmax": 0.04029540032807832,
+   "dmax": 0.0018024216593424134,
    "left": [],
    "worst_body": "remote_control",
-   "worst_v": 1.034372896678536,
+   "worst_v": 0.04029540032807832,
    "engine_warnings": {},
-   "pass": false
+   "pass": true
   },
   "rep_hull": {
-   "vmax": 1.0306941813394452,
-   "dmax": 0.1172041626267711,
+   "vmax": 0.1061681317761767,
+   "dmax": 0.002776896944278694,
    "left": [],
    "worst_body": "remote_control",
-   "worst_v": 1.0306941813394452,
+   "worst_v": 0.1061681317761767,
    "engine_warnings": {},
-   "pass": false
+   "pass": true
   },
   "rep_coacd": {
-   "vmax": 1.034372896678536,
-   "dmax": 0.11790204287205641,
+   "vmax": 0.04029540032807832,
+   "dmax": 0.0018024216593424134,
    "left": [],
    "worst_body": "remote_control",
-   "worst_v": 1.034372896678536,
+   "worst_v": 0.04029540032807832,
    "engine_warnings": {},
-   "pass": false
+   "pass": true
   }
  },
  {
@@ -132,7 +132,7 @@
   "pen_seated": 0,
   "pen_rep": 0,
   "rmsd_xy": 0.015862529603580585,
-  "repair_s": 3.3421144485473633,
+  "repair_s": 3.4131557941436768,
   "raw_hull": {
    "vmax": 1.2164399999999986,
    "dmax": 0.08359306383910317,
@@ -195,7 +195,7 @@
   "pen_seated": 1,
   "pen_rep": 0,
   "rmsd_xy": 0.16337112503485618,
-  "repair_s": 9.89113450050354,
+  "repair_s": 9.983030796051025,
   "raw_hull": {
    "vmax": 1.561664929384477,
    "dmax": 0.36049563197673823,
@@ -254,64 +254,64 @@
  {
   "n": 6,
   "seed": 1,
-  "pen_raw": 1,
+  "pen_raw": 2,
   "pen_seated": 2,
   "pen_rep": 0,
-  "rmsd_xy": 0.03249615030262521,
-  "repair_s": 4.026158571243286,
+  "rmsd_xy": 0.03329749572175258,
+  "repair_s": 3.9811458587646484,
   "raw_hull": {
-   "vmax": 1.6284599999999987,
-   "dmax": 0.3550220475484518,
+   "vmax": 1.7069399999999986,
+   "dmax": 0.18006773999509723,
    "left": [],
    "worst_body": "utilityjug_a03",
-   "worst_v": 1.6284599999999987,
+   "worst_v": 1.7069399999999986,
    "engine_warnings": {},
    "pass": false
   },
   "raw_coacd": {
-   "vmax": 1.608839999999998,
-   "dmax": 0.3519237033997622,
+   "vmax": 1.8050399999999978,
+   "dmax": 0.18106097042497693,
    "left": [],
    "worst_body": "utilityjug_a03",
-   "worst_v": 1.608839999999998,
+   "worst_v": 1.8050399999999978,
    "engine_warnings": {},
    "pass": false
   },
   "seated_hull": {
-   "vmax": 1.0204470926027223,
-   "dmax": 0.11641126233605453,
+   "vmax": 0.4923250898081438,
+   "dmax": 0.03016900349417713,
    "left": [],
    "worst_body": "remote_control",
-   "worst_v": 1.0204470926027223,
+   "worst_v": 0.4923250898081438,
    "engine_warnings": {},
-   "pass": false
+   "pass": true
   },
   "seated_coacd": {
-   "vmax": 1.0498076767010007,
-   "dmax": 0.12974369675942724,
+   "vmax": 0.5637418849624984,
+   "dmax": 0.10232912698086596,
    "left": [],
-   "worst_body": "remote_control",
-   "worst_v": 1.0498076767010007,
+   "worst_body": "hammer_5",
+   "worst_v": 0.5637418849624984,
    "engine_warnings": {},
-   "pass": false
+   "pass": true
   },
   "rep_hull": {
-   "vmax": 1.0306941813394388,
-   "dmax": 0.11720416262676696,
+   "vmax": 0.19442046688284528,
+   "dmax": 0.011399613742749283,
    "left": [],
-   "worst_body": "remote_control",
-   "worst_v": 1.0306941813394388,
+   "worst_body": "banana",
+   "worst_v": 0.19442046688284528,
    "engine_warnings": {},
-   "pass": false
+   "pass": true
   },
   "rep_coacd": {
-   "vmax": 1.0343728966785046,
-   "dmax": 0.11790204287205683,
+   "vmax": 0.07020694235142755,
+   "dmax": 0.0018024216593419057,
    "left": [],
-   "worst_body": "remote_control",
-   "worst_v": 1.0343728966785046,
+   "worst_body": "hammer_5",
+   "worst_v": 0.07020694235142755,
    "engine_warnings": {},
-   "pass": false
+   "pass": true
   }
  },
  {
@@ -321,7 +321,7 @@
   "pen_seated": 0,
   "pen_rep": 0,
   "rmsd_xy": 0.017543344969133103,
-  "repair_s": 3.8755099773406982,
+  "repair_s": 3.8760769367218018,
   "raw_hull": {
    "vmax": 1.2164399999999986,
    "dmax": 0.08359306383910317,
@@ -384,7 +384,7 @@
   "pen_seated": 3,
   "pen_rep": 0,
   "rmsd_xy": 0.09203309815468112,
-  "repair_s": 9.804809331893921,
+  "repair_s": 9.737505435943604,
   "raw_hull": {
    "vmax": 1.487060815915402,
    "dmax": 0.20766685231444196,
@@ -443,62 +443,62 @@
  {
   "n": 8,
   "seed": 1,
-  "pen_raw": 1,
-  "pen_seated": 2,
+  "pen_raw": 2,
+  "pen_seated": 3,
   "pen_rep": 0,
-  "rmsd_xy": 0.07852502022959623,
-  "repair_s": 4.795176029205322,
+  "rmsd_xy": 0.09422238677874638,
+  "repair_s": 4.898252487182617,
   "raw_hull": {
-   "vmax": 1.775893903539242,
-   "dmax": 0.3133394820243416,
+   "vmax": 1.6170805169549252,
+   "dmax": 0.17880819224223968,
    "left": [],
    "worst_body": "utilityjug_a03",
-   "worst_v": 1.775893903539242,
+   "worst_v": 1.6170805169549252,
    "engine_warnings": {},
    "pass": false
   },
   "raw_coacd": {
-   "vmax": 1.7724320691349476,
-   "dmax": 0.30766054394945824,
+   "vmax": 1.630639453224253,
+   "dmax": 0.17209737245319626,
    "left": [],
    "worst_body": "utilityjug_a03",
-   "worst_v": 1.7724320691349476,
+   "worst_v": 1.630639453224253,
    "engine_warnings": {},
    "pass": false
   },
   "seated_hull": {
-   "vmax": 1.2339787093305405,
-   "dmax": 0.21037695544763974,
+   "vmax": 0.6749167757300878,
+   "dmax": 0.11237337523512753,
    "left": [],
    "worst_body": "mayonnaise_bottle",
-   "worst_v": 1.2339787093305405,
+   "worst_v": 0.6749167757300878,
    "engine_warnings": {},
-   "pass": false
+   "pass": true
   },
   "seated_coacd": {
-   "vmax": 1.034372896678514,
-   "dmax": 0.11790204287205658,
+   "vmax": 0.7899802292723093,
+   "dmax": 0.1335173888464378,
    "left": [],
-   "worst_body": "remote_control",
-   "worst_v": 1.034372896678514,
+   "worst_body": "mayonnaise_bottle",
+   "worst_v": 0.7899802292723093,
    "engine_warnings": {},
-   "pass": false
+   "pass": true
   },
   "rep_hull": {
-   "vmax": 0.8307236709376505,
-   "dmax": 0.08980163574199594,
+   "vmax": 0.3324564560391658,
+   "dmax": 0.017293276522428912,
    "left": [],
-   "worst_body": "remote_control",
-   "worst_v": 0.8307236709376505,
+   "worst_body": "lunchbag",
+   "worst_v": 0.3324564560391658,
    "engine_warnings": {},
    "pass": true
   },
   "rep_coacd": {
-   "vmax": 0.7998804850388378,
-   "dmax": 0.0857048617859127,
+   "vmax": 0.07020676831526242,
+   "dmax": 0.0018024216593420868,
    "left": [],
-   "worst_body": "remote_control",
-   "worst_v": 0.7998804850388378,
+   "worst_body": "hammer_5",
+   "worst_v": 0.07020676831526242,
    "engine_warnings": {},
    "pass": true
   }
@@ -510,7 +510,7 @@
   "pen_seated": 0,
   "pen_rep": 0,
   "rmsd_xy": 0.031158195306594107,
-  "repair_s": 4.582388162612915,
+  "repair_s": 4.6653525829315186,
   "raw_hull": {
    "vmax": 1.2164399999999986,
    "dmax": 0.08359306383910317,
@@ -573,7 +573,7 @@
   "pen_seated": 7,
   "pen_rep": 0,
   "rmsd_xy": 0.04869238762786954,
-  "repair_s": 13.74864673614502,
+  "repair_s": 14.319913864135742,
   "raw_hull": {
    "vmax": 1.474570735996521,
    "dmax": 0.2670087379482724,
@@ -634,143 +634,133 @@
  {
   "n": 10,
   "seed": 1,
-  "pen_raw": 1,
-  "pen_seated": 2,
+  "pen_raw": 5,
+  "pen_seated": 6,
   "pen_rep": 0,
-  "rmsd_xy": 0.04048417815606276,
-  "repair_s": 5.996975421905518,
+  "rmsd_xy": 0.06485427938790912,
+  "repair_s": 6.006017208099365,
   "raw_hull": {
-   "vmax": 3.9632400000000176,
-   "dmax": 0.827160439942948,
-   "left": [
-    "mayonnaise_bottle"
-   ],
-   "worst_body": "mayonnaise_bottle",
-   "worst_v": 3.9632400000000176,
+   "vmax": 1.804606760985609,
+   "dmax": 0.33861530783729976,
+   "left": [],
+   "worst_body": "milkjug_a01",
+   "worst_v": 1.804606760985609,
    "engine_warnings": {},
    "pass": false
   },
   "raw_coacd": {
-   "vmax": 3.9632400000000176,
-   "dmax": 0.8269606572573128,
-   "left": [
-    "mayonnaise_bottle"
-   ],
+   "vmax": 2.069181198142825,
+   "dmax": 0.5336390039980803,
+   "left": [],
    "worst_body": "mayonnaise_bottle",
-   "worst_v": 3.9632400000000176,
+   "worst_v": 2.069181198142825,
    "engine_warnings": {},
    "pass": false
   },
   "seated_hull": {
-   "vmax": 3.9632400000000176,
-   "dmax": 0.8265807023430428,
+   "vmax": 3.9558841781546117,
+   "dmax": 1.14195555489034,
    "left": [
-    "mayonnaise_bottle"
+    "mayonnaise_bottle",
+    "milkjug_a01"
    ],
-   "worst_body": "mayonnaise_bottle",
-   "worst_v": 3.9632400000000176,
+   "worst_body": "milkjug_a01",
+   "worst_v": 3.9558841781546117,
    "engine_warnings": {},
    "pass": false
   },
   "seated_coacd": {
-   "vmax": 3.9632400000000176,
-   "dmax": 0.8264521716490576,
-   "left": [
-    "mayonnaise_bottle"
-   ],
-   "worst_body": "mayonnaise_bottle",
-   "worst_v": 3.9632400000000176,
+   "vmax": 0.7962702988715356,
+   "dmax": 0.1720432694671672,
+   "left": [],
+   "worst_body": "spaghetti",
+   "worst_v": 0.7962702988715356,
    "engine_warnings": {},
    "pass": false
   },
   "rep_hull": {
-   "vmax": 1.0306941813394292,
-   "dmax": 0.1172041626267694,
+   "vmax": 0.13389447194163284,
+   "dmax": 0.003957265469114139,
    "left": [],
-   "worst_body": "remote_control",
-   "worst_v": 1.0306941813394292,
+   "worst_body": "hammer_5",
+   "worst_v": 0.13389447194163284,
    "engine_warnings": {},
-   "pass": false
+   "pass": true
   },
   "rep_coacd": {
-   "vmax": 1.034372896678531,
-   "dmax": 0.11790204287205718,
+   "vmax": 0.07020826208461095,
+   "dmax": 0.001802421659342206,
    "left": [],
-   "worst_body": "remote_control",
-   "worst_v": 1.034372896678531,
+   "worst_body": "hammer_5",
+   "worst_v": 0.07020826208461095,
    "engine_warnings": {},
-   "pass": false
+   "pass": true
   }
  },
  {
   "n": 10,
   "seed": 2,
-  "pen_raw": 8,
-  "pen_seated": 7,
+  "pen_raw": 4,
+  "pen_seated": 4,
   "pen_rep": 0,
-  "rmsd_xy": 0.06174660627939015,
-  "repair_s": 5.574333906173706,
+  "rmsd_xy": 0.07262795669282512,
+  "repair_s": 5.4964659214019775,
   "raw_hull": {
-   "vmax": 4.444603926116742,
-   "dmax": 2.0112712249273406,
-   "left": [
-    "tomato_sauce_can",
-    "orange_02",
-    "pitcher"
-   ],
-   "worst_body": "tomato_sauce_can",
-   "worst_v": 4.444603926116742,
+   "vmax": 1.2164399999999986,
+   "dmax": 0.2962133584184538,
+   "left": [],
+   "worst_body": "bbq_sauce_bottle",
+   "worst_v": 1.2164399999999986,
    "engine_warnings": {},
    "pass": false
   },
   "raw_coacd": {
-   "vmax": 1.2164399999999993,
-   "dmax": 0.438333736975868,
+   "vmax": 4.000231298390467,
+   "dmax": 1.4811826820085052,
    "left": [
-    "ladle"
+    "lime01",
+    "orange_02"
    ],
-   "worst_body": "bbq_sauce_bottle",
-   "worst_v": 1.2164399999999993,
+   "worst_body": "orange_02",
+   "worst_v": 4.000231298390467,
    "engine_warnings": {},
    "pass": false
   },
   "seated_hull": {
-   "vmax": 3.9647272267846168,
-   "dmax": 1.078955395384715,
-   "left": [
-    "tomato_sauce_can"
-   ],
-   "worst_body": "tomato_sauce_can",
-   "worst_v": 3.9647272267846168,
+   "vmax": 0.5319503580886609,
+   "dmax": 0.024477671497111303,
+   "left": [],
+   "worst_body": "ladle",
+   "worst_v": 0.5319503580886609,
    "engine_warnings": {},
-   "pass": false
+   "pass": true
   },
   "seated_coacd": {
-   "vmax": 0.9741597946692421,
-   "dmax": 0.16304421321852094,
+   "vmax": 0.6797164166518793,
+   "dmax": 0.2721767788986578,
    "left": [],
-   "worst_body": "remote_control",
-   "worst_v": 0.9741597946692421,
+   "worst_body": "pitcher",
+   "worst_v": 0.6797164166518793,
    "engine_warnings": {},
    "pass": false
   },
   "rep_hull": {
-   "vmax": 1.0306148344334711,
-   "dmax": 0.1171954606378775,
+   "vmax": 0.18026350798119312,
+   "dmax": 0.010392315779450404,
    "left": [],
-   "worst_body": "remote_control",
-   "worst_v": 1.0306148344334711,
+   "worst_body": "ladle",
+   "worst_v": 0.18026350798119312,
    "engine_warnings": {},
-   "pass": false
+   "pass": true
   },
   "rep_coacd": {
-   "vmax": 1.0342933479557506,
-   "dmax": 0.11789206949906879,
+   "vmax": 0.19844005685625118,
+   "dmax": 0.020039731296133213,
    "left": [],
-   "worst_body": "remote_control",
-   "worst_v": 1.0342933479557506,
+   "worst_body": "ladle",
+   "worst_v": 0.19844005685625118,
    "engine_warnings": {},
-   "pass": false
+   "pass": true
   }
  }
 ]

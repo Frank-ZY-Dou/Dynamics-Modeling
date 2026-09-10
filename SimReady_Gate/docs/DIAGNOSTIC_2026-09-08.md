@@ -54,10 +54,10 @@ Layouts: skill bounds, objects from the catalog, 2 relations per layout, staged 
 
 | N | solver ok | seated pairs (ok cells) | seated pairs (failed cells) | S4R pen after | RMSD_xy (m) | time (s) |
 |---|---|---|---|---|---|---|
-| 4 | 3/3 | 0, 0, 0 | - | 0, 0, 0 | 0.031, 0.000, 0.016 | 3.1-3.7 |
-| 6 | 1/3 | 0 | 1, 2 | 0, 0, 0 | 0.163, 0.032, 0.018 | 4.0-9.8 |
-| 8 | 1/3 | 0 | 3, 2 | 0, 0, 0 | 0.092, 0.079, 0.031 | 4.6-9.6 |
-| 10 | 0/3 | - | 7, 2, 7 | 0, 0, 0 | 0.049, 0.040, 0.062 | 5.3-13.9 |
+| 4 | 3/3 | 0, 0, 0 | - | 0, 0, 0 | 0.031, 0.000, 0.016 | 3.2-3.8 |
+| 6 | 1/3 | 0 | 1, 2 | 0, 0, 0 | 0.163, 0.033, 0.018 | 4.0-10.2 |
+| 8 | 1/3 | 0 | 3, 3 | 0, 0, 0 | 0.092, 0.094, 0.031 | 4.7-10.2 |
+| 10 | 0/3 | - | 7, 6, 4 | 0, 0, 0 | 0.049, 0.065, 0.073 | 5.7-14.5 |
 
 - Layouts the disc solver ACCEPTS carry no mesh penetration once seated (5 / 5 cells). The
   penetration is in the layouts it REJECTS (its fallback is "reduce the object count"): 1-7 pairs.
@@ -65,6 +65,10 @@ Layouts: skill bounds, objects from the catalog, 2 relations per layout, staged 
   region kept.
 - RMSD is the planar RMS of the reference-center displacement. Times are per cell in a warm
   process (decimation cached), full-mesh verification included.
+- Assets are staged in their resting frame (`simready/data/asset_rest_orientations.json`): the
+  remote control, authored standing on its 3.6 x 2.5 cm end, is laid flat as in RoboLab's own
+  scenes, and the solver sees that footprint. The five cells that contain it (N=4 s1, N=6 s1,
+  N=8 s1, N=10 s1, N=10 s2) are laid out with that footprint.
 
 ## G5 in MuJoCo, RoboLab pre-settle layouts (12 cells, 2 s, hull and CoACD proxies)
 Same harness for every state (base scene, slab at the measured table top, floor, proxies, density,
@@ -73,18 +77,18 @@ timestep). Pass = no body off the table and peak speed <= 1.0 m/s and peak displ
 
 | state | peak speed median (max), hull / CoACD | peak displacement median (max) | cells with a body off the table | pass |
 |---|---|---|---|---|
-| raw, as the skill writes it (hovering) | 1.52 (4.45) / 1.44 (3.96) m/s | 0.24 (2.01) / 0.20 (0.83) m | 2 / 2 | 1 / 12 |
-| raw, seated | 1.01 (3.97) / 0.70 (3.96) m/s | 0.16 (1.08) / 0.11 (0.83) m | 3 / 1 | 4 / 6 of 12 |
-| after S4R | 0.41 (1.03) / 0.33 (1.03) m/s | 0.07 (0.12) / 0.06 (0.12) m | 0 / 0 | 8 / 8 of 12 |
+| raw, as the skill writes it (hovering) | 1.48 (1.82) / 1.47 (4.00) m/s | 0.18 (0.36) / 0.18 (1.48) m | 0 / 1 | 1 / 1 of 12 |
+| raw, seated | 0.51 (3.97) / 0.43 (0.87) m/s | 0.04 (1.14) / 0.10 (0.27) m | 2 / 0 | 8 / 9 of 12 |
+| after S4R | 0.31 (0.41) / 0.21 (0.33) m/s | 0.02 (0.09) / 0.01 (0.06) m | 0 / 0 | 12 / 12 of 12 |
 
 - The seated row isolates the repair's effect: the remaining raw motion is penetration-driven
-  (`mayonnaise_bottle` at 3.96 m/s leaves the table in N=10 s1; `milkjug_a02` 0.87 m/s in N=6 s0;
-  `pomegranate01` 0.53 m/s in N=8 s0) and disappears after S4R.
-- The four repaired cells that miss the 1.0 m/s bar (1.03 m/s) are `remote_control` toppling: a
-  16 cm tall body on a 3.6 x 2.5 cm footprint, present identically in the seated raw state. That is
-  an asset/placement instability, not a repair outcome; G5 reports it per body.
+  (`pomegranate01` at 3.97 m/s leaves the table in N=10 s0 and `milkjug_a01` at 3.96 m/s takes the
+  `mayonnaise_bottle` with it in N=10 s1, both under hull proxies; `milkjug_a02` 1.01 m/s in
+  N=6 s0) and disappears after S4R.
+- Every repaired cell passes under both proxies; the fastest repaired body is 0.41 m/s, and nothing
+  leaves the table.
 - Round objects drift on MuJoCo mesh contact (0.7-3 cm in 2 s); with the correct table nothing sits
-  at an edge, and no repaired cell loses a body.
+  at an edge.
 
 ## RoboCasa, counter-region packing with RoboCasa's own sampler (5 seeds per cell)
 `experiments/robocasa_capacity.py` -> `results/robocasa_capacity.json`; geometry = MuJoCo's own

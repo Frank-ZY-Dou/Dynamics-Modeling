@@ -16,10 +16,11 @@ from pathlib import Path
 import numpy as np
 
 ROBOLAB = Path(os.environ.get("ROBOLAB_DIR", str(Path(__file__).resolve().parents[2] / "ext" / "RoboLab")))   # a checkout of NVLabs/RoboLab
-sys.path.insert(0, str(ROBOLAB))
+sys.path.insert(0, str(ROBOLAB)); sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from robolab.scene_gen.llm_scene_gen.predicates import (  # noqa: E402
     ObjectState, PlaceOnBasePredicate, RelativePositionPredicate, PredicateType, Predicate)
 from robolab.scene_gen.llm_scene_gen.spatial_solver import SpatialSolver  # noqa: E402
+from simready.io.asset_rest import rest_dims, rest_rotation  # noqa: E402
 
 PLACEHOLDER = "<ROBOLAB_DIR>/"
 TABLE_BOUNDS = (0.25, 0.85, -0.45, 0.45)          # the skill's defaults (SKILL.md)
@@ -43,7 +44,9 @@ def make_layout(rng, n_objects=6, n_relations=2, margin=0.05, random_rot=True, s
     random.seed(seed)
     objs = pick_objects(rng, n_objects)
     names = [o["name"] for o in objs]
-    dims = {o["name"]: tuple(o["dims"]) for o in objs}
+    # extents in the resting frame (simready.io.asset_rest): the solver's footprint and the
+    # hover height are those of the pose the asset rests in
+    dims = {o["name"]: tuple(float(v) for v in rest_dims(o["dims"], rest_rotation(o["name"]))) for o in objs}
     states = {}
     for o in objs:
         st = ObjectState(name=o["name"])

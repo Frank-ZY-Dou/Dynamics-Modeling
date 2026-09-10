@@ -20,7 +20,7 @@
 <td><img src="docs/media/pile_n20_gate.gif" width="960" alt="twenty RoboLab objects heaped on the table, shrunk, laid out by the model in scale-space, restored to full size" /></td>
 </tr>
 <tr>
-<td><sub><b>Twenty objects from a heap, laid out by language.</b> Twenty RoboLab catalog objects are dropped into a 13 cm radius on RoboLab's own table (80 object-object interpenetrating pairs). The request asks for a cooking layout: the bowl in front of the pitcher, the ladle and the spoon within reach, the fruit grouped on the left, the cans and bottles in a row at the back, the hammer, bin, remote and spatula out of the way on the right. S4R shrinks every body about its reference center; the model places the shrunken bodies; the scale is restored under the program, and the result is penetration-free with every predicate satisfied, in 31 s.</sub></td>
+<td><sub><b>Twenty objects from a heap, laid out by language.</b> Twenty RoboLab catalog objects are dropped into a 13 cm radius on RoboLab's own table (82 object-object interpenetrating pairs). The request asks for a cooking layout: the bowl in front of the pitcher, the ladle and the spoon within reach, the fruit grouped on the left, the cans and bottles in a row at the back, the hammer, bin, remote and spatula out of the way on the right. S4R shrinks every body about its reference center; the model places the shrunken bodies; the scale is restored under the program, and the result is penetration-free with every predicate satisfied, in 30 s.</sub></td>
 </tr>
 <tr>
 <td><img src="docs/media/pile_n20_settle.gif" width="960" alt="MuJoCo settle of the heap (left) and of the repaired layout (right)" /></td>
@@ -81,7 +81,7 @@ supports. SimReady Gate is the layer between a scene generator and the simulator
 <td><img src="docs/media/workdesk_settle.gif" width="470" alt="MuJoCo settle of the shipped scene, before and after" /></td>
 </tr>
 <tr>
-<td colspan="2"><sub><code>workdesk_snacks</code>, already physics-settled by RoboLab's pipeline, still has three object-object interpenetrations, the largest scoring 9.9 mm (keyboard against smartphone). One sentence of intent and one certificate later it is clean, with 3.5 cm of planar motion. Right: the same scene settled in MuJoCo, as shipped and after the repair. Walked through step by step in <a href="#example-1-a-scene-robolab-ships-one-request-one-certificate">Example 1</a>.</sub></td>
+<td colspan="2"><sub><code>workdesk_snacks</code>, already physics-settled by RoboLab's pipeline, still has three object-object interpenetrations, the largest scoring 9.9 mm (keyboard against smartphone). One sentence of intent and one certificate later it is clean, with 3.3 cm of planar motion. Right: the same scene settled in MuJoCo, as shipped and after the repair. Walked through step by step in <a href="#example-1-a-scene-robolab-ships-one-request-one-certificate">Example 1</a>.</sub></td>
 </tr>
 </table>
 
@@ -89,11 +89,11 @@ supports. SimReady Gate is the layer between a scene generator and the simulator
 
 <table>
 <tr>
-<td><img src="docs/media/layout_n10_gate.gif" width="470" alt="a solver-rejected RoboLab layout: seated with seven interpenetrating pairs, shrunk, grown back into a clean arrangement" /></td>
+<td><img src="docs/media/layout_n10_gate.gif" width="470" alt="a solver-rejected RoboLab layout: seated with four interpenetrating pairs, shrunk, grown back into a clean arrangement" /></td>
 <td><img src="docs/media/layout_n10_settle.gif" width="470" alt="MuJoCo settle: as generated versus repaired" /></td>
 </tr>
 <tr>
-<td colspan="2"><sub>Ten catalog objects placed by RoboLab's own disc solver in its base scene; the solver reports failure and the layout carries seven interpenetrating pairs once seated. The gate repairs it to zero with the requested left/right/front/back relations kept. Right: settled in MuJoCo, the generated layout topples the pitcher and flips the bowl; the repaired one stays at rest.</sub></td>
+<td colspan="2"><sub>Ten catalog objects placed by RoboLab's own disc solver in its base scene; the solver reports failure and the layout carries four interpenetrating pairs once seated. The gate repairs it to zero with the requested left/right/front/back relations kept. Right: settled in MuJoCo, the generated layout tips the pitcher over and sends an orange rolling a third of a metre across the table; the repaired one stays at rest.</sub></td>
 </tr>
 </table>
 
@@ -171,7 +171,7 @@ poses into a copy of the USD and reads it back:
 
 ```
 $ python -m simready.cli repair assets/scenes/workdesk_snacks.usda program.json --out workdesk_repaired.usda
-{"ok": true, "pen_before": 12, "pen_after": 0, "rmsd_xy": 0.032, "time_s": 46.9,
+{"ok": true, "pen_before": 12, "pen_after": 0, "rmsd_xy": 0.033, "time_s": 45.9,
  "failed_predicates": [], "written_pose_error_m": 1.2e-06,
  "certificate": "workdesk_repaired.certificate.json"}
 ```
@@ -187,8 +187,8 @@ The repaired scene is simulated twice in MuJoCo, with the proxies a physics engi
 ```
 $ python -m simready.cli settle workdesk_repaired.usda --program program.json
 {"pass": true, "thresholds": {"v_max": 1.0, "d_max": 0.15, "source": "program gate"},
- "hull":  {"peak_speed": 0.805, "peak_disp": 0.1152, "left_support": [], "pass": true},
- "coacd": {"peak_speed": 0.816, "peak_disp": 0.1042, "left_support": [], "pass": true}}
+ "hull":  {"peak_speed": 0.570, "peak_disp": 0.0659, "left_support": [], "pass": true},
+ "coacd": {"peak_speed": 0.556, "peak_disp": 0.0596, "left_support": [], "pass": true}}
 ```
 
 ![MuJoCo settle, as shipped versus repaired](docs/media/workdesk_settle.png)
@@ -210,7 +210,7 @@ used.
 ## Example 2: twenty objects from a heap, laid out by language
 
 Twenty catalog objects are dropped into a 13 cm radius on RoboLab's `table_oak` (seed 2 of
-`viz/make_robolab_scene_video.py --pile`): 80 object-object interpenetrating pairs, 81 counting one contact with the table. The request:
+`viz/make_robolab_scene_video.py --pile`): 82 object-object interpenetrating pairs. The request:
 
 > *Twenty things were dumped in a heap on the kitchen table. Lay them out for cooking: the bowl in
 > front of the pitcher, the ladle and the big spoon within reach of the bowl, the fruit (both
@@ -241,20 +241,20 @@ the programs, every tool output and both certificates are in
 
 | round | repair | outcome | settle (hull / CoACD) |
 |---|---|---|---|
-| 1 | 81 → 0 pairs, planar RMSD 0.333 m, 31 s | `place(hammer_8)` missed by 7.3 cm: the 33 cm hammer does not fit at the requested corner next to the bin | 0.89 / 0.99 m/s, pass |
-| 2 | 81 → 0 pairs, planar RMSD 0.328 m, 31 s | the exact hammer target dropped (the request only asks for it out of the way on the right, which `right_of` states); every predicate holds, `ready: true` | 0.83 / 0.82 m/s, pass |
+| 1 | 82 → 0 pairs, planar RMSD 0.331 m, 30 s | `place(hammer_8)` missed by 7.3 cm: the 33 cm hammer does not fit at the requested corner next to the bin | 0.40 / 0.33 m/s, pass |
+| 2 | 82 → 0 pairs, planar RMSD 0.326 m, 30 s | the exact hammer target dropped (the request only asks for it out of the way on the right, which `right_of` states); every predicate holds, `ready: true` | 0.32 / 0.29 m/s, pass |
 
-The heap itself, settled as is, reaches 4.9 m/s with ten bodies off the table (hull proxies) and
-3.8 m/s with one (CoACD). The continuation here starts at s = 0.3, large enough to see the bodies
-while they are placed; the certificate records the value.
+The heap itself, settled as is, reaches 4.8 m/s with eleven bodies off the table (hull proxies)
+and 3.8 m/s with one (CoACD). The continuation here starts at s = 0.3, large enough to see the
+bodies while they are placed; the certificate records the value.
 
 The settle report also re-evaluates the program on the settled poses (`after_settle`). It shows
-what the peak-speed and displacement thresholds do not: the remote control, 16 cm tall on a
-3.6 × 2.5 cm footprint, tips over in MuJoCo under both proxies (final tilt 82° and 91°), and the
-round fruit rolls out of `upright`; every other statement still holds. The default policy leaves
-`ready` to the G5 thresholds and reports this; `--hold-predicates` would make the certificate not
-ready until the request is changed for that body. In Isaac Sim the same export keeps the remote
-standing (see [Running the repaired scene in a simulator](#running-the-repaired-scene-in-a-simulator)).
+what the peak-speed and displacement thresholds do not: the round fruit rolls out of `upright`
+(the lime and both oranges under hull proxies, one orange under CoACD) while every other statement
+holds, the remote control among them (it lies flat, as it rests in RoboLab's own scenes, and ends
+the settle within 1° of where it started). The default policy leaves `ready` to the G5
+thresholds and reports this; `--hold-predicates` would make the certificate not ready until the
+request is changed for those bodies.
 
 ## The agent loop
 
@@ -360,16 +360,31 @@ python examples/run_genesis.py pile_export --seconds 2                # Genesis,
 python examples/run_isaac.py pile_export --seconds 2                  # Isaac Sim (its own Python), from scene.usda
 ```
 
-The twenty-object layout of Example 2, exported and simulated for 2 s in each engine on this
-machine. Fixtures keep their full meshes; the MJCF file gives every free body one convex hull
-unless `--decompose` writes CoACD pieces, Genesis decomposes the meshes itself (`--convex` for
-one hull per body), and Isaac Sim's stage asks PhysX for a convex decomposition:
+Each runner takes `--record poses.json` to write the world pose of every free body at 30 frames
+per second; `viz/make_engine_video.py` turns the three recordings into the side-by-side clip.
+
+The certified twenty-object layout of Example 2, exported and simulated for 2 s in each engine
+on this machine; the three panels below are the recorded trajectories (`--record`), MuJoCo,
+Genesis and Isaac Sim from left to right, rendered from the same assets as the other clips:
+
+<table>
+<tr>
+<td><img src="docs/media/pile_n20_engines.gif" width="960" alt="the certified twenty-object layout simulated for 2 s in MuJoCo, Genesis and Isaac Sim, left to right" /></td>
+</tr>
+<tr>
+<td><sub>Left to right: MuJoCo 3.10, Genesis 1.2.3, Isaac Sim 4.5, 2 s of simulation in real time. In every engine the round fruit rolls a little (an orange by 9 cm in MuJoCo, 3 cm in Genesis, 2 cm in Isaac Sim); nothing tips over and no body leaves the table.</sub></td>
+</tr>
+</table>
+
+Fixtures keep their full meshes; the MJCF file gives every free body one convex hull unless
+`--decompose` writes CoACD pieces, Genesis decomposes the meshes itself (`--convex` for one hull
+per body), and Isaac Sim's stage asks PhysX for a convex decomposition:
 
 | engine | peak displacement of a free body | bodies below the ground |
 |---|---|---|
-| MuJoCo 3.10 | 0.135 m (the remote control tips over, as in the settle test) | none |
-| Genesis 1.2.3, GPU, conjugate-gradient solver | 0.119 m with its decomposition, 0.138 m with one hull per body | none |
-| Isaac Sim 4.5 (PhysX) | 0.024 m | none |
+| MuJoCo 3.10 | 0.050 m (an orange rolling, as in the settle test) | none |
+| Genesis 1.2.3, GPU, conjugate-gradient solver | 0.089 m with its decomposition, 0.053 m with one hull per body | none |
+| Isaac Sim 4.5 (PhysX) | 0.029 m | none |
 
 A flat fixed sheet such as RoboLab's ground plane has no volume to hull; it is marked `flat` in
 the manifest and every runner uses the export's ground height instead. Genesis's Newton
@@ -383,6 +398,18 @@ RoboLab and RoboCasa assets are not redistributed here. The experiments and the 
 them from their own checkouts: set `ROBOLAB_DIR` to a checkout of
 [NVLabs/RoboLab](https://github.com/NVLabs/RoboLab) (with its LFS assets pulled) and
 `ROBOCASA_AIGEN_DIR` to RoboCasa's `aigen_objs` folder.
+
+An asset's authored frame is not always the pose it rests in. RoboLab's remote control is authored
+standing on its 3.6 × 2.5 cm end, 16 cm tall, a pose that tips at 8.7°; every shipped scene that
+contains it has it lying on its back. `simready/data/asset_rest_orientations.json` lists the
+catalog assets whose authored pose cannot stand (tipping angle below 12°, mass centre at the box
+centre) together with the authored axis that points up in the shipped scenes, and the loaders
+re-express those assets in that resting frame: the vertices turn once, the pose rotation absorbs
+the inverse, the world geometry is unchanged. A layout that sets only a yaw then lays the remote
+flat, `upright` keeps it flat, the placement solver sees its resting footprint, and the export
+writes it lying. `experiments/asset_rest_orientations.py` regenerates the table from the catalog
+and the shipped scenes; assets that can stand keep their authored frame, because the shipped
+scenes are physics-settled heaps in which cans and cartons also lie knocked over.
 
 ## Gates
 
@@ -403,10 +430,10 @@ test; every table is backed by a tracked file under `results/`.
   of them surface intersections, none a body wholly inside another), a body nothing supports in 30.
 - **RoboLab pre-settle layouts** (N = 4–10, 3 seeds): the disc solver accepts 5 / 12 and those are
   clean; the 7 it rejects carry 1–7 penetrating pairs, and S4R repairs all 7 to zero with every
-  requested relation and region kept (planar RMSD 0.03–0.17 m, 3–14 s per cell).
-- **Settle** (MuJoCo, identical harness): median peak speed 1.0 → 0.4 m/s from the seated raw
-  layouts to the repaired ones; no repaired cell loses a body, and what remains is one tall remote
-  control toppling, present before the repair as well.
+  requested relation and region kept (planar RMSD 0.03–0.16 m, 3–15 s per cell).
+- **Settle** (MuJoCo, identical harness): median peak speed 0.5 → 0.3 m/s (hull proxies) and
+  0.4 → 0.2 m/s (CoACD) from the seated raw layouts to the repaired ones; every repaired cell
+  passes and nothing leaves the table.
 - **RoboCasa** (own placement test, 5 seeds): the box test is conservative and reliable; it gives
   up in a 0.3 m square at 8–12 objects (4/5, 1/5, 0/5), where the gate places every object (5/5).
 

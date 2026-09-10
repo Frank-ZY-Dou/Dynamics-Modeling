@@ -10,6 +10,7 @@ import os
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 import numpy as np
 import trimesh
@@ -558,3 +559,82 @@ class Export(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+ROBOLAB_DIR = Path(os.environ.get("ROBOLAB_DIR", str(Path(__file__).resolve().parents[2] / "ext" / "RoboLab")))
+_REMOTE_USD = ROBOLAB_DIR / "assets" / "objects" / "hot3d" / "remote_control.usd"
+_WORKDESK = ROBOLAB_DIR / "assets" / "scenes" / "workdesk_snacks.usda"
+
+
+class RestOrientation(unittest.TestCase):
+    """Assets whose authored pose cannot stand are handled in their resting frame."""
+
+    def test_table_and_rotation(self):
+        from simready.io.asset_rest import rest_rotation, rest_dims, rotation_to_up, table
+        self.assertIn("remote_control", table())
+        self.assertEqual(table()["remote_control"]["up_axis"], "-y")
+        R = rest_rotation("/some/checkout/assets/objects/hot3d/remote_control.usd")
+        np.testing.assert_allclose(R @ np.array([0.0, -1.0, 0.0]), [0.0, 0.0, 1.0], atol=1e-12)
+        self.assertAlmostEqual(float(np.linalg.det(R)), 1.0, places=12)
+        np.testing.assert_allclose(rest_dims([0.036, 0.025, 0.164], R), [0.036, 0.164, 0.025], atol=1e-12)
+        self.assertIsNone(rest_rotation("pitcher"))
+        self.assertIsNotNone(rest_rotation("remote_control_01"))
+        for axis in ("+x", "-x", "+y", "-y", "+z", "-z"):
+            R = rotation_to_up(axis)
+            self.assertAlmostEqual(float(np.linalg.det(R)), 1.0, places=12)
+            np.testing.assert_allclose(R @ R.T, np.eye(3), atol=1e-12)
+
+    @unittest.skipUnless(_REMOTE_USD.exists(), "needs the RoboLab checkout")
+    def test_catalog_remote_rests_flat(self):
+        from simready.io.usd_io import body_from_object_usd
+        from simready.repair.upright_s4r import decompose_zyx
+        b = body_from_object_usd("remote_control", str(_REMOTE_USD), (0.5, 0.0, 0.3), yaw_deg=30.0, tags={"object"})
+        v = b.world_vertices()
+        ext = v.max(0) - v.min(0)
+        self.assertLess(ext[2], 0.03, "the remote control must lie flat in its resting frame")
+        self.assertGreater(max(ext[0], ext[1]), 0.15)
+        _, roll, pitch = decompose_zyx(b.rotation)
+        self.assertLess(max(abs(roll), abs(pitch)), 1e-9)
+        self.assertIn("rest_rotation", b.meta)
+
+    @unittest.skipUnless(_WORKDESK.exists(), "needs the RoboLab checkout")
+    def test_shipped_remote_is_upright_and_geometry_unchanged(self):
+        from simready.io import usd_io
+        from simready.repair.upright_s4r import decompose_zyx
+        sc = usd_io.load_scene_usda(str(_WORKDESK))
+        b = sc["remote_control"]
+        _, roll, pitch = decompose_zyx(b.rotation)
+        self.assertLess(math.degrees(max(abs(roll), abs(pitch))), 1.0, "lying as shipped reads as upright in the resting frame")
+        v_rest = b.world_vertices()
+        saved = usd_io.rest_rotation
+        try:
+            usd_io.rest_rotation = lambda key: None            # load once more in the authored frame
+            v_auth = usd_io.load_scene_usda(str(_WORKDESK))["remote_control"].world_vertices()
+        finally:
+            usd_io.rest_rotation = saved
+        np.testing.assert_allclose(np.sort(v_rest, axis=0), np.sort(v_auth, axis=0), atol=1e-9)
+
+    @unittest.skipUnless(_WORKDESK.exists(), "needs the RoboLab checkout")
+    def test_written_pose_round_trip(self):
+        from simready.io.usd_io import load_scene_usda, write_scene_poses
+        sc = load_scene_usda(str(_WORKDESK))
+        b = sc["remote_control"]
+        yaw = math.radians(10.0)
+        Rz = np.array([[math.cos(yaw), -math.sin(yaw), 0.0], [math.sin(yaw), math.cos(yaw), 0.0], [0.0, 0.0, 1.0]])
+        b.rotation = Rz @ b.rotation
+        b.center = b.center + np.array([0.01, -0.02, 0.0])
+        want = b.world_vertices()
+        with tempfile.TemporaryDirectory() as d:
+            out = os.path.join(d, "moved.usda")
+            write_scene_poses(sc, str(_WORKDESK), out)
+            got = load_scene_usda(out)["remote_control"].world_vertices()
+        np.testing.assert_allclose(np.sort(got, axis=0), np.sort(want, axis=0), atol=1e-6)
+
+    @unittest.skipUnless(_REMOTE_USD.exists(), "needs the RoboLab checkout")
+    def test_layout_dims_are_resting_dims(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+        import robolab_offline_layouts as L
+        c = L.BY_NAME["remote_control"]
+        from simready.io.asset_rest import rest_dims, rest_rotation
+        d = rest_dims(c["dims"], rest_rotation("remote_control"))
+        self.assertLess(d[2], 0.03)

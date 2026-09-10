@@ -103,7 +103,7 @@ def main():
         for o in objs:
             r = a.pile_radius * math.sqrt(rng.uniform(0, 1)); th = rng.uniform(0, 2 * math.pi)
             b = body_from_object_usd(o["name"], str(RL_ROOT / o["usd_path"]), (cx + r * math.cos(th), cy + r * math.sin(th), 0.3), yaw_deg=float(rng.uniform(0, 360)), tags={"object"})
-            infos[o["name"]] = export(str(RL_ROOT / o["usd_path"]), assets_dir, name=o["name"]); infos[o["name"]]["c_model"] = b.meta["c_model"].tolist()
+            infos[o["name"]] = export(str(RL_ROOT / o["usd_path"]), assets_dir, name=o["name"], rotation=b.meta.get("rest_rotation")); infos[o["name"]]["c_model"] = b.meta["c_model"].tolist()
             bodies.append(b)
         raw = seat_scene(Scene(bodies))                        # every object dropped onto the table inside the pile
         source = {"pile": {"n": n, "seed": seed, "radius": a.pile_radius, "objects": [o["name"] for o in objs]}}
@@ -127,7 +127,7 @@ def main():
         infos = export_scene(str(BASE_SCENE), assets_dir)
         raw_as_written = scene_from_layout(L)                 # RoboLab's own z convention (hovering)
         for o in L["objects"]:
-            infos[o["name"]] = export(o["usd_path"], assets_dir, name=o["name"])
+            infos[o["name"]] = export(o["usd_path"], assets_dir, name=o["name"], rotation=raw_as_written[o["name"]].meta.get("rest_rotation"))
             infos[o["name"]]["c_model"] = raw_as_written[o["name"]].meta["c_model"].tolist()
         raw = seat_scene(raw_as_written)                        # the like-for-like state the repair starts from
         source = {"layout": {"n": n, "seed": seed, "solver_ok": L["ok"], "relations": L["relations"]}}

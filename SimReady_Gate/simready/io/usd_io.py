@@ -14,6 +14,8 @@ from pathlib import Path
 
 import numpy as np
 
+from .asset_rest import rest_rotation
+
 from ..scene.model import Body, Scene
 
 
@@ -103,6 +105,23 @@ def _rotation_from_affine(R: np.ndarray) -> np.ndarray:
     return rot
 
 
+def child_source(child, scene_path):
+    """Provenance of a scene child: (source path, payload targets). A payload path is relative
+    to the layer that declares it, the scene file here."""
+    src = ""
+    for arc in child.GetPrimStack():
+        src = arc.layer.identifier
+    payload_targets = []
+    for spec in child.GetPrimStack():
+        pl = getattr(spec, "payloadList", None)
+        for pp in (pl.GetAddedOrExplicitItems() if pl else []):
+            payload_targets.append(pp.assetPath)
+    srcpath = payload_targets[0] if payload_targets else src
+    if srcpath and not os.path.isabs(srcpath) and not srcpath.startswith(("omniverse:", "http")):
+        srcpath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(str(scene_path))), srcpath))
+    return srcpath, payload_targets
+
+
 def load_scene_usda(path, fixture_key: str = "fixtures", world_prim: str | None = None,
                     support_names=("table", "franka_table", "island", "counter")) -> Scene:
     from pxr import Usd, UsdGeom
@@ -154,23 +173,17 @@ def load_scene_usda(path, fixture_key: str = "fixtures", world_prim: str | None 
         Rc_aff, tc = _matrix_np(cache.GetLocalToWorldTransform(child))
         Rc = _rotation_from_affine(Rc_aff)
         local = (Rc.T @ (Vw - tc).T).T
+        srcpath, payload_targets = child_source(child, path)
+        # An asset whose authored pose cannot stand is re-expressed in its resting frame
+        # (simready.io.asset_rest): the vertices turn once, the pose rotation absorbs the
+        # inverse, the world geometry is unchanged.
+        R_rest = rest_rotation(srcpath or child.GetName()) if payload_targets else rest_rotation(child.GetName())
+        if R_rest is not None:
+            local = local @ R_rest.T
+            Rc = Rc @ R_rest.T
         lo, hi = local.min(0), local.max(0)
         c_model = 0.5 * (lo + hi)
         center = tc + Rc @ c_model
-        # provenance: payload / reference targets
-        src = ""
-        for arc in child.GetPrimStack():
-            src = arc.layer.identifier
-        pl = child.GetPayloads()
-        prox = child.GetPrimStack()
-        payload_targets = []
-        for spec in prox:
-            for pp in getattr(spec, "payloadList", None).GetAddedOrExplicitItems() if getattr(spec, "payloadList", None) else []:
-                payload_targets.append(pp.assetPath)
-        srcpath = payload_targets[0] if payload_targets else src
-        if srcpath and not os.path.isabs(srcpath) and not srcpath.startswith(("omniverse:", "http")):
-            # a payload path is relative to the layer that declares it: the scene file here
-            srcpath = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(path)), srcpath))
         lname = child.GetName().lower()
         inline = not payload_targets                      # authored in the scene layer itself
         is_fixture = (f"/{fixture_key}/" in srcpath.replace("\\", "/")) or any(k in lname for k in support_names) \
@@ -182,10 +195,12 @@ def load_scene_usda(path, fixture_key: str = "fixtures", world_prim: str | None 
                 tags.add("support")
             if any(k in lname for k in ("ground", "floor")):
                 tags.add("ground")
+        meta = {"prim": str(child.GetPath()), "n_mesh_prims": len(meshes),
+                "c_model": c_model.copy(), "center_loaded": center.copy()}
+        if R_rest is not None:
+            meta["rest_rotation"] = R_rest.copy()
         bodies.append(Body(name=child.GetName(), verts=local - c_model, faces=Fw, center=center,
-                           rotation=Rc, fixed=is_fixture, tags=tags, source=srcpath,
-                           meta={"prim": str(child.GetPath()), "n_mesh_prims": len(meshes),
-                                 "c_model": c_model.copy(), "center_loaded": center.copy()}))
+                           rotation=Rc, fixed=is_fixture, tags=tags, source=srcpath, meta=meta))
     if dropped:
         import warnings
         warnings.warn(f"{path}: {len(dropped)} referenced children without geometry (unresolved payloads?): {dropped}")
@@ -235,14 +250,16 @@ def write_scene_poses(scene: Scene, src_path, out_path, world_prim: str | None =
         else:
             raise ValueError(f"{b.name}: no c_model / center_loaded in meta; load the scene with load_scene_usda")
         # the child's authored scale is baked into its mesh (local = R_old^T (world - t_old)), so the
-        # new world pose is T(t_new) R_new S_old with S_old = R_old^T R_aff
+        # new world pose is T(t_new) R_new S_old with S_old = R_old^T R_aff; a body kept in its
+        # resting frame (meta rest_rotation) turns back into the authored frame here
         S_old = R_old.T @ R_old_aff
+        R_authored = b.rotation @ np.asarray(b.meta.get("rest_rotation", np.eye(3)), dtype=np.float64)
         t_new_w = b.center - b.rotation @ c_model
         # express in the parent's frame
         P_aff, P_t = _matrix_np(cache.GetLocalToWorldTransform(prim.GetParent()))
         P_inv = np.linalg.inv(P_aff)
         t_loc = P_inv @ (t_new_w - P_t)
-        M_loc = P_inv @ (b.rotation @ S_old)
+        M_loc = P_inv @ (R_authored @ S_old)
         R_loc = _rotation_from_affine(M_loc)
         S_loc = R_loc.T @ M_loc
         scale = np.diag(S_loc)
@@ -329,6 +346,9 @@ def body_from_object_usd(name, path, position, yaw_deg=0.0, quat_wxyz=None, fixe
     """Instantiate an object USD at a RoboLab solver pose (translate + yaw or quat)."""
     import math
     verts, faces = load_object_usd(path)
+    R_rest = rest_rotation(path)
+    if R_rest is not None:                      # resting frame, see simready.io.asset_rest
+        verts = verts @ R_rest.T
     if quat_wxyz is not None and yaw_deg not in (0, 0.0, None):
         raise ValueError("give either yaw_deg or quat_wxyz, not both")
     if quat_wxyz is not None:
@@ -342,6 +362,9 @@ def body_from_object_usd(name, path, position, yaw_deg=0.0, quat_wxyz=None, fixe
     lo, hi = verts.min(0), verts.max(0)
     c_model = 0.5 * (lo + hi)
     t = np.asarray(position, dtype=np.float64)
+    meta = {"prim_translate": t.copy(), "c_model": c_model}
+    if R_rest is not None:
+        meta["rest_rotation"] = R_rest.copy()
     b = Body(name=name, verts=verts - c_model, faces=faces, center=t + R @ c_model, rotation=R,
-             fixed=fixed, tags=set(tags or ()), source=str(path), meta={"prim_translate": t.copy(), "c_model": c_model})
+             fixed=fixed, tags=set(tags or ()), source=str(path), meta=meta)
     return b

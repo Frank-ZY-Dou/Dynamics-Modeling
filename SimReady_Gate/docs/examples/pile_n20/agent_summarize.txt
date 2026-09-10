@@ -9,7 +9,7 @@
 - lime01: object; size 0.07x0.07x0.06 m; at (0.53, 0.12, 0.33)
 - orange_02: object; size 0.07x0.07x0.07 m; at (0.50, 0.08, 0.34)
 - bowl: object; size 0.16x0.16x0.05 m; at (0.58, -0.05, 0.30)
-- remote_control: object; size 0.03x0.04x0.16 m; at (0.55, -0.02, 0.30)
+- remote_control: object; size 0.17x0.07x0.03 m; at (0.53, -0.02, 0.33)
 - pitcher: object; size 0.14x0.10x0.17 m; at (0.42, -0.03, 0.38)
 - lemon_02: object; size 0.05x0.05x0.04 m; at (0.56, -0.01, 0.32)
 - spoon_big: object; size 0.15x0.10x0.02 m; at (0.60, -0.11, 0.31)

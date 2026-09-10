@@ -2,14 +2,14 @@
  "ok": true,
  "scene": "results/videos/pile_n20/layout.json",
  "program": "results/videos/pile_n20/program.json",
- "pen_before": 81,
+ "pen_before": 82,
  "pen_after": 0,
  "min_score_after": 0.0,
  "contained_after": [],
  "floating_after": [],
- "rmsd_xy": 0.32776480303240424,
+ "rmsd_xy": 0.3255718951752328,
  "steps": 44,
- "time_s": 29.86,
+ "time_s": 29.94,
  "predicates": [
   [
    "on_support(pineapple_slices_can,table)",
@@ -254,7 +254,7 @@
   [
    "within(remote_control,table.top)",
    true,
-   0.0
+   0.00015980298772719226
   ],
   [
    "within(pitcher,table.top)",
@@ -304,7 +304,7 @@
   [
    "within(bin_b02,table.top)",
    true,
-   0.00044571092319578565
+   0.0004479862590006656
   ],
   [
    "within(orange_01,table.top)",
@@ -314,22 +314,22 @@
   [
    "place(pitcher)",
    true,
-   6.953677108809247e-14
+   6.958747056177637e-14
   ],
   [
    "place(bowl)",
    true,
-   0.00671976255086212
+   0.006348617820965891
   ],
   [
    "place(ladle)",
    true,
-   0.006657035562680779
+   0.00342387095888541
   ],
   [
    "place(spoon_big)",
    true,
-   3.919352646726055e-12
+   3.91939029565298e-12
   ],
   [
    "place(orange_02)",
@@ -384,22 +384,22 @@
   [
    "place(plasticjerrican_a01)",
    true,
-   0.0037635704440680926
+   0.003804237519395647
   ],
   [
    "place(bin_b02)",
    true,
-   0.03771888463665196
+   0.03770960120621027
   ],
   [
    "place(remote_control)",
    true,
-   0.0
+   0.020174270656237864
   ],
   [
    "place(spatula_17)",
    true,
-   0.00035031414897389676
+   0.00047994949191211377
   ],
   [
    "place(raisin_box)",
@@ -409,17 +409,17 @@
   [
    "in_front_of(bowl,pitcher,gap=0.12)",
    true,
-   0.07935982108803324
+   0.07944296076334334
   ],
   [
    "near(ladle,bowl,r=0.22)",
    true,
-   0.21403461218731745
+   0.21016093129995447
   ],
   [
    "near(spoon_big,bowl,r=0.22)",
    true,
-   0.15331213785949666
+   0.15367687678073197
   ],
   [
    "near(lime01,orange_02,r=0.12)",
@@ -439,62 +439,62 @@
   [
    "left_of(orange_02,bowl,gap=0.18)",
    true,
-   0.1533108012661784
+   0.1536758672115902
   ],
   [
    "in_front_of(pineapple_slices_can,bowl,gap=0.12)",
    true,
-   0.06064017891203033
+   0.06055703923672029
   ],
   [
    "in_front_of(tomato_sauce_can,bowl,gap=0.12)",
    true,
-   0.06064017891203033
+   0.06055703923672029
   ],
   [
    "in_front_of(peas_and_carrots,bowl,gap=0.12)",
    true,
-   0.06064017891203033
+   0.06055703923672029
   ],
   [
    "in_front_of(bbq_sauce_bottle,bowl,gap=0.12)",
    true,
-   0.06064017891203033
+   0.06055703923672029
   ],
   [
    "in_front_of(whitepackerbottle_a01,bowl,gap=0.12)",
    true,
-   0.06064017891203033
+   0.06055703923672029
   ],
   [
    "in_front_of(whitepackerbottle_a02,bowl,gap=0.12)",
    true,
-   0.06064017891203033
+   0.06055703923672029
   ],
   [
    "in_front_of(plasticjerrican_a01,bowl,gap=0.12)",
    true,
-   0.033748262824703446
+   0.03369491101888944
   ],
   [
    "right_of(hammer_8,bowl,gap=0.22)",
    true,
-   0.003074709554763133
+   -4.561544464018463e-05
   ],
   [
    "right_of(bin_b02,bowl,gap=0.25)",
    true,
-   0.1390985414870023
+   0.1387452226381813
   ],
   [
    "right_of(remote_control,bowl,gap=0.22)",
    true,
-   0.18668919873382164
+   0.18922061466570197
   ],
   [
    "right_of(spatula_17,bowl,gap=0.12)",
    true,
-   0.03673100151322556
+   0.03637962785964294
   ]
  ],
  "failed_predicates": [],
@@ -516,7 +516,7 @@
  },
  "synthetic_table": null,
  "written": "results/videos/pile_n20/agent_repaired.json",
- "written_sha256": "ad2d8f19d04fd074",
+ "written_sha256": "84e634720ad9d74c",
  "certificate": "results/videos/pile_n20/agent_repaired.certificate.json"
 }
 repair exit=0

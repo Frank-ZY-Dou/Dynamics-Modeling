@@ -337,8 +337,17 @@ def _write(out_dir, name, usd_path, gathered):
     return info
 
 
-def export(usd_path, out_dir, name=None):
-    """One object/fixture USD in its own stage frame (matches load_object_usd)."""
+def _rotate_gathered(g, R):
+    """The gathered geometry with its vertices turned by R (a resting-frame rotation)."""
+    if R is None:
+        return g
+    V, VT, F, FT, FM, mats, n_prims = g
+    return (np.asarray(V) @ np.asarray(R, dtype=np.float64).T, VT, F, FT, FM, mats, n_prims)
+
+
+def export(usd_path, out_dir, name=None, rotation=None):
+    """One object/fixture USD in its own stage frame (matches load_object_usd); `rotation`
+    turns the mesh into the body's resting frame (matches body_from_object_usd)."""
     from pxr import Usd, UsdGeom
     usd_path = str(usd_path)
     stage = Usd.Stage.Open(usd_path)
@@ -346,7 +355,7 @@ def export(usd_path, out_dir, name=None):
     g = _gather(root, UsdGeom.XformCache(), usd_path)
     if g is None:
         raise ValueError(f"no geometry in {usd_path}")
-    return _write(out_dir, name or root.GetName(), usd_path, g)
+    return _write(out_dir, name or root.GetName(), usd_path, _rotate_gathered(g, rotation))
 
 
 def export_scene(usda_path, out_dir, world_prim=None):
@@ -354,7 +363,8 @@ def export_scene(usda_path, out_dir, world_prim=None):
     child's scale baked in; returns {child_name: info} with `c_model` (AABB centre of the local
     mesh), `center` and `rotation` matching load_scene_usda's Body for that child."""
     from pxr import Usd, UsdGeom
-    from simready.io.usd_io import _rotation_from_affine
+    from simready.io.usd_io import _rotation_from_affine, child_source
+    from simready.io.asset_rest import rest_rotation
     usda_path = str(usda_path)
     stage = Usd.Stage.Open(usda_path)
     root = stage.GetPrimAtPath(world_prim) if world_prim else stage.GetDefaultPrim()
@@ -370,6 +380,11 @@ def export_scene(usda_path, out_dir, world_prim=None):
         g = _gather(child, xcache, usda_path, to_local=(Rc, tc))
         if g is None:
             continue
+        srcpath, payload_targets = child_source(child, usda_path)
+        R_rest = rest_rotation(srcpath or child.GetName()) if payload_targets else rest_rotation(child.GetName())
+        if R_rest is not None:                 # same resting frame as load_scene_usda
+            g = _rotate_gathered(g, R_rest)
+            Rc = Rc @ R_rest.T
         info = _write(out_dir, child.GetName(), usda_path, g)
         lo, hi = np.asarray(info["aabb"])
         c_model = 0.5 * (lo + hi)

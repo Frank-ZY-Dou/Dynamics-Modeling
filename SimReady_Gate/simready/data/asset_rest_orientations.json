@@ -1,0 +1,37 @@
+{
+ "rule": "authored pose kept when its tipping angle is at least 12 degrees; otherwise the authored axis that points up in the shipped scenes (majority, at least two scenes) rests up",
+ "assets": {
+  "remote_control": {
+   "usd_path": "assets/objects/hot3d/remote_control.usd",
+   "authored_dims": [
+    0.03558525629341602,
+    0.025243834592402023,
+    0.16430988907814026
+   ],
+   "tipping_deg": 8.73,
+   "up_axis": "-y",
+   "shipped_scenes": [
+    "workdesk.usda",
+    "workdesk_bin.usda",
+    "workdesk_snacks.usda"
+   ],
+   "rotation": [
+    [
+     1.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     1.0
+    ],
+    [
+     0.0,
+     -1.0,
+     0.0
+    ]
+   ]
+  }
+ }
+}
