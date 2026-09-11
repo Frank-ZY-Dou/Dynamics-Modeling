@@ -324,6 +324,26 @@ class OracleContracts(unittest.TestCase):
 
 
 class StartingScale(unittest.TestCase):
+    def test_audit_rows_describe_the_current_state(self):
+        # with a long refresh interval, the audit counts on cached steps must be those of
+        # the state the step starts from, not of the last refresh
+        objects = [box_object([0, 0, 0]), box_object([0.12, 0, 0]), box_object([0.24, 0.02, 0]), box_object([0.05, 0.16, 0])]
+        res = solve(objects, revalidate_interval=2, audit=True, adaptive_ds=False, ds_max=0.05)
+        rows = res["audit_log"]
+        self.assertGreater(len(rows), 2)
+        for a, b in zip(rows, rows[1:]):
+            if abs(a["scale_after"] - b["scale_before"]) < 1e-12:
+                self.assertEqual(a["evaluator_pen_after"], b["evaluator_pen_before"])
+
+    def test_attraction_weights_are_per_body(self):
+        # two separated cubes, a target 0.1 to the +x of each, weight 0 for the first: it stays
+        objects = [box_object([0, 0, 0]), box_object([1.0, 0, 0])]
+        targets = np.array([[0.1, 0, 0], [1.1, 0, 0]])
+        res = solve(objects, target_centers=targets, attraction_alpha=np.array([0.0, 1.0]), max_steps=1, ds_max=0.05)
+        moved = res["final_centers"] - np.array([o.center for o in objects])
+        self.assertAlmostEqual(float(np.linalg.norm(moved[0])), 0.0, places=9)
+        self.assertGreater(float(moved[1][0]), 0.0)
+
     def test_three_coincident_centroids(self):
         centers = np.zeros((3, 3))
         radii = np.full(3, math.sqrt(3) * 0.1)

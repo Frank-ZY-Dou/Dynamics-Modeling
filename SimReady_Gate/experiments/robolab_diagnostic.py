@@ -75,6 +75,9 @@ def repair_scene(scene, prog, faces=2000, verbose=False):
     reseat_on_supports(sc, spec)
     if verify_scene(sc).pen_pairs > 0:
         res2 = polish_full_mesh(sc, spec, iters=15); reseat_on_supports(sc, spec); res.steps += res2.steps
+    # the displacement of the whole run, the full-mesh polish included
+    res.displacement = np.array([b.center[:2] - scene[b.name].center[:2] for b in sc.free()]).reshape(-1, 2)
+    res.rmsd = float(np.sqrt(np.mean(np.sum(res.displacement ** 2, axis=1)))) if sc.free() else 0.0
     return sc, res, time.time() - t0, tops
 
 

@@ -13,7 +13,7 @@
 
 <img src="docs/media/scale_space_editing.png" width="420" alt="scale-space editing: two bodies overlap; S4R shrinks them; the model moves the shrunken bodies; the scale is restored" />
 
-<sub><b>Scale-space editing.</b> (1) Two bodies overlap. (2) S4R shrinks every body about its reference center until nothing touches. (3) The language model moves the shrunken bodies into the requested arrangement. (4) The scale is restored under the program, and the layout comes out penetration-free.</sub>
+<sub><b>Scale-space editing.</b> (1) Two bodies overlap. (2) S4R shrinks every body about its reference center to the configured scale. (3) The language model moves the shrunken bodies into the requested arrangement. (4) The scale is restored under the program, and the layout comes out penetration-free.</sub>
 
 <table>
 <tr>
@@ -35,7 +35,7 @@
 
 * [September 2026] **Into the engines.** `export` writes a repaired scene as meshes, a manifest, an MJCF file and a USD stage with physics schemas; `examples/run_mujoco.py`, `run_genesis.py` and `run_isaac.py` load it and simulate it. The twenty-object layout runs in MuJoCo, Genesis and Isaac Sim with no body leaving the table ([details](#running-the-repaired-scene-in-a-simulator)).
 * [September 2026] **Twenty-object demo.** A heap of twenty RoboLab objects laid out by a language request in scale-space, two recorded rounds of the agent loop, one passing certificate; the request, the programs, every tool output and both certificates are in [`docs/examples/pile_n20/`](docs/examples/pile_n20/) ([Example 2](#example-2-twenty-objects-from-a-heap-laid-out-by-language)).
-* [September 2026] **Scale-space placement.** `place(a, x, y, yaw)` lets the model position bodies while every body is shrunk and nothing touches; the continuation restores full scale under the program. Renders from the solver's own meshes with the assets' textures (`viz/`).
+* [September 2026] **Scale-space placement.** `place(a, x, y, yaw)` lets the model position bodies at the configured shrink scale, where overlaps may remain; the continuation restores full scale under the program. Renders from the solver's own meshes with the assets' textures (`viz/`).
 * [September 2026] **Initial release**: the scene layer for RoboLab USD scenes (`usd-core`, no Isaac Sim) and RoboCasa MJCF objects (compiled by MuJoCo itself); the constraint language, its JSON schema and compiler; the S4R upright-on-plane repair driven by the program; the mesh-level evaluator with containment and resting-contact tests; the MuJoCo settle test; certificates with provenance; the agent skill and the Anthropic SDK backend; the diagnostics on RoboLab's 68 shipped scenes, on layouts from RoboLab's own placement solver, and on RoboCasa counter regions with RoboCasa's own placement test ([`docs/DIAGNOSTIC_2026-09-08.md`](docs/DIAGNOSTIC_2026-09-08.md)).
 
 ## Table of Contents
@@ -66,7 +66,7 @@ supports. SimReady Gate is the layer between a scene generator and the simulator
 - **Reads the scenes robotics pipelines actually produce.** RoboLab USD scenes (payloads, instance proxies, gprims, MDL materials) through `usd-core`, no Isaac Sim needed; RoboCasa / robosuite MJCF objects compiled by MuJoCo itself, so the geometry is exactly what the simulator collides with.
 - **Measures interpenetration on the meshes, not on proxies.** An FCL evaluator with probed contact normals, a containment test and a resting-contact test: which pairs interpenetrate, which body sits inside another, which body nothing supports.
 - **Repairs with S4R under a typed constraint program.** Bodies shrink about their reference center, grow back through minimum-norm QPs, stay upright on their support, and obey the program: regions, left/right/front/back relations, distances, soft target poses.
-- **Lets a language model lay the scene out in scale-space.** At the shrunken scale the bodies come apart (pairs that share a reference center excepted); the model places bodies into a semantic arrangement (`place`), and the continuation restores full scale while resolving what overlaps.
+- **Lets a language model lay the scene out in scale-space.** At the configured shrink scale overlaps may remain; the model places bodies into a semantic arrangement (`place`), and the continuation restores full scale while resolving what overlaps.
 - **Certifies by settling.** The repaired scene is simulated in MuJoCo with the proxies an engine would use (convex hulls, CoACD pieces); peak speed, displacement and bodies that leave their support are measured against the program's own thresholds.
 - **Leaves a certificate with provenance.** Program text and JSON, scene hash, git commit, library versions, the tolerances, every predicate value, the settle report.
 - **Runs as an agent loop.** An agent following the skill in `skills/` (or the Anthropic SDK backend) writes and edits the program and acts on exit codes; it never overrides a number.
@@ -274,8 +274,8 @@ through relations, regions and `place` targets, and S4R decides what is feasible
 
 ### Scale-space editing
 
-S4R makes a scene an editable scale-space: once every body is shrunk about its reference center,
-bodies with distinct reference centers come apart, and a body can be moved anywhere. `place(a, x, y, yaw)` is that move, issued by
+S4R makes a scene an editable scale-space: every body is shrunk about its reference center to the
+configured scale, where overlaps can remain or be introduced by placement, and a body can be moved anywhere. `place(a, x, y, yaw)` is that move, issued by
 the model from its understanding of the request; restoring the scale then resolves whatever still
 overlaps, with the target kept as a soft pull. The pipeline is shrink, arrange, restore.
 
@@ -415,7 +415,7 @@ scenes are physics-settled heaps in which cans and cartons also lie knocked over
 
 | gate | question | tool |
 |---|---|---|
-| G0 | is the asset admissible: closed visual mesh, more than one collision piece, proxy that matches the visual? | `mjcf_object_stats` |
+| G0 | is the asset admissible: collision and visual geom counts, a watertight merged collision mesh, collision extents against `reg_bbox` | `mjcf_object_stats` |
 | G2 | does any pair interpenetrate, is any body inside another, is any body unsupported, and (with `min_gap`) does every pair other than a body and its declared support keep the clearance? | FCL score with probed normals, containment and resting-contact tests (`simready.gates.verify`); pair-by-pair clearance with coverage (`simready.gates.clearance`) |
 | G3 | the repair: S4R scale continuation under the program | `simready.repair.upright_s4r` |
 | G5 | does the scene stay at rest in a physics engine? | MuJoCo settle with hull and CoACD proxies (`python -m simready.cli settle`) |

@@ -179,7 +179,7 @@ def build_world_collision_mesh(
                 obj._s4r_pieces = pieces
             except Exception:
                 pass
-        mesh._s4r_components = pieces
+        mesh._cache["s4r_components"] = pieces
     return mesh
 
 
@@ -314,26 +314,23 @@ def _any_piece_nested(boxes, lo_o, hi_o, tol: float = 1e-12) -> bool:
 
 
 def _mesh_piece_boxes(mesh: trimesh.Trimesh):
-    """Piece boxes of a world mesh with several pieces, cached on the mesh; None for one piece."""
-    boxes = getattr(mesh, "_s4r_piece_boxes", False)
-    if boxes is False:
-        comps = _mesh_components(mesh)
-        boxes = _piece_boxes(np.asarray(mesh.vertices, dtype=np.float64), _piece_layout(comps)) if len(comps) > 1 else None
-        try:
-            mesh._s4r_piece_boxes = boxes
-        except Exception:
-            pass
+    """Piece boxes of a world mesh with several pieces, kept in the mesh's
+    cache (dropped when the mesh changes); None for one piece."""
+    if "s4r_piece_boxes" in mesh._cache:
+        return mesh._cache["s4r_piece_boxes"]
+    comps = _mesh_components(mesh)
+    boxes = _piece_boxes(np.asarray(mesh.vertices, dtype=np.float64), _piece_layout(comps)) if len(comps) > 1 else None
+    mesh._cache["s4r_piece_boxes"] = boxes
     return boxes
 
 
 def _mesh_components(mesh: trimesh.Trimesh) -> list:
-    comps = getattr(mesh, "_s4r_components", None)
+    """Pieces of a mesh, kept in the mesh's own cache so that an in-place
+    change of its vertices or faces drops them."""
+    comps = mesh._cache["s4r_components"] if "s4r_components" in mesh._cache else None
     if comps is None:
         comps = _vertex_components(mesh.faces, len(mesh.vertices))
-        try:
-            mesh._s4r_components = comps
-        except Exception:
-            pass
+        mesh._cache["s4r_components"] = comps
     return comps
 
 

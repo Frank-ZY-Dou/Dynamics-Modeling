@@ -260,7 +260,7 @@ Rules:
 - Frame convention (RoboLab): left_of(a,b) means a.y >= b.y + gap; in_front_of(a,b) means a.x >= b.x + gap
   (the robot looks along +x). Distances in metres.
 - place(a, x, y, yaw) is a placement in the shrunken scale-space: it puts body a's reference centre at
-  (x, y) on its support while every body is small and nothing touches, and keeps pulling it there as
+  (x, y) on its support at the configured shrink scale, where overlaps may remain, and keeps pulling it there as
   the scale is restored; contacts and the other statements can still move it. Use it to lay a scene
   out from your understanding of the request; coordinates in the scene frame, yaw in degrees about z,
   and the supports' top rectangles are listed with the scene. Do not place bodies on top of each other.

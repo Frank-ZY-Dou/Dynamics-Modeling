@@ -1028,7 +1028,7 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
                     n_j = ms[j].face_normals[fj]
                     inside_ji = np.sum((vj - cl_i) * n_i, axis=1) < 0
                     inside_ij = np.sum((vi - cl_j) * n_j, axis=1) < 0
-                    if np.any(inside_ji) or np.any(inside_ij):
+                    if np.any(inside_ji) or np.any(inside_ij) or evaluate_world_collision_meshes([ms[i], ms[j]]).pen_pairs:
                         pen_set.add((i, j))
             return stats.pen_pairs, stats.max_penetration, stats.min_signed_distance, pen_set
 
@@ -1081,8 +1081,8 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
         if target_centers is None or attraction_alpha is None:
             return None
         raw = attraction_alpha(scale) if callable(attraction_alpha) else attraction_alpha
-        a = float(np.asarray(raw).max())
-        if a <= 1e-8:
+        a = np.broadcast_to(np.asarray(raw, dtype=np.float64).reshape(-1), (N,))[:, None]   # per-body weights
+        if not np.any(a > 1e-8):
             return None
         err = centers - target_centers
         delta = -a / (1.0 + a) * err
@@ -1129,7 +1129,8 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
                 _phase_times['contact'] += time.time() - _t_contact
             step_cache_err = None
             if cache_propagated and cached_contacts:
-                prop = {(c[0], c[1]): c[2] for c in cached_contacts}
+                prop = {(c[0], c[1]): c[2] + c[3].dot(last_dp[c[1]] - last_dp[c[0]]) - last_ds_applied * (c[4] + c[5])
+                        for c in cached_contacts}   # the rows advanced by the last accepted transition
                 errs = [abs(c[2] - prop[(c[0], c[1])]) for c in contacts if (c[0], c[1]) in prop]
                 if errs:
                     step_cache_err = float(max(errs))
@@ -1161,6 +1162,10 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
             contacts = cached_contacts
             steps_since_detection += 1
             step_cache_err = None
+            if audit:
+                truth_pen, truth_maxp, truth_minsd, truth_set = _audit_pairs_at(scale)
+                solver_set = set((min(i, j), max(i, j)) for (i, j, *_) in contacts)
+                missed = truth_set - solver_set
 
         # Pairs that need pushing this step.
         active = [c for c in contacts if ds * (c[4] + c[5]) + d_hat - c[2] > 0]
@@ -1190,7 +1195,9 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
         # With walls every body carries a wall row every step, so sparsity
         # is disabled; joint endpoints are always in the QP so a joint row is
         # never dropped because one end had no contact.
-        if contact_sparsity and walls is None:
+        # an attraction target is an objective term of every body, so the
+        # contact-only reduction is not applied while one is active
+        if contact_sparsity and walls is None and not attraction_on:
             active_set = {b for c in active for b in (c[0], c[1])} | joint_bodies
             active_bodies = sorted(active_set)
         else:

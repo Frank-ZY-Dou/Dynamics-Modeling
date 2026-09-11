@@ -77,11 +77,27 @@ def _touch_normal(oi, oj, ci, cj, up, eps=1e-3):
 
 
 def _contained(inner_verts, outer_mesh):
-    """True when the inner body's centroid and one extreme vertex lie inside the outer mesh."""
-    pts = np.array([inner_verts.mean(0), inner_verts[np.argmin(inner_verts[:, 2])]])
+    """True when the inner body's lowest vertex lies inside the outer mesh (the surfaces are
+    apart, so one surface point decides; the mean of a non-convex body's vertices may fall in
+    a hole and is not used)."""
+    pts = inner_verts[[np.argmin(inner_verts[:, 2])]]
     try:
         return bool(np.all(outer_mesh.contains(pts)))
     except Exception as exc:  # a failed query must not count as absence
+        raise GeometryQueryError(f"point-in-mesh query failed: {type(exc).__name__}: {exc}") from exc
+
+
+def _contained_touching(inner_verts, outer_mesh):
+    """Containment of a body whose surface touches the other body's surface: points slightly
+    inside the inner body (towards its box centre) must lie inside the outer solid. A body
+    resting in a cavity fails this (those points are in the cavity), a body flush against the
+    inside of a solid passes."""
+    c = 0.5 * (inner_verts.min(axis=0) + inner_verts.max(axis=0))
+    step = max(1, len(inner_verts) // 32)
+    pts = c + (inner_verts[::step] - c) * (1.0 - 1e-3)
+    try:
+        return bool(np.all(outer_mesh.contains(pts)))
+    except Exception as exc:
         raise GeometryQueryError(f"point-in-mesh query failed: {type(exc).__name__}: {exc}") from exc
 
 
@@ -175,12 +191,14 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
                                     proj = cv @ nrm
                                     signed = -(signed + float(proj.max() - proj.min()))
                                     wi = wj = cen
+                                    inner = a
                                     inside = True
                                     break
             elif nrm is None:
                 # touching without contact points: probe whether it is a resting contact
                 wi = 0.5 * (ci + cj); wj = wi.copy()
                 nrm = _touch_normal(objs[i], objs[j], ci, cj, np.array([0.0, 0.0, 1.0]), eps=probe_eps)
+                inner = None
             else:
                 # intersecting surfaces: FCL's contact normal has no reliable orientation;
                 # keep the sign for which moving body j along +normal separates the pair
@@ -200,8 +218,26 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
                         signed = 0.0
                         break
                 objs[j].setTranslation(t0)
+                inner = None
+            if containment and signed == 0.0 and not inside:
+                # touching surfaces with nested boxes: a body flush against the inside of a solid
+                # (a face of the inner coincides with a face of the outer) is inside it
+                inner = outer = None
+                if np.all(lo[i] >= lo[j] - 1e-9) and np.all(hi[i] <= hi[j] + 1e-9):
+                    inner, outer = i, j
+                elif np.all(lo[j] >= lo[i] - 1e-9) and np.all(hi[j] <= hi[i] + 1e-9):
+                    inner, outer = j, i
+                if inner is not None and _contained_touching(verts[inner], mesh_of(outer)):
+                    d = cj - ci
+                    nrm = d / max(np.linalg.norm(d), 1e-12)
+                    signed = -bodies[inner].extent_along(nrm if inner == j else -nrm, scale)
+                    wi = wj = verts[inner].mean(0)
+                    inside = True
+                else:
+                    inner = None
             pair = PairScore((i, j, signed, nrm, wi, wj))
             pair.contained = inside
+            pair.inner_index = inner if inside else None
             out.append(pair)
     return out
 
@@ -243,12 +279,13 @@ def verify_scene(scene: Scene, supports: dict | None = None, gap_tol: float = 2e
     for p in pairs:
         if getattr(p, "contained", False):
             i, j = p[0], p[1]
-            bi, bj = scene.bodies[i], scene.bodies[j]
-            vi, vj = bi.world_aabb(), bj.world_aabb()
-            if np.all(vi[0] >= vj[0] - 1e-9) and np.all(vi[1] <= vj[1] + 1e-9):
-                rep.contained.append((bi.name, bj.name))
-            else:
-                rep.contained.append((bj.name, bi.name))
+            inner = getattr(p, "inner_index", None)
+            if inner is None:
+                bi, bj = scene.bodies[i], scene.bodies[j]
+                vi, vj = bi.world_aabb(), bj.world_aabb()
+                inner = i if np.all(vi[0] >= vj[0] - 1e-9) and np.all(vi[1] <= vj[1] + 1e-9) else j
+            outer = j if inner == i else i
+            rep.contained.append((scene.bodies[inner].name, scene.bodies[outer].name))
     # A free body is supported when some contact holds it from below: a pair within gap_tol whose
     # normal has a vertical component pointing up into the body (a wall contact does not count).
     up = scene.up

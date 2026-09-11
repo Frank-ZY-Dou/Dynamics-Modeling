@@ -9,6 +9,7 @@ AABB-centred to form one Body.
 from __future__ import annotations
 
 import os
+import re
 
 from pathlib import Path
 
@@ -154,6 +155,18 @@ def load_scene_usda(path, fixture_key: str = "fixtures", world_prim: str | None 
     cache = UsdGeom.XformCache()
     bodies = []
     dropped = []
+    # a child whose composition failed anywhere below it (a missing reference or payload of one
+    # of its parts) is unresolved even when the rest of it loaded
+    broken = []
+    for err in stage.GetCompositionErrors():
+        site = getattr(err, "rootSite", None)
+        p = str(getattr(site, "path", "")) if site is not None else ""
+        if not p and site is not None:
+            m = re.search(r"<([^>]+)>", str(site))
+            p = m.group(1) if m else ""
+        rp = str(root.GetPath())
+        if p.startswith(rp + "/"):
+            broken.append(p[len(rp) + 1:].split("/")[0])
     for child in root.GetChildren():
         if not child.IsA(UsdGeom.Xformable) and not child.GetChildren():
             continue
@@ -207,9 +220,12 @@ def load_scene_usda(path, fixture_key: str = "fixtures", world_prim: str | None 
             meta["rest_rotation"] = R_rest.copy()
         bodies.append(Body(name=child.GetName(), verts=local - c_model, faces=Fw, center=center,
                            rotation=Rc, fixed=is_fixture, tags=tags, source=srcpath, meta=meta))
+    for name in broken:
+        if name not in dropped:
+            dropped.append(name)
     if dropped:
         import warnings
-        warnings.warn(f"{path}: {len(dropped)} referenced children without geometry (unresolved payloads?): {dropped}")
+        warnings.warn(f"{path}: {len(dropped)} children with unresolved assets (missing payloads or references): {dropped}")
     layers = sorted({os.path.abspath(lay.realPath) for lay in stage.GetUsedLayers()
                      if getattr(lay, "realPath", "") and os.path.isfile(lay.realPath)
                      and os.path.abspath(lay.realPath) != os.path.abspath(path)})
@@ -288,22 +304,17 @@ def write_scene_poses(scene: Scene, src_path, out_path, world_prim: str | None =
             xf.SetResetXformStack(reset)
             continue
         names = [op.GetOpName() for op in xf.GetOrderedXformOps()]
-        canonical = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]
-        # the authored ops are reused only when they compose as translate, orient, scale in that
-        # order, which is what the pose is decomposed into
-        simple = all(n in canonical for n in names) and names == [c for c in canonical if c in names]
-        if not simple:
-            # rotateXYZ / transform / pivot stacks or another op order: replace by translate, orient, scale
-            xf.ClearXformOpOrder()
-            tr = xf.AddTranslateOp(); orient = xf.AddOrientOp(); sc = xf.AddScaleOp()
-            sc.Set(Gf.Vec3f(*[float(x) for x in scale]))
-            xf.SetResetXformStack(reset)
-        else:
-            ops = {op.GetOpName(): op for op in xf.GetOrderedXformOps()}
-            tr = ops.get("xformOp:translate") or xf.AddTranslateOp()
-            orient = ops.get("xformOp:orient") or xf.AddOrientOp()
-            if "xformOp:scale" in ops:
-                ops["xformOp:scale"].Set(Gf.Vec3f(*[float(x) for x in scale]) if ops["xformOp:scale"].GetAttr().GetTypeName() == Sdf.ValueTypeNames.Float3 else Gf.Vec3d(*[float(x) for x in scale]))
+        canonical = ("xformOp:translate", "xformOp:orient", "xformOp:scale")
+        if not all(n in canonical for n in names):
+            xf.ClearXformOpOrder()          # rotateXYZ / transform / pivot stacks: start from an empty stack
+        ops = {op.GetOpName(): op for op in xf.GetOrderedXformOps()}
+        tr = ops.get(canonical[0]) or xf.AddTranslateOp()
+        orient = ops.get(canonical[1]) or xf.AddOrientOp()
+        sc = ops.get(canonical[2]) or xf.AddScaleOp()
+        sc.Set(Gf.Vec3f(*[float(x) for x in scale]) if sc.GetAttr().GetTypeName() == Sdf.ValueTypeNames.Float3 else Gf.Vec3d(*[float(x) for x in scale]))
+        # the pose is decomposed as translate, orient, scale: the stack is set to exactly that
+        # order, whatever subset of these ops the prim authored before
+        xf.SetXformOpOrder([tr, orient, sc], resetXformStack=reset)
         if tr.GetAttr().GetTypeName() == Sdf.ValueTypeNames.Float3:
             tr.Set(Gf.Vec3f(*[float(x) for x in t_loc]))
         else:
@@ -316,6 +327,11 @@ def write_scene_poses(scene: Scene, src_path, out_path, world_prim: str | None =
     src_dir = os.path.dirname(os.path.abspath(str(src_path))); out_dir = os.path.dirname(os.path.abspath(str(out_path)))
     if src_dir != out_dir:
         # the scene refers to its assets by relative paths: re-anchor them so the copy still resolves
+        root_layer = stage.GetRootLayer()
+        if root_layer.subLayerPaths:
+            root_layer.subLayerPaths = [
+                p if os.path.isabs(p) or p.startswith(("http", "omniverse")) else os.path.normpath(os.path.join(src_dir, p))
+                for p in root_layer.subLayerPaths]
         for prim in stage.Traverse():
             for kind in ("payloads", "references"):
                 lst = prim.GetPayloads() if kind == "payloads" else prim.GetReferences()
@@ -338,9 +354,10 @@ def write_scene_poses(scene: Scene, src_path, out_path, world_prim: str | None =
     return out_path
 
 
-def load_object_usd(path):
+def load_object_usd(path, layers: list | None = None):
     """Mesh (verts, faces) of an object USD in its own default-prim frame, plus
-    the AABB centre offset. Used to instantiate catalog objects at solver poses."""
+    the AABB centre offset. Used to instantiate catalog objects at solver poses.
+    Every layer the stage composed is appended to ``layers`` when given."""
     from pxr import Usd, UsdGeom
     import os
     if not os.path.exists(str(path)):
@@ -352,6 +369,12 @@ def load_object_usd(path):
     if stage is None:
         raise ValueError(f"cannot open object USD {path}")
     _stage_frame(stage, path)
+    errors = stage.GetCompositionErrors()
+    if errors:
+        raise ValueError(f"{path}: unresolved USD composition ({len(errors)} missing references or payloads)")
+    if layers is not None:
+        layers.extend(sorted({os.path.abspath(lay.realPath) for lay in stage.GetUsedLayers()
+                              if getattr(lay, "realPath", "") and os.path.isfile(lay.realPath)}))
     root = stage.GetDefaultPrim()
     cache = UsdGeom.XformCache()
     V, F, off = [], [], 0
@@ -372,7 +395,8 @@ def load_object_usd(path):
 def body_from_object_usd(name, path, position, yaw_deg=0.0, quat_wxyz=None, fixed=False, tags=None):
     """Instantiate an object USD at a RoboLab solver pose (translate + yaw or quat)."""
     import math
-    verts, faces = load_object_usd(path)
+    layers = []
+    verts, faces = load_object_usd(path, layers)
     R_rest = rest_rotation(path)
     if R_rest is not None:                      # resting frame, see simready.io.asset_rest
         verts = verts @ R_rest.T
@@ -389,7 +413,7 @@ def body_from_object_usd(name, path, position, yaw_deg=0.0, quat_wxyz=None, fixe
     lo, hi = verts.min(0), verts.max(0)
     c_model = 0.5 * (lo + hi)
     t = np.asarray(position, dtype=np.float64)
-    meta = {"prim_translate": t.copy(), "c_model": c_model}
+    meta = {"prim_translate": t.copy(), "c_model": c_model, "layers": layers}
     if R_rest is not None:
         meta["rest_rotation"] = R_rest.copy()
     b = Body(name=name, verts=verts - c_model, faces=faces, center=t + R @ c_model, rotation=R,

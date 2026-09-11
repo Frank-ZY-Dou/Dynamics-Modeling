@@ -248,7 +248,14 @@ def check_predicates(program: Program, scene: Scene, tol: float = 2e-3, upright_
                     out.append((f"on_support({nm},{sup})", False, None))
                     continue
                 g = float((b.world_vertices() @ scene.up).min()) - h
-                out.append((f"on_support({nm},{sup})", abs(g) <= tol, g))
+                touching = True
+                if abs(g) <= tol:
+                    # the rays under the body can meet the support through a hole in the body:
+                    # the body's mesh must also come within the tolerance of the support's mesh
+                    from ..gates.verify import pair_signed_distances
+                    pairs = pair_signed_distances([scene[sup], b], prefilter=tol, skip_fixed_pairs=False, containment=False)
+                    touching = bool(pairs) and float(pairs[0][2]) <= tol
+                out.append((f"on_support({nm},{sup})", abs(g) <= tol and touching, g))
         elif n == "upright":
             for nm in _bodies(scene, st.args[0]):
                 _, roll, pitch = decompose_zyx(scene[nm].rotation)

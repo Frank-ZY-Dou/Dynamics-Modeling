@@ -11,13 +11,13 @@ you write a constraint program, then call the tools and read their numbers.
 Exit codes of every tool: 0 = the requested outcome holds, 1 = it does not (read the JSON),
 2 = the program or an input is invalid (fix the program: every number must be finite, every field
 must belong to its statement, every gate line must parse) or a geometric query could not be
-evaluated (report it; do not retry the same command). `check`, `repair`, `settle` and `verify` print a JSON
-report on stdout; `summarize` and `prompt` print text.
+evaluated (report it; do not retry the same command). `check`, `repair` and `settle` print a JSON
+report on stdout; `summarize`, `prompt` and `verify` print text.
 
 ## Procedure
 1. Load or build the scene:
    `python -m simready.cli summarize <scene.usda|layout.json>` prints the body list with tags and sizes.
-   If the summary lists `dropped children`, the scene references assets that did not resolve;
+   If loading warns about unresolved assets, or `repair` reports a nonempty `dropped_children`, assets did not resolve;
    stop and report that — a certificate cannot cover a missing container.
 2. Produce the program: run `python -m simready.cli prompt <scene> --request "<text>"`, answer
    the printed prompt with ONE JSON object (schema included in the prompt), save it to `program.json`.

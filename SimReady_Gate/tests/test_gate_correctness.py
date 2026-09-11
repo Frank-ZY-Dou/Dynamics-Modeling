@@ -357,7 +357,7 @@ class Solver(unittest.TestCase):
         self.assertLessEqual(float(np.abs(after - before).max()), 0.6 * 0.01 + 1e-6)   # tail cap: 0.6 x max_xy_step per axis, solver tolerance
 
 
-def write_usda(path, meters_per_unit=None, up_axis=None, ghost=True):
+def write_usda(path, meters_per_unit=None, up_axis=None, ghost=True, mug=True):
     """A minimal Z-up scene: a fixed table slab, a free cube on it and, optionally, a prim whose
     payload does not resolve."""
     def mesh(extents, indent="        "):
@@ -373,7 +373,7 @@ def write_usda(path, meters_per_unit=None, up_axis=None, ghost=True):
     if up_axis is not None:
         meta.append(f'    upAxis = "{up_axis}"')
     text = "#usda 1.0\n(\n" + "\n".join(meta) + "\n)\n\ndef Xform \"World\" {\n"
-    for name, ext, z in (("table", (1.0, 1.0, 0.05), -0.025), ("mug", (0.1, 0.1, 0.1), 0.05)):
+    for name, ext, z in [("table", (1.0, 1.0, 0.05), -0.025)] + ([("mug", (0.1, 0.1, 0.1), 0.05)] if mug else []):
         text += (f'    def Xform "{name}" {{\n        double3 xformOp:translate = (0, 0, {z})\n'
                  f'        uniform token[] xformOpOrder = ["xformOp:translate"]\n' + mesh(ext) + "    }\n")
     if ghost:
@@ -642,10 +642,12 @@ class RestOrientation(unittest.TestCase):
         self.assertLess(d[2], 0.03)
 
 
-def write_op_order_usda(path):
+def write_op_order_usda(path, world_scale=None):
     """A Z-up scene whose free bodies author their xform ops in orders other than translate,
-    orient, scale: a scale applied after the rotation (which reads as shear in the local map) and a
-    rotation authored after the translation."""
+    orient, scale, or only some of them: a scale applied after the rotation (which reads as shear
+    in the local map), a rotation authored after the translation, a translate-and-scale stack, a
+    lone scale and a lone rotation. With ``world_scale`` the World prim carries a non-uniform
+    scale, so every body sits under a scaled parent."""
     def mesh(extents, indent="        "):
         m = trimesh.creation.box(extents=extents)
         pts = ", ".join(f"({x:.4f}, {y:.4f}, {z:.4f})" for x, y, z in m.vertices)
@@ -654,7 +656,11 @@ def write_op_order_usda(path):
                 f'{indent}    int[] faceVertexCounts = [{", ".join(["3"] * len(m.faces))}]\n'
                 f'{indent}    int[] faceVertexIndices = [{idx}]\n{indent}}}\n')
     c, s = math.cos(math.radians(20.0) / 2), math.sin(math.radians(20.0) / 2)
-    text = ('#usda 1.0\n(\n    defaultPrim = "World"\n    metersPerUnit = 1\n    upAxis = "Z"\n)\n\ndef Xform "World" {\n'
+    world_ops = ""
+    if world_scale is not None:
+        world_ops = (f'    float3 xformOp:scale = ({world_scale[0]}, {world_scale[1]}, {world_scale[2]})\n'
+                     '    uniform token[] xformOpOrder = ["xformOp:scale"]\n')
+    text = ('#usda 1.0\n(\n    defaultPrim = "World"\n    metersPerUnit = 1\n    upAxis = "Z"\n)\n\ndef Xform "World" {\n' + world_ops +
             '    def Xform "table" {\n        double3 xformOp:translate = (0, 0, -0.025)\n'
             '        uniform token[] xformOpOrder = ["xformOp:translate"]\n' + mesh((1.0, 1.0, 0.05)) + "    }\n"
             '    def Xform "scaled_after_turn" {\n        double3 xformOp:translate = (0.2, 0, 0.05)\n'
@@ -662,7 +668,13 @@ def write_op_order_usda(path):
             '        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale", "xformOp:orient"]\n' + mesh((0.1, 0.1, 0.1)) + "    }\n"
             '    def Xform "turned_after_move" {\n        double3 xformOp:translate = (-0.2, 0.1, 0.05)\n'
             f'        quatf xformOp:orient = ({c:.7f}, 0, 0, {s:.7f})\n'
-            '        uniform token[] xformOpOrder = ["xformOp:orient", "xformOp:translate"]\n' + mesh((0.1, 0.1, 0.1)) + "    }\n}\n")
+            '        uniform token[] xformOpOrder = ["xformOp:orient", "xformOp:translate"]\n' + mesh((0.1, 0.1, 0.1)) + "    }\n"
+            '    def Xform "moved_scaled" {\n        double3 xformOp:translate = (0.2, 0.25, 0.05)\n        float3 xformOp:scale = (2, 1, 1)\n'
+            '        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]\n' + mesh((0.1, 0.1, 0.1)) + "    }\n"
+            '    def Xform "scaled_only" {\n        float3 xformOp:scale = (1, 2, 1)\n'
+            '        uniform token[] xformOpOrder = ["xformOp:scale"]\n' + mesh((0.1, 0.1, 0.1)) + "    }\n"
+            f'    def Xform "turned_only" {{\n        quatf xformOp:orient = ({c:.7f}, 0, 0, {s:.7f})\n'
+            '        uniform token[] xformOpOrder = ["xformOp:orient"]\n' + mesh((0.1, 0.1, 0.1)) + "    }\n}\n")
     open(path, "w").write(text)
 
 
@@ -706,7 +718,7 @@ class PiecesSheetsAndFrames(unittest.TestCase):
     def test_layout_keeps_the_base_scene_unresolved_children(self):
         from simready.cli import load_any
         with tempfile.TemporaryDirectory() as d:
-            base = os.path.join(d, "base.usda"); write_usda(base, ghost=True)
+            base = os.path.join(d, "base.usda"); write_usda(base, ghost=True, mug=False)
             layout = os.path.join(d, "layout.json")
             json.dump({"base_scene": base, "objects": []}, open(layout, "w"))
             sc = load_any(layout)
@@ -721,10 +733,15 @@ class PiecesSheetsAndFrames(unittest.TestCase):
                 body_from_object_usd("cube", path, (0, 0, 0))
 
     def test_written_pose_keeps_the_geometry_for_other_op_orders(self):
+        for world_scale in (None, (2.0, 1.0, 1.0)):
+            self._round_trip_ops(world_scale)
+
+    def _round_trip_ops(self, world_scale):
         from simready.io.usd_io import load_scene_usda, write_scene_poses
         with tempfile.TemporaryDirectory() as d:
-            src = os.path.join(d, "ops.usda"); write_op_order_usda(src)
+            src = os.path.join(d, "ops.usda"); write_op_order_usda(src, world_scale=world_scale)
             sc = load_scene_usda(src)
+            self.assertEqual(len(sc.free()), 5)
             yaw = math.radians(30.0)
             Rz = np.array([[math.cos(yaw), -math.sin(yaw), 0.0], [math.sin(yaw), math.cos(yaw), 0.0], [0.0, 0.0, 1.0]])
             want = {}
@@ -739,3 +756,106 @@ class PiecesSheetsAndFrames(unittest.TestCase):
             for name, w in want.items():
                 got = back[name].world_vertices()
                 np.testing.assert_allclose(np.sort(got, axis=0), np.sort(w, axis=0), atol=1e-6, err_msg=name)
+
+
+class LayersOpsAndContainment(unittest.TestCase):
+    def test_catalog_object_layers_are_bound(self):
+        from simready.cli import load_any, asset_hashes
+        with tempfile.TemporaryDirectory() as d:
+            geometry = os.path.join(d, "geometry.usda"); write_usda(geometry, ghost=False, mug=False)
+            wrapper = os.path.join(d, "wrapper.usda")
+            open(wrapper, "w").write('#usda 1.0\n(\n    defaultPrim = "World"\n)\n\ndef Xform "World" (\n    references = @./geometry.usda@</World>\n)\n{\n}\n')
+            layout = os.path.join(d, "layout.json")
+            json.dump({"objects": [{"name": "thing", "usd_path": wrapper, "x": 0.0, "y": 0.0, "z": 0.5}]}, open(layout, "w"))
+            sc = load_any(layout)
+            keys = [os.path.abspath(k) for k in asset_hashes(sc) if not k.startswith("<")]
+            self.assertIn(os.path.abspath(wrapper), keys)
+            self.assertIn(os.path.abspath(geometry), keys)          # the layer the object's geometry comes from
+
+    def test_layout_base_scene_with_movable_bodies_is_refused(self):
+        from simready.cli import load_any
+        with tempfile.TemporaryDirectory() as d:
+            base = os.path.join(d, "base.usda"); write_usda(base, ghost=False)          # a table and a free mug
+            layout = os.path.join(d, "layout.json"); json.dump({"base_scene": base, "objects": []}, open(layout, "w"))
+            with self.assertRaises(ValueError):
+                load_any(layout)
+
+    def test_partly_unresolved_child_is_reported(self):
+        from simready.io.usd_io import load_scene_usda, body_from_object_usd
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "scene.usda"); write_usda(path, ghost=False)
+            text = open(path).read().replace('    def Xform "mug" {',
+                                             '    def Xform "mug" {\n        def Xform "part" (\n            references = @missing_part.usda@\n        ) {\n        }')
+            open(path, "w").write(text)
+            sc = load_scene_usda(path)
+            self.assertIn("mug", [b.name for b in sc.bodies])       # its own mesh loads
+            self.assertIn("mug", sc.meta["dropped"])                  # but a part of it did not
+            with self.assertRaises(ValueError):
+                body_from_object_usd("mug", path, (0, 0, 0))        # a catalog object must load completely
+
+    def test_sublayered_scene_writes_to_another_directory(self):
+        from simready.io.usd_io import load_scene_usda, write_scene_poses
+        with tempfile.TemporaryDirectory() as d:
+            base = os.path.join(d, "base.usda"); write_usda(base, ghost=False)
+            root = os.path.join(d, "scene.usda")
+            open(root, "w").write('#usda 1.0\n(\n    defaultPrim = "World"\n    subLayers = [@./base.usda@]\n)\n')
+            sc = load_scene_usda(root)
+            self.assertEqual(sorted(b.name for b in sc.bodies), ["mug", "table"])
+            sc["mug"].center = sc["mug"].center + np.array([0.1, 0.0, 0.0])
+            want = sc["mug"].world_vertices()
+            other = os.path.join(d, "elsewhere"); os.makedirs(other)
+            out = os.path.join(other, "moved.usda")
+            write_scene_poses(sc, root, out)
+            back = load_scene_usda(out)
+            self.assertEqual(sorted(b.name for b in back.bodies), ["mug", "table"])
+            np.testing.assert_allclose(np.sort(back["mug"].world_vertices(), axis=0), np.sort(want, axis=0), atol=1e-6)
+
+    def test_nonconvex_body_inside_another_is_contained(self):
+        outer = trimesh.creation.torus(major_radius=0.4, minor_radius=0.15)
+        inner = trimesh.creation.torus(major_radius=0.4, minor_radius=0.05)
+        ring = Body.from_mesh("ring", outer.vertices, outer.faces, center=np.array([0.0, 0.0, 0.5]), fixed=True, tags={"fixture"})
+        core = Body.from_mesh("core", inner.vertices, inner.faces, center=np.array([0.0, 0.0, 0.5]))
+        pairs = pair_signed_distances([ring, core])
+        self.assertEqual(len(pairs), 1)
+        self.assertLess(pairs[0][2], 0.0)
+        self.assertTrue(pairs[0].contained)
+
+    def test_body_flush_inside_a_solid_is_contained(self):
+        from simready.gates.verify import verify_scene
+        big = box("bin", (2.0, 2.0, 2.0), (0.0, 0.0, 1.0), fixed=True, tags=("fixture",))
+        flush = box("cube", (0.2, 0.2, 0.2), (0.0, 0.0, 1.9))          # its top face lies in the bin's top face
+        pairs = pair_signed_distances([big, flush])
+        self.assertEqual(len(pairs), 1)
+        self.assertLess(pairs[0][2], 0.0)
+        self.assertTrue(pairs[0].contained)
+        self.assertEqual(verify_scene(Scene([big, flush])).contained, [("cube", "bin")])
+
+    def test_body_touching_a_cavity_wall_is_not_contained(self):
+        ring = trimesh.creation.annulus(r_min=0.3, r_max=0.5, height=0.2, sections=4)
+        ring.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 4, [0, 0, 1]))   # square hole, axis-aligned walls at x = +-0.3/sqrt(2)
+        cup = Body.from_mesh("cup", ring.vertices, ring.faces, center=np.array([0.0, 0.0, 0.1]), fixed=True, tags={"fixture"})
+        wall = 0.3 / math.sqrt(2.0)
+        cube = box("cube", (0.1, 0.1, 0.1), (wall - 0.05, 0.0, 0.05))     # its +x face lies in the cavity wall
+        pairs = pair_signed_distances([cup, cube])
+        self.assertEqual(len(pairs), 1)
+        self.assertGreaterEqual(pairs[0][2], 0.0)
+        self.assertFalse(pairs[0].contained)
+
+    def test_contained_labels_follow_the_inner_body(self):
+        from simready.gates.verify import verify_scene
+        bin_ = box("bin", (2.0, 2.0, 2.0), (0.0, 0.0, 1.0), fixed=True, tags=("fixture",))
+        two = trimesh.util.concatenate([trimesh.creation.box(extents=(0.2, 0.2, 0.2)).apply_translation([-1.5, 0, 0]),
+                                        trimesh.creation.box(extents=(0.2, 0.2, 0.2)).apply_translation([1.5, 0, 0])])
+        body = Body.from_mesh("two", two.vertices, two.faces, center=np.array([1.5, 0.0, 1.0]))
+        for order in ((bin_, body), (body, bin_)):
+            self.assertEqual(verify_scene(Scene(list(order))).contained, [("two", "bin")])
+
+    def test_on_support_needs_the_body_to_touch_the_support(self):
+        ring = trimesh.creation.annulus(r_min=0.2, r_max=0.3, height=0.1)
+        post = box("post", (0.1, 0.1, 0.05), (0.0, 0.0, -0.025), fixed=True, tags=("support", "fixture"))   # its top at z = 0, inside the hoop's hole
+        hoop = Body.from_mesh("hoop", ring.vertices, ring.faces, center=np.array([0.0, 0.0, 0.05]))          # bottom at z = 0, hanging around the post
+        preds = dict((n, (ok, v)) for n, ok, v in check_predicates(parse_program("program\n  on_support(hoop, post)"), Scene([post, hoop])))
+        self.assertFalse(preds["on_support(hoop,post)"][0])
+        cube = box("cube", (0.1, 0.1, 0.1), (0.0, 0.0, 0.05))
+        preds = dict((n, (ok, v)) for n, ok, v in check_predicates(parse_program("program\n  on_support(cube, post)"), Scene([post, cube])))
+        self.assertTrue(preds["on_support(cube,post)"][0])

@@ -89,7 +89,7 @@ def _solve_qp_osqp(ci_np, cj_np, cn_np, b_np, n_bodies):
                      eps_abs=1e-7, eps_rel=1e-7, max_iter=8000, verbose=False, polishing=True)
     dp = res.x if qp_status_ok(res) else None
     if dp is None or not _np.all(_np.isfinite(dp)):
-        dp = _np.zeros(dim)
+        raise RuntimeError(f"diagnostic OSQP solve failed: {getattr(res.info, 'status', 'no solution')}")
     return dp.reshape(n_bodies, 3).astype(_np.float32)
 
 

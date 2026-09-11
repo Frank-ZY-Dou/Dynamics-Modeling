@@ -63,6 +63,10 @@ def load_any(path: str) -> Scene:
                 raise FileNotFoundError(f"the layout's base scene does not exist: {L['base_scene']}")
             from .io.usd_io import load_scene_usda
             base = load_scene_usda(L["base_scene"])
+            if base.free():
+                # a layout writes back only its own objects: a base scene with movable bodies
+                # would be repaired without its result being saved
+                raise ValueError(f"the layout's base scene has movable bodies {[b.name for b in base.free()]}; repair that USD directly")
             bodies.extend(base.bodies)
             meta["base_scene"] = L["base_scene"]
             meta["dropped"] = list(base.meta.get("dropped", []))      # unresolved children of the base scene
@@ -149,6 +153,8 @@ def asset_hashes(scene: Scene) -> dict:
         if portable(src) not in out:
             out[portable(src)] = sha16(src)
     extra = list(scene.meta.get("layers", []))              # every layer the USD stage composed (references, payloads)
+    for b in scene.bodies:
+        extra.extend(b.meta.get("layers", []))              # the layers a catalog object composed
     if scene.meta.get("base_scene"):
         extra.append(scene.meta["base_scene"])                # a layout's base scene
     for src in extra:
@@ -297,7 +303,7 @@ def cmd_repair(a):
             from .io.usd_io import write_scene_poses
             write_scene_poses(sc, a.scene, a.out)          # asset paths are re-anchored when --out is elsewhere
             back = load_any(a.out)                               # round trip must reproduce the repaired poses
-            worst = max((float(np.abs(back[b.name].center - b.center).max()) for b in sc.free()), default=0.0)
+            worst = max((float(np.abs(back[b.name].world_vertices() - b.world_vertices()).max()) for b in sc.free()), default=0.0)
             report["written_pose_error_m"] = worst
             if worst > 1e-4:          # float32 orient ops reproduce poses to ~1e-6 m; 0.1 mm is far inside every tolerance
                 report["ok"] = ok = False; report["error"] = f"written scene does not reproduce the repaired poses ({worst:.2e} m)"
