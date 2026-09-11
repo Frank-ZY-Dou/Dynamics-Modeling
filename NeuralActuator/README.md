@@ -32,7 +32,7 @@ Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>,
 - [Inference](#inference)
 - [Results (OpenManipulator-X)](#results-openmanipulator-x)
 - [Additional differentiable simulation backends](#additional-differentiable-simulation-backends)
-  - [Newton (Warp)](#newton-warp) · [MuJoCo Warp](#mujoco-warp)
+  - [Newton (Warp)](#newton-warp) · [MuJoCo Warp](#mujoco-warp) · [SuperDex](#superdex)
 - [Additional robotic platforms and variants](#additional-robotic-platforms-and-variants)
   - [SO-101 (LeRobot arm)](#so-101-lerobot-arm) · [Franka Panda](#franka-panda) · [Residual torque variant](#residual-torque-variant) · [Implicit vs. explicit force coupling with differentiable simulation](#implicit-vs-explicit-force-coupling-with-differentiable-simulation)
 - [Hardware and Data Collection](#hardware-and-data-collection)
@@ -735,6 +735,148 @@ same ordering and gap as MJX (1.5x) and Newton (1.6x): the comparison holds acro
 three simulators. Training curves under MJWarp track the Newton runs closely at equal
 epochs (2.44 vs 2.44 deg at epoch 5,000 on the first seed), consistent with the two
 backends simulating the same physics.
+
+### SuperDex
+
+A fourth backend backpropagates through [Project SuperDex](https://github.com/facebookresearch/project_superdex),
+Meta's articulated-body and soft-body engine (Backward Euler, C++), through the
+[differentiable SuperDex](https://github.com/Frank-ZY-Dou/differentiable-superdex) fork, which
+adds a per-step adjoint of the engine's implicit step, the input and output adjoints the
+rollout needs (joint torques, joint pose and velocity, external forces, contact forces), and a
+URDF converter. Network, data, losses and protocol are unchanged, and training runs through
+the same PyTorch trainer via `--engine superdex`. The code is under `superdex/`. Both inference
+modes are shown, matching the OMX section above.
+
+**Dynamics rollout.**
+
+<table align="center">
+  <tr>
+    <th align="center">OpenManipulator-X, 300 g</th>
+    <th align="center">OpenManipulator-X, 400 g</th>
+    <th align="center">OpenManipulator-X, 500 g</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/superdex_omx_300g.gif" width="240" alt="OMX 300 g pick-and-place, SuperDex simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+    <td align="center"><img src="docs/media/superdex_omx_400g.gif" width="240" alt="OMX 400 g pick-and-place, SuperDex simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+    <td align="center"><img src="docs/media/superdex_omx_500g.gif" width="240" alt="OMX 500 g pick-and-place, SuperDex simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
+  </tr>
+  <tr>
+    <td align="center"><code>python superdex/rollout_superdex.py ... ; python superdex/render_superdex.py ...</code></td>
+    <td align="center"><code>python superdex/rollout_superdex.py ... ; python superdex/render_superdex.py ...</code></td>
+    <td align="center"><code>python superdex/rollout_superdex.py ... ; python superdex/render_superdex.py ...</code></td>
+  </tr>
+</table>
+
+**Virtual force sensor.**
+
+<table align="center">
+  <tr>
+    <th align="center">OpenManipulator-X, 300 g</th>
+    <th align="center">OpenManipulator-X, 400 g</th>
+    <th align="center">OpenManipulator-X, 500 g</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/superdex_omx_300g_deploy.gif" width="240" alt="OMX 300 g pick-and-place, SuperDex force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
+    <td align="center"><img src="docs/media/superdex_omx_400g_deploy.gif" width="240" alt="OMX 400 g pick-and-place, SuperDex force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
+    <td align="center"><img src="docs/media/superdex_omx_500g_deploy.gif" width="240" alt="OMX 500 g pick-and-place, SuperDex force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
+  </tr>
+  <tr>
+    <td align="center"><code>python superdex/rollout_superdex.py --force_only ... ; python superdex/render_superdex.py ...</code></td>
+    <td align="center"><code>python superdex/rollout_superdex.py --force_only ... ; python superdex/render_superdex.py ...</code></td>
+    <td align="center"><code>python superdex/rollout_superdex.py --force_only ... ; python superdex/render_superdex.py ...</code></td>
+  </tr>
+</table>
+
+#### Simulation interface
+
+SuperDex builds the robot from a URDF (`superdex/robot/omx.urdf`, converted to the engine's
+package format with the fork's `tools/urdf_to_superdex_bot.py`), so the MuJoCo model is
+translated rather than loaded: the joint limits are the MJCF ones, joint damping and armature
+are set through the engine's per-joint friction and joint-inertia parameters, and the run is
+contact-free like the other backends. A control step is four Backward-Euler substeps with the
+torques applied as external joint forces, the gripper torque halved onto the two finger joints
+as in the Newton backend, and control torques clamped to the actuator range on the PyTorch side.
+The measured end-effector force enters as `tau_ext = J^T f` through the same differentiable
+forward-kinematics chain as the other backends. The engine is a CPU library with one scene per
+lane, so the lanes run in worker processes (one per lane by default) that the trainer drives
+over sockets; the workers may run a separate Python 3.12 environment with the fork installed
+(`SUPERDEX_PYTHON`, see `superdex/requirements.txt`). The step's output velocity is the
+Backward-Euler pose difference over the last substep, which the engine's joint-velocity
+reading matches to within a term of order dt^2; with this definition the gradient with
+respect to the output velocity is a gradient with respect to two poses, which the engine's
+adjoint seeds exactly.
+
+#### Gradients
+
+Each control step is one differentiable operation whose backward recomputes the substeps under
+the fork's checkpointed adjoint sweep and reads the gradients with respect to the input pose,
+the input velocity and the torque. Gradients agree with central finite differences on every
+input channel (control, external force, and state) to within 5e-6 relative; the forward
+Newton solve converges to a residual tolerance, which a finite difference with a small step sees
+as noise, so the comparison uses a step of 1e-4 (or a tighter solver tolerance,
+`SUPERDEX_SOLVER_TOL`).
+
+#### Runtime and backend characteristics
+
+One training step is a forward and backward pass through network and simulator at batch size
+16 with 128-step rollouts, the protocol of the runtime table above; SuperDex is a CPU library,
+so the batch lanes run in worker processes (16 cores here) while the network stays on the GPU.
+The deviation column is the maximum arm-joint deviation from a plain-MuJoCo float64 reference
+over 320-step torque-driven rollouts on the OMX model, measured as in that table. SuperDex is
+an independent engine built from the URDF, so it is not expected to reproduce MuJoCo's numbers
+exactly; the deviation is of the same order as Newton's.
+
+| Simulator | Interface | Training step | Deviation from MuJoCo float64 |
+|---|---|---|---|
+| SuperDex (float64, CPU) | PyTorch | 29 ms | 2.3e-2 rad |
+
+#### Usage
+
+```bash
+# build the differentiable SuperDex fork in its own Python 3.12 environment (see superdex/requirements.txt)
+git clone https://github.com/Frank-ZY-Dou/differentiable-superdex && cd differentiable-superdex && uv sync --extra fp64
+export SUPERDEX_PYTHON=$PWD/.venv/bin/python
+
+cd newton
+
+# train with the shared PyTorch trainer, engine swapped
+python torch_native/train_newton_torch.py --config ../superdex/configs/train_superdex_omx.yaml \
+    --flax_init --engine superdex --log_json outputs/superdex_run/train_log.jsonl
+
+# evaluate: convert to the released Flax format, then score with the standard script
+python torch_native/export_flax.py --ckpt <ckpt>.pt --out <ckpt>_flax.pkl --use_ema
+python ../evaluate_actuator.py --model_path <ckpt>_flax.pkl \
+    --config ../configs/weight_all.yaml --output <results>.json
+
+# render a rollout (dynamics, or --force_only for the virtual force sensor)
+python ../superdex/rollout_superdex.py --ckpt <ckpt>.pt \
+    --csv ../data/weight/pick_place_object_500g/validation/001.csv --out rollout.npz
+python ../superdex/render_superdex.py --npz rollout.npz --out rollout.mp4
+```
+
+#### Results
+
+Scored by `evaluate_actuator.py` on the nine weight-benchmark tasks (EMA weights, 600-step
+window; three seeds, range in brackets), the protocol of the MJWarp table above and its
+training budget per seed, so the two tables are directly comparable: each implicit and
+explicit pair is compared where the explicit run stops, and the implicit rows are also
+reported at their own, later stopping point. The last column is the end-effector force error,
+the all-task mean.
+
+| Coupling | J1 | J2 | J3 | J4 | Arm mean (deg) | Grip (mm) | Force (N) |
+|---|---|---|---|---|---|---|---|
+| Implicit (matched budget) | 1.81 | 2.00 | 1.76 | 1.40 | 1.74 [1.54-1.86] | 0.24 | 0.084 |
+| Explicit (matched budget) | 2.14 | 3.47 | 3.44 | 1.85 | 2.73 [2.40-2.92] | 0.40 | 0.103 |
+| Implicit (full budget) | 1.36 | 1.63 | 1.37 | 1.07 | 1.36 [1.27-1.43] | 0.18 | 0.077 |
+
+At a matched budget, implicit coupling beats explicit by 1.6x in arm error and by 1.7x in
+grip error, the ordering and gap of MJX (1.5x), Newton (1.6x) and MJWarp (1.6x), and the force
+error is lower as well. The numbers land on the MJWarp ones seed by seed (implicit at full
+budget 1.37 / 1.43 / 1.27 deg against 1.37 / 1.44 / 1.24; explicit at the matched budget
+2.40 / 2.92 / 2.86 against 2.41 / 2.93 / 2.79), and the curves coincide throughout training:
+at matched budgets along the run the three-seed implicit mean agrees with the MJWarp and
+Newton ones to the second decimal. A fourth engine, with its own solver, its own model
+description and a CPU implementation, reproduces the result.
 
 ## Additional robotic platforms and variants
 

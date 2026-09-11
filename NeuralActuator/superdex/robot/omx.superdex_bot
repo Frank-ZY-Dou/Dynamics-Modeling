@@ -1,0 +1,425 @@
+{
+  "contactOverrides": [
+    {
+      "enable": false,
+      "linkA": "link1",
+      "linkB": "link3"
+    },
+    {
+      "enable": false,
+      "linkA": "link1",
+      "linkB": "link4"
+    },
+    {
+      "enable": false,
+      "linkA": "link1",
+      "linkB": "link5"
+    },
+    {
+      "enable": false,
+      "linkA": "link1",
+      "linkB": "end_effector_link"
+    },
+    {
+      "enable": false,
+      "linkA": "link1",
+      "linkB": "gripper_link"
+    },
+    {
+      "enable": false,
+      "linkA": "link1",
+      "linkB": "gripper_link_sub"
+    }
+  ],
+  "defaultPose": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "joints": [
+    {
+      "name": "world_joint",
+      "type": "Hard"
+    },
+    {
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "effortLimit": 1.0,
+      "friction": {
+        "coulomb": 0.0,
+        "viscous": 1.0
+      },
+      "limitDamping": 0.0,
+      "limitStiffness": 100.0,
+      "maxLimit": [
+        0.0,
+        0.0,
+        3.14159
+      ],
+      "minLimit": [
+        -0.0,
+        -0.0,
+        -3.14159
+      ],
+      "name": "joint1",
+      "parentLinkFromJoint": {
+        "translation": [
+          0.012,
+          0.0,
+          0.017
+        ]
+      },
+      "type": "Revolute"
+    },
+    {
+      "axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "effortLimit": 1.0,
+      "friction": {
+        "coulomb": 0.0,
+        "viscous": 1.0
+      },
+      "limitDamping": 0.0,
+      "limitStiffness": 100.0,
+      "maxLimit": [
+        0.0,
+        1.5,
+        0.0
+      ],
+      "minLimit": [
+        -0.0,
+        -2.2,
+        -0.0
+      ],
+      "name": "joint2",
+      "parentLinkFromJoint": {
+        "translation": [
+          0.0,
+          0.0,
+          0.0595
+        ]
+      },
+      "type": "Revolute"
+    },
+    {
+      "axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "effortLimit": 1.0,
+      "friction": {
+        "coulomb": 0.0,
+        "viscous": 1.0
+      },
+      "limitDamping": 0.0,
+      "limitStiffness": 100.0,
+      "maxLimit": [
+        0.0,
+        1.7,
+        0.0
+      ],
+      "minLimit": [
+        -0.0,
+        -2.0,
+        -0.0
+      ],
+      "name": "joint3",
+      "parentLinkFromJoint": {
+        "translation": [
+          0.024,
+          0.0,
+          0.128
+        ]
+      },
+      "type": "Revolute"
+    },
+    {
+      "axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "effortLimit": 1.0,
+      "friction": {
+        "coulomb": 0.0,
+        "viscous": 1.0
+      },
+      "limitDamping": 0.0,
+      "limitStiffness": 100.0,
+      "maxLimit": [
+        0.0,
+        1.97,
+        0.0
+      ],
+      "minLimit": [
+        -0.0,
+        -1.7,
+        -0.0
+      ],
+      "name": "joint4",
+      "parentLinkFromJoint": {
+        "translation": [
+          0.124,
+          0.0,
+          0.0
+        ]
+      },
+      "type": "Revolute"
+    },
+    {
+      "name": "end_effector_joint",
+      "parentLinkFromJoint": {
+        "translation": [
+          0.126,
+          0.0,
+          0.0
+        ]
+      },
+      "type": "Hard"
+    },
+    {
+      "axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "effortLimit": 1.0,
+      "friction": {
+        "coulomb": 0.0,
+        "viscous": 1.0
+      },
+      "limitDamping": 0.0,
+      "limitStiffness": 100.0,
+      "maxLimit": [
+        0.0,
+        0.02,
+        0.0
+      ],
+      "minLimit": [
+        -0.0,
+        -0.011,
+        -0.0
+      ],
+      "name": "gripper",
+      "parentLinkFromJoint": {
+        "translation": [
+          0.0817,
+          0.021,
+          0.0
+        ]
+      },
+      "type": "Prismatic"
+    },
+    {
+      "axis": [
+        0.0,
+        -1.0,
+        0.0
+      ],
+      "effortLimit": 1.0,
+      "friction": {
+        "coulomb": 0.0,
+        "viscous": 1.0
+      },
+      "limitDamping": 0.0,
+      "limitStiffness": 100.0,
+      "maxLimit": [
+        0.0,
+        -0.02,
+        0.0
+      ],
+      "minLimit": [
+        -0.0,
+        0.011,
+        -0.0
+      ],
+      "name": "gripper_sub",
+      "parentLinkFromJoint": {
+        "translation": [
+          0.0817,
+          -0.021,
+          0.0
+        ]
+      },
+      "type": "Prismatic"
+    }
+  ],
+  "links": [
+    {
+      "centerOfMass": [
+        0.00030876154,
+        0.0,
+        -0.00012176461
+      ],
+      "mass": 0.079119962,
+      "momentOfInertia": [
+        1.2505234e-05,
+        0.0,
+        -1.7855208e-07,
+        2.1898364e-05,
+        0.0,
+        1.9267361e-05
+      ],
+      "name": "link1",
+      "renderModel": "render/link1_render.glb",
+      "shape": "collision/link1_collision.stl"
+    },
+    {
+      "centerOfMass": [
+        -0.0003018487,
+        0.00054043684,
+        0.047433463999999995
+      ],
+      "mass": 0.098406837,
+      "momentOfInertia": [
+        3.4543422e-05,
+        -1.6031095e-08,
+        -3.8375155e-07,
+        3.2689329e-05,
+        2.8511935e-08,
+        1.885032e-05
+      ],
+      "name": "link2",
+      "parentLink": 0,
+      "renderModel": "render/link2_render.glb",
+      "renderModelRotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "renderModelTranslation": [
+        0.0,
+        0.0,
+        0.019
+      ],
+      "shape": "collision/link2_collision.stl",
+      "shapeRotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "shapeTranslation": [
+        0.0,
+        0.0,
+        0.019
+      ]
+    },
+    {
+      "centerOfMass": [
+        0.010308393,
+        0.00037743363,
+        0.10170197
+      ],
+      "mass": 0.13850917,
+      "momentOfInertia": [
+        0.00033055381,
+        -9.7940978e-08,
+        -3.8505711e-05,
+        0.00034290447,
+        -1.5717516e-06,
+        6.0346498e-05
+      ],
+      "name": "link3",
+      "parentLink": 1,
+      "renderModel": "render/link3_render.glb",
+      "shape": "collision/link3_collision.stl"
+    },
+    {
+      "centerOfMass": [
+        0.09090959,
+        0.00038929816,
+        0.00022413279
+      ],
+      "mass": 0.13274562,
+      "momentOfInertia": [
+        3.0654178e-05,
+        -1.2764155e-06,
+        -2.6874417e-07,
+        0.00024230292,
+        1.155955e-08,
+        0.00025155057
+      ],
+      "name": "link4",
+      "parentLink": 2,
+      "renderModel": "render/link4_render.glb",
+      "shape": "collision/link4_collision.stl"
+    },
+    {
+      "centerOfMass": [
+        0.044773678106193954,
+        3.6584640701967335e-07,
+        0.008852435590669117
+      ],
+      "mass": 0.14427573,
+      "momentOfInertia": [
+        8.194966157268974e-05,
+        2.992376480172987e-11,
+        -2.9172016688568135e-07,
+        8.37031420196639e-05,
+        -3.2612359437371636e-12,
+        0.00010077111544724371
+      ],
+      "name": "link5",
+      "parentLink": 3,
+      "renderModel": "render/link5_render.glb",
+      "shape": "collision/link5_collision.stl"
+    },
+    {
+      "name": "end_effector_link",
+      "parentLink": 4
+    },
+    {
+      "centerOfMass": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mass": 0.001,
+      "momentOfInertia": [
+        1e-06,
+        0.0,
+        0.0,
+        1e-06,
+        0.0,
+        1e-06
+      ],
+      "name": "gripper_link",
+      "parentLink": 4,
+      "renderModel": "render/gripper_link_render.glb",
+      "shape": "collision/gripper_link_collision.stl"
+    },
+    {
+      "centerOfMass": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mass": 0.001,
+      "momentOfInertia": [
+        1e-06,
+        0.0,
+        0.0,
+        1e-06,
+        0.0,
+        1e-06
+      ],
+      "name": "gripper_link_sub",
+      "parentLink": 4,
+      "renderModel": "render/gripper_link_sub_render.glb",
+      "shape": "collision/gripper_link_sub_collision.stl"
+    }
+  ],
+  "name": "omx"
+}

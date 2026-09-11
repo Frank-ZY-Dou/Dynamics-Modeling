@@ -174,9 +174,10 @@ def main():
     ap.add_argument("--flax_init", action="store_true",
                     help="initialize from the flax init at the same seed (parity runs)")
     ap.add_argument("--device", default="cuda")
-    ap.add_argument("--engine", default="newton", choices=["newton", "mjwarp"],
-                    help="simulation engine: newton (default) or mjwarp "
-                         "(differentiable MuJoCo Warp; see mjwarp/requirements.txt)")
+    ap.add_argument("--engine", default="newton", choices=["newton", "mjwarp", "superdex"],
+                    help="simulation engine: newton (default), mjwarp "
+                         "(differentiable MuJoCo Warp; see mjwarp/requirements.txt) or superdex "
+                         "(the differentiable SuperDex fork; see superdex/requirements.txt)")
     ap.add_argument("--resume", default=None,
                     help="checkpoint .pt to resume from"
                          "schedule/rng states for an exact continuation")
@@ -267,6 +268,10 @@ def main():
         sys.path.insert(0, os.path.abspath(os.path.join(
             os.path.dirname(__file__), "..", "..", "mjwarp")))
         from mjwarp_backend_torch import MJWarpBackendTorch as EngineBackend
+    elif args.engine == "superdex":
+        sys.path.insert(0, os.path.abspath(os.path.join(
+            os.path.dirname(__file__), "..", "..", "superdex")))
+        from superdex_backend_torch import SuperDexBackendTorch as EngineBackend
     else:
         from torch_native.newton_backend_torch import NewtonBackendTorch as EngineBackend
     be = EngineBackend(B, data_dt, int(cfg["sim_step_size"]), device=str(dev))

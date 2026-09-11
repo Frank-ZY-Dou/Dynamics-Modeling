@@ -1,0 +1,20 @@
+# Differentiable SuperDex backend. The simulator is the differentiable fork of
+# Meta's Project SuperDex (https://github.com/Frank-ZY-Dou/differentiable-superdex,
+# a per-step adjoint of the Backward-Euler engine in double precision). The
+# engine runs on the CPU in worker processes; the trainer's process needs torch
+# and mujoco (for the model constants) and drives the workers over sockets.
+#
+# The fork needs Python 3.12. Its wheels are built from the repository:
+#
+#   git clone https://github.com/Frank-ZY-Dou/differentiable-superdex
+#   cd differentiable-superdex && uv sync --extra fp64     # builds the double-precision engine
+#   export SUPERDEX_PYTHON=$PWD/.venv/bin/python           # the workers' interpreter
+#
+# The trainer itself runs in the usual environment (newton/requirements or the
+# MuJoCo Warp one); with SUPERDEX_PYTHON set it starts the workers from the
+# fork's interpreter:
+#
+#   cd newton && python torch_native/train_newton_torch.py --config ../superdex/configs/train_superdex_omx.yaml --engine superdex
+#
+# SUPERDEX_WORKERS sets the number of worker processes (default: one per lane of
+# the batch). Each worker holds one CPU core while training runs.
