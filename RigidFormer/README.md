@@ -34,10 +34,10 @@ On standard benchmarks, RigidFormer outperforms or matches mesh-based baselines 
 
 <table>
 <tr>
-<td width="25%"><a href="assets/MoviS_sample_1.mp4"><img src="assets/gifs/MoviS_sample_1.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/MoviS_sample_2.mp4"><img src="assets/gifs/MoviS_sample_2.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/MoviS_sample_3.mp4"><img src="assets/gifs/MoviS_sample_3.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/MoviS_sample_4.mp4"><img src="assets/gifs/MoviS_sample_4.gif" width="100%"/></a></td>
+<td><a href="assets/MoviS_sample_1.mp4"><img src="assets/gifs/MoviS_sample_1.gif"/></a></td>
+<td><a href="assets/MoviS_sample_2.mp4"><img src="assets/gifs/MoviS_sample_2.gif"/></a></td>
+<td><a href="assets/MoviS_sample_3.mp4"><img src="assets/gifs/MoviS_sample_3.gif"/></a></td>
+<td><a href="assets/MoviS_sample_4.mp4"><img src="assets/gifs/MoviS_sample_4.gif"/></a></td>
 </tr>
 </table>
 
@@ -45,10 +45,10 @@ On standard benchmarks, RigidFormer outperforms or matches mesh-based baselines 
 
 <table>
 <tr>
-<td width="25%"><a href="assets/MoviA_sample_1.mp4"><img src="assets/gifs/MoviA_sample_1.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/MoviA_sample_2.mp4"><img src="assets/gifs/MoviA_sample_2.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/MoviA_sample_3.mp4"><img src="assets/gifs/MoviA_sample_3.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/MoviA_sample_4.mp4"><img src="assets/gifs/MoviA_sample_4.gif" width="100%"/></a></td>
+<td><a href="assets/MoviA_sample_1.mp4"><img src="assets/gifs/MoviA_sample_1.gif"/></a></td>
+<td><a href="assets/MoviA_sample_2.mp4"><img src="assets/gifs/MoviA_sample_2.gif"/></a></td>
+<td><a href="assets/MoviA_sample_3.mp4"><img src="assets/gifs/MoviA_sample_3.gif"/></a></td>
+<td><a href="assets/MoviA_sample_4.mp4"><img src="assets/gifs/MoviA_sample_4.gif"/></a></td>
 </tr>
 </table>
 
@@ -56,22 +56,22 @@ On standard benchmarks, RigidFormer outperforms or matches mesh-based baselines 
 
 <table>
 <tr>
-<td width="25%"><a href="assets/MoviB_sample_1.mp4"><img src="assets/gifs/MoviB_sample_1.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/MoviB_sample_2.mp4"><img src="assets/gifs/MoviB_sample_2.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/MoviB_sample_3.mp4"><img src="assets/gifs/MoviB_sample_3.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/MoviB_sample_4.mp4"><img src="assets/gifs/MoviB_sample_4.gif" width="100%"/></a></td>
+<td><a href="assets/MoviB_sample_1.mp4"><img src="assets/gifs/MoviB_sample_1.gif"/></a></td>
+<td><a href="assets/MoviB_sample_2.mp4"><img src="assets/gifs/MoviB_sample_2.gif"/></a></td>
+<td><a href="assets/MoviB_sample_3.mp4"><img src="assets/gifs/MoviB_sample_3.gif"/></a></td>
+<td><a href="assets/MoviB_sample_4.mp4"><img src="assets/gifs/MoviB_sample_4.gif"/></a></td>
 </tr>
 <tr>
-<td width="25%"><a href="assets/MoviB_sample_5.mp4"><img src="assets/gifs/MoviB_sample_5.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/MoviB_sample_6.mp4"><img src="assets/gifs/MoviB_sample_6.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/MoviB_sample_7.mp4"><img src="assets/gifs/MoviB_sample_7.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/MoviB_sample_8.mp4"><img src="assets/gifs/MoviB_sample_8.gif" width="100%"/></a></td>
+<td><a href="assets/MoviB_sample_5.mp4"><img src="assets/gifs/MoviB_sample_5.gif"/></a></td>
+<td><a href="assets/MoviB_sample_6.mp4"><img src="assets/gifs/MoviB_sample_6.gif"/></a></td>
+<td><a href="assets/MoviB_sample_7.mp4"><img src="assets/gifs/MoviB_sample_7.gif"/></a></td>
+<td><a href="assets/MoviB_sample_8.mp4"><img src="assets/gifs/MoviB_sample_8.gif"/></a></td>
 </tr>
 <tr>
-<td width="25%"><a href="assets/MoviB_sample_9.mp4"><img src="assets/gifs/MoviB_sample_9.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/MoviB_sample_10.mp4"><img src="assets/gifs/MoviB_sample_10.gif" width="100%"/></a></td>
-<td width="25%"></td>
-<td width="25%"></td>
+<td><a href="assets/MoviB_sample_9.mp4"><img src="assets/gifs/MoviB_sample_9.gif"/></a></td>
+<td><a href="assets/MoviB_sample_10.mp4"><img src="assets/gifs/MoviB_sample_10.gif"/></a></td>
+<td></td>
+<td></td>
 </tr>
 </table>
 
@@ -79,16 +79,16 @@ On standard benchmarks, RigidFormer outperforms or matches mesh-based baselines 
 
 <table>
 <tr>
-<td width="25%"><a href="assets/PartialPC_sample_1.mp4"><img src="assets/gifs/PartialPC_sample_1.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/PartialPC_sample_2.mp4"><img src="assets/gifs/PartialPC_sample_2.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/PartialPC_sample_3.mp4"><img src="assets/gifs/PartialPC_sample_3.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/PartialPC_sample_4.mp4"><img src="assets/gifs/PartialPC_sample_4.gif" width="100%"/></a></td>
+<td><a href="assets/PartialPC_sample_1.mp4"><img src="assets/gifs/PartialPC_sample_1.gif"/></a></td>
+<td><a href="assets/PartialPC_sample_2.mp4"><img src="assets/gifs/PartialPC_sample_2.gif"/></a></td>
+<td><a href="assets/PartialPC_sample_3.mp4"><img src="assets/gifs/PartialPC_sample_3.gif"/></a></td>
+<td><a href="assets/PartialPC_sample_4.mp4"><img src="assets/gifs/PartialPC_sample_4.gif"/></a></td>
 </tr>
 <tr>
-<td width="25%"><a href="assets/PartialPC_sample_5.mp4"><img src="assets/gifs/PartialPC_sample_5.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/PartialPC_sample_6.mp4"><img src="assets/gifs/PartialPC_sample_6.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/PartialPC_sample_7.mp4"><img src="assets/gifs/PartialPC_sample_7.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/PartialPC_sample_8.mp4"><img src="assets/gifs/PartialPC_sample_8.gif" width="100%"/></a></td>
+<td><a href="assets/PartialPC_sample_5.mp4"><img src="assets/gifs/PartialPC_sample_5.gif"/></a></td>
+<td><a href="assets/PartialPC_sample_6.mp4"><img src="assets/gifs/PartialPC_sample_6.gif"/></a></td>
+<td><a href="assets/PartialPC_sample_7.mp4"><img src="assets/gifs/PartialPC_sample_7.gif"/></a></td>
+<td><a href="assets/PartialPC_sample_8.mp4"><img src="assets/gifs/PartialPC_sample_8.gif"/></a></td>
 </tr>
 </table>
 
@@ -98,16 +98,16 @@ On standard benchmarks, RigidFormer outperforms or matches mesh-based baselines 
 
 <table>
 <tr>
-<td width="25%"><a href="assets/Soft_Bodies_1.mp4"><img src="assets/gifs/Soft_Bodies_1.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/Soft_Bodies_2.mp4"><img src="assets/gifs/Soft_Bodies_2.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/Soft_Bodies_3.mp4"><img src="assets/gifs/Soft_Bodies_3.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/Soft_Bodies_4.mp4"><img src="assets/gifs/Soft_Bodies_4.gif" width="100%"/></a></td>
+<td><a href="assets/Soft_Bodies_1.mp4"><img src="assets/gifs/Soft_Bodies_1.gif"/></a></td>
+<td><a href="assets/Soft_Bodies_2.mp4"><img src="assets/gifs/Soft_Bodies_2.gif"/></a></td>
+<td><a href="assets/Soft_Bodies_3.mp4"><img src="assets/gifs/Soft_Bodies_3.gif"/></a></td>
+<td><a href="assets/Soft_Bodies_4.mp4"><img src="assets/gifs/Soft_Bodies_4.gif"/></a></td>
 </tr>
 <tr>
-<td width="25%"><a href="assets/Soft_Bodies_5.mp4"><img src="assets/gifs/Soft_Bodies_5.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/Soft_Bodies_6.mp4"><img src="assets/gifs/Soft_Bodies_6.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/Soft_Bodies_7.mp4"><img src="assets/gifs/Soft_Bodies_7.gif" width="100%"/></a></td>
-<td width="25%"><a href="assets/Soft_Bodies_8.mp4"><img src="assets/gifs/Soft_Bodies_8.gif" width="100%"/></a></td>
+<td><a href="assets/Soft_Bodies_5.mp4"><img src="assets/gifs/Soft_Bodies_5.gif"/></a></td>
+<td><a href="assets/Soft_Bodies_6.mp4"><img src="assets/gifs/Soft_Bodies_6.gif"/></a></td>
+<td><a href="assets/Soft_Bodies_7.mp4"><img src="assets/gifs/Soft_Bodies_7.gif"/></a></td>
+<td><a href="assets/Soft_Bodies_8.mp4"><img src="assets/gifs/Soft_Bodies_8.gif"/></a></td>
 </tr>
 </table>
 
@@ -115,9 +115,9 @@ On standard benchmarks, RigidFormer outperforms or matches mesh-based baselines 
 
 <table>
 <tr>
-<td width="33%" align="center"><a href="assets/LargeScale_3x3x3.mp4"><img src="assets/gifs/LargeScale_3x3x3.gif" width="100%"/></a><br><sub>3 &times; 3 &times; 3</sub></td>
-<td width="33%" align="center"><a href="assets/LargeScale_5x5x5.mp4"><img src="assets/gifs/LargeScale_5x5x5.gif" width="100%"/></a><br><sub>5 &times; 5 &times; 5</sub></td>
-<td width="33%" align="center"><a href="assets/LargeScale_6x6x6.mp4"><img src="assets/gifs/LargeScale_6x6x6.gif" width="100%"/></a><br><sub>6 &times; 6 &times; 6</sub></td>
+<td align="center"><a href="assets/LargeScale_3x3x3.mp4"><img src="assets/gifs/LargeScale_3x3x3.gif"/></a><br><sub>3 &times; 3 &times; 3</sub></td>
+<td align="center"><a href="assets/LargeScale_5x5x5.mp4"><img src="assets/gifs/LargeScale_5x5x5.gif"/></a><br><sub>5 &times; 5 &times; 5</sub></td>
+<td align="center"><a href="assets/LargeScale_6x6x6.mp4"><img src="assets/gifs/LargeScale_6x6x6.gif"/></a><br><sub>6 &times; 6 &times; 6</sub></td>
 </tr>
 </table>
 
@@ -125,12 +125,12 @@ On standard benchmarks, RigidFormer outperforms or matches mesh-based baselines 
 
 <table>
 <tr>
-<td width="50%" align="center"><a href="assets/Controllable_ASE_sample_1.mp4"><img src="assets/gifs/Controllable_ASE_sample_1.gif" width="100%"/></a><br><sub>ASE Humanoid &mdash; Sample 1</sub></td>
-<td width="50%" align="center"><a href="assets/Controllable_ASE_sample_2.mp4"><img src="assets/gifs/Controllable_ASE_sample_2.gif" width="100%"/></a><br><sub>ASE Humanoid &mdash; Sample 2</sub></td>
+<td align="center"><a href="assets/Controllable_ASE_sample_1.mp4"><img src="assets/gifs/Controllable_ASE_sample_1.gif"/></a><br><sub>ASE Humanoid &mdash; Sample 1</sub></td>
+<td align="center"><a href="assets/Controllable_ASE_sample_2.mp4"><img src="assets/gifs/Controllable_ASE_sample_2.gif"/></a><br><sub>ASE Humanoid &mdash; Sample 2</sub></td>
 </tr>
 <tr>
-<td width="50%" align="center"><a href="assets/Controllable_ASE_sample_3.mp4"><img src="assets/gifs/Controllable_ASE_sample_3.gif" width="100%"/></a><br><sub>ASE Humanoid &mdash; Sample 3</sub></td>
-<td width="50%" align="center"><a href="assets/Controllable_G1_sample_1.mp4"><img src="assets/gifs/Controllable_G1_sample_1.gif" width="100%"/></a><br><sub>Unitree G1</sub></td>
+<td align="center"><a href="assets/Controllable_ASE_sample_3.mp4"><img src="assets/gifs/Controllable_ASE_sample_3.gif"/></a><br><sub>ASE Humanoid &mdash; Sample 3</sub></td>
+<td align="center"><a href="assets/Controllable_G1_sample_1.mp4"><img src="assets/gifs/Controllable_G1_sample_1.gif"/></a><br><sub>Unitree G1</sub></td>
 </tr>
 </table>
 

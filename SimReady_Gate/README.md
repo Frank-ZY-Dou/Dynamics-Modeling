@@ -17,13 +17,13 @@
 
 <table>
 <tr>
-<td><img src="docs/media/pile_n20_gate.gif" width="960" alt="twenty RoboLab objects heaped on the table, shrunk, laid out by the model in scale-space, restored to full size" /></td>
+<td><img src="docs/media/pile_n20_gate.gif" alt="twenty RoboLab objects heaped on the table, shrunk, laid out by the model in scale-space, restored to full size" /></td>
 </tr>
 <tr>
 <td><sub><b>Twenty objects from a heap, laid out by language.</b> Twenty RoboLab catalog objects are dropped into a 13 cm radius on RoboLab's own table (82 object-object interpenetrating pairs). The request asks for a cooking layout: the bowl in front of the pitcher, the ladle and the spoon within reach, the fruit grouped on the left, the cans and bottles in a row at the back, the hammer, bin, remote and spatula out of the way on the right. S4R shrinks every body about its reference center; the model places the shrunken bodies; the scale is restored under the program, and the result is penetration-free with every predicate satisfied, in 30 s.</sub></td>
 </tr>
 <tr>
-<td><img src="docs/media/pile_n20_settle.gif" width="960" alt="MuJoCo settle of the heap (left) and of the repaired layout (right)" /></td>
+<td><img src="docs/media/pile_n20_settle.gif" alt="MuJoCo settle of the heap (left) and of the repaired layout (right)" /></td>
 </tr>
 <tr>
 <td><sub><b>Settle as certification.</b> The heap and the repaired layout simulated in MuJoCo with CoACD proxies: the heap reaches 3.8 m/s and throws a body off the table; the repaired scene peaks at 0.29 m/s with nothing leaving the table. Every clip in this repository is rendered from the solver's own meshes with the assets' textures, without overlays.</sub></td>
@@ -77,8 +77,8 @@ supports. SimReady Gate is the layer between a scene generator and the simulator
 
 <table>
 <tr>
-<td><img src="docs/media/workdesk_gate.gif" width="470" alt="RoboLab's shipped workdesk_snacks scene repaired" /></td>
-<td><img src="docs/media/workdesk_settle.gif" width="470" alt="MuJoCo settle of the shipped scene, before and after" /></td>
+<td><img src="docs/media/workdesk_gate.gif" alt="RoboLab's shipped workdesk_snacks scene repaired" /></td>
+<td><img src="docs/media/workdesk_settle.gif" alt="MuJoCo settle of the shipped scene, before and after" /></td>
 </tr>
 <tr>
 <td colspan="2"><sub><code>workdesk_snacks</code>, already physics-settled by RoboLab's pipeline, still has three object-object interpenetrations, the largest scoring 9.9 mm (keyboard against smartphone). One sentence of intent and one certificate later it is clean, with 3.3 cm of planar motion. Right: the same scene settled in MuJoCo, as shipped and after the repair. Walked through step by step in <a href="#example-1-a-scene-robolab-ships-one-request-one-certificate">Example 1</a>.</sub></td>
@@ -89,8 +89,8 @@ supports. SimReady Gate is the layer between a scene generator and the simulator
 
 <table>
 <tr>
-<td><img src="docs/media/layout_n10_gate.gif" width="470" alt="a solver-rejected RoboLab layout: seated with four interpenetrating pairs, shrunk, grown back into a clean arrangement" /></td>
-<td><img src="docs/media/layout_n10_settle.gif" width="470" alt="MuJoCo settle: as generated versus repaired" /></td>
+<td><img src="docs/media/layout_n10_gate.gif" alt="a solver-rejected RoboLab layout: seated with four interpenetrating pairs, shrunk, grown back into a clean arrangement" /></td>
+<td><img src="docs/media/layout_n10_settle.gif" alt="MuJoCo settle: as generated versus repaired" /></td>
 </tr>
 <tr>
 <td colspan="2"><sub>Ten catalog objects placed by RoboLab's own disc solver in its base scene; the solver reports failure and the layout carries four interpenetrating pairs once seated. The gate repairs it to zero with the requested left/right/front/back relations kept. Right: settled in MuJoCo, the generated layout tips the pitcher over and sends an orange rolling a third of a metre across the table; the repaired one stays at rest.</sub></td>
@@ -101,7 +101,7 @@ supports. SimReady Gate is the layer between a scene generator and the simulator
 
 <table>
 <tr>
-<td><img src="docs/media/robocasa_n10_gate.gif" width="640" alt="ten AI-generated RoboCasa objects on a 0.3 m counter region" /></td>
+<td><img src="docs/media/robocasa_n10_gate.gif" alt="ten AI-generated RoboCasa objects on a 0.3 m counter region" /></td>
 </tr>
 <tr>
 <td><sub>Ten AI-generated RoboCasa objects on a 0.3 x 0.3 m counter region. RoboCasa's own placement test (a separating-axis test on rotated bounding boxes) places nine and gives up on the tenth; the gate places all ten with overlaps allowed, and S4R packs them to zero penetration on the objects' V-HACD collision pieces in 2.9 s, under <code>within</code>, <code>on_support</code> and <code>upright</code>.</sub></td>
@@ -369,7 +369,7 @@ Genesis and Isaac Sim from left to right, rendered from the same assets as the o
 
 <table>
 <tr>
-<td><img src="docs/media/pile_n20_engines.gif" width="960" alt="the certified twenty-object layout simulated for 2 s in MuJoCo, Genesis and Isaac Sim, left to right" /></td>
+<td><img src="docs/media/pile_n20_engines.gif" alt="the certified twenty-object layout simulated for 2 s in MuJoCo, Genesis and Isaac Sim, left to right" /></td>
 </tr>
 <tr>
 <td><sub>Left to right: MuJoCo 3.10, Genesis 1.2.3, Isaac Sim 4.5, 2 s of simulation in real time. In every engine the round fruit rolls a little (an orange by 9 cm in MuJoCo, 5 cm in Genesis, 3 cm in Isaac Sim); nothing tips over and no body leaves the table.</sub></td>

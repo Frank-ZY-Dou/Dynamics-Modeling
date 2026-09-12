@@ -294,32 +294,14 @@ pick-and-place task, and the Franka Panda at 600 g and 200 g on the lift-and-hol
 The with-simulator mode rolls the learned dynamics out on a recorded trajectory: the
 left panel plays the simulated motion, the right panel the recording.
 
-<table align="center">
-  <tr>
-    <th align="center">OMX, 500 g</th>
-    <th align="center">OMX, 300 g</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/media/omx_force_arrows.gif" width="280" alt="OMX 500 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-    <td align="center"><img src="docs/media/omx_300g_sim.gif" width="280" alt="OMX 300 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-  </tr>
-  <tr>
-    <th align="center">SO-101, 500 g</th>
-    <th align="center">SO-101, 300 g</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/media/so101_pick_place_500g.gif" width="280" alt="SO-101 500 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-    <td align="center"><img src="docs/media/so101_pick_place_300g.gif" width="280" alt="SO-101 300 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-  </tr>
-  <tr>
-    <th align="center">Franka Panda, 600 g</th>
-    <th align="center">Franka Panda, 200 g</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/media/franka_lift_hold_600g.gif" width="280" alt="Franka 600 g lift-and-hold, simulator rollout: model prediction (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-    <td align="center"><img src="docs/media/franka_lift_hold_200g.gif" width="280" alt="Franka 200 g lift-and-hold, simulator rollout: model prediction (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-  </tr>
-</table>
+| **OMX, 500 g** | **OMX, 300 g** |
+| :-: | :-: |
+| ![OMX 500 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows](docs/media/omx_force_arrows.gif) | ![OMX 300 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows](docs/media/omx_300g_sim.gif) |
+| **SO-101, 500 g** | **SO-101, 300 g** |
+| ![SO-101 500 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows](docs/media/so101_pick_place_500g.gif) | ![SO-101 300 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows](docs/media/so101_pick_place_300g.gif) |
+| **Franka Panda, 600 g** | **Franka Panda, 200 g** |
+| ![Franka 600 g lift-and-hold, simulator rollout: model prediction (left panel) and ground truth in green (right panel), with weight-force arrows](docs/media/franka_lift_hold_600g.gif) | ![Franka 200 g lift-and-hold, simulator rollout: model prediction (left panel) and ground truth in green (right panel), with weight-force arrows](docs/media/franka_lift_hold_200g.gif) |
+
 <p align="center"><sub>Rendered with <code>python infer_actuator.py --robot omx ...</code> &middot; <code>python infer_actuator.py --robot so101 ...</code> &middot; <code>python infer_actuator.py --robot franka ...</code></sub></p>
 
 
@@ -359,32 +341,14 @@ simulator; the two modes only differ in how the model is queried at inference ti
 In the clips below the two panels move identically, since deployment does not
 simulate motion.
 
-<table align="center">
-  <tr>
-    <th align="center">OMX, 500 g</th>
-    <th align="center">OMX, 300 g</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/media/omx_500g_deploy.gif" width="280" alt="OMX 500 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
-    <td align="center"><img src="docs/media/omx_300g_deploy.gif" width="280" alt="OMX 300 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel)"></td>
-  </tr>
-  <tr>
-    <th align="center">SO-101, 500 g</th>
-    <th align="center">SO-101, 300 g</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/media/so101_pick_place_500g_deploy.gif" width="280" alt="SO-101 500 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
-    <td align="center"><img src="docs/media/so101_pick_place_300g_deploy.gif" width="280" alt="SO-101 300 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel)"></td>
-  </tr>
-  <tr>
-    <th align="center">Franka Panda, 600 g</th>
-    <th align="center">Franka Panda, 200 g</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/media/franka_lift_hold_600g_deploy.gif" width="280" alt="Franka 600 g lift-and-hold, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
-    <td align="center"><img src="docs/media/franka_lift_hold_200g_deploy.gif" width="280" alt="Franka 200 g lift-and-hold, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel)"></td>
-  </tr>
-</table>
+| **OMX, 500 g** | **OMX, 300 g** |
+| :-: | :-: |
+| ![OMX 500 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion](docs/media/omx_500g_deploy.gif) | ![OMX 300 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel)](docs/media/omx_300g_deploy.gif) |
+| **SO-101, 500 g** | **SO-101, 300 g** |
+| ![SO-101 500 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion](docs/media/so101_pick_place_500g_deploy.gif) | ![SO-101 300 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel)](docs/media/so101_pick_place_300g_deploy.gif) |
+| **Franka Panda, 600 g** | **Franka Panda, 200 g** |
+| ![Franka 600 g lift-and-hold, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion](docs/media/franka_lift_hold_600g_deploy.gif) | ![Franka 200 g lift-and-hold, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel)](docs/media/franka_lift_hold_200g_deploy.gif) |
+
 <p align="center"><sub>Rendered with <code>python infer_actuator.py --robot omx ... --force_only</code> &middot; <code>python infer_actuator.py --robot so101 ... --force_only</code> &middot; <code>python infer_actuator.py --robot franka ... --force_only</code></sub></p>
 
 
@@ -482,35 +446,19 @@ The code is under `newton/`. Both inference modes are shown, matching the OMX se
 
 **Dynamics rollout** (OpenManipulator-X, by payload).
 
-<table align="center">
-  <tr>
-    <th align="center">300 g</th>
-    <th align="center">400 g</th>
-    <th align="center">500 g</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/media/newton_omx_300g.gif" width="240" alt="OMX 300 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-    <td align="center"><img src="docs/media/newton_omx_400g.gif" width="240" alt="OMX 400 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-    <td align="center"><img src="docs/media/newton_omx_500g.gif" width="240" alt="OMX 500 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-  </tr>
-</table>
+| **300 g** | **400 g** | **500 g** |
+| :-: | :-: | :-: |
+| ![OMX 300 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows](docs/media/newton_omx_300g.gif) | ![OMX 400 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows](docs/media/newton_omx_400g.gif) | ![OMX 500 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows](docs/media/newton_omx_500g.gif) |
+
 <p align="center"><sub>Rendered with <code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></sub></p>
 
 
 **Virtual force sensor** (OpenManipulator-X, by payload).
 
-<table align="center">
-  <tr>
-    <th align="center">300 g</th>
-    <th align="center">400 g</th>
-    <th align="center">500 g</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/media/newton_omx_300g_deploy.gif" width="240" alt="OMX 300 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
-    <td align="center"><img src="docs/media/newton_omx_400g_deploy.gif" width="240" alt="OMX 400 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
-    <td align="center"><img src="docs/media/newton_omx_500g_deploy.gif" width="240" alt="OMX 500 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
-  </tr>
-</table>
+| **300 g** | **400 g** | **500 g** |
+| :-: | :-: | :-: |
+| ![OMX 300 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion](docs/media/newton_omx_300g_deploy.gif) | ![OMX 400 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion](docs/media/newton_omx_400g_deploy.gif) | ![OMX 500 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion](docs/media/newton_omx_500g_deploy.gif) |
+
 <p align="center"><sub>Rendered with <code>python torch_native/newton_rollout.py --force_only ... ; python torch_native/newton_viewer_render.py ...</code></sub></p>
 
 
@@ -589,35 +537,19 @@ the OMX section above.
 
 **Dynamics rollout** (OpenManipulator-X, by payload).
 
-<table align="center">
-  <tr>
-    <th align="center">300 g</th>
-    <th align="center">400 g</th>
-    <th align="center">500 g</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/media/mjwarp_omx_300g.gif" width="240" alt="OMX 300 g pick-and-place, MuJoCo Warp simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-    <td align="center"><img src="docs/media/mjwarp_omx_400g.gif" width="240" alt="OMX 400 g pick-and-place, MuJoCo Warp simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-    <td align="center"><img src="docs/media/mjwarp_omx_500g.gif" width="240" alt="OMX 500 g pick-and-place, MuJoCo Warp simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-  </tr>
-</table>
+| **300 g** | **400 g** | **500 g** |
+| :-: | :-: | :-: |
+| ![OMX 300 g pick-and-place, MuJoCo Warp simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows](docs/media/mjwarp_omx_300g.gif) | ![OMX 400 g pick-and-place, MuJoCo Warp simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows](docs/media/mjwarp_omx_400g.gif) | ![OMX 500 g pick-and-place, MuJoCo Warp simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows](docs/media/mjwarp_omx_500g.gif) |
+
 <p align="center"><sub>Rendered with <code>python mjwarp/rollout_mjwarp.py ... ; python mjwarp/render_mjwarp.py ...</code></sub></p>
 
 
 **Virtual force sensor** (OpenManipulator-X, by payload).
 
-<table align="center">
-  <tr>
-    <th align="center">300 g</th>
-    <th align="center">400 g</th>
-    <th align="center">500 g</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/media/mjwarp_omx_300g_deploy.gif" width="240" alt="OMX 300 g pick-and-place, MuJoCo Warp force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
-    <td align="center"><img src="docs/media/mjwarp_omx_400g_deploy.gif" width="240" alt="OMX 400 g pick-and-place, MuJoCo Warp force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
-    <td align="center"><img src="docs/media/mjwarp_omx_500g_deploy.gif" width="240" alt="OMX 500 g pick-and-place, MuJoCo Warp force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
-  </tr>
-</table>
+| **300 g** | **400 g** | **500 g** |
+| :-: | :-: | :-: |
+| ![OMX 300 g pick-and-place, MuJoCo Warp force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion](docs/media/mjwarp_omx_300g_deploy.gif) | ![OMX 400 g pick-and-place, MuJoCo Warp force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion](docs/media/mjwarp_omx_400g_deploy.gif) | ![OMX 500 g pick-and-place, MuJoCo Warp force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion](docs/media/mjwarp_omx_500g_deploy.gif) |
+
 <p align="center"><sub>Rendered with <code>python mjwarp/rollout_mjwarp.py --force_only ... ; python mjwarp/render_mjwarp.py ...</code></sub></p>
 
 
@@ -720,35 +652,19 @@ modes are shown, matching the OMX section above.
 
 **Dynamics rollout** (OpenManipulator-X, by payload).
 
-<table align="center">
-  <tr>
-    <th align="center">300 g</th>
-    <th align="center">400 g</th>
-    <th align="center">500 g</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/media/superdex_omx_300g.gif" width="240" alt="OMX 300 g pick-and-place, SuperDex simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-    <td align="center"><img src="docs/media/superdex_omx_400g.gif" width="240" alt="OMX 400 g pick-and-place, SuperDex simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-    <td align="center"><img src="docs/media/superdex_omx_500g.gif" width="240" alt="OMX 500 g pick-and-place, SuperDex simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-  </tr>
-</table>
+| **300 g** | **400 g** | **500 g** |
+| :-: | :-: | :-: |
+| ![OMX 300 g pick-and-place, SuperDex simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows](docs/media/superdex_omx_300g.gif) | ![OMX 400 g pick-and-place, SuperDex simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows](docs/media/superdex_omx_400g.gif) | ![OMX 500 g pick-and-place, SuperDex simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows](docs/media/superdex_omx_500g.gif) |
+
 <p align="center"><sub>Rendered with <code>python superdex/rollout_superdex.py ... ; python superdex/render_superdex.py ...</code></sub></p>
 
 
 **Virtual force sensor** (OpenManipulator-X, by payload).
 
-<table align="center">
-  <tr>
-    <th align="center">300 g</th>
-    <th align="center">400 g</th>
-    <th align="center">500 g</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/media/superdex_omx_300g_deploy.gif" width="240" alt="OMX 300 g pick-and-place, SuperDex force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
-    <td align="center"><img src="docs/media/superdex_omx_400g_deploy.gif" width="240" alt="OMX 400 g pick-and-place, SuperDex force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
-    <td align="center"><img src="docs/media/superdex_omx_500g_deploy.gif" width="240" alt="OMX 500 g pick-and-place, SuperDex force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
-  </tr>
-</table>
+| **300 g** | **400 g** | **500 g** |
+| :-: | :-: | :-: |
+| ![OMX 300 g pick-and-place, SuperDex force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion](docs/media/superdex_omx_300g_deploy.gif) | ![OMX 400 g pick-and-place, SuperDex force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion](docs/media/superdex_omx_400g_deploy.gif) | ![OMX 500 g pick-and-place, SuperDex force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion](docs/media/superdex_omx_500g_deploy.gif) |
+
 <p align="center"><sub>Rendered with <code>python superdex/rollout_superdex.py --force_only ... ; python superdex/render_superdex.py ...</code></sub></p>
 
 
@@ -984,16 +900,10 @@ differentiable rollout at the grasp point. The clips below apply a known externa
 (left: none; middle: a downward load; right: an upward load, red arrow) on both arms, and
 the end effector moves as expected &mdash; a check that the injection acts correctly:
 
-<table align="center">
-  <tr>
-    <th align="center">OpenManipulator-X</th>
-    <th align="center">SO-101</th>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/media/extforce_omx.gif" width="390" alt="OMX: predicted external force injected at the grasp point in the differentiable simulator; no force (static), downward load (arm sags), upward load (arm rises)"></td>
-    <td align="center"><img src="docs/media/extforce_so101.gif" width="390" alt="SO-101: predicted external force injected at the grasp point in the differentiable simulator; no force (static), downward load (arm sags), upward load (arm rises)"></td>
-  </tr>
-</table>
+| **OpenManipulator-X** | **SO-101** |
+| :-: | :-: |
+| ![OMX: predicted external force injected at the grasp point in the differentiable simulator; no force (static), downward load (arm sags), upward load (arm rises)](docs/media/extforce_omx.gif) | ![SO-101: predicted external force injected at the grasp point in the differentiable simulator; no force (static), downward load (arm sags), upward load (arm rises)](docs/media/extforce_so101.gif) |
+
 
 On the OMX combined weight benchmark &mdash; pick-and-place (0 / 200 / 300 / 400 / 500 g)
 and lift-and-hold (0 / 200 / 300 / 400 g) &mdash; a 3-seed from-scratch A/B gives (worst
