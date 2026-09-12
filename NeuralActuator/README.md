@@ -46,7 +46,7 @@ Michal Piotr Lipiec<sup>1</sup>, Joshua Jacob<sup>1</sup>, Chao Liu<sup>1</sup>,
 
 - **[July 2026]** 🏆 NeuralActuator received the **Outstanding Systems Paper Award** at RSS 2026.
 - **[July 2026]** Initial release: training, evaluation and inference code for the
-  OpenManipulator-X, SO-101 and Franka Panda; the Neural Actuation Dataset (NAD), 450 task
+  OpenManipulator-X (OMX), SO-101 and Franka Panda; the Neural Actuation Dataset (NAD), 450 task
   assignments (430 distinct trajectories) across 45 tasks on the OpenManipulator-X and
   SO-101, plus Franka lift-and-hold trajectories for five payloads (200&ndash;600 g) with
   external-force estimation; eleven pretrained checkpoints; both inference modes (dynamics
@@ -296,16 +296,12 @@ left panel plays the simulated motion, the right panel the recording.
 
 <table align="center">
   <tr>
-    <th align="center">OpenManipulator-X, 500 g</th>
-    <th align="center">OpenManipulator-X, 300 g</th>
+    <th align="center">OMX, 500 g</th>
+    <th align="center">OMX, 300 g</th>
   </tr>
   <tr>
     <td align="center"><img src="docs/media/omx_force_arrows.gif" width="280" alt="OMX 500 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
     <td align="center"><img src="docs/media/omx_300g_sim.gif" width="280" alt="OMX 300 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
-  </tr>
-  <tr>
-    <td align="center"><code>python infer_actuator.py --robot omx ...</code></td>
-    <td align="center"><code>python infer_actuator.py --robot omx ...</code></td>
   </tr>
   <tr>
     <th align="center">SO-101, 500 g</th>
@@ -316,10 +312,6 @@ left panel plays the simulated motion, the right panel the recording.
     <td align="center"><img src="docs/media/so101_pick_place_300g.gif" width="280" alt="SO-101 300 g pick-and-place, simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
   </tr>
   <tr>
-    <td align="center"><code>python infer_actuator.py --robot so101 ...</code></td>
-    <td align="center"><code>python infer_actuator.py --robot so101 ...</code></td>
-  </tr>
-  <tr>
     <th align="center">Franka Panda, 600 g</th>
     <th align="center">Franka Panda, 200 g</th>
   </tr>
@@ -327,11 +319,9 @@ left panel plays the simulated motion, the right panel the recording.
     <td align="center"><img src="docs/media/franka_lift_hold_600g.gif" width="280" alt="Franka 600 g lift-and-hold, simulator rollout: model prediction (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
     <td align="center"><img src="docs/media/franka_lift_hold_200g.gif" width="280" alt="Franka 200 g lift-and-hold, simulator rollout: model prediction (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
   </tr>
-  <tr>
-    <td align="center"><code>python infer_actuator.py --robot franka ...</code></td>
-    <td align="center"><code>python infer_actuator.py --robot franka ...</code></td>
-  </tr>
 </table>
+<p align="center"><sub>Rendered with <code>python infer_actuator.py --robot omx ...</code> &middot; <code>python infer_actuator.py --robot so101 ...</code> &middot; <code>python infer_actuator.py --robot franka ...</code></sub></p>
+
 
 Besides the batch eval scripts, `infer_actuator.py` rolls a checkpoint out on a single
 trajectory CSV and writes the per-step predictions (simulated joint positions, torque,
@@ -371,16 +361,12 @@ simulate motion.
 
 <table align="center">
   <tr>
-    <th align="center">OpenManipulator-X, 500 g</th>
-    <th align="center">OpenManipulator-X, 300 g</th>
+    <th align="center">OMX, 500 g</th>
+    <th align="center">OMX, 300 g</th>
   </tr>
   <tr>
     <td align="center"><img src="docs/media/omx_500g_deploy.gif" width="280" alt="OMX 500 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
     <td align="center"><img src="docs/media/omx_300g_deploy.gif" width="280" alt="OMX 300 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel)"></td>
-  </tr>
-  <tr>
-    <td align="center"><code>python infer_actuator.py --robot omx ... --force_only</code></td>
-    <td align="center"><code>python infer_actuator.py --robot omx ... --force_only</code></td>
   </tr>
   <tr>
     <th align="center">SO-101, 500 g</th>
@@ -391,10 +377,6 @@ simulate motion.
     <td align="center"><img src="docs/media/so101_pick_place_300g_deploy.gif" width="280" alt="SO-101 300 g pick-and-place, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel)"></td>
   </tr>
   <tr>
-    <td align="center"><code>python infer_actuator.py --robot so101 ... --force_only</code></td>
-    <td align="center"><code>python infer_actuator.py --robot so101 ... --force_only</code></td>
-  </tr>
-  <tr>
     <th align="center">Franka Panda, 600 g</th>
     <th align="center">Franka Panda, 200 g</th>
   </tr>
@@ -402,11 +384,9 @@ simulate motion.
     <td align="center"><img src="docs/media/franka_lift_hold_600g_deploy.gif" width="280" alt="Franka 600 g lift-and-hold, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
     <td align="center"><img src="docs/media/franka_lift_hold_200g_deploy.gif" width="280" alt="Franka 200 g lift-and-hold, force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel)"></td>
   </tr>
-  <tr>
-    <td align="center"><code>python infer_actuator.py --robot franka ... --force_only</code></td>
-    <td align="center"><code>python infer_actuator.py --robot franka ... --force_only</code></td>
-  </tr>
 </table>
+<p align="center"><sub>Rendered with <code>python infer_actuator.py --robot omx ... --force_only</code> &middot; <code>python infer_actuator.py --robot so101 ... --force_only</code> &middot; <code>python infer_actuator.py --robot franka ... --force_only</code></sub></p>
+
 
 `--force_only` runs the deployment path on a recorded stream — the feature history is
 built from the CSV rows exactly as it would be from a live robot, and the script writes
@@ -500,45 +480,39 @@ protocol are unchanged, so the simulator swap is a controlled ablation. There is
 PyTorch-native interface and a JAX binding that trains the released Flax model unchanged.
 The code is under `newton/`. Both inference modes are shown, matching the OMX section above.
 
-**Dynamics rollout.**
+**Dynamics rollout** (OpenManipulator-X, by payload).
 
 <table align="center">
   <tr>
-    <th align="center">OpenManipulator-X, 300 g</th>
-    <th align="center">OpenManipulator-X, 400 g</th>
-    <th align="center">OpenManipulator-X, 500 g</th>
+    <th align="center">300 g</th>
+    <th align="center">400 g</th>
+    <th align="center">500 g</th>
   </tr>
   <tr>
     <td align="center"><img src="docs/media/newton_omx_300g.gif" width="240" alt="OMX 300 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
     <td align="center"><img src="docs/media/newton_omx_400g.gif" width="240" alt="OMX 400 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
     <td align="center"><img src="docs/media/newton_omx_500g.gif" width="240" alt="OMX 500 g pick-and-place, Newton simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
   </tr>
-  <tr>
-    <td align="center"><code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></td>
-    <td align="center"><code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></td>
-    <td align="center"><code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></td>
-  </tr>
 </table>
+<p align="center"><sub>Rendered with <code>python torch_native/newton_rollout.py ... ; python torch_native/newton_viewer_render.py ...</code></sub></p>
 
-**Virtual force sensor.**
+
+**Virtual force sensor** (OpenManipulator-X, by payload).
 
 <table align="center">
   <tr>
-    <th align="center">OpenManipulator-X, 300 g</th>
-    <th align="center">OpenManipulator-X, 400 g</th>
-    <th align="center">OpenManipulator-X, 500 g</th>
+    <th align="center">300 g</th>
+    <th align="center">400 g</th>
+    <th align="center">500 g</th>
   </tr>
   <tr>
     <td align="center"><img src="docs/media/newton_omx_300g_deploy.gif" width="240" alt="OMX 300 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
     <td align="center"><img src="docs/media/newton_omx_400g_deploy.gif" width="240" alt="OMX 400 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
     <td align="center"><img src="docs/media/newton_omx_500g_deploy.gif" width="240" alt="OMX 500 g pick-and-place, Newton force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
   </tr>
-  <tr>
-    <td align="center"><code>python torch_native/newton_rollout.py --force_only ... ; python torch_native/newton_viewer_render.py ...</code></td>
-    <td align="center"><code>python torch_native/newton_rollout.py --force_only ... ; python torch_native/newton_viewer_render.py ...</code></td>
-    <td align="center"><code>python torch_native/newton_rollout.py --force_only ... ; python torch_native/newton_viewer_render.py ...</code></td>
-  </tr>
 </table>
+<p align="center"><sub>Rendered with <code>python torch_native/newton_rollout.py --force_only ... ; python torch_native/newton_viewer_render.py ...</code></sub></p>
+
 
 #### Simulation interface
 
@@ -613,45 +587,39 @@ training runs through the same PyTorch trainer as the Newton backend via
 `--engine mjwarp`. The code is under `mjwarp/`. Both inference modes are shown, matching
 the OMX section above.
 
-**Dynamics rollout.**
+**Dynamics rollout** (OpenManipulator-X, by payload).
 
 <table align="center">
   <tr>
-    <th align="center">OpenManipulator-X, 300 g</th>
-    <th align="center">OpenManipulator-X, 400 g</th>
-    <th align="center">OpenManipulator-X, 500 g</th>
+    <th align="center">300 g</th>
+    <th align="center">400 g</th>
+    <th align="center">500 g</th>
   </tr>
   <tr>
     <td align="center"><img src="docs/media/mjwarp_omx_300g.gif" width="240" alt="OMX 300 g pick-and-place, MuJoCo Warp simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
     <td align="center"><img src="docs/media/mjwarp_omx_400g.gif" width="240" alt="OMX 400 g pick-and-place, MuJoCo Warp simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
     <td align="center"><img src="docs/media/mjwarp_omx_500g.gif" width="240" alt="OMX 500 g pick-and-place, MuJoCo Warp simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
   </tr>
-  <tr>
-    <td align="center"><code>python mjwarp/rollout_mjwarp.py ... ; python mjwarp/render_mjwarp.py ...</code></td>
-    <td align="center"><code>python mjwarp/rollout_mjwarp.py ... ; python mjwarp/render_mjwarp.py ...</code></td>
-    <td align="center"><code>python mjwarp/rollout_mjwarp.py ... ; python mjwarp/render_mjwarp.py ...</code></td>
-  </tr>
 </table>
+<p align="center"><sub>Rendered with <code>python mjwarp/rollout_mjwarp.py ... ; python mjwarp/render_mjwarp.py ...</code></sub></p>
 
-**Virtual force sensor.**
+
+**Virtual force sensor** (OpenManipulator-X, by payload).
 
 <table align="center">
   <tr>
-    <th align="center">OpenManipulator-X, 300 g</th>
-    <th align="center">OpenManipulator-X, 400 g</th>
-    <th align="center">OpenManipulator-X, 500 g</th>
+    <th align="center">300 g</th>
+    <th align="center">400 g</th>
+    <th align="center">500 g</th>
   </tr>
   <tr>
     <td align="center"><img src="docs/media/mjwarp_omx_300g_deploy.gif" width="240" alt="OMX 300 g pick-and-place, MuJoCo Warp force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
     <td align="center"><img src="docs/media/mjwarp_omx_400g_deploy.gif" width="240" alt="OMX 400 g pick-and-place, MuJoCo Warp force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
     <td align="center"><img src="docs/media/mjwarp_omx_500g_deploy.gif" width="240" alt="OMX 500 g pick-and-place, MuJoCo Warp force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
   </tr>
-  <tr>
-    <td align="center"><code>python mjwarp/rollout_mjwarp.py --force_only ... ; python mjwarp/render_mjwarp.py ...</code></td>
-    <td align="center"><code>python mjwarp/rollout_mjwarp.py --force_only ... ; python mjwarp/render_mjwarp.py ...</code></td>
-    <td align="center"><code>python mjwarp/rollout_mjwarp.py --force_only ... ; python mjwarp/render_mjwarp.py ...</code></td>
-  </tr>
 </table>
+<p align="center"><sub>Rendered with <code>python mjwarp/rollout_mjwarp.py --force_only ... ; python mjwarp/render_mjwarp.py ...</code></sub></p>
+
 
 #### Simulation interface
 
@@ -750,45 +718,39 @@ URDF converter. Network, data, losses and protocol are unchanged, and training r
 the same PyTorch trainer via `--engine superdex`. The code is under `superdex/`. Both inference
 modes are shown, matching the OMX section above.
 
-**Dynamics rollout.**
+**Dynamics rollout** (OpenManipulator-X, by payload).
 
 <table align="center">
   <tr>
-    <th align="center">OpenManipulator-X, 300 g</th>
-    <th align="center">OpenManipulator-X, 400 g</th>
-    <th align="center">OpenManipulator-X, 500 g</th>
+    <th align="center">300 g</th>
+    <th align="center">400 g</th>
+    <th align="center">500 g</th>
   </tr>
   <tr>
     <td align="center"><img src="docs/media/superdex_omx_300g.gif" width="240" alt="OMX 300 g pick-and-place, SuperDex simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
     <td align="center"><img src="docs/media/superdex_omx_400g.gif" width="240" alt="OMX 400 g pick-and-place, SuperDex simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
     <td align="center"><img src="docs/media/superdex_omx_500g.gif" width="240" alt="OMX 500 g pick-and-place, SuperDex simulator rollout: model prediction in white (left panel) and ground truth in green (right panel), with weight-force arrows"></td>
   </tr>
-  <tr>
-    <td align="center"><code>python superdex/rollout_superdex.py ... ; python superdex/render_superdex.py ...</code></td>
-    <td align="center"><code>python superdex/rollout_superdex.py ... ; python superdex/render_superdex.py ...</code></td>
-    <td align="center"><code>python superdex/rollout_superdex.py ... ; python superdex/render_superdex.py ...</code></td>
-  </tr>
 </table>
+<p align="center"><sub>Rendered with <code>python superdex/rollout_superdex.py ... ; python superdex/render_superdex.py ...</code></sub></p>
 
-**Virtual force sensor.**
+
+**Virtual force sensor** (OpenManipulator-X, by payload).
 
 <table align="center">
   <tr>
-    <th align="center">OpenManipulator-X, 300 g</th>
-    <th align="center">OpenManipulator-X, 400 g</th>
-    <th align="center">OpenManipulator-X, 500 g</th>
+    <th align="center">300 g</th>
+    <th align="center">400 g</th>
+    <th align="center">500 g</th>
   </tr>
   <tr>
     <td align="center"><img src="docs/media/superdex_omx_300g_deploy.gif" width="240" alt="OMX 300 g pick-and-place, SuperDex force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
     <td align="center"><img src="docs/media/superdex_omx_400g_deploy.gif" width="240" alt="OMX 400 g pick-and-place, SuperDex force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
     <td align="center"><img src="docs/media/superdex_omx_500g_deploy.gif" width="240" alt="OMX 500 g pick-and-place, SuperDex force-only deployment: telemetry-predicted weight force (left panel) next to the ground-truth force (right panel) on the same motion"></td>
   </tr>
-  <tr>
-    <td align="center"><code>python superdex/rollout_superdex.py --force_only ... ; python superdex/render_superdex.py ...</code></td>
-    <td align="center"><code>python superdex/rollout_superdex.py --force_only ... ; python superdex/render_superdex.py ...</code></td>
-    <td align="center"><code>python superdex/rollout_superdex.py --force_only ... ; python superdex/render_superdex.py ...</code></td>
-  </tr>
 </table>
+<p align="center"><sub>Rendered with <code>python superdex/rollout_superdex.py --force_only ... ; python superdex/render_superdex.py ...</code></sub></p>
+
 
 #### Simulation interface
 
