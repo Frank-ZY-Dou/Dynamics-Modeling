@@ -680,18 +680,21 @@ errors below 2e-3 and typically below 1e-3.
 #### Runtime and backend characteristics
 
 One training step is a forward and backward pass through network and simulator on an
-A100 at batch size 16 with 128-step rollouts, the same protocol for all rows. The last
-column is the maximum arm-joint deviation from a plain-MuJoCo float64 reference over
-320-step torque-driven rollouts on the OMX model (contact-free, within joint limits).
-MJX and MuJoCo Warp implement MuJoCo's model semantics, so close agreement with that
-reference is expected of them; Newton is an independent engine with its own contact and
-limit models, and matching MuJoCo is not one of its design goals.
+A100 at batch size 16 with 128-step rollouts, the same protocol for all rows; SuperDex is a
+CPU library, so its batch lanes run in worker processes (16 cores here) while the network
+stays on the A100. The last column is the maximum arm-joint deviation from a plain-MuJoCo
+float64 reference over 320-step torque-driven rollouts on the OMX model (contact-free,
+within joint limits). MJX and MuJoCo Warp implement MuJoCo's model semantics, so close
+agreement with that reference is expected of them; Newton and SuperDex are independent
+engines with their own contact and limit models, and SuperDex is built from the URDF rather
+than the MJCF, so matching MuJoCo is not one of their design goals.
 
 | Simulator | Interface | Training step | Deviation from MuJoCo float64 |
 |---|---|---|---|
 | MuJoCo MJX (float32) | JAX | 8 ms | 3.7e-3 rad |
 | Newton | JAX / PyTorch | 22 / 24 ms | 1.7e-2 rad |
 | MuJoCo Warp (float32) | PyTorch | 17 ms | 4.2e-6 rad |
+| SuperDex (float64, CPU) | PyTorch | 29 ms | 2.3e-2 rad |
 
 #### Usage
 
@@ -814,21 +817,8 @@ the input velocity and the torque. Gradients agree with central finite differenc
 input channel (control, external force, and state) to within 5e-6 relative; the forward
 Newton solve converges to a residual tolerance, which a finite difference with a small step sees
 as noise, so the comparison uses a step of 1e-4 (or a tighter solver tolerance,
-`SUPERDEX_SOLVER_TOL`).
-
-#### Runtime and backend characteristics
-
-One training step is a forward and backward pass through network and simulator at batch size
-16 with 128-step rollouts, the protocol of the runtime table above; SuperDex is a CPU library,
-so the batch lanes run in worker processes (16 cores here) while the network stays on the GPU.
-The deviation column is the maximum arm-joint deviation from a plain-MuJoCo float64 reference
-over 320-step torque-driven rollouts on the OMX model, measured as in that table. SuperDex is
-an independent engine built from the URDF, so it is not expected to reproduce MuJoCo's numbers
-exactly; the deviation is of the same order as Newton's.
-
-| Simulator | Interface | Training step | Deviation from MuJoCo float64 |
-|---|---|---|---|
-| SuperDex (float64, CPU) | PyTorch | 29 ms | 2.3e-2 rad |
+`SUPERDEX_SOLVER_TOL`). This backend's training step and its deviation from the MuJoCo
+reference are in the comparison table under *MuJoCo Warp* above.
 
 #### Usage
 
