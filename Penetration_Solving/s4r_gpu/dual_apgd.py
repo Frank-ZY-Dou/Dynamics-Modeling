@@ -357,8 +357,12 @@ class DualAPGD:
     def _certified_L(self, contact_i_np: np.ndarray, contact_j_np: np.ndarray,
                      contact_n_np: np.ndarray, K: int, N: int) -> float:
         """Gershgorin row-sum bound on AAᵀ from the actual (float32) normals,
-        never above the degree bound and never below ‖AAᵀ‖₂."""
-        L_deg = self._gershgorin_L(contact_i_np, contact_j_np, K, N)
+        never above the degree bound scaled by the largest squared normal
+        length (stored float32 normals can exceed unit length by rounding)
+        and never below ‖AAᵀ‖₂."""
+        n_d = np.asarray(contact_n_np, dtype=np.float32).reshape(-1, 3).astype(np.float64)
+        m = max(1.0, float((n_d * n_d).sum(axis=1).max())) if len(n_d) else 1.0
+        L_deg = self._gershgorin_L(contact_i_np, contact_j_np, K, N) * m
         if K <= 1:
             return L_deg
         try:
@@ -367,7 +371,6 @@ class DualAPGD:
             return L_deg
         ci = np.asarray(contact_i_np, dtype=np.int64)
         cj = np.asarray(contact_j_np, dtype=np.int64)
-        n_d = np.asarray(contact_n_np, dtype=np.float32).reshape(K, 3).astype(np.float64)
         rows = np.repeat(np.arange(K, dtype=np.int64), 6)
         cols = np.empty(6 * K, dtype=np.int64)
         data = np.empty(6 * K, dtype=np.float64)
