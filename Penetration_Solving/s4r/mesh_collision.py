@@ -562,6 +562,35 @@ def evaluate_mesh_object_scene(
     )
 
 
+
+def _aabb_candidate_pairs(lo: np.ndarray, hi: np.ndarray, margin: float):
+    """Index pairs (i < j), in lexicographic order, that can pass a padded
+    AABB-overlap test.  Two boxes that overlap after padding by ``margin``
+    have centres within ``h_i + h_j + margin`` of each other on every axis,
+    hence within ``sqrt(3) (2 h_max + margin)`` in Euclidean distance, so a
+    neighbour query with that radius returns a superset of the overlapping
+    pairs; the caller applies the exact per-axis test to the subset."""
+    n = len(lo)
+    if n < 2:
+        return np.zeros(0, dtype=np.int64), np.zeros(0, dtype=np.int64)
+    lo = np.asarray(lo, dtype=np.float64)
+    hi = np.asarray(hi, dtype=np.float64)
+    centre = 0.5 * (lo + hi)
+    half = 0.5 * (hi - lo)
+    radius = np.sqrt(3.0) * (2.0 * float(half.max()) + float(margin))
+    radius = radius * (1.0 + 1e-9) + 1e-12
+    try:
+        from scipy.spatial import cKDTree
+    except ImportError:
+        return np.triu_indices(n, k=1)
+    pairs = cKDTree(centre).query_pairs(radius, output_type="ndarray")
+    if len(pairs) == 0:
+        return np.zeros(0, dtype=np.int64), np.zeros(0, dtype=np.int64)
+    pairs = np.sort(pairs, axis=1)
+    order = np.lexsort((pairs[:, 1], pairs[:, 0]))
+    return pairs[order, 0].astype(np.int64), pairs[order, 1].astype(np.int64)
+
+
 class MeshOracle:
     """Collision oracle for oriented triangle meshes using trimesh proximity.
 

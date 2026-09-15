@@ -30,6 +30,7 @@ if _HERE not in sys.path:
 from mesh_collision import _contains_points as _mesh_contains_points  # noqa: E402
 from mesh_collision import _vertex_components, _nested_component_contact, _piece_layout, _piece_boxes, _any_piece_nested  # noqa: E402
 from mesh_collision import _signed_volume  # noqa: E402
+from mesh_collision import _aabb_candidate_pairs  # noqa: E402
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -340,7 +341,10 @@ class PrebuiltFCLOracle:
             return ds * (ei + ej) + d_hat + extra_margin
 
         if state is None:
-            ii, jj = np.triu_indices(N, k=1)
+            # Neighbour superset of the padded-AABB overlaps; _broadphase_pairs
+            # applies the exact tests to it in lexicographic order.
+            ii, jj = _aabb_candidate_pairs(
+                lo, hi, (ds * 2.0 * float(E.max()) + d_hat + extra_margin) * inv_s)
             ci, cj = self._broadphase_pairs(ii, jj, C, lo, hi, s, ds, extra_margin)
             move = np.zeros(N)
             d_cache = {}
