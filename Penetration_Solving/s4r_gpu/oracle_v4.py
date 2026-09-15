@@ -191,8 +191,8 @@ class S4RWarpContactOracleV4(S4RWarpContactOracleV3):
         if K == 0:
             return []
         K = min(K, self.max_pairs_v4)
-        idx_i = self.broad_pair_i_dev.numpy()[:K].copy()
-        idx_j = self.broad_pair_j_dev.numpy()[:K].copy()
+        idx_i = self.broad_pair_i_dev[:K].numpy()
+        idx_j = self.broad_pair_j_dev[:K].numpy()
         # The atomic append order is not deterministic; sort to V3's
         # lexicographic order so the QP sees the same contact order run
         # after run and V4 matches V3 bit for bit.
