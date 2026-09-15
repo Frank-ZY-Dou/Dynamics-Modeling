@@ -578,7 +578,10 @@ def _aabb_candidate_pairs(lo: np.ndarray, hi: np.ndarray, margin: float):
     centre = 0.5 * (lo + hi)
     half = 0.5 * (hi - lo)
     radius = np.sqrt(3.0) * (2.0 * float(half.max()) + float(margin))
-    radius = radius * (1.0 + 1e-9) + 1e-12
+    # Outward slack for the rounding of the box centres and of the
+    # neighbour-query distances, proportional to the coordinate magnitude.
+    coord = max(float(np.abs(lo).max()), float(np.abs(hi).max()), 1.0)
+    radius = radius * (1.0 + 1e-9) + 64.0 * np.finfo(np.float64).eps * (coord + radius) + 1e-12
     try:
         from scipy.spatial import cKDTree
     except ImportError:
