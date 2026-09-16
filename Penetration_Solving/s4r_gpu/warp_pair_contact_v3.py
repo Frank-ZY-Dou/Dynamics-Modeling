@@ -738,7 +738,16 @@ class S4RWarpContactOracleV3:
             cl = np.linalg.norm(cdir, axis=1, keepdims=True)
             n_h[bad] = cdir / np.where(cl < 1e-12, 1.0, cl)
             ln = np.linalg.norm(n_h, axis=1)
-        n_h = n_h / np.where(ln < 1e-12, 1.0, ln)[:, None]
+        # A normal that is still zero (coincident centres and a degenerate
+        # witness) cannot form a constraint row; drop that pair.
+        ok = ln >= 1e-12
+        if not np.all(ok):
+            idx_i = idx_i[ok]; idx_j = idx_j[ok]; sd_h = sd_h[ok]; cross_h = cross_h[ok]
+            n_h = n_h[ok]; cpa_h = cpa_h[ok]; cpb_h = cpb_h[ok]; ln = ln[ok]
+            K = len(idx_i)
+            if K == 0:
+                return []
+        n_h = n_h / ln[:, None]
 
         def _extents_for(which_pair: np.ndarray, sign: float) -> np.ndarray:
             b_dev = wp.array(np.ascontiguousarray(which_pair, dtype=np.int32), dtype=wp.int32, device=_DEVICE)

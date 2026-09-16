@@ -100,11 +100,30 @@ def _spread_direction(k: int) -> np.ndarray:
     return v / n if n > 1e-12 else np.array([1.0, 0.0, 0.0])
 
 
-def _admissibility_violations(C, target_fn, block=1024):
-    """Pairs (i, j, d_ij) with ||c_i - c_j|| < target(i, j), lexicographic,
-    computed block-wise so the memory stays O(block * N)."""
+def _admissibility_violations(C, target_fn, block=1024, radius=None):
+    """Pairs (i, j, d_ij) with ||c_i - c_j|| < target(i, j), lexicographic.
+
+    When ``radius`` bounds every target from above, only the pairs within
+    that distance are examined (a neighbour query on the centres); otherwise
+    the scan is block-wise over all pairs so the memory stays O(block * N)."""
     N = len(C)
     out = []
+    if radius is not None and N >= 2:
+        try:
+            from scipy.spatial import cKDTree
+        except ImportError:
+            cKDTree = None
+        if cKDTree is not None:
+            pairs = cKDTree(C).query_pairs(float(radius), output_type="ndarray")
+            if len(pairs) == 0:
+                return out
+            pairs = np.sort(pairs, axis=1)
+            pairs = pairs[np.lexsort((pairs[:, 1], pairs[:, 0]))]
+            ii = pairs[:, 0]; jj = pairs[:, 1]
+            d = np.linalg.norm(C[ii] - C[jj], axis=1)
+            tgt = np.asarray(target_fn(ii, jj), dtype=np.float64)
+            keep = d < tgt
+            return [(int(i), int(j), float(dd)) for i, j, dd in zip(ii[keep], jj[keep], d[keep])]
     for a in range(0, N, block):
         b = min(N, a + block)
         d = np.linalg.norm(C[a:b, None, :] - C[None, :, :], axis=2)  # (b-a, N)
@@ -157,8 +176,12 @@ def separate_coincident_centroids(centers, radii, d_hat, s_min,
             C[b] = C[b] + seed * _spread_direction(b)
 
     k_coincident = 0
+    # Every target is at most d_hat + 2 s_min max(R) + eps; the pushes below
+    # never move a pair beyond its own target, so this radius covers every
+    # pair a pass can flag (padded for rounding).
+    radius = (d_hat + 2.0 * s_min * float(R.max()) + eps) * (1.0 + 1e-9) + 1e-12
     for p in range(max_passes):
-        viol = _admissibility_violations(C, target)
+        viol = _admissibility_violations(C, target, radius=radius)
         if not viol:
             return p, 0
         for (i, j, d) in viol:
@@ -178,7 +201,7 @@ def separate_coincident_centroids(centers, radii, d_hat, s_min,
             C[i] = C[i] - 0.5 * gap * axis
             if verbose:
                 print(f"    jitter pair ({i},{j}) by ±{0.5 * gap:.5f}")
-    return max_passes, len(_admissibility_violations(C, target))
+    return max_passes, len(_admissibility_violations(C, target, radius=radius))
 
 
 def _one_sided_support(model_verts, rot, direction) -> float:

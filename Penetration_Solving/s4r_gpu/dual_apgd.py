@@ -529,7 +529,10 @@ class DualAPGD:
         N3 = 3 * self.cap_N
 
         # Warm the device + JIT-compile every kernel BEFORE capture
-        # (capture mode forbids kernel compilation).
+        # (capture mode forbids kernel compilation). The warm-up launches
+        # only load the kernels; they must not disturb the multipliers
+        # already uploaded for this step, so the touched buffers are restored.
+        saved = [buf.numpy().copy() for buf in (self.lam, self.lam_prev, self.y, self.dp)]
         warmup_K = wp.array(np.array([1], dtype=np.int32), dtype=wp.int32,
                             device=_DEVICE)
         warmup_N3 = wp.array(np.array([1], dtype=np.int32), dtype=wp.int32,
@@ -547,6 +550,9 @@ class DualAPGD:
         wp.launch(_proj_swap_g, dim=K,
                   inputs=[warmup_K, self._meta_inv_L, self.y, self.AAy, self.b,
                           self.lam, self.lam_prev], device=_DEVICE)
+        wp.synchronize()
+        for buf, arr in zip((self.lam, self.lam_prev, self.y, self.dp), saved):
+            buf.assign(arr)
         wp.synchronize()
 
         # Capture the full max_iter unroll.
