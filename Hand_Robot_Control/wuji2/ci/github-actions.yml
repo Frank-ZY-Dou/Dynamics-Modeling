@@ -1,0 +1,59 @@
+name: Hand Robot Control
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Hand_Robot_Control/**'
+      - '.github/workflows/hand-robot-control.yml'
+  pull_request:
+    paths:
+      - 'Hand_Robot_Control/**'
+      - '.github/workflows/hand-robot-control.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hand-robot-control-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  wuji2:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10', '3.12', '3.13']
+    defaults:
+      run:
+        working-directory: Hand_Robot_Control/wuji2
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: Hand_Robot_Control/wuji2/pyproject.toml
+      - name: Install package and test dependencies
+        run: python -m pip install -e '.[dev,model,camera]'
+      - name: Install video encoder
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Fetch reference model
+        run: |
+          git clone --filter=blob:none --sparse https://github.com/wuji-technology/wuji-description.git external/wuji-description
+          git -C external/wuji-description sparse-checkout set hand2/hand2_beta2/body
+          git -C external/wuji-description checkout c2cd7f8d1ef8b6dc8cb907c17daa5a88b4442d95
+      - name: Lint
+        run: ruff check src tests examples
+      - name: Test without hardware
+        env:
+          WUJI2_MODEL_PATH: external/wuji-description/hand2/hand2_beta2/body/mjcf/left.xml
+        run: python -m pytest -q
+      - name: Build distribution
+        run: python -m build

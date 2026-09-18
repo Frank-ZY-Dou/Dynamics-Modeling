@@ -19,6 +19,7 @@ Research code and open-source projects on dynamics modeling and simulation.
   bodies, a PyTorch bridge for policy and parameter learning, and manipulation demos solved by gradient
   descent through contact.
 - [**HandDiffSim**](HandDiffSim/) — Differentiable simulation of the Pollen Robotics AmazingHand on MuJoCo Warp.
+- [**Hand_Robot_Control**](Hand_Robot_Control/) — Communication, joint control, and gesture examples for robotic hands, starting with Wuji Hand 2.
 - [**SimReady Gate**](SimReady_Gate/) — Language-driven, verifier-in-the-loop repair that turns generated tabletop
   scenes into penetration-free, simulation-ready ones: a request becomes a typed constraint program, S4R repairs
   the scene under it in scale-space, and a mesh-level evaluator plus a MuJoCo settle certify the result. Reads
