@@ -1,8 +1,8 @@
 <div align="center">
 <h1>S4R: Scaling for Rigid-Body Interpenetration Resolution</h1>
 
-<!-- <a href="PROJECT_PAGE_URL"><img src="https://img.shields.io/badge/Project_Page-green" alt="Project Page"></a> -->
-<!-- <a href="ARXIV_URL"><img src="https://img.shields.io/badge/arXiv-XXXX.XXXXX-b31b1b" alt="arXiv"></a> -->
+<a href="https://frank-zy-dou.github.io/projects/S4R/index.html"><img src="https://img.shields.io/badge/Project_Page-green" alt="Project Page"></a>
+<a href="https://arxiv.org/abs/2609.20524"><img src="https://img.shields.io/badge/arXiv-2609.20524-b31b1b" alt="arXiv"></a>
 <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="License: MIT"></a>
 <a href="data/"><img src="https://img.shields.io/badge/Data-Kubric_%2B_HY3D-orange" alt="Bundled datasets"></a>
 
