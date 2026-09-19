@@ -23,10 +23,10 @@ spell &ldquo;SIGGRAPH ASIA,&rdquo; from an interpenetrating initialization to a 
 configuration. <b>Right:</b> S4R efficiently converts cluttered 3D assets into simulation-ready
 scenes for downstream robot policy training.</sub></p>
 
-<table>
+<table align="center">
 <tr>
-<td><img src="assets/ycb48_repair_and_settle.gif" alt="48 YCB objects spawned in interpenetration, resolved by S4R and settled" /></td>
-<td><img src="assets/ycb48_pick_and_place.gif" alt="a Franka arm picks the sugar box from the repaired scene and places it in the ring" /></td>
+<td align="center"><img src="assets/ycb48_repair_and_settle.gif" alt="48 YCB objects spawned in interpenetration, resolved by S4R and settled" /></td>
+<td align="center"><img src="assets/ycb48_pick_and_place.gif" alt="a Franka arm picks the sugar box from the repaired scene and places it in the ring" /></td>
 </tr>
 <tr>
 <td><sub><b>Repair and settle.</b> 48 YCB objects spawned in interpenetration, resolved by S4R and settled in simulation (<a href="assets/ycb48_repair_and_settle.mp4">mp4</a>).</sub></td>
@@ -74,30 +74,30 @@ The clips below show the process from interpenetrating layouts to a
 penetration-free state. Each clip pauses 2 s on the initial overlap, then
 plays the optimization.
 
-<table>
+<table align="center">
 <tr>
-<td><img src="gifs/seed1.gif" /></td>
-<td><img src="gifs/seed2.gif" /></td>
-<td><img src="gifs/seed3.gif" /></td>
-<td><img src="gifs/seed4.gif" /></td>
+<td align="center"><img src="gifs/seed1.gif" /></td>
+<td align="center"><img src="gifs/seed2.gif" /></td>
+<td align="center"><img src="gifs/seed3.gif" /></td>
+<td align="center"><img src="gifs/seed4.gif" /></td>
 </tr>
 <tr>
-<td><img src="gifs/seed5.gif" /></td>
-<td><img src="gifs/seed6.gif" /></td>
-<td><img src="gifs/seed7.gif" /></td>
-<td><img src="gifs/seed8.gif" /></td>
+<td align="center"><img src="gifs/seed5.gif" /></td>
+<td align="center"><img src="gifs/seed6.gif" /></td>
+<td align="center"><img src="gifs/seed7.gif" /></td>
+<td align="center"><img src="gifs/seed8.gif" /></td>
 </tr>
 <tr>
-<td><img src="gifs/seed9.gif" /></td>
-<td><img src="gifs/seed10.gif" /></td>
-<td><img src="gifs/seed11.gif" /></td>
-<td><img src="gifs/seed12.gif" /></td>
+<td align="center"><img src="gifs/seed9.gif" /></td>
+<td align="center"><img src="gifs/seed10.gif" /></td>
+<td align="center"><img src="gifs/seed11.gif" /></td>
+<td align="center"><img src="gifs/seed12.gif" /></td>
 </tr>
 <tr>
-<td><img src="gifs/seed13.gif" /></td>
-<td><img src="gifs/seed14.gif" /></td>
-<td><img src="gifs/seed15.gif" /></td>
-<td><img src="gifs/seed16.gif" /></td>
+<td align="center"><img src="gifs/seed13.gif" /></td>
+<td align="center"><img src="gifs/seed14.gif" /></td>
+<td align="center"><img src="gifs/seed15.gif" /></td>
+<td align="center"><img src="gifs/seed16.gif" /></td>
 </tr>
 </table>
 
