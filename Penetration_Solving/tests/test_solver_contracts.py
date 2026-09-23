@@ -436,5 +436,58 @@ class Evaluator(unittest.TestCase):
         self.assertEqual(evaluate_world_collision_meshes([a, b]).pen_pairs, 1)
 
 
+class AnchorOption(unittest.TestCase):
+    """anchor_alpha: alpha/2 ||c + dp - c0||^2 in every step, with the
+    detection margin widened by the pull."""
+
+    def setUp(self):
+        os.environ["S4R_DISABLE_PENALTY_CLEANUP"] = "1"
+
+    def tearDown(self):
+        os.environ.pop("S4R_DISABLE_PENALTY_CLEANUP", None)
+
+    @staticmethod
+    def cluster():
+        rng = np.random.default_rng(7)
+        return [box_object(c) for c in rng.uniform(-0.12, 0.12, size=(8, 3))]
+
+    def test_zero_weight_matches_the_default(self):
+        a = solve(self.cluster(), ds_max=0.05, adaptive_ds=True)
+        b = solve(self.cluster(), ds_max=0.05, adaptive_ds=True, anchor_alpha=0.0)
+        np.testing.assert_array_equal(a["final_centers"], b["final_centers"])
+
+    def test_anchored_run_converges(self):
+        r = solve(self.cluster(), ds_max=0.05, adaptive_ds=True, anchor_alpha=1.0)
+        self.assertEqual(r["status"], "converged")
+        self.assertEqual(r["pen"], 0)
+        self.assertEqual(r["anchor_alpha"], 1.0)
+
+    def test_reach_widens_detection(self):
+        # Half-edge 0.1 cubes 0.25 apart: a 0.05 gap, above d_hat = 0.02.
+        objects = [box_object([0, 0, 0]), box_object([0.25, 0, 0])]
+        nfs = [o.normalize_factor for o in objects]
+        oracle = PrebuiltFCLOracle(nfs, [o.collision_verts_model for o in objects],
+                                   [o.collision_faces for o in objects], d_hat=0.02)
+        centers = np.array([o.center for o in objects])
+        rots = [o.rotation for o in objects]
+        self.assertEqual(oracle.find_contacts(1.0, 0.0, centers, rots), [])
+        # Margin d_hat + reach_i + reach_j: 0.04 < 0.05 misses the pair, 0.06 finds it.
+        self.assertEqual(oracle.find_contacts(1.0, 0.0, centers, rots, reach=np.array([0.02, 0.0])), [])
+        c = oracle.find_contacts(1.0, 0.0, centers, rots, reach=np.array([0.04, 0.0]))
+        self.assertEqual([(x[0], x[1]) for x in c], [(0, 1)])
+        self.assertAlmostEqual(c[0][2], 0.05, places=6)
+        with self.assertRaises(ValueError):
+            oracle.find_contacts(1.0, 0.0, centers, rots, reach=np.zeros(2), incremental=True)
+
+    def test_unsupported_settings_are_rejected(self):
+        objects = [box_object([0, 0, 0]), box_object([0.1, 0, 0])]
+        for kw in (dict(revalidate_interval=3), dict(enable_rotation=True),
+                   dict(use_dual=True), dict(box_bounds=(-np.ones(3), np.ones(3)))):
+            with self.assertRaises(ValueError):
+                solve(objects, anchor_alpha=1.0, **kw)
+        with self.assertRaises(ValueError):
+            solve(objects, anchor_alpha=-1.0)
+
+
 if __name__ == "__main__":
     unittest.main()

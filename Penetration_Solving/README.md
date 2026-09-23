@@ -37,6 +37,7 @@ scenes for downstream robot policy training.</sub></p>
 
 ## 📢 Updates
 
+* [September 2026] Optional anchor term that pulls each object back toward its input position at every step, suggested by [Sarvex Jatasra](https://www.linkedin.com/in/sarvex/); see [Anchoring to the input layout](#anchoring-to-the-input-layout-optional).
 * [September 2026] **SimReady Gate** — an agentic, language-driven layer on top of S4R that turns generated RoboLab and RoboCasa scenes into certified simulation-ready ones: a request becomes a typed constraint program, S4R repairs under it in scale-space, a probed mesh-level evaluator and a MuJoCo settle decide, and a certificate with provenance is written. Measured on RoboLab's 68 shipped scenes, on layouts from RoboLab's own placement solver, and on RoboCasa's counter regions with RoboCasa's own placement test. A separate project in this repository: [`../SimReady_Gate/`](../SimReady_Gate/).
 * [September 2026] Timing tables extended to N = 2000 and 3000 on both the CPU and the GPU solver, with the hardware noted.
 * [August 2026] Initial release: the CPU solver (progressive scaling, contact QP, SOI events, frozen-witness cache, tail refinement), the GPU-native solver on NVIDIA Warp, the benchmark scene generators with fixed seeds, the bundled Kubric pool and the processed HY3D meshes, and end-to-end examples.
@@ -263,6 +264,27 @@ python examples/run_upright.py --output upright_seed123.json --N 12 --seed 123 -
 Both runs end with `final pen=0` and all objects upright on the plane;
 the JSON holds the poses of every stage (`init`, `s30`, `s60`, `s90`,
 `final`) for rendering.
+
+### Anchoring to the input layout (optional)
+
+Each step moves the objects as little as possible, which does not
+guarantee the smallest final displacement. `anchor_alpha` adds
+α/2 ‖c + Δp − c<sub>0</sub>‖² to every step, pulling each object back
+toward its input position c<sub>0</sub>; each step stays a convex QP.
+Because the pull also moves objects that touch nothing, every pair within
+reach of the pull is detected and constrained as well.
+
+```bash
+python examples/run_kubric.py --N 40 --seed 42 --anchor-alpha 1
+```
+
+In Python, pass `anchor_alpha=1.0, revalidate_interval=1` to
+`solve_s4r_qp` (CPU solver, translation only). Over 20 seeds with α = 1,
+the final RMSD drops by 3–4% on Kubric scenes (N = 40 and 100) and by
+3% on a dense ball of 100 HY3D objects, compared with the default
+objective at the same `revalidate_interval=1`; runs take 1.2× and 2.5×
+as long. Background and a side-by-side video:
+[project page](https://frank-zy-dou.github.io/projects/S4R/#community).
 
 ## Data
 

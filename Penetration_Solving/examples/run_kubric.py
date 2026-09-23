@@ -7,6 +7,7 @@ with the shared mesh-level evaluator.
 Usage:
   python run_kubric.py --N 40 --seed 42            # CPU solver
   python run_kubric.py --N 1000 --seed 42 --solver gpu
+  python run_kubric.py --N 40 --seed 42 --anchor-alpha 1   # pull toward the input layout
 """
 import argparse
 import sys
@@ -31,6 +32,9 @@ def main() -> None:
     ap.add_argument("--dataset", default="kubric", choices=["kubric", "hy3d", "thingi"])
     ap.add_argument("--solver", default="cpu", choices=["cpu", "gpu"],
                     help="gpu needs an NVIDIA GPU and warp-lang")
+    ap.add_argument("--anchor-alpha", type=float, default=None,
+                    help="CPU solver: weight of the pull toward the input positions "
+                         "(re-detects contacts every step)")
     args = ap.parse_args()
 
     objs, _, _ = make_scene(args.dataset, args.N, args.seed, 1.0)
@@ -43,9 +47,11 @@ def main() -> None:
         res = solve_s4r_gpu(objs)
         centers = res["centers"]
     else:
+        anchored = args.anchor_alpha is not None
         res = solve_s4r_qp(objs, d_hat=0.02, ds_max=0.05, max_steps=200,
-                           adaptive_ds=True, contact_sparsity=True,
-                           revalidate_interval=3,
+                           adaptive_ds=True, contact_sparsity=not anchored,
+                           revalidate_interval=1 if anchored else 3,
+                           anchor_alpha=args.anchor_alpha,
                            contact_backend="fcl_prebuilt", verbose=False)
         centers = res["final_centers"]
     dt = time.time() - t0

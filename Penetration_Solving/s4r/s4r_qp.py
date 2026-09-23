@@ -316,7 +316,7 @@ class PrebuiltFCLOracle:
                                           np.asarray(p_local, dtype=np.float64)[None, :])[0])
 
     def find_contacts(self, s, ds, centers, rots, extra_margin=0.0,
-                      all_contacts=False, incremental=False):
+                      all_contacts=False, incremental=False, reach=None):
         """Contacts at scale s that the inflation by ds may activate.
 
         Returns a list of (i, j, d_signed, n, e_i, e_j, cp_on_i, cp_on_j) in
@@ -333,7 +333,14 @@ class PrebuiltFCLOracle:
         pair of two unmoved bodies keeps its previous result. The candidate
         set is refreshed only for pairs involving a moved body. The result
         is identical to a full detection.
+
+        ``reach`` (N,), optional: how far each body may move in this step
+        besides the contact response (the anchor pull). A pair is returned
+        when its gap is below its usual margin plus the reach of its two
+        bodies.
         """
+        if reach is not None and incremental:
+            raise ValueError("reach needs a full detection (incremental=False)")
         fcl = self._fcl
         N = self.N
         inv_s = 1.0 / s
@@ -366,9 +373,11 @@ class PrebuiltFCLOracle:
         if state is None:
             # Neighbour superset of the padded-AABB overlaps; _broadphase_pairs
             # applies the exact tests to it in lexicographic order.
-            ii, jj = _aabb_candidate_pairs(
-                lo, hi, (ds * 2.0 * float(E.max()) + d_hat + extra_margin) * inv_s)
-            ci, cj = self._broadphase_pairs(ii, jj, C, lo, hi, s, ds, extra_margin)
+            pad = ds * 2.0 * float(E.max()) + d_hat + extra_margin
+            if reach is not None:
+                pad = pad + 2.0 * float(np.max(reach))
+            ii, jj = _aabb_candidate_pairs(lo, hi, pad * inv_s)
+            ci, cj = self._broadphase_pairs(ii, jj, C, lo, hi, s, ds, extra_margin, reach)
             move = np.zeros(N)
             d_cache = {}
         else:
@@ -469,7 +478,10 @@ class PrebuiltFCLOracle:
             n = n_raw / nn
             ext_i = self.support(i, rots[i], n)
             ext_j = self.support(j, rots[j], -n)
-            if d_signed < ds * (ext_i + ext_j) + d_hat:
+            threshold = ds * (ext_i + ext_j) + d_hat
+            if reach is not None:
+                threshold = threshold + reach[i] + reach[j]
+            if d_signed < threshold:
                 tup = (i, j, d_signed, n, ext_i, ext_j, cp_on_a, cp_on_b)
                 contacts.append(tup)
                 new_cache[(i, j)] = (d_signed, tup)
@@ -485,16 +497,22 @@ class PrebuiltFCLOracle:
             self._inc = None
         return contacts
 
-    def _broadphase_pairs(self, ii, jj, C, lo, hi, s, ds, extra_margin):
+    def _broadphase_pairs(self, ii, jj, C, lo, hi, s, ds, extra_margin, reach=None):
         """Candidate pairs among the given (ii, jj) index arrays: SOI cull on
         bounding spheres, then Euclidean u-space AABB gap against the
-        conservative margin."""
+        conservative margin (widened by the reach of both bodies if given)."""
         E = self.max_extents
         inv_s = 1.0 / s
         d_ij = np.linalg.norm(C[ii] - C[jj], axis=1)
-        s_contact = np.maximum(0.0, (d_ij - self.d_hat) / (E[ii] + E[jj] + 1e-12))
+        if reach is None:
+            s_contact = np.maximum(0.0, (d_ij - self.d_hat) / (E[ii] + E[jj] + 1e-12))
+        else:
+            s_contact = np.maximum(0.0, (d_ij - self.d_hat - reach[ii] - reach[jj])
+                                   / (E[ii] + E[jj] + 1e-12))
         soi_keep = (s + ds) >= (s_contact * 0.9)
         margin_u = (ds * (E[ii] + E[jj]) + self.d_hat + extra_margin) * inv_s
+        if reach is not None:
+            margin_u = margin_u + (reach[ii] + reach[jj]) * inv_s
         gap_axis = np.maximum(np.maximum(lo[ii] - hi[jj], lo[jj] - hi[ii]), 0.0)
         near = np.einsum('ij,ij->i', gap_axis, gap_axis) <= margin_u * margin_u
         keep = soi_keep & near
@@ -689,6 +707,7 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
                   contact_backend='fcl',
                   trajectory_dumper=None, dump_every=1,
                   target_centers=None, attraction_alpha=None,
+                  anchor_alpha=None,
                   perturb_rot_deg=0.0, perturb_seed=None,
                   box_bounds=None, joints=None,
                   profile=False):
@@ -726,6 +745,14 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
     ``'qp_failure'``, ``'numerical_failure'``, ``'container_infeasible'``,
     ``'residual_penetration'``, ``'wall_violation'``,
     ``'joint_violation'``). The same rule is used by the GPU driver.
+
+    ``anchor_alpha`` (optional, translation only, FCL backend,
+    ``revalidate_interval=1``) adds alpha/2 ||c + dp - c0||^2 to every step,
+    pulling each body back toward its input center c0; each step stays a
+    convex QP. The pull also moves bodies with no contact, so each pair's
+    detection margin grows by the pull the step can apply to its two bodies
+    (alpha/(1+alpha) ||c_i - c0_i|| each) and every detected pair is a
+    constraint row. The full-scale tail is unchanged.
     """
     if contact_backend not in _BACKENDS:
         raise ValueError(f"contact_backend must be one of {_BACKENDS}, got {contact_backend!r}")
@@ -747,6 +774,15 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
         raise ValueError(
             "joints need enable_rotation=True: with translation only a "
             "joint row welds the two links instead of letting them swing")
+    if anchor_alpha is not None:
+        if not (np.isfinite(anchor_alpha) and anchor_alpha >= 0.0):
+            raise ValueError(f"anchor_alpha must be a non-negative finite weight, got {anchor_alpha}")
+        if (contact_backend not in ('fcl', 'fcl_prebuilt') or enable_rotation or use_dual
+                or box_bounds is not None or joints or target_centers is not None
+                or int(revalidate_interval) != 1):
+            raise ValueError(
+                "anchor_alpha needs the FCL backend, translation only, the primal "
+                "solver, no walls, joints or target_centers, and revalidate_interval=1")
 
     def _sync_backend():
         if contact_backend == 'warp':
@@ -914,6 +950,7 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
         return _warp_oracle[0]
 
     _all_contacts = os.environ.get('S4R_ALL_CONTACTS', '0') == '1'
+    _anchor_reach = [None]     # per-body reach of the anchor pull in the current step
 
     def find_contacts(s, ds, bidirectional=True):
         """Pairs needing attention at scale s for an inflation by ds:
@@ -926,7 +963,8 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
             return _init_warp_oracle().find_contacts(s, ds, centers, rots)
         if contact_backend in ('fcl', 'fcl_prebuilt'):
             return _get_fcl_oracle().find_contacts(s, ds, centers, rots,
-                                                   all_contacts=_all_contacts)
+                                                   all_contacts=_all_contacts,
+                                                   reach=_anchor_reach[0])
         return _find_contacts_trimesh(s, ds)
 
     def find_contacts_margin(s, ds, extra_margin, incremental=False):
@@ -1119,6 +1157,13 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
         centers[:] += delta
         return delta
 
+    # Anchor option: the attraction machinery with the input centers as target
+    # and every body in the QP (see the docstring for the detection margin).
+    if anchor_alpha is not None:
+        anchor_alpha = float(anchor_alpha)
+        target_centers = centers0.copy()
+        attraction_alpha = anchor_alpha
+
     # Set when the container walls become mutually infeasible at some scale:
     # no translation keeps every body inside the box. The walls are HARD, so
     # the run reports infeasibility instead of relaxing them.
@@ -1145,6 +1190,10 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
             if step > 0 and diagnostics and not diagnostics[-1].get('had_contacts', True):
                 ds = min(2.0 * ds_max, 1.0 - scale)
             ds = min(ds, ds_retry_cap)
+
+        if anchor_alpha is not None:
+            _anchor_reach[0] = (anchor_alpha / (1.0 + anchor_alpha)
+                                * np.linalg.norm(centers - centers0, axis=1))
 
         # ── Full detection or analytical update ──────────────────────
         # interval=M detects every M steps (interval=1: every step).
@@ -1196,6 +1245,8 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
 
         # Pairs that need pushing this step.
         active = [c for c in contacts if ds * (c[4] + c[5]) + d_hat - c[2] > 0]
+        if anchor_alpha is not None:
+            active = list(contacts)      # the pull can close any detected pair
         n_pen = sum(1 for c in contacts if c[2] < -1e-6)
 
         # A step without active contacts needs no solve unless container
@@ -1205,7 +1256,12 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
         # the joint rows; the closed-form attraction step does not).
         attraction_on = target_centers is not None and attraction_alpha is not None
         if not active and walls is None and not (joints and attraction_on):
-            delta = _apply_attraction_only()
+            if anchor_alpha is not None:
+                # No pair within reach of the pull: the unconstrained minimiser.
+                delta = -anchor_alpha / (1.0 + anchor_alpha) * (centers - centers0)
+                centers[:] += delta
+            else:
+                delta = _apply_attraction_only()
             last_dp = delta if delta is not None else np.zeros((N, 3))
             last_ds_applied = ds
             scale += ds
@@ -1447,6 +1503,8 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
     if continuation_complete:
         scale = 1.0
 
+    _anchor_reach[0] = None
+
     # ── Tail refinement: correction QPs at scale 1 with ds = 0 ────────
     # Residual linearisation error can leave a few pairs with d < 0 at full
     # scale. Correction QPs use the same active set as the main loop
@@ -1681,6 +1739,7 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
         "max_pen": stats.max_penetration,
         "evaluated_at_scale": 1.0,
         "rmsd": rmsd,
+        "anchor_alpha": anchor_alpha,
         "timing_policy": "per_scene_setup_plus_solve_v1",
         "setup_time": setup_time,
         "solve_time": solve_time,
