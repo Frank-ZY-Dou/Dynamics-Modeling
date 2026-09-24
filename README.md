@@ -24,3 +24,7 @@ Research code and open-source projects on dynamics modeling and simulation.
   scenes into penetration-free, simulation-ready ones: a request becomes a typed constraint program, S4R repairs
   the scene under it in scale-space, and a mesh-level evaluator plus a MuJoCo settle certify the result. Reads
   RoboLab (USD) and RoboCasa (MJCF) scenes directly; measured on their assets.
+
+## Surveys & Living Archives
+
+- [**Frontier AI for 3D Modeling & Robotics (Visual Case Archive)**](https://mit-cdfg.github.io/Survey-AI-for-3D-modeling-Robotics/#view-gallery) — A systematic empirical horizon scan and interactive case registry cataloging 190+ showcases across parametric CAD, 3D generative scenes, physics-grounded simulations (Isaac Sim, MuJoCo, Genesis), and real-world robotic control. Structured around a three-tier reproducibility hierarchy (Rank 1 verified code/harnesses, Rank 2 interactive cloud viewers, Rank 3 demonstration media) to audit spatial reasoning, closed-loop dynamics, and simulation-to-reality transfer in frontier foundation models. Companion repository: [awesome-ai-3d-modeling-robotics](https://github.com/Frank-ZY-Dou/awesome-ai-3d-modeling-robotics).
