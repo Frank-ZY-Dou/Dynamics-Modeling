@@ -5,7 +5,7 @@ Research code and open-source projects on dynamics modeling and simulation.
 ## Papers
 
 - [**NeuralActuator**](NeuralActuator/) — Neural Actuation Modeling for Robot Dynamics and External Force Perception.
-  Robotics: Science and Systems (RSS) 2026.<!-- **Finalist for the Outstanding Student Paper and Outstanding Paper Awards.** -->
+  Robotics: Science and Systems (RSS) 2026. 🏆 **Outstanding Systems Paper Award.**
 - [**RigidFormer**](RigidFormer/) — Learning Rigid Dynamics using Transformers.
   Conference on Neural Information Processing Systems (NeurIPS) 2026.
 - [**S4R**](Penetration_Solving/) — Scaling for Rigid-Body Interpenetration Resolution.
