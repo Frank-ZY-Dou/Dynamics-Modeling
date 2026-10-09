@@ -2,6 +2,8 @@
 
 **Project page:** [https://people.csail.mit.edu/frankzydou/projects/RigidFormer/index.html](https://people.csail.mit.edu/frankzydou/projects/RigidFormer/index.html)
 
+**Conference on Neural Information Processing Systems (NeurIPS) 2026**
+
 Zhiyang Dou<sup>1</sup>, Minghao Guo<sup>1</sup>, Haixu Wu<sup>1</sup>, Doug Roble<sup>2</sup>, Tuur Stuyck<sup>2</sup>, Wojciech Matusik<sup>1</sup>
 
 <sup>1</sup> Massachusetts Institute of Technology &nbsp;&nbsp;&nbsp; <sup>2</sup> Meta
