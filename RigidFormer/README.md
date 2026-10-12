@@ -17,12 +17,12 @@ Zhiyang Dou<sup>1</sup>, Minghao Guo<sup>1</sup>, Haixu Wu<sup>1</sup>, Doug Rob
 
 <table>
 <tr>
-<td><a href="assets/MoviS_sample_1.mp4"><img src="assets/gifs/MoviS_sample_1.gif"/></a></td>
+<td><a href="assets/MoviB_sample_2.mp4"><img src="assets/gifs/MoviB_sample_2.gif"/></a></td>
 <td><a href="assets/MoviA_sample_1.mp4"><img src="assets/gifs/MoviA_sample_1.gif"/></a></td>
 </tr>
 <tr>
 <td><a href="assets/MoviB_sample_1.mp4"><img src="assets/gifs/MoviB_sample_1.gif"/></a></td>
-<td><a href="assets/MoviB_sample_2.mp4"><img src="assets/gifs/MoviB_sample_2.gif"/></a></td>
+<td><a href="assets/MoviS_sample_1.mp4"><img src="assets/gifs/MoviS_sample_1.gif"/></a></td>
 </tr>
 </table>
 <p align="center"><i>RigidFormer rollouts from point inputs on MOVi-Sphere, MOVi-A and MOVi-B.</i></p>
