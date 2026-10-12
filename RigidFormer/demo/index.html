@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RigidFormer Rollouts</title>
+<meta name="description" content="Interactive rollouts of RigidFormer on held-out MOVi test scenes: choose a dataset, a scene and the step size, play and orbit.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap">
+<style>
+/* Layout: one studio stage (16:9) with a transport bar and a strip of segmented controls under it, notes below. */
+:root {
+  --paper: #f3f5f6;
+  --panel: #ffffff;
+  --ink: #14181d;
+  --ink-2: #59626c;
+  --line: #d8dde2;
+  --accent: #2c5d8f;
+  --accent-ink: #ffffff;
+  --context: #d9822b;
+  --focus: #2c5d8f;
+  --font-display: "Newsreader", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --radius: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #0f1214;
+    --panel: #171b1f;
+    --ink: #e7ebee;
+    --ink-2: #99a3ad;
+    --line: #2a3037;
+    --accent: #8db4dd;
+    --accent-ink: #0f1214;
+    --context: #f0a35a;
+    --focus: #8db4dd;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0f1214;
+  --panel: #171b1f;
+  --ink: #e7ebee;
+  --ink-2: #99a3ad;
+  --line: #2a3037;
+  --accent: #8db4dd;
+  --accent-ink: #0f1214;
+  --context: #f0a35a;
+  --focus: #8db4dd;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 15px/1.55 var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 36px 20px 56px;
+  display: grid;
+  gap: 22px;
+}
+.masthead { display: grid; gap: 6px; }
+.eyebrow {
+  margin: 0;
+  font: 500 12px/1.2 var(--font-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+h1 {
+  margin: 0;
+  font: 600 clamp(30px, 4.2vw, 42px)/1.08 var(--font-display);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.lede { margin: 2px 0 0; max-width: 68ch; color: var(--ink-2); }
+
+.viewer {
+  display: grid;
+  gap: 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  max-width: 100%;
+  background: #d9dadc;
+  touch-action: none;
+}
+.stage[data-floor="dark"] { background: #232528; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
+.status {
+  position: absolute;
+  left: 16px;
+  bottom: 14px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font: 500 13px/1.3 var(--font-ui);
+  color: #14181d;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(6px);
+}
+.status.error { color: #8a1f11; max-width: calc(100% - 32px); }
+.hint {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  margin: 0;
+  font: 400 12px/1.3 var(--font-ui);
+  color: #59626c;
+}
+.stage[data-floor="dark"] .hint { color: #99a3ad; }
+
+.transport {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+}
+.play {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 0;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: var(--accent-ink);
+  cursor: pointer;
+}
+.play svg { width: 16px; height: 16px; fill: currentColor; }
+.play svg[hidden] { display: none; }
+.timeline { position: relative; height: 28px; }
+.track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 12px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+  overflow: hidden;
+}
+.track .context { position: absolute; left: 0; top: 0; bottom: 0; background: var(--context); }
+.track .progress { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); opacity: 0.85; }
+.timeline input[type="range"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+.timeline input[type="range"]::-webkit-slider-runnable-track { height: 28px; background: transparent; }
+.timeline input[type="range"]::-moz-range-track { height: 28px; background: transparent; }
+.timeline input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 2px solid var(--accent);
+}
+.timeline input[type="range"]::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 2px solid var(--accent);
+}
+.readout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 400 13px/1.2 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.phase {
+  font: 500 11px/1 var(--font-ui);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 7px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.phase[data-phase="context"] { color: var(--context); }
+.phase[data-phase="predicted"] { color: var(--accent); }
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px 22px;
+  padding: 14px 16px 16px;
+  border-top: 1px solid var(--line);
+}
+fieldset { margin: 0; padding: 0; border: 0; min-width: 0; display: grid; gap: 6px; }
+legend, .label {
+  padding: 0;
+  font: 500 11px/1.2 var(--font-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--paper);
+}
+.seg button {
+  font: 500 13px/1 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  padding: 8px 11px;
+  border: 0;
+  border-radius: 7px;
+  color: var(--ink-2);
+  background: transparent;
+  cursor: pointer;
+}
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.ghost {
+  margin-left: auto;
+  font: 500 13px/1 var(--font-ui);
+  padding: 9px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  cursor: pointer;
+}
+button:focus-visible, input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.notes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 28px;
+  margin: 0;
+}
+.notes div { display: grid; gap: 4px; align-content: start; }
+.notes dt { font: 600 14px/1.3 var(--font-ui); }
+.notes dd { margin: 0; color: var(--ink-2); font-size: 14px; max-width: 46ch; }
+.notes code { font: 400 13px var(--font-mono); }
+@media (max-width: 760px) {
+  .page { padding-top: 24px; gap: 18px; }
+  .transport { grid-template-columns: auto 1fr; }
+  .readout { grid-column: 1 / -1; justify-content: space-between; }
+  .notes { grid-template-columns: 1fr; }
+  .ghost { margin-left: 0; }
+  .hint { display: none; }
+}
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <p class="eyebrow">Interactive rollouts</p>
+    <h1>RigidFormer</h1>
+    <p class="lede">Rigid-body dynamics predicted by RigidFormer on held-out MOVi test scenes. Choose a dataset, a scene and the step size the model predicts at; drag to orbit and scroll to zoom.</p>
+  </header>
+
+  <section class="viewer" aria-label="Rollout viewer">
+    <div class="stage" id="stage" data-floor="light">
+      <canvas id="canvas" tabindex="0" aria-label="3D view of the predicted rollout: drag to orbit, scroll to zoom"></canvas>
+      <div class="status" id="status" role="status">Loading scenes…</div>
+      <p class="hint">Space plays or pauses · arrow keys step</p>
+    </div>
+    <div class="transport">
+      <button class="play" id="play" type="button" aria-label="Pause">
+        <svg id="icon-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1"/><rect x="9.4" y="2" width="3.6" height="12" rx="1"/></svg>
+        <svg id="icon-play" viewBox="0 0 16 16" aria-hidden="true" hidden><path d="M4 2.2v11.6c0 .6.7 1 1.2.6l9-5.8a.7.7 0 0 0 0-1.2l-9-5.8C4.7 1.2 4 1.6 4 2.2z"/></svg>
+      </button>
+      <div class="timeline">
+        <div class="track"><div class="context" id="context-band"></div><div class="progress" id="progress"></div></div>
+        <input id="scrub" type="range" min="0" max="1" step="1" value="0" aria-label="Frame">
+      </div>
+      <div class="readout"><span id="readout">t 0.000 s · frame 0</span><span class="phase" id="phase" data-phase="context">Context</span></div>
+    </div>
+    <div class="controls">
+      <fieldset><legend>Dataset</legend><div class="seg" id="dataset"></div></fieldset>
+      <fieldset><legend>Test scene</legend><div class="seg" id="scene"></div></fieldset>
+      <fieldset><legend>Step size</legend><div class="seg" id="step"></div></fieldset>
+      <fieldset><legend>Speed</legend><div class="seg" id="speed"></div></fieldset>
+      <fieldset><legend>Floor</legend><div class="seg" id="floor"></div></fieldset>
+      <button class="ghost" id="fit" type="button">Reset view</button>
+    </div>
+  </section>
+
+  <dl class="notes">
+    <div><dt>Context, then prediction</dt><dd>The first four frames at the chosen step size are given (orange on the timeline). Every later frame is predicted by the model from its own previous predictions.</dd></div>
+    <div><dt>Step size</dt><dd>One model predicts at all three step sizes. With step size <code>s</code> it advances <code>s</code> simulation frames (240 per second) per prediction: 476 predictions for the 2-second scene at <code>s = 1</code>, 44 at <code>s = 10</code>. Playback is in real time at 1×; between predictions the poses are interpolated for display.</dd></div>
+    <div><dt>What is drawn</dt><dd>The predictions only, on six test scenes per dataset chosen for low prediction error among the busier half of the test set. Each object is drawn with its render mesh, moved by the rigid motion the model predicts for its collision mesh.</dd></div>
+  </dl>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+// object colours (sRGB), as in the rendered videos
+const PALETTE = ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f', '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac'];
+// checker floors in the tones of the rendered videos; the far floor fades into the background
+const FLOORS = {
+  light: { label: 'Light', tiles: ['#dfe0e1', '#d3d5d7'], background: '#d9dadc', shadow: 0.3, exposure: 0.9 },
+  dark: { label: 'Dark', tiles: ['#292b2e', '#1c1e21'], background: '#232528', shadow: 0.55, exposure: 0.95 },
+};
+const TILE = 1.0;                              // floor tile (m)
+const FLOOR_SIZE = 1200;                       // m: its edge stays inside the fog
+const SPEEDS = [0.25, 0.5, 1];
+const END_HOLD = 0.9;                          // seconds the last frame stays before the clip restarts
+// The data is z-up; three.js is y-up: (x, y, z) -> (x, z, -y)
+const zup = (x, y, z) => new THREE.Vector3(x, z, -y);
+const VIEW = zup(1.0, -1.25, 1.35).normalize();    // from the target to the camera
+const KEY = zup(0.02, -0.42, 0.91).normalize();    // toward the key light: above, left of the camera
+const FILL = zup(-0.65, 0.6, 0.45).normalize();
+// sharp at rest; while the clip plays, a lighter pixel ratio keeps the frame rate up
+const SHARP_RATIO = Math.min(window.devicePixelRatio, 2);
+const MOVING_RATIO = Math.min(window.devicePixelRatio, 1.5);
+
+const $ = (id) => document.getElementById(id);
+const stage = $('stage'), canvas = $('canvas'), statusEl = $('status');
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// --- studio -------------------------------------------------------------------------------------------------
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(SHARP_RATIO);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+pmrem.dispose();
+scene.add(new THREE.HemisphereLight(0xffffff, 0x9a968f, 0.55));
+const key = new THREE.DirectionalLight(0xfff4e6, 2.5);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.bias = -0.0004;
+key.shadow.radius = 4;
+scene.add(key, key.target);
+const fill = new THREE.DirectionalLight(0xffffff, 0.3);
+scene.add(fill, fill.target);
+scene.fog = new THREE.Fog(0xffffff, 30, 120);
+
+// floor: a checker in exact colours (not lit, not tone mapped), a shadow catcher just above it
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(FLOOR_SIZE, FLOOR_SIZE), new THREE.MeshBasicMaterial({ toneMapped: false }));
+floor.rotation.x = -Math.PI / 2;
+scene.add(floor);
+const shadowCatcher = new THREE.Mesh(new THREE.PlaneGeometry(FLOOR_SIZE, FLOOR_SIZE), new THREE.ShadowMaterial({
+  opacity: 0.3, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+}));
+shadowCatcher.rotation.x = -Math.PI / 2;
+shadowCatcher.receiveShadow = true;
+scene.add(shadowCatcher);
+function checker(a, b) {
+  const c = document.createElement('canvas');
+  c.width = c.height = 256;
+  const g = c.getContext('2d');
+  g.fillStyle = a;
+  g.fillRect(0, 0, 256, 256);
+  g.fillStyle = b;
+  g.fillRect(0, 0, 128, 128);
+  g.fillRect(128, 128, 128, 128);
+  const tex = new THREE.CanvasTexture(c);       // 2 x 2 tiles, repeated over the floor
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(FLOOR_SIZE / (2 * TILE), FLOOR_SIZE / (2 * TILE));
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return tex;
+}
+
+const world = new THREE.Group();               // holds the objects in the data's z-up frame
+world.rotation.x = -Math.PI / 2;
+scene.add(world);
+
+const camera = new THREE.PerspectiveCamera(30, 16 / 9, 0.05, 500);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.maxPolarAngle = Math.PI * 0.49;
+controls.minDistance = 0.5;
+controls.maxDistance = 80;
+
+let pixelRatio = SHARP_RATIO;
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  if (!w || !h) return;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+function setPixelRatio(r) {
+  if (r === pixelRatio) return;
+  pixelRatio = r;
+  renderer.setPixelRatio(r);
+  resize();
+}
+new ResizeObserver(resize).observe(stage);
+resize();
+
+// --- data ---------------------------------------------------------------------------------------------------
+function bytes(b64) {
+  const s = atob(b64), out = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
+  return out.buffer;
+}
+async function getJSON(path) {
+  const r = await fetch(path);
+  if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`);
+  return r.json();
+}
+
+const geometries = new Map();
+let meshData = null;
+function geometry(shape) {
+  if (!geometries.has(shape)) {
+    const m = meshData[shape];
+    if (!m) throw new Error(`no mesh for shape ${shape}`);
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(bytes(m.position)), 3));
+    g.setAttribute('normal', new THREE.BufferAttribute(new Int8Array(bytes(m.normal)), 3, true));
+    const index = m.index_type === 'uint16' ? new Uint16Array(bytes(m.index)) : new Uint32Array(bytes(m.index));
+    g.setIndex(new THREE.BufferAttribute(index, 1));
+    g.computeBoundingSphere();
+    geometries.set(shape, g);
+  }
+  return geometries.get(shape);
+}
+function material(i, metal) {
+  const color = new THREE.Color(PALETTE[i % PALETTE.length]);
+  return metal
+    ? new THREE.MeshStandardMaterial({ color, metalness: 1, roughness: 0.3, envMapIntensity: 1 })
+    : new THREE.MeshPhysicalMaterial({ color, metalness: 0, roughness: 0.45, clearcoat: 0.5, clearcoatRoughness: 0.12, envMapIntensity: 0.6 });
+}
+
+// --- state --------------------------------------------------------------------------------------------------
+const datasets = new Map();                    // name -> loaded dataset json (pose arrays decoded lazily)
+let manifest = null;
+const state = { dataset: null, scene: 0, step: 1, speed: 1, floor: 'light', playing: !reduceMotion, t: 0, hold: 0 };
+let objects = [];                              // three.js meshes of the current scene
+let rollout = null;                            // { frames, pose: Float32Array (frames * n * 7) }
+let current = null;                            // current dataset json
+let shownFrame = -1;
+
+function poseOf(sceneData, step) {
+  const r = sceneData.rollouts[String(step)];
+  if (!r._pose) r._pose = new Float32Array(bytes(r.pose));
+  return { frames: r.frames, pose: r._pose };
+}
+
+function showError(err) {
+  setStatus(`Could not load the scene data (${err.message}). Serve this folder over HTTP, for example with python -m http.server, and reload.`, true);
+}
+
+function setStatus(text, error = false) {
+  statusEl.textContent = text;
+  statusEl.hidden = !text;
+  statusEl.classList.toggle('error', error);
+}
+
+function buildScene() {
+  for (const o of objects) { world.remove(o); o.material.dispose(); }
+  state.t = 0;
+  state.hold = 0;
+  const sc = current.scenes[state.scene];
+  objects = sc.objects.map((o, i) => {
+    const m = new THREE.Mesh(geometry(o.shape), material(i, o.material === 'metal'));
+    m.scale.setScalar(o.size);
+    m.castShadow = m.receiveShadow = true;
+    world.add(m);
+    return m;
+  });
+  fitView();
+  setRollout();
+}
+
+const endTime = () => (rollout.frames - 1) * state.step / current.frame_rate;
+
+function setRollout() {
+  const sc = current.scenes[state.scene];
+  rollout = poseOf(sc, state.step);
+  state.t = Math.min(state.t, endTime());
+  $('scrub').max = String((rollout.frames - 1) * state.step);
+  $('context-band').style.width = `${100 * (current.context_frames - 1) / Math.max(1, rollout.frames - 1)}%`;
+  shownFrame = -1;
+  applyTime();
+}
+
+// Poses at time state.t: the predicted frames are key frames (every `step` simulation frames); in between, positions
+// are interpolated linearly and rotations along the shortest arc, as in the rendered videos.
+const q0 = new THREE.Quaternion(), q1 = new THREE.Quaternion();
+function applyTime() {
+  const n = objects.length, p = rollout.pose;
+  const f = Math.min(state.t * current.frame_rate / state.step, rollout.frames - 1);
+  const k = Math.max(0, Math.min(Math.floor(f), rollout.frames - 2)), a = rollout.frames > 1 ? f - k : 0;
+  const k1 = Math.min(k + 1, rollout.frames - 1);
+  for (let i = 0; i < n; i++) {
+    const o = (k * n + i) * 7, o1 = (k1 * n + i) * 7;
+    objects[i].position.set(p[o] + a * (p[o1] - p[o]), p[o + 1] + a * (p[o1 + 1] - p[o + 1]), p[o + 2] + a * (p[o1 + 2] - p[o + 2]));
+    q0.set(p[o + 3], p[o + 4], p[o + 5], p[o + 6]);
+    q1.set(p[o1 + 3], p[o1 + 4], p[o1 + 5], p[o1 + 6]);
+    objects[i].quaternion.slerpQuaternions(q0, q1, a);
+  }
+  const frame = Math.round(state.t * current.frame_rate);
+  if (frame === shownFrame) return;
+  shownFrame = frame;
+  $('scrub').value = String(frame);
+  $('progress').style.width = `${100 * state.t / Math.max(1e-9, endTime())}%`;
+  $('readout').textContent = `t ${(frame / current.frame_rate).toFixed(3)} s · frame ${String(frame).padStart(3, ' ')}`;
+  const phase = f <= current.context_frames - 1 ? 'context' : 'predicted';
+  $('phase').dataset.phase = phase;
+  $('phase').textContent = phase === 'context' ? 'Context' : 'Predicted';
+}
+
+// Fixed camera that keeps every object in view over the whole clip at every step size (the camera stays put when
+// the step size changes): each object, a sphere of its radius around its centre in every frame, must fit.
+function fitView() {
+  const sc = current.scenes[state.scene];
+  const n = sc.objects.length, centres = [], radii = [];
+  const radius = sc.objects.map((o) => meshData[o.shape].radius * o.size);
+  for (const step of current.step_sizes) {
+    const r = poseOf(sc, step);
+    for (let k = 0; k < r.frames; k += 2) {
+      for (let i = 0; i < n; i++) {
+        const o = (k * n + i) * 7;
+        centres.push(zup(r.pose[o], r.pose[o + 1], r.pose[o + 2]));
+        radii.push(radius[i]);
+      }
+    }
+  }
+  const lo = new THREE.Vector3(Infinity, Infinity, Infinity), hi = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
+  centres.forEach((c, j) => {
+    lo.min(c.clone().subScalar(radii[j]));
+    hi.max(c.clone().addScalar(radii[j]));
+  });
+  const target = new THREE.Vector3((lo.x + hi.x) / 2, 0.3 * Math.max(hi.y, 0), (lo.z + hi.z) / 2);
+  const f = VIEW.clone().negate();
+  const right = new THREE.Vector3().crossVectors(f, new THREE.Vector3(0, 1, 0)).normalize();
+  const up = new THREE.Vector3().crossVectors(right, f);
+  const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), th = tv * camera.aspect;
+  // a sphere fits when its centre, widened by the radius across and brought nearer by it, does
+  let need = 1.5;
+  centres.forEach((c, j) => {
+    const d = c.clone().sub(target), z = d.dot(f), r = radii[j];
+    need = Math.max(need, (Math.abs(d.dot(right)) + r) / th - z + r, (Math.abs(d.dot(up)) + r) / tv - z + r);
+  });
+  const dist = need * 1.04;
+  camera.position.copy(target).addScaledVector(VIEW, dist);
+  camera.near = dist / 60;
+  camera.far = dist * 30;
+  camera.updateProjectionMatrix();
+  controls.target.copy(target);
+  controls.update();
+
+  const spread = Math.max(hi.x - lo.x, hi.z - lo.z, hi.y, 2);
+  const half = spread * 0.75 + 1;
+  Object.assign(key.shadow.camera, { left: -half, right: half, top: half, bottom: -half, near: 0.1, far: half * 8 });
+  key.shadow.camera.updateProjectionMatrix();
+  key.shadow.normalBias = spread * 0.0006;
+  key.target.position.copy(target);
+  key.position.copy(target).addScaledVector(KEY, half * 3);
+  fill.target.position.copy(target);
+  fill.position.copy(target).addScaledVector(FILL, half * 3);
+}
+
+function setFloor(name) {
+  state.floor = name;
+  const f = FLOORS[name];
+  if (floor.material.map) floor.material.map.dispose();
+  floor.material.map = checker(...f.tiles);
+  floor.material.needsUpdate = true;
+  scene.background = new THREE.Color(f.background);
+  scene.fog.color.set(f.background);
+  shadowCatcher.material.opacity = f.shadow;
+  renderer.toneMappingExposure = f.exposure;
+  stage.dataset.floor = name;
+}
+
+// --- controls -----------------------------------------------------------------------------------------------
+function segmented(id, items, isOn, onPick) {
+  const box = $(id);
+  box.replaceChildren(...items.map((it) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = it.label;
+    b.setAttribute('aria-pressed', String(isOn(it.value)));
+    b.addEventListener('click', () => {
+      onPick(it.value);
+      for (const c of box.children) c.setAttribute('aria-pressed', String(c === b));
+    });
+    return b;
+  }));
+}
+
+function setPlaying(on) {
+  state.playing = on;
+  $('icon-play').hidden = on;
+  $('icon-pause').hidden = !on;
+  $('play').setAttribute('aria-label', on ? 'Pause' : 'Play');
+  setPixelRatio(on ? MOVING_RATIO : SHARP_RATIO);
+}
+
+function renderControls() {
+  segmented('dataset', manifest.datasets.map((d) => ({ label: d.name, value: d.name })),
+    (v) => v === state.dataset, (v) => selectDataset(v).catch(showError));
+  segmented('scene', current.scenes.map((s, i) => ({ label: s.id.replace(/^movi_/, ''), value: i })),
+    (v) => v === state.scene, (v) => { state.scene = v; buildScene(); });
+  segmented('step', current.step_sizes.map((s) => ({ label: String(s), value: s })),
+    (v) => v === state.step, (v) => { state.step = v; setRollout(); });
+}
+
+async function selectDataset(name) {
+  state.dataset = name;
+  if (!datasets.has(name)) {
+    setStatus(`Loading ${name}…`);
+    const entry = manifest.datasets.find((d) => d.name === name);
+    datasets.set(name, await getJSON(`data/${entry.file}`));
+  }
+  current = datasets.get(name);
+  state.scene = 0;
+  if (!current.step_sizes.includes(state.step)) state.step = current.step_sizes[0];
+  renderControls();
+  buildScene();
+  setStatus('');
+}
+
+$('play').addEventListener('click', () => {
+  if (!state.playing && state.t >= endTime()) state.t = 0;
+  setPlaying(!state.playing);
+});
+$('scrub').addEventListener('input', (e) => {
+  setPlaying(false);
+  state.t = Math.min(Number(e.target.value) / current.frame_rate, endTime());
+  applyTime();
+});
+$('fit').addEventListener('click', fitView);
+segmented('speed', SPEEDS.map((s) => ({ label: `${s}×`, value: s })), (v) => v === state.speed, (v) => { state.speed = v; });
+segmented('floor', Object.entries(FLOORS).map(([k, f]) => ({ label: f.label, value: k })), (v) => v === state.floor, setFloor);
+window.addEventListener('keydown', (e) => {
+  if (!rollout || e.target.closest('button, input, select, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.code === 'Space') {
+    e.preventDefault();
+    $('play').click();
+  } else if (e.code === 'ArrowRight' || e.code === 'ArrowLeft') {
+    // one predicted frame (step size simulation frames) back or forward
+    e.preventDefault();
+    setPlaying(false);
+    const k = Math.round(state.t * current.frame_rate / state.step) + (e.code === 'ArrowRight' ? 1 : -1);
+    state.t = Math.max(0, Math.min(rollout.frames - 1, k)) * state.step / current.frame_rate;
+    applyTime();
+  }
+});
+
+// --- loop ---------------------------------------------------------------------------------------------------
+const clock = new THREE.Clock();
+document.addEventListener('visibilitychange', () => clock.getDelta());   // no jump after the tab was hidden
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 0.25);
+  if (rollout && state.playing) {
+    // real time at 1x: state.t is simulation time
+    if (state.t < endTime()) {
+      state.t = Math.min(endTime(), state.t + dt * state.speed);
+      state.hold = 0;
+    } else if ((state.hold += dt) > END_HOLD) {
+      state.t = 0;
+    }
+    applyTime();
+  }
+  const d = camera.position.distanceTo(controls.target);
+  scene.fog.near = d * 1.4;
+  scene.fog.far = d * 4.5;
+  controls.update();
+  renderer.render(scene, camera);
+});
+
+// --- start --------------------------------------------------------------------------------------------------
+setFloor('light');
+setPlaying(state.playing);
+try {
+  [manifest, meshData] = await Promise.all([getJSON('data/manifest.json'), getJSON('data/meshes.json')]);
+  const first = manifest.datasets.find((d) => d.name === 'MOVi-B') || manifest.datasets[0];
+  await selectDataset(first.name);
+  if (reduceMotion) { state.t = 0.5 * endTime(); applyTime(); }
+} catch (err) {
+  showError(err);
+}
+</script>
+</body>
+</html>

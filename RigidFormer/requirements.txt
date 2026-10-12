@@ -1,0 +1,23 @@
+# Tested with Python 3.10, CUDA 12.4 and these versions (README, Getting started). Install torch first, then
+# flash-attn without build isolation (it compiles against the installed torch and needs the CUDA toolkit):
+#   pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+#   pip install flash-attn==2.7.4.post1 --no-build-isolation
+#   pip install -r requirements.txt
+torch==2.6.0
+flash-attn==2.7.4.post1
+numpy==2.2.6
+scipy==1.15.3
+h5py==3.15.1
+einops==0.8.1
+roma==1.5.4
+trimesh==4.9.0
+tensorboard==2.20.0
+matplotlib==3.10.7
+tqdm==4.67.1
+pyyaml==6.0.3
+open3d==0.19.0              # rollout videos (src/utils/rollout_render.py, offscreen through EGL); ffmpeg on PATH
+# polyscope==2.5.0          # only for training.checkpoint.video_renderer: polyscope (the earlier mesh view)
+pyarrow==25.0.0             # data_generation/materialize_hf_dataset.py
+huggingface_hub==1.0.1      # the hf command
+pytest==9.0.2
+# datasets.load_dataset (dataset card examples only): pip install datasets

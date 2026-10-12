@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.log
+exps/
+datasets
+checkpoints
+RigidFormer-MOVi/
+raw/
+replay/
+configs/_tmp_*.yaml
+eval_results.txt
+videos/
+rollouts/
