@@ -5430,6 +5430,16 @@ def main():
             total_params += encoder_params
             module_stats.append(("PointNet Encoder (shared)", encoder_params))
 
+        if getattr(model, 'encoder_film', None) is not None:
+            film_params = sum(p.numel() for p in model.encoder_film.parameters())
+            total_params += film_params
+            module_stats.append(("Encoder Step-Size FiLM", film_params))
+
+        if getattr(model, 'avp', None) is not None:
+            avp_params = sum(p.numel() for p in model.avp.parameters())
+            total_params += avp_params
+            module_stats.append(("Anchor-Vertex Pooling", avp_params))
+
         if hasattr(model, 'obj_feature_proj'):
             obj_proj_params = sum(p.numel() for p in model.obj_feature_proj.parameters())
             total_params += obj_proj_params
@@ -5469,6 +5479,13 @@ def main():
         total_params += transform_params
         module_stats.append(("Transform Layer", transform_params))
 
+    # The totals count every parameter of the model, so a part not listed above is shown, not left out
+    all_params = sum(p.numel() for p in model.parameters())
+    if all_params > total_params:
+        module_stats.append(("Other parameters", all_params - total_params))
+    total_params = all_params
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+
     # Second pass: print with percentages
     for name, param_count in module_stats:
         percentage = (param_count / total_params * 100) if total_params > 0 else 0
@@ -5479,7 +5496,8 @@ def main():
     logger.info("=" * 80)
     total_params_millions = total_params / 1_000_000
     model_size_mb = total_params * 4 / 1024 / 1024
-    logger.info(f"  TOTAL TRAINABLE PARAMETERS:       {total_params:>12,} params ({total_params_millions:.1f}M)")
+    logger.info(f"  TOTAL PARAMETERS:                 {total_params:>12,} params ({total_params_millions:.1f}M)")
+    logger.info(f"  TOTAL TRAINABLE PARAMETERS:       {trainable_params:>12,} params ({trainable_params / 1_000_000:.1f}M)")
     logger.info(f"  TOTAL MODEL SIZE:                 {model_size_mb:>12.2f} MB (FP32)")
     logger.info("=" * 80)
 
