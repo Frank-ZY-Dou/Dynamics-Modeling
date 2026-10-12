@@ -143,6 +143,22 @@ CHECKPOINT=checkpoints/rigidformer_movisphere.pth BASE_CONFIG=configs/movi_spher
 
 After the metrics, the script renders the model's predictions on the first three test scenes at every step size to `videos/<dataset>/scene_<n>_step_<s>.mp4` (rendering does not change the metrics). `RENDER=0` turns this off, `RENDER=N` renders N scenes and `FLOOR=dark` uses a dark floor.
 
+**Fast inference.** Two opt-in switches make the rollout faster, `--cuda-graph` and `--compile` of `src/train.py` (`CUDA_GRAPH=1` and `COMPILE=1` for `scripts/eval.sh`); without them the default path runs. Time per step on the MOVi-B test scene 72 (10 objects, 4,016 vertices; 50-step rollout at step size 1, mean &plusmn; standard deviation over 10 rollouts) on an NVIDIA GeForce RTX 5080:
+
+<table align="center">
+<tr><th><sub>Switch</sub></th><th><sub>ms / step</sub></th><th><sub>FPS</sub></th><th><sub>Peak memory</sub></th></tr>
+<tr><td><sub>default</sub></td><td><sub>11.96 &plusmn;&nbsp;0.19</sub></td><td><sub>83.6</sub></td><td><sub>835&nbsp;MiB</sub></td></tr>
+<tr><td><sub><code>CUDA_GRAPH=1</code></sub></td><td><sub>7.94 &plusmn;&nbsp;0.07</sub></td><td><sub>126.0</sub></td><td><sub>933&nbsp;MiB</sub></td></tr>
+<tr><td><sub><code>COMPILE=1</code></sub></td><td><sub>9.07 &plusmn;&nbsp;0.18</sub></td><td><sub>110.3</sub></td><td><sub>779&nbsp;MiB</sub></td></tr>
+</table>
+
+```bash
+CUDA_GRAPH=1 bash scripts/eval.sh     # or: python src/train.py ... --cuda-graph
+COMPILE=1    bash scripts/eval.sh     # or: python src/train.py ... --compile
+```
+
+With `--cuda-graph` the rollout step is captured once as a CUDA graph and replayed for the remaining steps; trajectories are bit-identical to the default path. With `--compile` the encoder, decoder and predictor are compiled with `torch.compile` after a one-time compilation (about two minutes on this GPU). Kernel fusion reorders floating-point arithmetic, so rotation cells can move by a few thousandths of a degree and long-horizon cells within the run-to-run band; prefer `--cuda-graph` when exact reproduction matters.
+
 <details>
 <summary><b>Evaluation protocol</b></summary>
 
@@ -152,21 +168,6 @@ Evaluate a checkpoint with the config it was trained with: a checkpoint that sto
 
 </details>
 
-<details>
-<summary><b>Fast inference</b></summary>
-
-Two opt-in accelerations ship with the code; both leave the default path untouched.
-
-```bash
-CUDA_GRAPH=1 bash scripts/eval.sh     # or: python src/train.py ... --cuda-graph
-COMPILE=1    bash scripts/eval.sh     # or: python src/train.py ... --compile
-```
-
-With `--cuda-graph` the rollout step is captured once as a CUDA graph and replayed for the remaining steps, which roughly halves the per-step cost (40.0 to 17.3 ms per step on an idle A100 for the reference scene). Trajectories are bit-identical to the standard path over full-length rollouts.
-
-With `--compile` the encoder, decoder and predictor are compiled with `torch.compile` (about 1.25x after a one-time compilation). Kernel fusion reorders floating-point arithmetic, so rotation cells can move by a few thousandths of a degree and long-horizon cells within the run-to-run band; prefer `--cuda-graph` when exact reproduction matters.
-
-</details>
 
 ## 🎨 Visualization
 
@@ -293,6 +294,15 @@ Test scenes of each dataset; every cell reports the position RMSE (m, top) and t
 <tr><td><sub>10</sub></td><td><sub>0.016<br>1.43</sub></td><td><sub>/</sub></td><td><sub>0.092<br>11.26</sub></td><td><sub>0.012<br>1.22</sub></td><td><sub>/</sub></td><td><sub>0.071<br>8.74</sub></td><td><sub>0.010<br>0.88</sub></td><td><sub>/</sub></td><td><sub>0.062<br>6.58</sub></td></tr>
 <tr><td><sub>5</sub></td><td><sub>0.029<br>2.94</sub></td><td><sub>0.068<br>7.76</sub></td><td><sub>0.120<br>13.76</sub></td><td><sub>0.020<br>2.71</sub></td><td><sub>0.048<br>6.32</sub></td><td><sub>0.090<br>11.52</sub></td><td><sub>0.017<br>2.02</sub></td><td><sub>0.040<br>4.83</sub></td><td><sub>0.073<br>8.85</sub></td></tr>
 <tr><td><sub>1</sub></td><td><sub>0.040<br>4.81</sub></td><td><sub>0.086<br>10.64</sub></td><td><sub>0.145<br>17.57</sub></td><td><sub>0.030<br>3.29</sub></td><td><sub>0.061<br>7.16</sub></td><td><sub>0.108<br>12.65</sub></td><td><sub>0.022<br>2.93</sub></td><td><sub>0.045<br>6.28</sub></td><td><sub>0.078<br>10.74</sub></td></tr>
+</table>
+
+**Runtime on MOVi-B.** A 50-step autoregressive rollout averaged over 10 iterations on an NVIDIA GeForce RTX 5080; RigidFormer is 28&times; faster than FIGNet and 354&times; faster than HopNet.
+
+<table align="center">
+<tr><th><sub>Model</sub></th><th><sub>ms / step</sub></th><th><sub>FPS</sub></th></tr>
+<tr><td><sub>HopNet</sub></td><td><sub>4228.7</sub></td><td><sub>0.2</sub></td></tr>
+<tr><td><sub>FIGNet</sub></td><td><sub>336.0</sub></td><td><sub>3.0</sub></td></tr>
+<tr><td><sub>RigidFormer (Ours)</sub></td><td><sub><b>12.0</b></sub></td><td><sub><b>83.6</b></sub></td></tr>
 </table>
 
 ## 📝 Citation
