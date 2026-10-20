@@ -25,7 +25,7 @@ During fine-tuning, each training sample is observed at the distance, field of v
 
 The completion network ([`src/data/shape_completion.py`](../src/data/shape_completion.py), a PointNet encoder and an MLP decoder) reads up to 256 observed points of an object in a view-aligned frame, together with the camera elevation, the camera distance and the height of the points above the floor, and predicts 512 points on the object's surface. The observed and predicted points are merged and reduced to at most 1,024 points by farthest-point sampling; about 40-45% of the resulting points come from the network.
 
-The network is trained on training scenes only: the 960 training scenes of MOVi-B and 2,400 additional scenes generated with MOVi-B's shapes, new seeds, continuous friction, restitution and density, and thrown, tossed and sliding objects ([`data_generation/augment_movi_scenes.py`](../data_generation/augment_movi_scenes.py), in the replay environment of [`data_generation/README.md`](../data_generation/README.md)). Training views are drawn at random (elevation 10-80°, distance 8-16 m, 320 × 240 or 640 × 480 pixels) and perturbed with depth noise, eroded segment boundaries and random occluders ([`configs/completion_data_movi_b_aug.yaml`](../configs/completion_data_movi_b_aug.yaml)). On the MOVi-B validation scenes, its Chamfer distance is 4.7 cm from the predicted points to the surface and 5.8 cm from the surface to the predicted points.
+The network is trained on training scenes only: the 960 training scenes of MOVi-B and 2,400 additional scenes generated with MOVi-B's shapes, new seeds, continuous friction, restitution and density, and thrown, tossed and sliding objects ([`data_generation/augment_movi_scenes.py`](../data_generation/augment_movi_scenes.py), in the replay environment of [`data_generation/README.md`](../data_generation/README.md)). Training views are drawn at random (elevation 10-80°, distance 8-16 m, 320 × 240 or 640 × 480 pixels) and perturbed with depth noise, eroded segment boundaries and random occluders ([`configs/completion_data_movi_b_aug.yaml`](../configs/completion_data_movi_b_aug.yaml)). On the MOVi-B validation scenes, its Chamfer distance is 4.7 cm from the predicted points to the surface and 5.8 cm from the surface to the predicted points. The trained network is `completion/completion.pth` of [`frankzydou/RigidFormer`](https://huggingface.co/frankzydou/RigidFormer); the configs read it from `checkpoints/completion/completion.pth`. To train it yourself:
 
 ```bash
 python data_generation/augment_movi_scenes.py --manifest KuBasic/KuBasic_local.json --out raw/MOVi-B-aug \
@@ -41,7 +41,7 @@ python scripts/train_completion.py --train completion/train.npz --val completion
 
 ## Fine-tuning
 
-The released models are fine-tuned on these inputs for 60 epochs with all weights trained, at a learning rate of 4e-6 after a two-epoch warm-up with cosine decay (ten times that for the fusion layers of the acceleration head, as in the released models' training) and 21 scenes per step.
+The released models are fine-tuned on these inputs for 60 epochs with all weights trained, at a learning rate of 4e-6 after a two-epoch warm-up with cosine decay (ten times that for the fusion layers of the acceleration head, as in the released models' training) and 21 scenes per step. The fine-tuned models are `rigidformer_movi{sphere,a,b}_partial.pth` of [`frankzydou/RigidFormer`](https://huggingface.co/frankzydou/RigidFormer).
 
 ```bash
 CONFIG=configs/movi_a_partial.yaml bash scripts/train.sh --checkpoint=checkpoints/rigidformer_movia.pth   # likewise movi_b_partial.yaml, movi_sphere_partial.yaml
@@ -50,7 +50,7 @@ CONFIG=configs/movi_a_partial.yaml bash scripts/train.sh --checkpoint=checkpoint
 ## Evaluation
 
 ```bash
-CHECKPOINT=<checkpoint> BASE_CONFIG=configs/movi_a_partial.yaml TARGETS=A CUDA_GRAPH=1 bash scripts/eval.sh
+CHECKPOINT=checkpoints/rigidformer_movia_partial.pth BASE_CONFIG=configs/movi_a_partial.yaml TARGETS=A CUDA_GRAPH=1 bash scripts/eval.sh
 ```
 
 The model rolls out the input points. For every object, the rigid motion of its points moves its full collision mesh, which is scored with the evaluation protocol of the [README](../README.md#-evaluation); the metrics are averaged over the observed objects. Test scenes, step size 1; position RMSE (m, top) and orientation RMSE (&deg;, bottom):
@@ -80,7 +80,7 @@ The depth images, segmentations and rollout videos of the README (likewise for M
 
 ```bash
 python scripts/plot_partial_view.py --config configs/movi_a_partial.yaml --scene movi_423 --out partial_movi_423
-python scripts/export_rollouts.py --checkpoint <checkpoint> --config configs/movi_a_partial.yaml --target A \
+python scripts/export_rollouts.py --checkpoint checkpoints/rigidformer_movia_partial.pth --config configs/movi_a_partial.yaml --target A \
     --out rollouts/movi_a_partial
 python scripts/render_rollouts.py --rollouts rollouts/movi_a_partial --best 2 --data datasets/MOVi-A --steps 1 \
     --config configs/movi_a_partial.yaml --out videos/movi_a_partial

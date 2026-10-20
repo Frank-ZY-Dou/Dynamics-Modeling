@@ -198,9 +198,19 @@ python -m http.server 8000 --directory demo        # then open http://localhost:
 
 RigidFormer can also be trained and evaluated on partial point clouds from a single depth camera: each object is represented by the points of its segment in one depth image, and a completion network adds points on its occluded side. [`docs/partial_point_clouds.md`](docs/partial_point_clouds.md) describes the depth camera, the completion network, fine-tuning, evaluation and the data.
 
+The fine-tuned models and the completion network are on [`frankzydou/RigidFormer`](https://huggingface.co/frankzydou/RigidFormer):
+
+| Weights | Trained on | Config |
+|---|---|---|
+| `rigidformer_movisphere_partial.pth` | MOVi-Sphere, partial point clouds | [`configs/movi_sphere_partial.yaml`](configs/movi_sphere_partial.yaml) |
+| `rigidformer_movia_partial.pth` | MOVi-A, partial point clouds | [`configs/movi_a_partial.yaml`](configs/movi_a_partial.yaml) |
+| `rigidformer_movib_partial.pth` | MOVi-B, partial point clouds | [`configs/movi_b_partial.yaml`](configs/movi_b_partial.yaml) |
+| `completion/completion.pth` | completion network | [`configs/completion_data_movi_b_aug.yaml`](configs/completion_data_movi_b_aug.yaml) |
+
 ```bash
-CONFIG=configs/movi_a_partial.yaml bash scripts/train.sh --checkpoint=checkpoints/rigidformer_movia.pth   # likewise movi_b_partial.yaml, movi_sphere_partial.yaml
-CHECKPOINT=<checkpoint> BASE_CONFIG=configs/movi_a_partial.yaml TARGETS=A bash scripts/eval.sh
+hf download frankzydou/RigidFormer rigidformer_movisphere_partial.pth rigidformer_movia_partial.pth rigidformer_movib_partial.pth completion/completion.pth --local-dir checkpoints
+CHECKPOINT=checkpoints/rigidformer_movia_partial.pth BASE_CONFIG=configs/movi_a_partial.yaml TARGETS=A bash scripts/eval.sh   # likewise movi_b_partial.yaml, movi_sphere_partial.yaml
+CONFIG=configs/movi_a_partial.yaml bash scripts/train.sh --checkpoint=checkpoints/rigidformer_movia.pth   # fine-tuning the released model
 ```
 
 ## 🎬 Gallery
