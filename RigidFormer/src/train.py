@@ -46,6 +46,7 @@ from src.models.transform_layer import create_transform_layer
 from src.utils.intersection_handler import handle_intersections
 from src.models.physformer_rope import rope_memo_reset
 from src.utils.weight_ema import WeightEMA
+from src.utils.anchor_rotation import centered_anchor_error
 
 # Require CUDA KNN (no fallback). If unavailable, raise immediately.
 try:
@@ -397,6 +398,13 @@ class CUT3RDynamicsModel(nn.Module):
         else:
             # For 2-layer model (tiny), use all available layers
             layer_indices = list(range(num_decoder_layers + 1))  # [0, 1, 2] for 2 layers
+        # model.predictor.layer_indices overrides the rule above, e.g. [0, 1, 2, 8] for a decoder grown from 4 to 8
+        # layers (scripts/grow_decoder.py) that reads the same layers as the 4-layer model
+        if config['model']['predictor'].get('layer_indices') is not None:
+            layer_indices = [int(i) for i in config['model']['predictor']['layer_indices']]
+            if sorted(set(layer_indices)) != layer_indices or layer_indices[-1] != num_decoder_layers:
+                raise ValueError(f"model.predictor.layer_indices must be increasing and end with the last decoder layer "
+                                 f"({num_decoder_layers}); got {layer_indices}")
 
         # Verify that all layer indices are valid for the decoder
         max_valid_index = num_decoder_layers  # 0 to num_decoder_layers inclusive (initial + N layers)
@@ -740,7 +748,9 @@ class CUT3RDynamicsModel(nn.Module):
         mask-aware per-vertex queries across all objects.
         """
         time_step_id = batch['time_step_id']  # (B,)
-        obj_pos = batch['obj_positions']  # (B,T,Nobj,Nv,3)
+        # network inputs: the rigid-noise augmentation's perturbed frames when present (the losses keep comparing
+        # against batch['obj_positions'])
+        obj_pos = batch.get('obj_positions_input', batch['obj_positions'])  # (B,T,Nobj,Nv,3)
         obj_mask = batch['valid_obj_mask']  # (B,Nobj)
         vtx_mask = batch['valid_vtx_mask']  # (B,T,Nobj,Nv)
         ref_obj_positions = batch['ref_obj_positions']  # (B?,Nobj,Nv,3) or (Nobj,Nv,3)
@@ -2528,7 +2538,9 @@ class Trainer:
             fusion_lr_mult = float(opt_cfg.get('fusion_lr_mult', 10.0))
             fusion_lr = lr * fusion_lr_mult
 
-            if fusion_params or enc_params or dec_params:
+            # decay_matrices_only splits the groups, so it takes this path also when no group differs in lr (e.g. the
+            # fusion layers frozen with training.optimizer.frozen_params)
+            if fusion_params or enc_params or dec_params or bool(opt_cfg.get('decay_matrices_only', False)):
                 param_groups = [
                     {'params': other_params, 'lr': lr},
                 ]
@@ -2749,7 +2761,8 @@ class Trainer:
         if not self.inference_only:
             from src.data.gpu_augmentation import GPUAugmentation
             self.gpu_augmentation = GPUAugmentation(config, self.device)
-            logger.info(f"GPU augmentation initialized (rotation={self.gpu_augmentation.rotation_enabled})")
+            logger.info(f"GPU augmentation initialized (rotation={self.gpu_augmentation.rotation_enabled}, "
+                        f"reflection={self.gpu_augmentation.reflection_enabled}, rigid_noise={self.gpu_augmentation.noise_enabled})")
         else:
             self.gpu_augmentation = None
 
@@ -2771,6 +2784,7 @@ class Trainer:
         logger.info(f"    acceleration_before_icp: {loss_w.get('acceleration_before_icp', 'N/A')}")
         logger.info(f"    acceleration_after_icp:  {loss_w.get('acceleration_after_icp', 'N/A')}")
         logger.info(f"    penetration_sign:        {loss_w.get('penetration_sign', 'N/A')}")
+        logger.info(f"    rotation_anchor:         {loss_w.get('rotation_anchor', 0.0)}")
         logger.info(f"    if_time_step_scale:      {loss_w.get('if_time_step_scale', False)}")
         logger.info(f"  Scheduled Sampling:")
         logger.info(f"    enabled:          {ss_cfg.get('enabled', False)}")
@@ -3057,9 +3071,30 @@ class Trainer:
                 else:
                     position_loss_after_icp = torch.tensor(0.0, device=self.device)
 
+                # 1c) Orientation loss (training.loss_weights.rotation_anchor, anchor-only): the after-Kabsch anchor error
+                # without its mean over the object's anchors (the translation part), divided by the RMS distance of the
+                # ground-truth anchors from their centroid. This is about the rotation error in radians whatever the
+                # object's size; the position losses weigh a rotation error by the object's size, while the orientation
+                # metric (degrees per object) does not.
+                rot_anchor_w = float(self.loss_weights.get('rotation_anchor', 0.0))
+                if rot_anchor_w > 0:
+                    if 'obj_positions_icp_norm' not in predictions:
+                        raise KeyError("training.loss_weights.rotation_anchor needs 'obj_positions_icp_norm' in the predictions")
+                    rot_error = centered_anchor_error(pred_pos_icp_anchor, gt_pos_anchor)  # (B,T-2,Nobj,Nq,3)
+                    if if_time_step_scale_pos:
+                        rot_error = rot_error / scale_pos
+                    rot_l1 = F.smooth_l1_loss(rot_error, torch.zeros_like(rot_error), reduction='none').sum(dim=-1)
+                    rotation_anchor_loss = (rot_l1.float() * anchor_mask_pos.float()).sum() / (_anchor_count + 1e-8)
+                else:
+                    rotation_anchor_loss = torch.tensor(0.0, device=self.device)
+
                 # 2) Acceleration losses in normalized space
-                gt_prev = batch['obj_positions'][:, 0:T0-2]
-                gt_curr = batch['obj_positions'][:, 1:T0-1]
+                # Targets: the acceleration that, integrated from the frames the network was given (the rigid-noise
+                # augmentation's perturbed frames when present), reaches the ground-truth next frame; with clean
+                # inputs this is the ground-truth acceleration
+                _inputs = batch.get('obj_positions_input', batch['obj_positions'])
+                gt_prev = _inputs[:, 0:T0-2]
+                gt_curr = _inputs[:, 1:T0-1]
                 gt_next = batch['obj_positions'][:, 2:T0]
                 gt_accel_den = gt_next - 2 * gt_curr + gt_prev  # (B,T-2,Nobj,Nv,3)
                 gt_accel_norm = gt_accel_den
@@ -3268,6 +3303,7 @@ class Trainer:
                 + pos_after_icp_w * position_loss_after_icp
                 + accel_after_icp_w * accel_loss_after_icp_ste
                 + accel_before_icp_w * accel_loss_before_icp
+                + rot_anchor_w * rotation_anchor_loss
             )
 
             # Add penetration loss with its own weight if enabled
@@ -3295,6 +3331,7 @@ class Trainer:
                 logger.error(f"  pos_after_icp ={position_loss_after_icp.item():.6e} (w={pos_after_icp_w})")
                 logger.error(f"  acc_before_icp={accel_loss_before_icp.item():.6e} (w={accel_before_icp_w})")
                 logger.error(f"  acc_after_icp ={accel_loss_after_icp_ste.item():.6e} (w={accel_after_icp_w})")
+                logger.error(f"  rot_anchor    ={rotation_anchor_loss.item():.6e} (w={rot_anchor_w})")
                 # Log which component caused the explosion
                 weighted = {
                     'pos_before': pos_before_icp_w * position_loss_before_icp.item(),
@@ -3416,6 +3453,8 @@ class Trainer:
                 self.writer.add_scalar('train/accel_loss_after_icp', accel_after_icp_sync, global_step)
                 self.writer.add_scalar('train/accel_loss_before_icp', accel_before_icp_sync, global_step)
                 self.writer.add_scalar('train/position_loss_before_icp', pos_before_icp_sync, global_step)
+                if rot_anchor_w > 0:
+                    self.writer.add_scalar('train/rotation_anchor_loss', rotation_anchor_loss.item(), global_step)
                 self.writer.add_scalar('train/position_loss_after_icp', pos_after_icp_sync, global_step)
                 if self.loss_weights.get('edge_length', 0.0) > 0:
                     self.writer.add_scalar('train/edge_loss', edge_sync, global_step)
@@ -4367,9 +4406,11 @@ class Trainer:
         # Apply GPU augmentation (rotation) if enabled for visualization
         # This ensures the visualization shows what the training sees
         rotation_angle_deg = 0.0  # Default: no rotation
-        if self.gpu_augmentation is not None and self.gpu_augmentation.rotation_enabled:
-            # Apply rotation to batch (modifies obj_positions and ref_obj_positions)
-            batch = self.gpu_augmentation(batch, split=split)
+        if (self.gpu_augmentation is not None and self.gpu_augmentation.rotation_enabled
+                and not self.gpu_augmentation.rotation_per_sample):
+            # Apply rotation to batch (modifies obj_positions and ref_obj_positions); per-sample rotations, reflections
+            # and input noise are not applied here (one angle is what the ground-truth overlay can follow)
+            batch = self.gpu_augmentation.apply_rotation_augmentation(batch, split=split)
             rotation_angle_deg = batch.get('rotation_angle_deg', 0.0)
             if rotation_angle_deg != 0.0:
                 logger.info(f"[Video Gen] Applied rotation augmentation: {rotation_angle_deg:.0f}° for verification")
@@ -5401,6 +5442,8 @@ def main():
         max_objects_per_frame=config['data'].get('max_objects_per_frame', None),
         if_phys_param=config.get('model', {}).get('if_phys_param', False),
         random_step_size=config['data'].get('random_step_size', {'enable': False}),  # Multi-timescale training config
+        partial_view=config['data'].get('partial_view'),  # partial point clouds of a simulated depth camera
+        stride=config['data'].get('stride', 1),  # windows every `stride` frames; with random_start_frame: the epoch length
         inference_mode=inference_mode  # Skip train dataset indexing in inference mode
     )
     try:
@@ -5521,6 +5564,23 @@ def main():
             getattr(model, _name).compile(mode=_tc_mode, dynamic=(True if _name in _tc_dyn_modules else _tc_dynamic))
         logger.info(f"[Compile] training torch.compile ACTIVE: modules={_tc_modules} mode={_tc_mode} "
                     f"dynamic={_tc_dynamic} dynamic_modules={sorted(_tc_dyn_modules)}")
+
+    # training.optimizer.frozen_params: parameters (or module prefixes) that keep their loaded values when fine-tuning.
+    # Adam moves a parameter by about lr per step whatever its scale: even at lr 4e-7, the acceleration head's output
+    # bias (predictor.fusion_out.bias, a constant acceleration in m/frame^2; gravity is 1.7e-4 at 240 fps) drifts by
+    # several percent of gravity within one epoch.
+    _frozen = [str(f) for f in ((config.get('training', {}).get('optimizer') or {}).get('frozen_params') or [])]
+    if _frozen:
+        _hit = []
+        for _n, _p in model.named_parameters():
+            _k = _n.replace('module.', '').replace('_orig_mod.', '')
+            if any(_k == f or _k.startswith(f + '.') for f in _frozen):
+                _p.requires_grad_(False)
+                _hit.append(_k)
+        _miss = [f for f in _frozen if not any(h == f or h.startswith(f + '.') for h in _hit)]
+        if _miss:
+            raise ValueError(f"training.optimizer.frozen_params: no parameter named {_miss}")
+        logger.info(f"[Frozen] training.optimizer.frozen_params: {_hit} keep their loaded values")
 
     if use_ddp:
         # Convert BatchNorm to SyncBatchNorm for multi-GPU training;

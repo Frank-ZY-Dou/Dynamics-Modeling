@@ -18,6 +18,11 @@ from typing import Dict, Optional
 
 import numpy as np
 
+try:
+    from data.scene_frames import load_frame
+except ImportError:                        # imported as src.data.object_scale
+    from src.data.scene_frames import load_frame
+
 
 class ObjectScale:
     def __init__(self, scale_file: str):
@@ -79,8 +84,8 @@ def check_object_counts(object_scale: 'ObjectScale', data_path, scenes) -> None:
         if sc not in object_scale.scales:
             bad.append(f'{sc}: missing')
             continue
-        f0 = os.path.join(str(data_path), sc, 'frame_00000')
-        n = len([f for f in os.listdir(f0) if f.startswith('obj_') and f.endswith('_pos.npy')])
+        frame0 = load_frame(Path(data_path) / sc, 0)          # either layout (src/data/scene_frames.py)
+        n = len(frame0)
         if n != len(object_scale.scales[sc]):
             bad.append(f'{sc}: {n} objects vs {len(object_scale.scales[sc])} sizes')
             continue
@@ -91,8 +96,7 @@ def check_object_counts(object_scale: 'ObjectScale', data_path, scenes) -> None:
         if not np.abs(p0[0] - object_scale.fingerprint[sc]).max() <= 1e-4:     # (a NaN fails this test too)
             bad.append(f'{sc}: frame-0 origin {p0[0].round(4).tolist()} vs fingerprint {object_scale.fingerprint[sc].tolist()}')
             continue
-        r = np.array([np.linalg.norm(np.load(os.path.join(f0, f'obj_{o}_pos.npy')).astype(np.float64) - p0[o], axis=1).max()
-                      for o in range(n)])
+        r = np.array([np.linalg.norm(frame0[o].astype(np.float64) - p0[o], axis=1).max() for o in range(n)])
         if not np.abs(r - object_scale.radius0[sc]).max() <= 1e-4:            # (a NaN fails this test too)
             bad.append(f'{sc}: frame-0 vertex radii {r.round(4).tolist()} vs radius0 {object_scale.radius0[sc].tolist()} '
                        f'(sizes {object_scale.scales[sc].round(4).tolist()})')

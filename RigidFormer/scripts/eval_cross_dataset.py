@@ -29,14 +29,15 @@ from pathlib import Path
 import yaml
 
 
-# Per-target data: dataset folder, scene lists, object sizes
+# Per-target data: dataset folder, scene lists, object sizes, scene cameras (partial point clouds)
 TARGET_TABLE = {
     "B": {"name": "MoviB", "dataset_path": "./datasets/MOVi-B", "split_file": "dataset_split_MoviB_1200.json",
-          "scales": "data_generation/object_scales_MoviB.json"},
+          "scales": "data_generation/object_scales_MoviB.json", "cameras": "data_generation/scene_cameras_MoviB.json"},
     "A": {"name": "MoviA", "dataset_path": "./datasets/MOVi-A", "split_file": "dataset_split_MoviA_1200.json",
-          "scales": "data_generation/object_scales_MoviA.json"},
+          "scales": "data_generation/object_scales_MoviA.json", "cameras": "data_generation/scene_cameras_MoviA.json"},
     "S": {"name": "MoviSphere", "dataset_path": "./datasets/MOVi-Sphere", "split_file": "dataset_split_MoviSphere_1200.json",
-          "scales": "data_generation/object_scales_MoviSphere.json"},
+          "scales": "data_generation/object_scales_MoviSphere.json",
+          "cameras": "data_generation/scene_cameras_MoviSphere.json"},
 }
 
 
@@ -69,11 +70,17 @@ def build_target_config(base_cfg, target_key, run_tag, render=0, floor="light"):
     if cfg["data"].get("object_scale_file"):
         # the object sizes are per dataset (scene names repeat across MOVi-A/B/Sphere)
         cfg["data"]["object_scale_file"] = t["scales"]
+    if cfg["data"].get("partial_view", {}).get("enable"):
+        # so are the scene cameras that place the depth camera
+        cfg["data"]["partial_view"]["camera_file"] = t["cameras"]
     cfg["experiment_tag"] = run_tag
     cfg.setdefault("inference", {})
     cfg["inference"]["mode"] = True
     cfg["inference"]["generate_videos"] = render > 0
     cfg["inference"]["compute_metrics"] = True
+    # the evaluator computes the rollout metrics only with training.metrics_test.enable, which a training config may
+    # switch off (no rollouts on the test scenes during training)
+    cfg.setdefault("training", {}).setdefault("metrics_test", {})["enable"] = True
     ck = cfg.setdefault("training", {}).setdefault("checkpoint", {})
     ck["save_video"] = render > 0
     if render > 0:
@@ -327,7 +334,8 @@ def main():
     ap.add_argument("--checkpoint", default="checkpoints/rigidformer_movib.pth")
     ap.add_argument("--output_file", default="eval_results.txt")
     ap.add_argument("--targets", default="B,A,S")
-    ap.add_argument("--gpus", default="0", help="CUDA_VISIBLE_DEVICES string, e.g. '0' or '0,1,2,3'")
+    ap.add_argument("--gpus", default=os.environ.get("CUDA_VISIBLE_DEVICES", "0"),
+                    help="CUDA_VISIBLE_DEVICES string, e.g. '0' or '0,1,2,3' (default: the one already set, e.g. by Slurm, else 0)")
     ap.add_argument("--compile", action="store_true", help="Forward --compile to the evaluation processes")
     ap.add_argument("--cuda-graph", action="store_true", help="Forward --cuda-graph to the evaluation processes")
     ap.add_argument("--position_estimator", choices=["config", "area_centroid", "hopnet"], default="config",

@@ -24,6 +24,9 @@ import logging
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.noise_utils import apply_random_walk_noise_to_batch, apply_independent_noise
 from data.object_scale import ObjectScale, check_object_counts
+from data.partial_view import PartialView, quat_to_rotmat
+from data.scene_frames import frame_dirs as scene_frame_dirs, is_packed, load_frame
+import zlib
 
 logger = logging.getLogger(__name__)
 
@@ -168,6 +171,19 @@ class MultiObjectDynamics(Dataset):
                                  f"but the dataset path resolves to '{_ds_real}'")
         if self._object_scale is not None:
             print(f"[{split}] Object scale ACTIVE: vertices scaled about the object origin by the metadata size ({_scale_file})")
+        # data.partial_view: partial point clouds of a simulated depth camera instead of the mesh vertices
+        # (src/data/partial_view.py)
+        _pv = kwargs.get('partial_view') or {}
+        self._partial = None
+        if _pv.get('enable', False):
+            if self._object_scale is None:
+                raise ValueError("data.partial_view needs data.object_scale_file for the objects' metadata sizes")
+            self._partial = PartialView(_pv, Path(__file__).resolve().parents[2])
+            if self._partial.min_points < self.anchor_k:
+                raise ValueError(f'data.partial_view.min_points ({self._partial.min_points}) must be at least '
+                                 f'anchor_k ({self.anchor_k})')
+            self._partial_scenes = {}
+            print(f"[{split}] {self._partial.describe(train=split == 'train')}")
         self._fps_order_by_dataset = {}
         if self.anchor_fps_start not in ('index0', 'centroid_farthest'):
             raise ValueError(f"data.anchor_fps_start must be 'index0' or 'centroid_farthest'; got '{self.anchor_fps_start}'")
@@ -218,7 +234,7 @@ class MultiObjectDynamics(Dataset):
             show_progress = (dist.get_rank() == 0)
 
         for ds in tqdm(self.dataset_dirs, desc=f"Indexing {split} datasets", unit="ds", disable=not show_progress):
-            frames = sorted([p for p in ds.glob('frame_*') if p.is_dir()])
+            frames = scene_frame_dirs(ds)
             if self.skip_first_frames > 0:
                 frames = frames[self.skip_first_frames:]
             if self.skip_step_size > 1:
@@ -243,10 +259,10 @@ class MultiObjectDynamics(Dataset):
         for ds in self.dataset_dirs:
             ds_name = ds.name
             frame0 = ds / 'frame_00000'
-            if not frame0.exists():
+            if not (frame0.exists() or is_packed(ds)):
                 raise FileNotFoundError(
                     f"Missing reference frame for dataset '{ds_name}': {frame0}. "
-                    f"Expected a 'frame_00000' directory under {ds}.")
+                    f"Expected a 'frame_00000' directory (or frames.npy) under {ds}.")
 
             # For point cloud mode, load point clouds for validation
             # For mesh mode, load mesh vertices
@@ -302,7 +318,7 @@ class MultiObjectDynamics(Dataset):
                     # Compute deterministic FPS anchors on the STORED (unscaled) frame-0 vertices, as
                     # pregen_cf_anchors.py does: FPS is invariant to the size scaling only in exact arithmetic (float32
                     # rounding of the scaled coordinates breaks the exact ties of symmetric meshes differently)
-                    V_ref = np.load(frame0 / f'obj_{i}_pos.npy').astype(np.float32, copy=False)
+                    V_ref = load_frame(ds, 0)[i].astype(np.float32, copy=False)
                     idx = self._farthest_point_sample_np(V_ref, self.anchor_k, rule=self.anchor_fps_start)
                     # Atomic write: concurrent DDP ranks must never read a partially written cache.
                     tmp_path = anchor_path.with_name(f"{anchor_path.stem}.{os.getpid()}.tmp.npy")
@@ -319,7 +335,7 @@ class MultiObjectDynamics(Dataset):
                             raise ValueError(f"FPS-order cache {order_path} is not a permutation of the {nv} vertices")
                     else:
                         # stored (unscaled) frame-0 vertices, as pregen_fps_order.py does (see the anchors above)
-                        order = self._farthest_point_sample_np(np.load(frame0 / f'obj_{i}_pos.npy').astype(np.float32, copy=False),
+                        order = self._farthest_point_sample_np(load_frame(ds, 0)[i].astype(np.float32, copy=False),
                                                                nv, rule='centroid_farthest')
                         tmp_path = order_path.with_name(f"{order_path.stem}.{os.getpid()}.tmp.npy")
                         np.save(tmp_path, order.astype(np.int32, copy=False))
@@ -359,7 +375,7 @@ class MultiObjectDynamics(Dataset):
 
         for ds in self.dataset_dirs:
             ds_name = ds.name
-            all_frames = sorted([p for p in ds.glob('frame_*') if p.is_dir()])
+            all_frames = scene_frame_dirs(ds)
             self._all_frames_by_dataset[ds_name] = all_frames
             for fp in all_frames:
                 frame_id = int(fp.name.split('_')[-1])  # "frame_00123" -> 123
@@ -496,7 +512,7 @@ class MultiObjectDynamics(Dataset):
             print(f"[{split}] Validating dataset frame counts for multi-timescale training...")
             insufficient_datasets = []
             for ds in self.dataset_dirs:
-                frames = sorted([p for p in ds.glob('frame_*') if p.is_dir()])
+                frames = scene_frame_dirs(ds)
                 if self.skip_first_frames > 0:
                     frames = frames[self.skip_first_frames:]
                 available_frames = len(frames)
@@ -589,9 +605,11 @@ class MultiObjectDynamics(Dataset):
                     f"Please use a dataset with pre-computed point clouds."
                 )
         else:
-            # Mesh vertex mode: load from obj_i_pos.npy
-            while (frame_dir / f'obj_{idx}_pos.npy').exists():
-                V = cached_load_npy(frame_dir / f'obj_{idx}_pos.npy')  # (Ni, 3)
+            # Mesh vertex mode: load from obj_i_pos.npy (packed layout: the same arrays from frames.npy)
+            packed = (load_frame(frame_dir.parent, int(frame_dir.name.split('_')[-1]))
+                      if is_packed(frame_dir.parent) else None)
+            while (idx < len(packed)) if packed is not None else (frame_dir / f'obj_{idx}_pos.npy').exists():
+                V = packed[idx] if packed is not None else cached_load_npy(frame_dir / f'obj_{idx}_pos.npy')  # (Ni, 3)
                 if self._object_scale is not None:
                     V = self._object_scale.apply(frame_dir / f'obj_{idx}_pos.npy', V)
 
@@ -664,6 +682,9 @@ class MultiObjectDynamics(Dataset):
             frame_ids = np.asarray(info.get('frame_ids', []), dtype=np.int32)
             selected_step_size = self.skip_step_size
 
+        if self._partial is not None:
+            return self._partial_item(ds_name, frame_ids, selected_step_size)
+
         # Load per-frame objects (ragged); point clouds are loaded instead of mesh
         # vertices when pc_resolution is set.
         frames_objs: List[List[np.ndarray]] = [self._load_frame_objects(fp, pc_resolution=pc_resolution) for fp in frame_paths]
@@ -702,10 +723,10 @@ class MultiObjectDynamics(Dataset):
         if cache_key not in self._reference_frames_cache:
             ds_root = self.data_path / ds_name
             frame0 = ds_root / 'frame_00000'
-            if not frame0.exists():
+            if not (frame0.exists() or is_packed(ds_root)):
                 raise FileNotFoundError(
                     f"Missing reference frame for dataset '{ds_name}': {frame0}. "
-                    f"Expected a 'frame_00000' directory under {ds_root}."
+                    f"Expected a 'frame_00000' directory (or frames.npy) under {ds_root}."
                 )
             ref_objs = self._load_frame_objects(frame0, pc_resolution=pc_resolution)
             if len(ref_objs) == 0:
@@ -717,9 +738,10 @@ class MultiObjectDynamics(Dataset):
             ref_objs = self._reference_frames_cache[cache_key]
         # Every frame in the sequence must contain all reference objects, each stored
         # as a non-empty (N, 2|3) array. Point cloud mode is already validated inside
-        # _load_frame_objects, so it is skipped here.
+        # _load_frame_objects, so it is skipped here, and so is the packed layout (frames.npy holds every object of
+        # every frame by construction; scene_frames checks its shape against frames_counts.npy).
         expected_num_objs = len(ref_objs)
-        if pc_resolution is None:
+        if pc_resolution is None and not is_packed(self.data_path / ds_name):
             for t, fdir in enumerate(frame_paths):
                 for i_ref in range(expected_num_objs):
                     npy_path = fdir / f"obj_{i_ref}_pos.npy"
@@ -857,6 +879,114 @@ class MultiObjectDynamics(Dataset):
             elif self.noise_config.get('independent', {}).get('enable', False):
                 sample = apply_independent_noise(sample, self.noise_config, is_training=True)
 
+        return sample
+
+    def _partial_scene(self, ds_name: str) -> dict:
+        """Shapes, metadata sizes and pose trajectory (T, N, 7: position, quaternion w x y z) of a scene."""
+        info = self._partial_scenes.get(ds_name)
+        if info is None:
+            ds = self.data_path / ds_name
+            shapes = [o['asset_id'] for o in json.loads((ds / 'conversion.json').read_text())['objects']]
+            traj = np.load(ds / 'vis_traj.npy')[0]
+            sizes = self._object_scale.scales[ds_name]
+            if not (len(shapes) == len(sizes) == traj.shape[1]):
+                raise ValueError(f'{ds}: {len(shapes)} shapes, {len(sizes)} sizes, {traj.shape[1]} trajectories')
+            info = {'shapes': shapes, 'sizes': np.asarray(sizes, dtype=np.float64), 'traj': traj}
+            self._partial_scenes[ds_name] = info
+        return info
+
+    def _partial_item(self, ds_name: str, frame_ids: np.ndarray, step_size: int) -> Dict[str, torch.Tensor]:
+        """Sample whose objects are the partial point clouds a depth camera observes at sample frame
+        partial_view.observe_index, moved with the ground-truth poses to every frame (src/data/partial_view.py).
+
+        Objects with fewer than min_points observed points are left out; `partial_obj_index` maps the sample's objects
+        to the scene's. Points are in farthest-point order, so the anchors are the first anchor_k points and the FPS
+        rank of a point is its index. Evaluation samples also carry the index of the observation frame in the sample
+        (`partial_obs_index`) and the full collision meshes of all objects at that frame (`partial_full_obs`) for
+        scoring.
+        """
+        info = self._partial_scene(ds_name)
+        traj = info['traj']
+        fids = np.asarray(frame_ids, dtype=np.int64)
+        T = len(fids)
+        k = min(self._partial.observe_index, T - 1)
+        t_obs = int(fids[k])
+        train = self.split == 'train'
+        rng = np.random.default_rng(None if train else zlib.crc32(f'{ds_name}:{t_obs}'.encode()))
+        pos_obs = traj[t_obs, :, :3].astype(np.float64)
+        quat_obs = traj[t_obs, :, 3:7].astype(np.float64)
+        # The model's contact search needs at least two objects. A training view that observes fewer is redrawn; after
+        # 8 such views the evaluation camera, which observes nearly all objects, is used instead, or the whole objects
+        # for a scene without a recorded camera (augmented training scenes).
+        for attempt in range(9 if train else 1):
+            use_train_camera = train and attempt < 8
+            if train and not use_train_camera and ds_name not in self._partial.cameras:
+                local = self._partial.whole_objects(info['shapes'])
+            else:
+                local = self._partial.observe(ds_name, info['shapes'], info['sizes'], pos_obs, quat_obs,
+                                              use_train_camera, rng)
+            observed = np.array([i for i, u in enumerate(local) if u is not None], dtype=np.int64)
+            if observed.size >= 2:
+                break
+        if observed.size < 2:
+            raise RuntimeError(f'{ds_name}: {observed.size} object(s) observed at frame {t_obs}, at least 2 needed '
+                               f'({self._partial.describe(train=False)})')
+
+        n_obj = int(observed.size)
+        nmax = max(local[i].shape[0] for i in observed)
+        P = traj[fids][:, observed, :3].astype(np.float64)                 # (T, n_obj, 3)
+        Rq = quat_to_rotmat(traj[fids][:, observed, 3:7])                  # (T, n_obj, 3, 3)
+        P0 = traj[0, observed, :3].astype(np.float64)                      # reference pose: global frame 0
+        R0 = quat_to_rotmat(traj[0, observed, 3:7])
+        obj_positions = np.full((T, n_obj, nmax, 3), PADDING_VALUE, dtype='float32')
+        valid_vtx_mask = np.zeros((T, n_obj, nmax), dtype='bool')
+        ref_obj_positions = np.full((n_obj, nmax, 3), PADDING_VALUE, dtype='float32')
+        vtx_rank = np.full((n_obj, nmax), nmax, dtype=np.int32)
+        for j, i in enumerate(observed):
+            U = local[i] * info['sizes'][i]                                 # object frame, metres
+            n = U.shape[0]
+            obj_positions[:, j, :n] = P[:, j, None, :] + np.einsum('tab,nb->tna', Rq[:, j], U)
+            valid_vtx_mask[:, j, :n] = True
+            ref_obj_positions[j, :n] = P0[j] + U @ R0[j].T
+            vtx_rank[j, :n] = np.arange(n, dtype=np.int32)
+        anchor_idx = np.tile(np.arange(self.anchor_k, dtype=np.int32), (n_obj, 1))
+        valid_obj_mask = np.ones((n_obj,), dtype='bool')
+        phys_params = self._physics_by_dataset[ds_name][observed]
+        faces_list = [np.zeros((0, 3), dtype=np.int64) for _ in range(n_obj)]
+
+        perm = None
+        if self.permute_enabled and np.random.random() < self.permute_prob and n_obj >= 2:
+            perm = np.random.permutation(n_obj)
+            obj_positions = obj_positions[:, perm]
+            valid_vtx_mask = valid_vtx_mask[:, perm]
+            ref_obj_positions = ref_obj_positions[perm]
+            vtx_rank = vtx_rank[perm]
+            anchor_idx = anchor_idx[perm]
+            phys_params = phys_params[perm]
+            observed = observed[perm]
+            faces_list = [faces_list[p] for p in perm]
+
+        sample = {
+            'obj_positions': torch.from_numpy(obj_positions),
+            'valid_obj_mask': torch.from_numpy(valid_obj_mask),
+            'valid_vtx_mask': torch.from_numpy(valid_vtx_mask),
+            'ref_obj_positions': torch.from_numpy(ref_obj_positions),
+            'dt': torch.tensor(1.0, dtype=torch.float32),
+            'frame_ids': torch.from_numpy(fids.astype(np.int32)),
+            'time_step_id': torch.tensor(int(fids[0]), dtype=torch.int64),
+            'anchor_idx': torch.from_numpy(anchor_idx),
+            **({'vtx_rank': torch.from_numpy(vtx_rank)} if self.fps_order else {}),
+            'dataset_name': ds_name,
+            'faces_list': faces_list,
+            'permutation': perm if perm is not None else np.arange(n_obj),
+            'phys_params': torch.from_numpy(np.ascontiguousarray(phys_params)),
+            'skip_step_size': torch.tensor(step_size, dtype=torch.float32),
+            'is_point_cloud': False,
+            'partial_obj_index': observed,
+        }
+        if not train:
+            sample['partial_obs_index'] = k
+            sample['partial_full_obs'] = self._load_frame_objects(self.data_path / ds_name / f'frame_{t_obs:05d}')
         return sample
 
     def set_epoch(self, epoch: int):

@@ -320,6 +320,7 @@ def test_protocol_names_the_evaluated_partition(tmp_path):
     (tmp_path / 'val.json').write_text(json.dumps(sp))
     ev = E.Evaluator.__new__(E.Evaluator)
     ev.position_estimator = 'hopnet'
+    ev.warmup_from_step1, ev._partial_view = False, None          # the defaults of Evaluator.__init__
     ev.config = {'data': {'split_file': str(tmp_path / 'val.json'), 'scene_set': 'complete'}}
     assert '114 val scenes' in ev._protocol_text('test', 114)
     ev.config['data']['split_file'] = os.path.join(REPO, 'dataset_split_MoviB_1200.json')

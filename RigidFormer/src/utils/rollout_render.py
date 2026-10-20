@@ -8,7 +8,8 @@ The scene: a checker floor (1 m tiles), light (default) or dark, image-based lig
 ambient occlusion and filmic tone mapping; physically based materials (a fixed palette; metal objects metallic). A fixed
 camera frames where the objects move. Given the times of the key poses, a video samples the motion in real time at
 its frame rate, interpolating between key poses. Frames are rendered at `supersample` times the output size, averaged
-down and piped to ffmpeg (H.264). Nothing but the scene is drawn: no text.
+down and piped to ffmpeg (H.264). Nothing but the scene is drawn: no text. Without a GPU, EGL_PLATFORM=surfaceless
+renders the same scene with Mesa's software rasterizer (llvmpipe), more slowly.
 
     meshes = load_render_meshes('data_generation/objects', shapes)
     poses = [fit_poses(size * collision_vertices(mesh_dir, shape), frames)[0] ...]   # per object: (T, 4, 4)
@@ -46,6 +47,12 @@ KEY_DIRECTION = (-0.02, 0.42, -0.91)  # key light travel direction (world, z up)
 FLOOR_SIZE = 2000.0                # m
 TILE = 1.0                         # floor tile (m)
 GHOST = (0.55, 0.57, 0.62, 0.3)    # translucent ground truth
+POINT = (0.93, 0.94, 0.95)         # style 'solid': colour of the drawn surface points, linear RGB
+SEE_THROUGH = 0.55                 # style 'points': opacity of the object meshes around their points
+GLASS_TINT = 0.1                   # style 'points': mesh colour, the object's blended this far towards white
+POINT_SHADE = 0.75                 # style 'points': point colour, the object's darkened by this factor
+ADDED_TINT = 0.6                   # style 'points': added-point colour, the object's blended this far towards white
+ADDED_RADIUS = 0.6                 # radius of the added (completion) points, relative to the observed points'
 VIEW = (1.0, -1.25, 1.35)          # camera direction (from the target)
 FOV = 30.0                         # vertical field of view (degrees)
 
@@ -140,6 +147,19 @@ def load_obj(path):
     if (length[:, 0] == 0).any() or ((N * file_normals).sum(1) <= 0).any():
         raise ValueError(f'{path}: vertex normals undefined or against the file normals (face winding)')
     return V, N / length, F
+
+
+def point_spheres(points, radius, resolution=4):
+    """One mesh of small spheres of `radius` centred at `points` (N, 3): (vertices, normals, faces)."""
+    import open3d as o3d
+    sphere = o3d.geometry.TriangleMesh.create_sphere(radius=1.0, resolution=resolution)
+    sphere.compute_vertex_normals()
+    V0, N0, F0 = np.asarray(sphere.vertices), np.asarray(sphere.vertex_normals), np.asarray(sphere.triangles)
+    P = np.asarray(points, np.float64)
+    V = (P[:, None, :] + radius * V0[None]).reshape(-1, 3)
+    N = np.broadcast_to(N0, (len(P),) + N0.shape).reshape(-1, 3)
+    F = (F0[None] + (np.arange(len(P)) * len(V0))[:, None, None]).reshape(-1, 3)
+    return V, N, F
 
 
 def load_render_meshes(mesh_dir, shapes):
@@ -251,7 +271,8 @@ class RolloutRenderer:
         mat.base_reflectance = L['floor_reflectance']
         return mesh, mat
 
-    def _add(self, name, V, N, F, color, metal=False, ghost=False):
+    def _add(self, name, V, N, F, color, metal=False, ghost=False, alpha=None):
+        """alpha: draw the mesh in `color` with this opacity and without shadows (style 'points')."""
         o3d, rendering, L = self.o3d, self.rendering, self.look
         # int32 triangles: with int64 ones and given vertex normals the engine draws nothing but the shadow
         mesh = o3d.geometry.TriangleMesh(o3d.utility.Vector3dVector(np.ascontiguousarray(V, np.float64)),
@@ -263,6 +284,10 @@ class RolloutRenderer:
             mat.shader = 'defaultLitTransparency'
             mat.base_color = list(GHOST)
             mat.base_roughness = 0.6
+        elif alpha is not None:                     # matte, little specular: the colour shows through
+            mat.shader = 'defaultLitTransparency'
+            mat.base_color = [*color, float(alpha)]
+            mat.base_roughness, mat.base_reflectance = 0.8, 0.1
         else:
             mat.shader = 'defaultLit'
             mat.base_color = [*color, 1.0]
@@ -273,14 +298,31 @@ class RolloutRenderer:
                 mat.base_reflectance = L['reflectance']
                 mat.base_clearcoat, mat.base_clearcoat_roughness = L['clearcoat'], L['clearcoat_roughness']
         self.renderer.scene.add_geometry(name, mesh, mat)
-        if ghost:                                       # the ground truth casts no shadow of its own
+        if ghost or alpha is not None:                  # the ground truth and see-through meshes cast no shadow
             self.renderer.scene.scene.geometry_shadows(name, False, False)
 
-    def render(self, out_path, meshes, sizes, metal, poses, fps, ghost=None, times=None):
+    def render(self, out_path, meshes, sizes, metal, poses, fps, ghost=None, times=None, points=None,
+               point_radius=0.025, colours=None, view=None, style='solid', see_through=SEE_THROUGH, added=None):
         """meshes[i] = (vertices, normals, faces) in the object's frame, unscaled; sizes[i] its scale; metal[i] bool;
         poses[i] (K, 4, 4) its key poses; ghost: key poses drawn translucent (the ground truth), or None. With
         `times` (K,), the video time (s) of each key pose, the video samples the motion at `fps`, interpolating
-        between key poses (interpolate_poses); without, every key pose is one frame."""
+        between key poses (interpolate_poses); without, every key pose is one frame. points[i] (N_i, 3) or None:
+        surface points of object i in its frame (unscaled), drawn as spheres of `point_radius` (m) that move with the
+        object (the observed points of partial inputs); added[i] (M_i, 3) or None: points a completion network added
+        to points[i] (data.partial_view.completion), drawn with ADDED_RADIUS times that radius. style 'solid': opaque
+        objects with light points on them; 'points': the points opaque in the object's colour (darkened by
+        POINT_SHADE, added points lightened by ADDED_TINT), the object see-through around them (opacity
+        `see_through`, its colour lightened by GLASS_TINT). colours[i]: sRGB hex colour of object i (default: PALETTE
+        by index). view: direction from the objects to the camera (default VIEW); the key light turns with it about
+        the vertical, so it keeps lighting the objects from above, left of the camera."""
+        if style not in ('solid', 'points'):
+            raise ValueError(f"style must be 'solid' or 'points', got {style!r}")
+        view = VIEW if view is None else tuple(float(v) for v in view)
+        turn = np.arctan2(view[1], view[0]) - np.arctan2(VIEW[1], VIEW[0])
+        c, s = np.cos(turn), np.sin(turn)
+        kx, ky, kz = KEY_DIRECTION
+        self.renderer.scene.scene.set_sun_light([c * kx - s * ky, s * kx + c * ky, kz], list(self.look['key']),
+                                                self.look['key_intensity'])
         if times is not None:
             t = np.arange(int(np.floor(float(times[-1] - times[0]) * fps + 1e-6)) + 1) / fps + float(times[0])
             poses = [interpolate_poses(P, times, t) for P in poses]
@@ -289,12 +331,24 @@ class RolloutRenderer:
         scene.clear_geometry()
         scene.add_geometry('floor', *self.floor)
         layers = [('obj', poses)] + ([('gt', ghost)] if ghost is not None else [])
+        marked = [i for i in range(len(meshes)) if points is not None and points[i] is not None and len(points[i])]
+        rgb = [linear_rgb(colours[i] if colours is not None else PALETTE[i % len(PALETTE)]) for i in range(len(meshes))]
         for tag, _ in layers:
             for i, (V, N, F) in enumerate(meshes):
-                self._add(f'{tag}{i}', V * float(sizes[i]), N, F, linear_rgb(PALETTE[i % len(PALETTE)]),
-                          bool(metal[i]), ghost=tag == 'gt')
+                glass = style == 'points' and tag == 'obj' and i in marked
+                colour = (1 - GLASS_TINT) * rgb[i] + GLASS_TINT if glass else rgb[i]
+                self._add(f'{tag}{i}', V * float(sizes[i]), N, F, colour, bool(metal[i]), ghost=tag == 'gt',
+                          alpha=float(see_through) if glass else None)
+        for i in marked:
+            self._add(f'pts{i}', *point_spheres(np.asarray(points[i], np.float64) * float(sizes[i]), point_radius),
+                      POINT_SHADE * rgb[i] if style == 'points' else POINT)
+        filled = [i for i in marked if added is not None and added[i] is not None and len(added[i])]
+        for i in filled:
+            self._add(f'add{i}', *point_spheres(np.asarray(added[i], np.float64) * float(sizes[i]),
+                                                ADDED_RADIUS * point_radius),
+                      (1 - ADDED_TINT) * rgb[i] + ADDED_TINT if style == 'points' else POINT)
         radii = [float(np.linalg.norm(V, axis=1).max()) * float(sizes[i]) for i, (V, _, _) in enumerate(meshes)]
-        target, eye = frame_camera(poses, radii, self.width / self.height)
+        target, eye = frame_camera(poses, radii, self.width / self.height, view=view)
         cmd = ['ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24',
                '-s', f'{self.width}x{self.height}', '-r', f'{fps:.6f}', '-i', '-', '-c:v', 'libx264', '-crf', '18',
                '-preset', 'medium', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', str(out_path)]
@@ -304,6 +358,10 @@ class RolloutRenderer:
             for tag, seq in layers:
                 for i in range(len(meshes)):
                     scene.set_geometry_transform(f'{tag}{i}', seq[i][0])
+            for i in marked:
+                scene.set_geometry_transform(f'pts{i}', poses[i][0])
+            for i in filled:
+                scene.set_geometry_transform(f'add{i}', poses[i][0])
             self.renderer.setup_camera(FOV, target, eye, [0, 0, 1])
             for _ in range(2):
                 self.renderer.render_to_image()
@@ -311,6 +369,10 @@ class RolloutRenderer:
                 for tag, seq in layers:
                     for i in range(len(meshes)):
                         scene.set_geometry_transform(f'{tag}{i}', seq[i][t])
+                for i in marked:
+                    scene.set_geometry_transform(f'pts{i}', poses[i][t])
+                for i in filled:
+                    scene.set_geometry_transform(f'add{i}', poses[i][t])
                 # after the objects are placed: the camera's clipping planes follow the scene's bounds
                 self.renderer.setup_camera(FOV, target, eye, [0, 0, 1])
                 img = np.asarray(self.renderer.render_to_image())

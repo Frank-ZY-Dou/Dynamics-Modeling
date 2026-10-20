@@ -34,6 +34,8 @@ def replay_num_objects(meta):
     metadata.seed: the replay uses that one, and a set flags.seed must agree with it.
     """
     flags = meta['flags']
+    if flags.get('generator') == 'augment_movi_scenes':     # writes every object it simulates
+        return len(meta['instances'])
     seed = meta['metadata']['seed']
     if flags.get('seed') and flags['seed'] != seed:
         raise ValueError(f"flags.seed {flags['seed']} differs from metadata.seed {seed}")

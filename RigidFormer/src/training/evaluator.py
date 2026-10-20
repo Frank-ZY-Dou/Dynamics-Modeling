@@ -35,6 +35,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 import trimesh
 import roma  # For rotation matrix to quaternion conversion
+from src.data.scene_frames import load_frame
 
 logger = logging.getLogger(__name__)
 
@@ -108,6 +109,12 @@ class Evaluator:
         # data.object_scale_file: the canonical frame-0 meshes read below must carry the same scale as the model inputs
         from src.data.object_scale import from_config as _object_scale_from_config
         self._object_scale = _object_scale_from_config(self.config)
+        # data.partial_view: the inputs are partial point clouds of a simulated depth camera (src/data/partial_view.py);
+        # each observed object's rigid motion moves its full collision mesh before scoring, unobserved objects are
+        # left out of the metrics
+        _pv = self.config['data'].get('partial_view') or {}
+        self._partial_view = dict(_pv) if _pv.get('enable', False) else None
+        self._partial_counts = (0, 0)   # observed objects, all objects (last evaluated split and step size)
         # Unwrap DDP wrapper to access custom methods (e.g., rollout)
         self.model = trainer.model.module if isinstance(trainer.model, DDP) else trainer.model
         self.device = trainer.device
@@ -125,6 +132,12 @@ class Evaluator:
         self.eval_warmup_frames = metrics_cfg.get('eval_warmup_frames', 2)  # Ground-truth frames before autoregressive rollout
         self.hopnet_checkpoints_physical = metrics_cfg.get('hopnet_checkpoints',
                                                            [25, 50, 75, 100, 200, 300, 400])
+        # Step sizes > 1 start from the model's own step-size-1 rollout instead of ground-truth warm-up frames
+        # (_warmup_from_step1): every step size then sees only the ground truth of the step-size-1 protocol
+        self.warmup_from_step1 = bool(metrics_cfg.get('warmup_from_step1', False))
+        if self.warmup_from_step1 and self._partial_view is not None:
+            raise ValueError("metrics_test.warmup_from_step1 is not defined for partial-view inputs (the observation "
+                             "frame differs between step sizes)")
         # Object-pose extraction from predicted vertices.
         #   'area_centroid': area-weighted surface centroid vs. the ground-truth origin.
         #   'hopnet':        HopNet's shape matching: volume centre of mass + polar-decomposition
@@ -153,9 +166,21 @@ class Evaluator:
         d = self.config['data']
         with open(d['split_file']) as f:
             partition = json.load(f).get('evaluated_partition', split)
-        return (f"position estimator {self.position_estimator}; scene set {d.get('scene_set', 'benchmark')} "
+        text = (f"position estimator {self.position_estimator}; scene set {d.get('scene_set', 'benchmark')} "
                 f"({os.path.basename(str(d.get('split_file')))}), {n_scenes} {partition} scenes; "
                 f"rotation error = RMS over objects, rotation MAE = mean absolute angle over objects")
+        if self.warmup_from_step1:
+            text += (f"; step sizes > 1: warm-up frames s .. {self.eval_warmup_frames - 1}s predicted by the model at "
+                     f"step size 1 from ground-truth frames 0-{self.eval_warmup_frames - 1} (only frame 0 is ground "
+                     f"truth at step size s)")
+        if self._partial_view is not None:
+            from src.data.partial_view import PartialView
+            pv = PartialView({**self._partial_view, 'observe_index': self.eval_warmup_frames - 1},
+                             Path(__file__).resolve().parents[2])
+            seen, total = self._partial_counts
+            text += (f"; inputs: {pv.describe(train=False)}; metrics over the {seen} observed of {total} objects "
+                     f"(full collision meshes moved by the predicted rigid motions)")
+        return text
 
     def should_evaluate(self, epoch: int) -> bool:
         """Check if RMSE evaluation should run this epoch."""
@@ -275,6 +300,31 @@ class Evaluator:
                     logger.info(f"{physical_cp:^12} | {network_step:^13} | {network_step - self.eval_warmup_frames + 1:^20}")
             logger.info("")
 
+        eval_dataset = self._get_eval_dataset(split, skip_step_size, eval_sequence_length)
+        batch_size = self.config['training'].get('eval_batch_size', 8)
+        eval_loader = self._eval_loader(eval_dataset, batch_size)
+        # metrics_test.warmup_from_step1: for a step size s > 1 the warm-up frames s, 2s, ... are the model's own
+        # step-size-1 rollout from the step-size-1 warm-up (ground-truth frames 0 .. warm-up - 1), instead of
+        # ground-truth frames; every step size then uses exactly the ground truth of the step-size-1 protocol
+        step1_loader = None
+        if self.warmup_from_step1 and skip_step_size > 1:
+            step1_loader = self._eval_loader(
+                self._get_eval_dataset(split, 1, self.eval_num_frames), batch_size)
+            if len(step1_loader) != len(eval_loader):
+                raise ValueError(f"warmup_from_step1: {len(step1_loader)} step-size-1 batches vs {len(eval_loader)}")
+
+        if self.rank == 0:
+            logger.info(f"[RMSE Dataset] {split} set: {len(eval_dataset)} samples, "
+                       f"batch_size={batch_size}, {len(eval_loader)} batches"
+                       + (", warm-up from the step-size-1 rollout" if step1_loader is not None else ""))
+
+        return self._evaluate_rmse_loop(eval_dataset, eval_loader, step1_loader, split, skip_step_size,
+                                        eval_sequence_length)
+
+    def _get_eval_dataset(self, split: str, skip_step_size: int, eval_sequence_length: int):
+        """The cached evaluation dataset of a split at a step size (one sample per scene, warm-up frames only)."""
+        from src.data.multi_dataloader import MultiObjectDynamics
+
         # Create or reuse cached dataset
         cache_key = f'_eval_dataset_{split}_step{skip_step_size}'
         if cache_key not in (self._test_eval_datasets if split == 'test' else self._val_eval_datasets):
@@ -284,7 +334,7 @@ class Evaluator:
             # Load only the warmup frames; rollout() generates the remaining
             # predictions autoregressively.
             eval_load_frames = max(self.eval_warmup_frames, 8)  # At least 8 frames for safety margin
-            
+
             if self.rank == 0:
                 logger.info(f"[RMSE Eval] Loading only {eval_load_frames} frames (not {eval_sequence_length})")
 
@@ -307,7 +357,10 @@ class Evaluator:
                 fps_order=self.config['data'].get('fps_order', False),
                 object_scale_file=self.config['data'].get('object_scale_file'),
                 # the same physics-parameter validation as the training data (missing entries are errors)
-                if_phys_param=self.config.get('model', {}).get('if_phys_param', False)
+                if_phys_param=self.config.get('model', {}).get('if_phys_param', False),
+                # partial inputs observed at the last warm-up frame
+                partial_view=({**self._partial_view, 'observe_index': self.eval_warmup_frames - 1}
+                              if self._partial_view is not None else None)
             )
 
             # Cache the dataset
@@ -320,9 +373,13 @@ class Evaluator:
                 logger.info(f"[RMSE Dataset] Reusing cached {split} dataset")
             eval_dataset = (self._test_eval_datasets if split == 'test'
                           else self._val_eval_datasets)[cache_key]
+        return eval_dataset
+
+    def _eval_loader(self, eval_dataset, batch_size: int):
+        """Evaluation DataLoader: scenes in dataset order, every scene on exactly one rank."""
+        from src.data.multi_dataloader import make_collate_fn
 
         # Create DataLoader with DDP-aware sampler
-        batch_size = self.config['training'].get('eval_batch_size', 8)
         collate_fn = make_collate_fn(
             max_objects_per_frame=self.config['data'].get('max_objects_per_frame', 20),
             max_vertices_per_object=self.config['data'].get('max_vertices_per_object', 1150)
@@ -352,10 +409,26 @@ class Evaluator:
                 drop_last=False,
                 collate_fn=collate_fn
             )
+        return eval_loader
 
-        if self.rank == 0:
-            logger.info(f"[RMSE Dataset] {split} set: {len(eval_dataset)} samples, "
-                       f"batch_size={batch_size}, {len(eval_loader)} batches")
+    def _warmup_from_step1(self, batch: dict, batch1: dict, skip_step_size: int) -> dict:
+        """Replace the warm-up frames s, 2s, ... of a step-size-s batch by the model's step-size-1 rollout of the same
+        scenes, started from the step-size-1 warm-up (ground-truth frames 0 .. warm-up - 1)."""
+        W = self.eval_warmup_frames
+        if list(batch.get('dataset_name', [])) != list(batch1.get('dataset_name', [])):
+            raise ValueError(f"warmup_from_step1: scene order differs between the step-size-{skip_step_size} and "
+                             f"step-size-1 evaluation batches")
+        frames = [k * skip_step_size for k in range(1, W)]
+        out = self.model.rollout(initial_batch=batch1, num_steps=frames[-1] + 1, dt=1.0, return_extras=False,
+                                 warmup_frames=W)
+        pos = batch['obj_positions'].clone()
+        pos[:, 1:W] = out['obj_positions'][:, frames].to(pos.dtype)
+        return {**batch, 'obj_positions': pos}
+
+    def _evaluate_rmse_loop(self, eval_dataset, eval_loader, step1_loader, split: str, skip_step_size: int,
+                            eval_sequence_length: int):
+        import torch.distributed as dist
+        step1_batches = iter(step1_loader) if step1_loader is not None else None
 
         # Synchronize all ranks before starting evaluation loop (avoid DDP deadlock)
         if self.world_size > 1:
@@ -376,6 +449,7 @@ class Evaluator:
         checkpoint_mapping = {}  # checkpoint -> (evaluated physical frame, warm-up frames) when not (cp, main warm-up)
         not_evaluated = {}  # checkpoint -> reason ("/"): off the step-size grid or at a warm-up (context) frame
         total_samples = 0
+        partial_seen, partial_total = 0, 0  # data.partial_view: observed objects, all objects
 
         # Flash Attention handles dtype conversion inside the decoder; the rest
         # of the model runs in FP32, so no global autocast is needed.
@@ -399,6 +473,10 @@ class Evaluator:
                 # Move batch to device
                 batch = {k: v.to(self.device, non_blocking=True) if isinstance(v, torch.Tensor) else v
                         for k, v in batch.items()}
+                if step1_batches is not None:
+                    batch1 = {k: v.to(self.device, non_blocking=True) if isinstance(v, torch.Tensor) else v
+                              for k, v in next(step1_batches).items()}
+                    batch = self._warmup_from_step1(batch, batch1, skip_step_size)
 
                 # Get dataset names for this batch
                 batch_dataset_names = batch.get('dataset_name', None)
@@ -434,11 +512,16 @@ class Evaluator:
                 for b_idx in range(B_actual):
                     dataset_name = batch_dataset_names[b_idx] if isinstance(batch_dataset_names, list) else batch_dataset_names[b_idx].item()
                     pred_single = pred_full[b_idx]  # (T, Nobj, Nv, 3)
+                    object_mask = None
+                    if self._partial_view is not None:
+                        pred_single, object_mask = self._full_from_partial(pred_single, batch, b_idx)
+                        partial_seen += int(object_mask.sum())
+                        partial_total += int(object_mask.size)
 
                     # Compute RMSE for this sample
                     rmse_dict = self._compute_rmse_for_sample(
                         pred_single, dataset_name, eval_dataset, skip_step_size,
-                        self.hopnet_checkpoints_physical
+                        self.hopnet_checkpoints_physical, object_mask=object_mask
                     )
 
                     # Aggregate results (position RMSE and rotation error)
@@ -496,7 +579,8 @@ class Evaluator:
             dist.all_gather_object(gathered_position, position_rmse_list)
             dist.all_gather_object(gathered_rotation, rotation_error_list)
             dist.all_gather_object(gathered_extra, {'rotation_mae': all_rotation_mae, 'mapping': checkpoint_mapping,
-                                                    'not_evaluated': not_evaluated, 'samples': total_samples})
+                                                    'not_evaluated': not_evaluated, 'samples': total_samples,
+                                                    'partial': (partial_seen, partial_total)})
 
             if self.rank == 0:
                 # Merge results from all ranks
@@ -527,6 +611,9 @@ class Evaluator:
 
                 # Count total samples across all ranks
                 total_samples = sum(_ex['samples'] for _ex in gathered_extra)
+                partial_seen = sum(_ex['partial'][0] for _ex in gathered_extra)
+                partial_total = sum(_ex['partial'][1] for _ex in gathered_extra)
+        self._partial_counts = (partial_seen, partial_total)
 
         # Only Rank 0 logs and writes to TensorBoard
         if self.rank == 0:
@@ -632,6 +719,33 @@ class Evaluator:
             # Non-rank-0: return empty dict
             return {}
 
+    def _full_from_partial(self, pred_single: np.ndarray, batch: dict, b_idx: int):
+        """Full-mesh prediction of a rollout from partial point clouds (data.partial_view).
+
+        The rollout moves each observed object's points rigidly; Kabsch from the points at the observation frame (the
+        last warm-up frame, ground truth) to the points of every frame recovers that motion, which moves the object's
+        full collision mesh of the observation frame. Unobserved objects keep their observation-frame mesh as a
+        placeholder and are masked out of the metrics. Returns ((T, Nobj, Nv, 3), observed mask (Nobj,)).
+        """
+        from src.data.partial_view import kabsch
+        observed = np.asarray(batch['partial_obj_index'][b_idx], dtype=np.int64)
+        k = int(batch['partial_obs_index'][b_idx])
+        full = batch['partial_full_obs'][b_idx]                       # (Nv_i, 3) per object of the scene
+        vmask = batch['valid_vtx_mask'][b_idx].detach().cpu().numpy()  # (T0, Nobs, Np)
+        T = pred_single.shape[0]
+        nv = max(V.shape[0] for V in full)
+        out = np.zeros((T, len(full), nv, 3), dtype=np.float32)
+        for i, V in enumerate(full):
+            out[:, i, :V.shape[0]] = V
+        for j, i in enumerate(observed):
+            m = vmask[k, j]
+            R, t = kabsch(pred_single[k, j, m], pred_single[:, j, m])
+            out[:, i, :full[i].shape[0]] = (np.einsum('tab,nb->tna', R, full[i].astype(np.float64))
+                                            + t[:, None, :]).astype(np.float32)
+        mask = np.zeros((len(full),), dtype=bool)
+        mask[observed] = True
+        return out, mask
+
     def _compute_rmse_for_sample(
         self,
         pred_single: np.ndarray,
@@ -639,6 +753,7 @@ class Evaluator:
         eval_dataset,
         skip_step_size: int,
         physical_checkpoints: List[int],
+        object_mask: Optional[np.ndarray] = None,
     ) -> Dict[int, float]:
         """
         Compute position RMSE and rotation error for one sample at the checkpoints.
@@ -698,9 +813,10 @@ class Evaluator:
             # Canonical meshes (object frame, from the ground-truth frame-0 pose) for shape matching
             _gt_quat_eval = traj_sampled[:T_eval, :Nobj_gt, 3:7].astype(np.float32)
             _ref_list = []
+            _frame0 = load_frame(dataset_path, 0)               # either layout (src/data/scene_frames.py)
             for obj_idx in range(Nobj_gt):
                 _p0 = dataset_path / 'frame_00000' / f'obj_{obj_idx}_pos.npy'
-                _pos0 = np.load(_p0)
+                _pos0 = _frame0[obj_idx]
                 if self._object_scale is not None:
                     _pos0 = self._object_scale.apply(_p0, _pos0)
                 _q0 = _gt_quat_eval[0, obj_idx]
@@ -749,7 +865,9 @@ class Evaluator:
         # Compute position error
         pos_err = np.sum((pred_com - gt_com)**2, axis=-1)  # (T_eval, Nobj)
 
-        # Compute per-step RMSE
+        # Compute per-step RMSE (data.partial_view: over the observed objects)
+        if object_mask is not None:
+            pos_err = pos_err[:, np.asarray(object_mask, dtype=bool)]
         position_rmse_all_steps = []
         for step in range(T_eval):
             mse_step = np.mean(pos_err[step])  # Average over objects
@@ -769,10 +887,11 @@ class Evaluator:
         # Load canonical mesh for each object (inverse transform from frame 0)
         # Canonical mesh = rotation-free reference at origin
         ref_positions_list = []
+        _frame0 = load_frame(dataset_path, 0)                   # either layout (src/data/scene_frames.py)
         for obj_idx in range(Nobj_gt):
             # Load frame 0 positions
             _p0 = dataset_path / 'frame_00000' / f'obj_{obj_idx}_pos.npy'
-            obj_pos_0 = np.load(_p0)
+            obj_pos_0 = _frame0[obj_idx]
             if self._object_scale is not None:
                 obj_pos_0 = self._object_scale.apply(_p0, obj_pos_0)
 
@@ -816,6 +935,8 @@ class Evaluator:
             rotation_errors_t = []
             
             for obj_idx in range(Nobj_gt):
+                if object_mask is not None and not object_mask[obj_idx]:
+                    continue
                 ref_pts = ref_positions_gpu[obj_idx]  # Already on GPU
                 Nv_actual = ref_pts.shape[0]
                 if Nv_actual < 3:

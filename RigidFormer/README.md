@@ -42,6 +42,7 @@ Learning-based simulation of multi-object rigid-body dynamics remains difficult 
 
 **RigidFormer** is an object-centric Transformer that learns mesh-free rigid-body dynamics with controllable integration step sizes.
 
+- **Mesh-free.** Each object is a set of points without mesh connectivity: mesh vertices, points sampled on its surface, or the points a depth camera sees of it.
 - **Object-level reasoning.** Each object advances through a few compact anchors; *Anchor-Vertex Pooling* enriches the anchors with local vertex features, keeping contact-relevant geometry without dense vertex-level interaction.
 - **Anchor-based RoPE.** Anchor geometry enters attention while respecting the unordered nature of objects and anchors: object-token processing is permutation-equivariant, and the mean-pooled anchor descriptor is invariant to anchor reindexing while preserving shape extent.
 - **Rigidity by construction.** Predicted updates are projected onto the rigid-body manifold with differentiable Kabsch alignment.
@@ -77,13 +78,17 @@ python data_generation/materialize_hf_dataset.py --dataset RigidFormer-MOVi --ou
 
 The written files are identical to the conversion of the raw Kubric scenes. To build them from the raw scenes instead (download, recovery of the objects that never come into view, conversion, checks), follow [`data_generation/README.md`](data_generation/README.md).
 
+With `--packed`, each scene stores the same per-frame vertices in a single `frames.npy` (every object of every frame) instead of one file per object and frame, i.e. two files per scene instead of ~5,000. This suits network file systems and small local disks; the loader and the evaluation read both layouts ([`src/data/scene_frames.py`](src/data/scene_frames.py)).
+
 <details>
 <summary><b>Repository layout</b></summary>
 
 ```
 RigidFormer/
 ├── configs/movi_{sphere,a,b}.yaml    # training and evaluation configuration per dataset
+├── configs/movi_{sphere,a,b}_partial.yaml   # fine-tuning on partial point clouds (docs/partial_point_clouds.md)
 ├── demo/                             # interactive viewer of exported rollouts (three.js)
+├── docs/                             # partial point clouds: depth camera, completion network, fine-tuning
 ├── data_generation/                  # raw MOVi scenes -> training data; Hugging Face export and materialization
 ├── scripts/                          # train.sh, eval.sh, the evaluation driver, rollout export and videos, data checks
 ├── src/                              # model, data loader, rollout evaluator
@@ -189,6 +194,15 @@ python -m http.server 8000 --directory demo        # then open http://localhost:
 
 `export_rollouts.py` runs the evaluation and records the predicted pose of every object in every frame; `build_demo_data.py` picks, among the busier half of the test scenes, those with the lowest prediction error.
 
+## 📷 Partial Point Clouds
+
+RigidFormer can also be trained and evaluated on partial point clouds from a single depth camera: each object is represented by the points of its segment in one depth image, and a completion network adds points on its occluded side. [`docs/partial_point_clouds.md`](docs/partial_point_clouds.md) describes the depth camera, the completion network, fine-tuning, evaluation and the data.
+
+```bash
+CONFIG=configs/movi_a_partial.yaml bash scripts/train.sh --checkpoint=checkpoints/rigidformer_movia.pth   # likewise movi_b_partial.yaml, movi_sphere_partial.yaml
+CHECKPOINT=<checkpoint> BASE_CONFIG=configs/movi_a_partial.yaml TARGETS=A bash scripts/eval.sh
+```
+
 ## 🎬 Gallery
 
 > RigidFormer's predictions from point inputs on held-out test scenes, played in real time; meshes are shown only for visualization. Click a preview to open the MP4. More results are on the [project page](https://people.csail.mit.edu/frankzydou/projects/RigidFormer/index.html), with an [interactive demo](https://frank-zy-dou.github.io/projects/RigidFormer/index.html#interactive-demo).
@@ -254,6 +268,47 @@ python -m http.server 8000 --directory demo        # then open http://localhost:
 </table>
 <p align="center"><i>One model on one MOVi-B test scene at three step sizes: 240, 48 and 24 predictions per second of simulated time, played in real time (between predictions, poses are interpolated for display).</i></p>
 
+### Partial point clouds
+
+<table>
+<tr>
+<th>Depth image</th>
+<th>Segmentation</th>
+<th>Rollout</th>
+</tr>
+<tr>
+<td><img src="assets/MoviA_partial_1_depth.png"/></td>
+<td><img src="assets/MoviA_partial_1_segmentation.png"/></td>
+<td><a href="assets/MoviA_partial_1.mp4"><img src="assets/gifs/MoviA_partial_1.gif"/></a></td>
+</tr>
+<tr>
+<td><img src="assets/MoviA_partial_2_depth.png"/></td>
+<td><img src="assets/MoviA_partial_2_segmentation.png"/></td>
+<td><a href="assets/MoviA_partial_2.mp4"><img src="assets/gifs/MoviA_partial_2.gif"/></a></td>
+</tr>
+<tr>
+<td><img src="assets/MoviB_partial_1_depth.png"/></td>
+<td><img src="assets/MoviB_partial_1_segmentation.png"/></td>
+<td><a href="assets/MoviB_partial_1.mp4"><img src="assets/gifs/MoviB_partial_1.gif"/></a></td>
+</tr>
+<tr>
+<td><img src="assets/MoviB_partial_2_depth.png"/></td>
+<td><img src="assets/MoviB_partial_2_segmentation.png"/></td>
+<td><a href="assets/MoviB_partial_2.mp4"><img src="assets/gifs/MoviB_partial_2.gif"/></a></td>
+</tr>
+<tr>
+<td><img src="assets/MoviSphere_partial_1_depth.png"/></td>
+<td><img src="assets/MoviSphere_partial_1_segmentation.png"/></td>
+<td><a href="assets/MoviSphere_partial_1.mp4"><img src="assets/gifs/MoviSphere_partial_1.gif"/></a></td>
+</tr>
+<tr>
+<td><img src="assets/MoviSphere_partial_2_depth.png"/></td>
+<td><img src="assets/MoviSphere_partial_2_segmentation.png"/></td>
+<td><a href="assets/MoviSphere_partial_2.mp4"><img src="assets/gifs/MoviSphere_partial_2.gif"/></a></td>
+</tr>
+</table>
+<p align="center"><i>Test scenes of MOVi-A, MOVi-B and MOVi-Sphere observed by a single depth camera. Opaque points are observed by the camera and light points are predicted by the completion network.</i></p>
+
 ## 📈 Results
 
 Test scenes of each dataset; every cell reports the position RMSE (m, top) and the orientation RMSE (&deg;, bottom) at the given prediction horizon (frames). **Bold**: best, <ins>underlined</ins>: second best.
@@ -303,6 +358,17 @@ Test scenes of each dataset; every cell reports the position RMSE (m, top) and t
 <tr><td><sub>HopNet</sub></td><td><sub>4228.7</sub></td><td><sub>0.2</sub></td></tr>
 <tr><td><sub>FIGNet</sub></td><td><sub>336.0</sub></td><td><sub>3.0</sub></td></tr>
 <tr><td><sub>RigidFormer (Ours)</sub></td><td><sub><b>12.0</b></sub></td><td><sub><b>83.6</b></sub></td></tr>
+</table>
+
+**Partial point clouds.** Inputs from a single depth camera ([Partial Point Clouds](#-partial-point-clouds)), step size 1. The completion network lowers the position error of the released models on all three datasets; fine-tuning further lowers the orientation error on all three and the position error on MOVi-A and MOVi-B.
+
+<table align="center">
+<tr><th rowspan="2"><sub>Input and model</sub></th><th colspan="3"><sub>MOVi-A</sub></th><th colspan="3"><sub>MOVi-B</sub></th><th colspan="3"><sub>MOVi-Sphere</sub></th></tr>
+<tr><th><sub>50</sub></th><th><sub>75</sub></th><th><sub>100</sub></th><th><sub>50</sub></th><th><sub>75</sub></th><th><sub>100</sub></th><th><sub>50</sub></th><th><sub>75</sub></th><th><sub>100</sub></th></tr>
+<tr><td><sub>Full point clouds, released model</sub></td><td><sub>0.040<br>4.81</sub></td><td><sub>0.086<br>10.64</sub></td><td><sub>0.145<br>17.57</sub></td><td><sub>0.030<br>3.29</sub></td><td><sub>0.061<br>7.16</sub></td><td><sub>0.108<br>12.65</sub></td><td><sub>0.022<br>2.93</sub></td><td><sub>0.045<br>6.28</sub></td><td><sub>0.078<br>10.74</sub></td></tr>
+<tr><td><sub>Partial point clouds, released model</sub></td><td><sub>0.055<br>4.84</sub></td><td><sub>0.111<br>10.69</sub></td><td><sub>0.182<br>17.84</sub></td><td><sub>0.041<br>3.75</sub></td><td><sub>0.083<br>8.04</sub></td><td><sub>0.142<br>14.29</sub></td><td><sub>0.053<br>3.30</sub></td><td><sub>0.110<br>7.15</sub></td><td><sub>0.184<br>12.65</sub></td></tr>
+<tr><td><sub>Partial point clouds + completion, released model</sub></td><td><sub>0.052<br>5.24</sub></td><td><sub>0.097<br>10.73</sub></td><td><sub>0.162<br>18.02</sub></td><td><sub>0.036<br>3.75</sub></td><td><sub>0.075<br>7.88</sub></td><td><sub>0.129<br>13.48</sub></td><td><sub>0.023<br>3.08</sub></td><td><sub>0.048<br>6.54</sub></td><td><sub>0.083<br>11.10</sub></td></tr>
+<tr><td><sub>Partial point clouds + completion, fine-tuned</sub></td><td><sub>0.047<br>4.71</sub></td><td><sub>0.092<br>9.78</sub></td><td><sub>0.156<br>16.44</sub></td><td><sub>0.034<br>3.54</sub></td><td><sub>0.069<br>7.54</sub></td><td><sub>0.120<br>13.21</sub></td><td><sub>0.026<br>2.92</sub></td><td><sub>0.054<br>6.23</sub></td><td><sub>0.093<br>10.63</sub></td></tr>
 </table>
 
 ## 📝 Citation

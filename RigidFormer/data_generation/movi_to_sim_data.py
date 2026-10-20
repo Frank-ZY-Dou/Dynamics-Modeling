@@ -308,9 +308,10 @@ def process_sample(sample_dir: Path, dst_root: Path, assets_dir: Path) -> None:
     write_conversion(out_ds, conv)
 
 
-def write_conversion(out_ds: Path, conv: Conversion, verbose: bool = True) -> None:
+def write_conversion(out_ds: Path, conv: Conversion, verbose: bool = True, packed: bool = False) -> None:
     """Write one scene's conversion into the new folder out_ds; the manifest is written last. verbose: frame progress
-    bar and a note for an incomplete scene."""
+    bar and a note for an incomplete scene. packed: the per-frame vertices go into frames.npy (T, sum_i Nv_i, 3) with
+    frames_counts.npy (N,) instead of one file per object and frame (src/data/scene_frames.py reads both)."""
     out_ds.mkdir(parents=True, exist_ok=False)
 
     # mesh faces, physics parameters, anchors, per-frame vertices, trajectory; the manifest last
@@ -322,7 +323,20 @@ def write_conversion(out_ds: Path, conv: Conversion, verbose: bool = True) -> No
     (out_ds / "anchors").mkdir()
     for (i, K), idx in conv.anchors.items():
         np.save(out_ds / "anchors" / f"obj_{i}_anchors_fps{K}.npy", idx)
-    for t in tqdm(range(conv.T), desc=f"[{conv.ds_name}] Frames", unit="frame", leave=False, disable=not verbose):
+    if packed:
+        frames, counts = None, None
+        for t in tqdm(range(conv.T), desc=f"[{conv.ds_name}] Frames", unit="frame", leave=False, disable=not verbose):
+            Vs = conv.frame_vertices(t)
+            if frames is None:
+                counts = np.array([V.shape[0] for V in Vs], dtype=np.int64)
+                frames = np.empty((conv.T, int(counts.sum()), 3), dtype=np.float32)
+            frames[t] = np.concatenate(Vs, axis=0)
+        np.save(out_ds / "frames_counts.npy", counts)
+        with open(out_ds / "frames.npy.part", "wb") as fh:
+            np.save(fh, frames)
+        os.replace(out_ds / "frames.npy.part", out_ds / "frames.npy")
+    for t in tqdm(range(0 if packed else conv.T), desc=f"[{conv.ds_name}] Frames", unit="frame", leave=False,
+                  disable=not verbose):
         frame_dir = out_ds / f"frame_{t:05d}"
         frame_dir.mkdir()
         for i, V in enumerate(conv.frame_vertices(t)):

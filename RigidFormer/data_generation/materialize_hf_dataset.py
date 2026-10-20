@@ -12,6 +12,10 @@ scenes). The output folders are the ones the configs read and the size files nam
 
     python data_generation/materialize_hf_dataset.py --dataset <local copy of the dataset repository> \\
         --out datasets --workers 16
+
+With --packed the per-frame vertices of a scene go into one frames.npy (T, sum_i Nv_i, 3) plus frames_counts.npy instead
+of one file per object and frame: the same values in 2 files per scene instead of ~5,000 (MOVi-B: 3.8 million files),
+which suits network file systems and small local disks. The loader reads both layouts (src/data/scene_frames.py).
 """
 import argparse
 import hashlib
@@ -121,12 +125,12 @@ def metadata(rec):
 
 
 def materialize(job):
-    rec, out_root, assets, source = job
+    rec, out_root, assets, source, packed = job
     conv = prepare_from_metadata(metadata(rec), rec['scene'], Path(assets), source=f"{source} {rec['scene']}",
                                  metadata_sha256=None)
     if not conv.manifest['complete']:
         raise ValueError(f"{rec['scene']}: not a complete scene")
-    write_conversion(Path(out_root) / rec['scene'], conv, verbose=False)
+    write_conversion(Path(out_root) / rec['scene'], conv, verbose=False, packed=packed)
     return rec['scene']
 
 
@@ -136,6 +140,9 @@ def main():
     ap.add_argument('--out', required=True, help='folder for the converted datasets (the datasets/ folder of the code)')
     ap.add_argument('--configs', default='movi_sphere,movi_a,movi_b')
     ap.add_argument('--workers', type=int, default=8)
+    ap.add_argument('--packed', action='store_true',
+                    help='per-frame vertices in one frames.npy per scene instead of one file per object and frame '
+                         '(src/data/scene_frames.py): 2 files per scene instead of ~5,000')
     args = ap.parse_args()
     ds = Path(args.dataset)
     assets = ds / 'assets' / 'kubasic'
@@ -161,7 +168,7 @@ def main():
         n = 0
         with ProcessPoolExecutor(args.workers) as pool:
             for path in files:
-                jobs = [(rec, str(out_root), str(assets), f'{ds.name}/{path.relative_to(ds)}')
+                jobs = [(rec, str(out_root), str(assets), f'{ds.name}/{path.relative_to(ds)}', args.packed)
                         for rec in rows(path, CONVERT_COLUMNS)]
                 for _ in pool.map(materialize, jobs):
                     n += 1

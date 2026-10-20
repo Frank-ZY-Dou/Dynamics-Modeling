@@ -59,6 +59,8 @@ def scene_errors(folder, scene, steps, context, traj):
     for step in steps:
         r = load(folder, scene, step)
         gt = traj[r['frame']].astype(np.float64)
+        if 'object_index' in r:                     # rollouts from partial point clouds: the observed objects
+            gt = gt[:, np.asarray(r['object_index'])]
         if np.abs(r['translation'][:context] - gt[:context, :, :3]).max() > 1e-4:
             raise ValueError(f'{folder}/{scene} step size {step}: the context frames differ from the ground truth')
         for h in HORIZONS:
