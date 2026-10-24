@@ -308,7 +308,8 @@ class Ordering(unittest.TestCase):
         objs = [box("tall", (0.06, 0.06, 0.15), (0.5, -0.1, 0.075)), box("short", (0.06, 0.06, 0.06), (0.5, 0.0, 0.03)),
                 box("mid", (0.06, 0.06, 0.10), (0.5, 0.1, 0.05))]
         sc = table_scene(*objs)
-        res, preds, rep = repaired(sc, HEAD + "  row(tall, short, mid, axis=-y, gap=0.02, order=height)\n")
+        res, preds, rep = repaired(sc, HEAD + "  row(tall, short, mid, axis=-y, gap=0.02, order=height, spacing=even, tol=0.005)\n")
+        self.assertIn("row(tall,short,mid):even", preds)
         self.assertTrue(all(p[1] for p in preds.values()), [n for n, p in preds.items() if not p[1]])
         ys = {n: float(sc[n].center[1]) for n in ("short", "mid", "tall")}
         self.assertGreater(ys["short"], ys["mid"]); self.assertGreater(ys["mid"], ys["tall"])   # shortest at the left (+y)

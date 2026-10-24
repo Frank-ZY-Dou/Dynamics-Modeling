@@ -307,6 +307,41 @@ gate
 Every statement that constrains a pose also becomes a predicate that the final scene is checked
 against, and a line of the certificate.
 
+### What robot scenes ask for
+
+The statements of v1 say what layout requests for robots say: where the arm can reach and grasp,
+how a tidy scene is arranged, which zones stay free, how far a shipped scene may change, what
+stands on what. Each compiles to rows of the same step QP, and to a predicate:
+
+```
+program
+  reach(mug, r=0.60, min=0.45)   facing(mug, axis=-x, tol=20)   approach(mug, length=0.6, width=0.15)
+  clearance(mug, gap=0.03)       keep_out(*, x0=0.25, x1=0.40, y0=0.20, y1=0.40)
+  at(plate, x=0.55, y=0.0)       beside(fork, plate, side=left, gap=0.02, max=0.05)   symmetric(fork, knife, plate, axis=y)
+  yaw(fork, deg=0, axis=long)    parallel(spoon, knife)
+  row(can_1, can_2, can_3, can_4, axis=-y, gap=0.02, order=height)   evenly_spaced(can_1, can_2, can_3, can_4, axis=y)
+  grid(box_1, box_2, box_3, box_4, box_5, box_6, cols=3)   cluster(apple, orange, lime, r=0.12)
+  within(apple, table.top, side=left, frac=0.33)   stack(box_large, box_medium, box_small)   balanced_on(box_medium, box_large)
+  max_move(*, d=0.03)   max_turn(*, deg=10)   left_of(cup, plate, gap=0.10, soft=0.5)
+```
+
+| family | statements | compiles to |
+|---|---|---|
+| the robot | `reach`, `clearance`, `approach`, `facing` | the tangent half-plane of the distance to the base; the contact rows' margin; the free side of a corridor toward the robot; first-order rows on the heading toward a point |
+| positions and headings | `at`, `beside`, `yaw`, `parallel`, `max_turn` | exact rows on centres, footprint projections and headings (`axis=long`: a body's long side) |
+| arrangements | `row` (with `order=height` / `width` / `length` / `mass` sorted by the compiler), `align`, `evenly_spaced`, `grid`, `cluster`, `symmetric`, `between`, `centered`, `offset`, `attach` | exact rows on centres and footprints; the tangent row of each member for `cluster`; first-order rows for an offset in a body's own frame |
+| regions | `within(a, b, side, frac, depth, x0..y1)`, `keep_out` | rectangle rows on the footprint; for `keep_out`, the side that needs the least motion and leaves the body room in its own regions |
+| edits and stacks | `max_move`, `stack`, `balanced_on` | a 16-gon inscribed in the allowed disc; supports that follow the body below, centring rows; the centre of mass inside the base's rectangle in its own frame |
+| preferences | `soft=w` on any of them | the same rows with a slack weight a hundred times smaller: reported, not required |
+
+A program with these statements is first solved alone at the shrunken scale, where the bodies can
+pass each other, before the scale is restored (the relational counterpart of `place`); a program
+the contacts contradict ends penetration-free with the failing statement named. Every linearised
+row is checked against finite differences of its own residual in `tests/test_dsl_v1.py`.
+[`docs/DSL.md`](docs/DSL.md) lists every statement with its rows, its predicate and its defaults,
+and recipes for place settings, shelves, sorting a heap, pick-ready scenes, small fixes,
+palletizing and towers.
+
 ## Getting started
 
 ### Setup
@@ -333,6 +368,7 @@ repository holds a credential, and `.env` files are ignored); Blender 3.6 for th
 | `python -m simready.cli repair <scene> program.json --out <file>` | S4R under the program, full-mesh verification, write-back, certificate | pen 0, every predicate holds and, with a `G2: min_gap` gate, every pair keeps that clearance |
 | `python -m simready.cli settle <scene> --program program.json` | the MuJoCo settle test, thresholds from the program's gate | the scene stays at rest (with a `G2: min_gap` gate, the scene as given is also checked for that clearance) |
 | `python -m simready.cli export <scene> --out <dir>` | meshes, manifest, MJCF and USD for MuJoCo, Genesis and Isaac Sim | the files were written |
+| `python -m simready.cli assets search\|fetch\|info ...` | find SimReady packages, fetch them checked against their bill of materials, print their physics | the packages were found or fetched |
 
 Exit code 1 means the outcome does not hold; exit code 2 means the program or an input is invalid,
 or a geometric query could not be evaluated. A gate value that cannot be parsed, a coordinate that
@@ -394,6 +430,30 @@ switch).
 
 ### Assets
 
+**NVIDIA SimReady packages.** `python -m simready.cli assets search "coffee mug" --max-size 0.2`
+asks [SimReady Central](https://huggingface.co/spaces/nvidia/simready-central) (text and SigLIP2
+image search over the SimReady datasets) and lists packages with their size, mass and license;
+`assets fetch <package> ...` downloads them from
+[nvidia/simready-assets](https://huggingface.co/datasets/nvidia/simready-assets) without their
+textures, checks every file against the package's bill of materials and records the dataset
+commit; `assets info <package>` prints what the gate reads. A layout names packages directly:
+
+```json
+{"table": {"package": "table_metal_stainless_a03", "position": [0.548, 0.0, -0.055], "yaw": 90},
+ "objects": [{"name": "mug", "package": "dishware_mug_coffee_a01", "x": 0.517, "y": 0.110, "z": 0.0, "yaw": 30}]}
+```
+
+From a package the loader reads the mesh, the mass, the centre of mass and the inertia
+(UsdPhysics `MassAPI`), friction, restitution and density (the bound `PhysicsMaterialAPI`), the
+semantic class (`semantics:labels`, e.g. `coffee mug`) and the grasp hint SimReady props carry (the
+mug's handle is on its local -x side, which the scene summary prints for `facing`). An asset
+authored in a pose it cannot rest in (a cutting board on its edge) is re-expressed in its most
+stable resting frame, by the rule `simready/data/asset_rest_orientations.json` applies to RoboLab's
+catalog. The settle test and the export give every such body its own friction and mass (and
+restitution in USD) instead of the defaults, and `balanced_on` uses its centre of mass. Fetched
+files live under `SIMREADY_ASSETS_DIR` and are written as `<SIMREADY_ASSETS_DIR>/...` in layouts,
+certificates and manifests; a repair never downloads.
+
 RoboLab and RoboCasa assets are not redistributed here. The experiments and the video drivers read
 them from their own checkouts: set `ROBOLAB_DIR` to a checkout of
 [NVLabs/RoboLab](https://github.com/NVLabs/RoboLab) (with its LFS assets pulled) and
@@ -447,17 +507,19 @@ simready/            the library
   scene/             Body, Scene, mesh proxies, surface-based seating
   gates/             verify.py (G2)  clearance.py (G2 min_gap)  settle_mujoco.py (G5)
   repair/            upright_s4r.py: S4R upright-on-plane continuation with program rows
-  dsl/               model.py (parser)  schema.py (JSON schema, prompt)  compile.py  text2dsl.py  anthropic_backend.py
+  dsl/               model.py (parser)  schema.py (JSON schema, prompt)  compile.py  statements.py (the v1 statements' rows and predicates)  text2dsl.py  anthropic_backend.py
   io/                usd_io.py (RoboLab USD read/write)  mjcf_io.py (RoboCasa MJCF via MuJoCo)  export.py (meshes, manifest, MJCF, USD for the engines)
+                     nvidia_assets.py (SimReady packages: search, fetch, physics and semantics)
   errors.py          GeometryQueryError: a query that could not be evaluated is an error, not a result
   cli.py             summarize | prompt | check | verify | repair | settle | export
 examples/            run_mujoco.py, run_genesis.py, run_isaac.py: load an export and simulate it
 tests/               regression tests (python -m unittest discover tests)
 skills/              the agent skill that runs the loop
 experiments/         the diagnostics behind docs/DIAGNOSTIC_2026-09-08.md (RoboLab, RoboCasa, settle)
+  dsl_vs_direct/     the program-or-poses comparison: SimReady tasks and rubrics, the isolated CLI calls, the leak test, the tables
 viz/                 Blender rendering on the solver's meshes, video drivers, the agent-run page generator
 results/             tracked result tables and the persisted layouts
-docs/                diagnostic notes, design note, media, the recorded example runs
+docs/                diagnostic notes, design note, the language (DSL.md), the comparison (EVAL_DSL_vs_direct.md), media, the recorded example runs
 ```
 
 ## Citation

@@ -51,6 +51,7 @@ PROGRAM_SCHEMA = {
                     "cols": {"type": "integer", "minimum": 1}, "dx": {"type": "number"}, "dy": {"type": "number"},
                     "frame": {"type": "string", "enum": ["world", "local"]}, "edge": {"type": "string", "enum": ["min", "center", "max"]},
                     "order": {"type": "string", "enum": ["height", "-height", "width", "-width", "length", "-length", "mass", "-mass"]},
+                    "spacing": {"type": "string", "enum": ["even"]},
                     "side": {"type": "string", "enum": ["left", "right", "near", "far", "center"]},
                     "frac": {"type": "number", "minimum": 0, "maximum": 1}, "depth": {"type": "number", "minimum": 0},
                     "x0": {"type": "number"}, "x1": {"type": "number"}, "y0": {"type": "number"}, "y1": {"type": "number"},
@@ -110,7 +111,7 @@ FIELDS = {
     "approach": {"a", "length", "width", "toward", "x", "y", "soft"},
     "facing": {"a", "b", "axis", "tol", "x", "y", "soft"}, "yaw": {"a", "deg", "tol", "mod", "axis", "soft"},
     "parallel": {"a", "b", "mod", "tol", "axis", "soft"},
-    "row": {"members", "axis", "gap", "tol", "order", "soft"}, "align": {"members", "axis", "edge", "tol", "soft"},
+    "row": {"members", "axis", "gap", "tol", "order", "spacing", "soft"}, "align": {"members", "axis", "edge", "tol", "soft"},
     "evenly_spaced": {"members", "axis", "tol", "soft"}, "grid": {"members", "cols", "dx", "dy", "tol", "soft"},
     "cluster": {"members", "r", "soft"}, "symmetric": {"a", "b", "c", "axis", "tol", "soft"},
     "between": {"a", "b", "c", "axis", "gap", "soft"}, "centered": {"a", "b", "tol", "soft"},
@@ -122,9 +123,9 @@ FIELDS = {
 NUMERIC = ("gap", "inset", "r", "margin", "w", "x", "y", "yaw", "min", "max", "length", "width", "tol", "deg", "mod", "cols",
            "dx", "dy", "frac", "depth", "x0", "x1", "y0", "y1", "d", "soft")
 SIGNED = ("x", "y", "yaw", "deg", "dx", "dy", "x0", "x1", "y0", "y1")
-WORD_FIELDS = ("axis", "edge", "side", "toward", "frame", "order")
+WORD_FIELDS = ("axis", "edge", "side", "toward", "frame", "order", "spacing")
 # the order keywords are written in the DSL text of a v1 statement
-KW_ORDER = ("side", "r", "min", "gap", "max", "length", "width", "toward", "axis", "order", "edge", "cols", "dx", "dy", "frame", "deg", "mod",
+KW_ORDER = ("side", "r", "min", "gap", "max", "length", "width", "toward", "axis", "order", "spacing", "edge", "cols", "dx", "dy", "frame", "deg", "mod",
             "tol", "inset", "frac", "depth", "x0", "x1", "y0", "y1", "x", "y", "d", "margin", "soft")
 
 
@@ -436,10 +437,11 @@ LANGUAGE = """Statements (a, b, c are body names; members is a list of names, in
                                          line, so deg and deg+180 are the same); mod 90 or 180 for shapes
                                          that repeat when turned
   parallel(a, b, tol)                    a's and b's long sides parallel (axis=x: their local x axes)
-  row(members, axis, gap, order)         on one line, in the order listed, footprints at least gap apart;
-                                         axis=+y lists them right to left, -y left to right, +x near to far,
-                                         -x far to near; order=height|width|length|mass (- for descending)
-                                         sorts the members first, from the bodies' sizes and masses
+  row(members, axis, gap, order, spacing)  on one line (aligned), in the order listed, footprints at least gap
+                                         apart; axis=+y lists them right to left, -y left to right, +x near to
+                                         far, -x far to near; order=height|width|length|mass (- for descending)
+                                         sorts the members first, from the bodies' sizes and masses;
+                                         spacing=even makes the centre spacing equal, in the row's order
   align(members, axis, edge)             equal x (or y) of the centres, or of the footprints' min or max edge
   evenly_spaced(members, axis)           equal centre spacing along axis
   grid(members, cols, dx, dy)            rows of cols members: member k at (row*dx, col*dy) from the first;
@@ -503,7 +505,9 @@ def program_schema(ops=None) -> dict:
 V1_NOTES = """
 - Table between two objects ("2 cm between the plate and the fork") is a gap between footprints:
   beside, row and keep_out measure footprints; left_of, near, min_distance and reach measure centres.
-- To sort by height, width, length or mass, give row an order; the compiler sorts from the sizes."""
+- To sort by height, width, length or mass, give row an order; the compiler sorts from the sizes.
+  A row already aligns its members; spacing=even spaces them evenly in that order. Do not repeat a
+  row's members in align or evenly_spaced."""
 
 
 def system_prompt(ops=None, language: str | None = None, with_schema: bool = True, reasons: bool = True) -> str:

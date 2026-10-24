@@ -314,6 +314,7 @@ def compile_statement(st, ctx: Ctx):
         pa = 1 - ax
         u = np.zeros(2); u[ax] = sgn
         gap, tol = float(kwd(st, "gap")), float(kwd(st, "tol"))
+        even = kw.get("spacing") == "even"
 
         def gen(state):
             out, sc = [], state.scene
@@ -326,6 +327,12 @@ def compile_statement(st, ctx: Ctx):
                 lo_j, _ = projection(sc.bodies[kj], state.body_scale(kj), u)
                 cur = sgn * float(_c(sc, kj)[ax] - _c(sc, ki)[ax]) + lo_j - hi_i
                 _row(out, {(kj, COL[ax]): sgn, (ki, COL[ax]): -sgn}, gap - cur, INF, w)
+            if even:
+                for a, b, c in zip(ks, ks[1:], ks[2:]):
+                    cur = float(_c(sc, c)[ax] - 2.0 * _c(sc, b)[ax] + _c(sc, a)[ax])
+                    co = {}
+                    _acc(co, (c, COL[ax]), 1.0); _acc(co, (b, COL[ax]), -2.0); _acc(co, (a, COL[ax]), 1.0)
+                    _row(out, co, -tol - cur, tol - cur, w)
             return out
         gens.append(gen)
     elif n == "align":
@@ -789,6 +796,9 @@ def check_v1(st, scene, supports: dict, tol: float, angle_tol: float, bodies_fn)
                     for i in range(len(members) - 1)]
             out.append((label + ":aligned", spread <= float(kwd(st, "tol")) + tol, spread))
             out.append((label + ":order", min(gaps) >= float(kwd(st, "gap")) - tol, min(gaps)))
+            if kw.get("spacing") == "even" and len(members) >= 3:
+                v = float(np.abs(np.diff(P[:, ax], 2)).max())
+                out.append((label + ":even", v <= float(kwd(st, "tol")) + tol, v))
         elif n == "align":
             ax = 0 if kwd(st, "axis") == "x" else 1
             u = np.zeros(2); u[ax] = 1.0

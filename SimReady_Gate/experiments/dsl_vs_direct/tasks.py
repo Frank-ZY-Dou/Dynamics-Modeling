@@ -121,12 +121,9 @@ def drinks_row(n=6):
         return out + R.generic(sc)
     def ref(sc):
         seq = sorted(names, key=lambda n_: float(np.ptp(sc[n_].world_vertices()[:, 2])))          # shortest first, at the left
-        width = [float(np.ptp(sc[n_].verts[:, :2], axis=0).max()) for n_ in seq]
-        pitch = max(0.5 * (width[i] + width[i + 1]) for i in range(len(seq) - 1)) + 0.03
-        ys = [0.5 * pitch * (len(seq) - 1) - pitch * i for i in range(len(seq))]
-        return {"statements": BASE + [_st("row", members=seq, axis="-y", gap=0.025, tol=0.005),
-                                      _st("evenly_spaced", members=seq, axis="y", tol=0.004)] + [
-            _st("at", a=n_, x=0.75, y=round(y, 4), tol=0.004) for n_, y in zip(seq, ys)]}
+        return {"statements": BASE + [_st("row", members=names, axis="-y", gap=0.025, order="height", spacing="even", tol=0.004),
+                                      _st("at", a="*", x=0.75, tol=0.004),
+                                      _st("symmetric", a=seq[0], b=seq[-1], c="table", axis="y", tol=0.004)]}
     return Task("drinks_row", len(objs), objs, {"kind": "heap", "center": (0.55, 0.15), "radius": 0.12}, request, checks, ref)
 
 
@@ -287,6 +284,21 @@ def kitchen_prep():
     return Task("kitchen_prep", len(objs), objs, {"kind": "heap", "center": (0.55, 0.0), "radius": 0.13}, request, checks, ref)
 
 
+def pack(n=10):
+    fruit = group("fruit", ["apple", "orange", "banana", "tangerine"], n)
+    half = {10: 0.14, 14: 0.16}[n]
+    x0, x1, y0, y1 = 0.56 - half, 0.56 + half, -half, half
+    request = (f"Pack all the fruit into the square from x = {x0:.2f} to {x1:.2f} and y = {y0:.2f} to {y1:.2f}: every piece entirely "
+               f"inside that square, resting upright on the table. Nothing interpenetrates.")
+    names = [o[0] for o in fruit]
+
+    def checks(sc, st):
+        return [R.in_region(sc, names, x0, x1, y0, y1, label="square")] + R.generic(sc)
+    ref = {"statements": [_st("no_penetration", margin=0.002), _st("on_support", a="*", b="table"), _st("upright", a="*"),
+                          _st("within", a="*", x0=x0 + 0.002, x1=x1 - 0.002, y0=y0 + 0.002, y1=y1 - 0.002)]}
+    return Task("pack", n, fruit, {"kind": "heap", "center": (0.56, 0.0), "radius": 0.12}, request, checks, ref)
+
+
 def all_tasks():
     return [setting(), drinks_row(6), drinks_row(10), fruit_cans(10), fruit_cans(16), fruit_cans(24), pick_ready(), minimal_fix(),
-            stack(), palletize(4), palletize(6), kitchen_prep()]
+            stack(), palletize(4), palletize(6), kitchen_prep(), pack(10), pack(14)]
