@@ -289,8 +289,11 @@ as long. Background and a side-by-side video:
 ## Data
 
 - `data/kubric_pool/` — the 40-mesh household-object pool used by the
-  Kubric benchmarks. Meshes originate from Google Scanned Objects
-  (CC-BY 4.0); attribution to the original dataset applies.
+  Kubric benchmarks: 39 Google Scanned Objects and the `sphere` primitive,
+  taken from Kubric's processed assets. These Kubric assets are licensed
+  CC BY-SA 4.0 (the `license` field in each `data.json`); the original
+  Google Scanned Objects scans are CC BY 4.0. Attribution and share-alike
+  terms apply.
 - `data/hy3d_processed/` — 300 watertight volume meshes generated with
   [Tencent Hunyuan3D](https://github.com/Tencent-Hunyuan/Hunyuan3D-2) and
   processed for collision use (decimated to ≤1500 faces, per-mesh visual
