@@ -45,17 +45,23 @@ size and the yaw. Satisfy every part of the request; its numbers are in metres a
 """
 
 
-def direct_schema(scene, support):
-    names = [b.name for b in scene.free()]
-    return {"type": "object", "properties": {"poses": {"type": "array", "items": {"type": "object", "properties": {
-        "name": {"type": "string", "enum": names}, "x": {"type": "number"}, "y": {"type": "number"}, "yaw": {"type": "number"},
-        "on": {"type": "string", "enum": [support] + names}}, "required": ["name", "x", "y", "yaw"], "additionalProperties": False}}},
-        "required": ["poses"], "additionalProperties": False}
+# The answer formats carry no scene names, so that a condition's prompt prefix (format and system
+# prompt) is the same for every call and the prompt cache serves it; names are checked on arrival.
+DIRECT_SCHEMA = {"type": "object", "properties": {"poses": {"type": "array", "items": {"type": "object", "properties": {
+    "name": {"type": "string"}, "x": {"type": "number"}, "y": {"type": "number"}, "yaw": {"type": "number"},
+    "on": {"type": "string", "description": "the body this one rests on, when not the support"}},
+    "required": ["name", "x", "y", "yaw"], "additionalProperties": False}}}, "required": ["poses"], "additionalProperties": False}
 
 
 def conditions():
     from simready.dsl.schema import system_prompt, V0_OPS
-    return {"dsl_v1": system_prompt(with_schema=False), "dsl_v0": system_prompt(ops=V0_OPS, with_schema=False), "direct": DIRECT_SYSTEM}
+    return {"dsl_v1": system_prompt(with_schema=False, reasons=False), "dsl_v0": system_prompt(ops=V0_OPS, with_schema=False, reasons=False),
+            "direct": DIRECT_SYSTEM}
+
+
+def schemas():
+    from simready.dsl.schema import op_schema, V0_OPS
+    return {"dsl_v1": op_schema(), "dsl_v0": op_schema(ops=V0_OPS), "direct": DIRECT_SCHEMA}
 
 
 def sanitize(obj, home=str(Path.home())):
@@ -69,17 +75,14 @@ def sanitize(obj, home=str(Path.home())):
 def run_trial(job):
     import tasks as T, scenes as S, pipelines as P, llm
     from simready.cli import load_any
-    from simready.dsl.schema import user_prompt, api_schema, V0_OPS
+    from simready.dsl.schema import user_prompt
     os.environ.setdefault("OMP_NUM_THREADS", "2")
     task = {t.key: t for t in T.all_tasks()}[job["task"]]
     cond, seed = job["condition"], job["seed"]
     layout = S.build(task, seed, Path(job["out"]) / "layouts")
     start = load_any(str(layout))
     system = conditions()[cond]
-    if cond == "direct":
-        schema = direct_schema(start, task.support)
-    else:
-        schema = api_schema(start, ops=V0_OPS if cond == "dsl_v0" else None)
+    schema = schemas()[cond]
     base = user_prompt(task.request, start)
     rounds, prev = [], None
     for r in range(1, job["rounds"] + 1):
@@ -136,6 +139,7 @@ def main():
     (out / "run_meta.json").write_text(json.dumps(meta, indent=1))
     for k, v in conditions().items():
         (out / f"system_{k}.txt").write_text(v)
+        (out / f"schema_{k}.json").write_text(json.dumps(schemas()[k], indent=1))
     print(f"{len(jobs)} trials", flush=True)
     with ProcessPoolExecutor(max_workers=a.workers) as ex:
         futs = {ex.submit(run_trial, j): j for j in jobs}

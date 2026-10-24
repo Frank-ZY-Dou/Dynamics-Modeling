@@ -171,6 +171,7 @@ class Ctx:
 
     def __init__(self, scene, idx, supports, bodies_fn):
         self.scene, self.idx, self.supports, self.bodies = scene, idx, supports, bodies_fn
+        self.regions = {}               # body name -> [(rect, label, weight)] of its within/inside statements with fixed references
 
 
 def _acc(co: dict, key, val: float):
@@ -306,7 +307,7 @@ def compile_statement(st, ctx: Ctx):
             return out
         gens.append(gen)
     elif n == "row":
-        ks = [idx[b] for b in st.args]
+        ks = [idx[b] for b in sorted_members(st, sc0)]
         tok = kwd(st, "axis")
         ax = 0 if tok.endswith("x") else 1
         sgn = -1.0 if tok.startswith("-") else 1.0
@@ -499,7 +500,10 @@ def compile_statement(st, ctx: Ctx):
                 if y1 < INF: options.append(("y", +1.0, y1 - (cy + py0)))
                 if not options:
                     continue
-                col, sense, need = min(options, key=lambda o: o[2])
+                # a side that leaves the body no room inside its own required regions is not a way out
+                own = [r for r, _, wr in ctx.regions.get(sc.bodies[k].name, []) if wr is None]
+                fits = [o for o in options if all(_room(o, rect, (x0, x1, y0, y1), (px0, px1, py0, py1)) for rect in own)]
+                col, sense, need = min(fits or options, key=lambda o: o[2])
                 co = {(k, col): 1.0}
                 if dyn:
                     _acc(co, (kr, col), -1.0)
@@ -623,6 +627,50 @@ def compile_statement(st, ctx: Ctx):
     return all_rows
 
 
+def member_key(b, prop: str) -> float:
+    """A body's height, width (shorter side), length (longer side) or mass (its asset's, else its
+    volume at unit density) for ordering a group."""
+    if prop == "mass":
+        m = (b.meta.get("physics") or {}).get("mass")
+        if m:
+            return float(m)
+        import trimesh
+        try:
+            return float(abs(trimesh.Trimesh(b.verts, b.faces, process=False).volume))
+        except Exception:  # noqa: BLE001
+            return float(np.prod(np.ptp(b.verts, axis=0)))
+    if prop == "height":
+        return float(np.ptp(b.world_vertices()[:, 2]))
+    ext = sorted(np.ptp(b.verts[:, :2], axis=0))
+    return float(ext[0] if prop == "width" else ext[1])
+
+
+def sorted_members(st, scene) -> list:
+    """The members of a group statement, sorted by `order=` when it is given (ties keep the order
+    written; a leading '-' sorts descending)."""
+    order = st.kw.get("order")
+    if not order:
+        return list(st.args)
+    prop, rev = order.lstrip("-"), order.startswith("-")
+    keyed = [(member_key(scene[n], prop), i, n) for i, n in enumerate(st.args)]
+    keyed.sort(key=lambda t: ((-t[0] if rev else t[0]), t[1]))
+    return [n for _, _, n in keyed]
+
+
+def _room(option, rect, region, foot) -> bool:
+    """Whether a keep-out side leaves the footprint (relative extents `foot`) room inside a required
+    rectangle: leaving across x0 means fitting in [rect.x0, x0], and so on."""
+    col, sense, _ = option
+    rx0, rx1, ry0, ry1 = rect
+    x0, x1, y0, y1 = region
+    px0, px1, py0, py1 = foot
+    if col == "x":
+        lo, hi = (rx0, min(rx1, x0)) if sense < 0 else (max(rx0, x1), rx1)
+        return hi - lo >= px1 - px0
+    lo, hi = (ry0, min(ry1, y0)) if sense < 0 else (max(ry0, y1), ry1)
+    return hi - lo >= py1 - py0
+
+
 def approach_obstacles(ctx: Ctx, k: int) -> list:
     """Bodies that can block an approach to body k: everything but k, the surfaces (fixed bodies
     tagged support or ground), k's own support and the bodies resting on k."""
@@ -728,7 +776,8 @@ def check_v1(st, scene, supports: dict, tol: float, angle_tol: float, bodies_fn)
                 label = f"max_turn({nm},deg={tol_s:g})"
             out.append((label, e is not None and e <= tol_s + angle_tol, e))
     elif n in ("row", "align", "evenly_spaced", "grid", "cluster", "stack"):
-        P = np.array([sc[x].center[:2] for x in st.args])
+        members = sorted_members(st, sc) if n == "row" else list(st.args)
+        P = np.array([sc[x].center[:2] for x in members])
         label = f"{n}({','.join(st.args)})"
         if n == "row":
             tok = kwd(st, "axis")
@@ -736,8 +785,8 @@ def check_v1(st, scene, supports: dict, tol: float, angle_tol: float, bodies_fn)
             sgn = -1.0 if tok.startswith("-") else 1.0
             u = np.zeros(2); u[ax] = sgn
             spread = float(np.abs(P[1:, 1 - ax] - P[0, 1 - ax]).max())
-            gaps = [sgn * float(P[i + 1, ax] - P[i, ax]) + projection(sc[st.args[i + 1]], 1.0, u)[0] - projection(sc[st.args[i]], 1.0, u)[1]
-                    for i in range(len(st.args) - 1)]
+            gaps = [sgn * float(P[i + 1, ax] - P[i, ax]) + projection(sc[members[i + 1]], 1.0, u)[0] - projection(sc[members[i]], 1.0, u)[1]
+                    for i in range(len(members) - 1)]
             out.append((label + ":aligned", spread <= float(kwd(st, "tol")) + tol, spread))
             out.append((label + ":order", min(gaps) >= float(kwd(st, "gap")) - tol, min(gaps)))
         elif n == "align":

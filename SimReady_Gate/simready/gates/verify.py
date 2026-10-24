@@ -33,6 +33,34 @@ def _fcl_model(verts: np.ndarray, faces: np.ndarray):
     return fcl.CollisionObject(m, fcl.Transform())
 
 
+from collections import OrderedDict
+
+_BVH_CACHE: OrderedDict = OrderedDict()
+_BVH_CACHE_MAX = 512      # least recently used first out: a continuation step's scaled BVHs are not used again
+
+
+def _fcl_object(body: Body, scale: float):
+    """FCL object of a body at a scale: the BVH is built once on the body's own (scaled) vertices and
+    kept, keyed on the identity of its vertex and face arrays (rebound, never edited in place, in this
+    package; the cache keeps them alive so the identity cannot be recycled); the pose is the
+    object's transform. A continuation step reuses every BVH whose body and scale did not change."""
+    import fcl
+    key = (id(body.verts), id(body.faces), body.verts.shape, body.faces.shape, round(float(scale), 12))
+    hit = _BVH_CACHE.get(key)
+    if hit is not None:
+        _BVH_CACHE.move_to_end(key)
+    else:
+        while len(_BVH_CACHE) >= _BVH_CACHE_MAX:
+            _BVH_CACHE.popitem(last=False)
+        m = fcl.BVHModel()
+        m.beginModel(len(body.verts), len(body.faces))
+        m.addSubModel((scale * body.verts).astype(np.float64), np.asarray(body.faces, dtype=np.int32))
+        m.endModel()
+        hit = (m, body.verts, body.faces)
+        _BVH_CACHE[key] = hit
+    return fcl.CollisionObject(hit[0], fcl.Transform(np.asarray(body.rotation, dtype=np.float64), np.asarray(body.center, dtype=np.float64)))
+
+
 def _score(oi, oj):
     """(signed, normal_or_None, wi, wj): FCL gap when separated, minus the deepest contact depth
     when intersecting; the returned normal is FCL's raw direction (unoriented)."""
@@ -53,11 +81,16 @@ def _score(oi, oj):
     fcl.collide(oi, oj, creq, cres)
     if not cres.is_collision or not cres.contacts:
         return 0.0, None, None, None
-    c = max(cres.contacts, key=lambda c: c.penetration_depth)
+    deepest = max(c.penetration_depth for c in cres.contacts)
+    # the contacts as deep as the deepest stand for one contact: their mean position is the witness
+    # and the normal is that of the one nearest to it (ties by position), so the result does not
+    # depend on the order FCL lists its contacts in, and a symmetric overlap gets no spurious lever
+    tied = [c for c in cres.contacts if c.penetration_depth >= deepest - 1e-9]
+    w = np.mean([np.asarray(c.pos, dtype=np.float64) for c in tied], axis=0)
+    c = min(tied, key=lambda c: (round(float(np.linalg.norm(np.asarray(c.pos) - w)), 9), tuple(np.round(np.asarray(c.pos, dtype=np.float64), 9))))
     nrm = np.asarray(c.normal, dtype=np.float64)
     nrm = nrm / max(np.linalg.norm(nrm), 1e-12)
-    w = np.asarray(c.pos, dtype=np.float64)
-    return -float(c.penetration_depth), nrm, w, w.copy()
+    return -float(deepest), nrm, w, w.copy()
 
 
 def _touch_normal(oi, oj, ci, cj, up, eps=1e-3):
@@ -109,8 +142,10 @@ class PairScore(tuple):
 
 def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | None = None,
                           skip_fixed_pairs: bool = True, with_witness: bool = False,
-                          containment: bool = True, probe_eps: float = 1e-3):
-    """Return a list of (i, j, signed, normal, wit_i, wit_j) over candidate pairs.
+                          containment: bool = True, probe_eps: float = 1e-3, scales: list | None = None):
+    """Return a list of (i, j, signed, normal, wit_i, wit_j) over candidate pairs. `scales` gives
+    each body its own scale about its reference centre (the continuation's free bodies), `scale`
+    one for all.
 
     signed > 0: FCL boundary gap; signed < 0: minus FCL's deepest contact depth (sign exact,
     magnitude not a depth), or minus (gap + inner extent) for a body wholly inside another.
@@ -119,10 +154,19 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
     """
     import fcl
     n = len(bodies)
-    verts = [b.world_vertices(scale) for b in bodies]
+    sc_of = list(scales) if scales is not None else [scale] * n
+    verts = [b.world_vertices(sc_of[k]) for k, b in enumerate(bodies)]
     lo = [v.min(axis=0) for v in verts]
     hi = [v.max(axis=0) for v in verts]
-    objs = [_fcl_model(verts[k], bodies[k].faces) for k in range(n)]
+    built = {}
+
+    class _Objects:
+        """FCL objects built on first use: only bodies in a candidate pair need one."""
+        def __getitem__(self, k):
+            if k not in built:
+                built[k] = _fcl_object(bodies[k], sc_of[k])
+            return built[k]
+    objs = _Objects()
     tmesh = {}
 
     def mesh_of(k):
@@ -171,7 +215,7 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
                     if inner is not None and _contained(verts[inner], mesh_of(outer)):
                         d = cj - ci
                         nrm = d / max(np.linalg.norm(d), 1e-12)
-                        ext = bodies[inner].extent_along(nrm if inner == j else -nrm, scale)
+                        ext = bodies[inner].extent_along(nrm if inner == j else -nrm, sc_of[inner])
                         signed = -(signed + ext)
                         wi = wj = verts[inner].mean(0)
                         inside = True
@@ -230,7 +274,7 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
                 if inner is not None and _contained_touching(verts[inner], mesh_of(outer)):
                     d = cj - ci
                     nrm = d / max(np.linalg.norm(d), 1e-12)
-                    signed = -bodies[inner].extent_along(nrm if inner == j else -nrm, scale)
+                    signed = -bodies[inner].extent_along(nrm if inner == j else -nrm, sc_of[inner])
                     wi = wj = verts[inner].mean(0)
                     inside = True
                 else:

@@ -303,6 +303,21 @@ class Headings(unittest.TestCase):
         self.assertEqual(rep.pen_pairs, 0)                               # the cup made room
 
 
+class Ordering(unittest.TestCase):
+    def test_row_sorts_its_members(self):
+        objs = [box("tall", (0.06, 0.06, 0.15), (0.5, -0.1, 0.075)), box("short", (0.06, 0.06, 0.06), (0.5, 0.0, 0.03)),
+                box("mid", (0.06, 0.06, 0.10), (0.5, 0.1, 0.05))]
+        sc = table_scene(*objs)
+        res, preds, rep = repaired(sc, HEAD + "  row(tall, short, mid, axis=-y, gap=0.02, order=height)\n")
+        self.assertTrue(all(p[1] for p in preds.values()), [n for n, p in preds.items() if not p[1]])
+        ys = {n: float(sc[n].center[1]) for n in ("short", "mid", "tall")}
+        self.assertGreater(ys["short"], ys["mid"]); self.assertGreater(ys["mid"], ys["tall"])   # shortest at the left (+y)
+        sc["tall"].meta["physics"] = {"mass": 0.1}; sc["short"].meta["physics"] = {"mass": 2.0}; sc["mid"].meta["physics"] = {"mass": 1.0}
+        from simready.dsl.statements import sorted_members
+        st = parse_program("program\n  row(tall, short, mid, order=-mass)").statements[0]
+        self.assertEqual(sorted_members(st, sc), ["short", "mid", "tall"])
+
+
 class Seating(unittest.TestCase):
     def test_a_ridge_between_the_corners_is_cleared(self):
         # a carton whose top has a 1.5 mm ridge across its middle, between a box's corner rays
@@ -317,6 +332,25 @@ class Seating(unittest.TestCase):
         self.assertEqual(out["after"].pen_pairs, 0)
         self.assertGreaterEqual(float(sc["top"].world_aabb()[0][2]), float(sc["carton"].world_aabb()[1][2]) - 1e-4)
         self.assertTrue(out["ok"], [p[0] for p in out["hard"] if not p[1]])
+
+
+class Disjunctions(unittest.TestCase):
+    def test_keep_out_side_leaves_room_in_the_bodys_region(self):
+        # a 12 cm wide body held in the band |y| < 0.2 starts in a keep-out square |y| < 0.1: leaving
+        # sideways cannot fit it in the band, so it has to leave along x
+        sc = table_scene(box("mug", (0.12, 0.12, 0.1), (0.42, 0.01, 0.05)))
+        res, preds, rep = repaired(sc, HEAD + "  within(mug, y0=-0.2, y1=0.2)\n  keep_out(mug, x0=0.3, x1=0.5, y0=-0.1, y1=0.1)\n")
+        self.assertTrue(preds["within(mug,region)"][1] and preds["keep_out(mug,region)"][1], [n for n, p in preds.items() if not p[1]])
+
+    def test_stray_vertices_do_not_lift_a_body(self):
+        m = trimesh.creation.box(extents=(0.4, 0.4, 0.05))
+        v = np.vstack([m.vertices, [[0.0, 0.0, 0.5]]])                   # a vertex no triangle uses, high above the top
+        slab = Body.from_mesh("slab", v, m.faces, center=np.array([0.5, 0.0, 0.0]), fixed=True, tags={"support", "fixture"})
+        cube = box("cube", (0.1, 0.1, 0.1), (0.5, 0.0, 0.3))
+        sc = Scene([slab, cube])
+        from simready.dsl.compile import support_height_for
+        top = float(slab.world_vertices()[np.unique(slab.faces)][:, 2].max())
+        self.assertAlmostEqual(support_height_for(sc, cube, slab), top, places=6)    # the top face, not the stray vertex above it
 
 
 class Reports(unittest.TestCase):

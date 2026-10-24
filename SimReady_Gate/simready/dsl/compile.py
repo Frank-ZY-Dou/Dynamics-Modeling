@@ -146,25 +146,67 @@ def support_height_for(scene: Scene, body: Body, support: Body, require_hit: boo
 
 
 def _highest_vertex_under(support: Body, foot: np.ndarray, below: float | None = None):
-    """Highest vertex of the support inside the convex hull of a footprint (and under `below`, the
-    body's centre, when given): with the rays at the footprint's points, the top of a piecewise-flat
-    surface over the footprint, a ridge narrower than the ray grid included. None when no vertex is
-    inside."""
-    if len(foot) < 3:
-        return None
-    v = support.world_vertices()
-    lo, hi = foot.min(0), foot.max(0)
-    m = (v[:, 0] >= lo[0]) & (v[:, 0] <= hi[0]) & (v[:, 1] >= lo[1]) & (v[:, 1] <= hi[1])
-    if below is not None:
-        m &= v[:, 2] < below
-    if not m.any():
+    """Top of the support's surface over the convex hull of a footprint (under `below`, the body's
+    centre, when given), exactly: the highest point of each support triangle over the hull is a
+    vertex of their intersection, i.e. a triangle vertex inside the hull, a hull vertex inside the
+    triangle, or a crossing of their edges. A ridge narrower than any sampling between the
+    footprint's points is included. None when no triangle reaches over the hull."""
+    if len(foot) < 3 or not len(support.faces):
         return None
     try:
-        from scipy.spatial import Delaunay
-        inside = Delaunay(foot).find_simplex(v[m][:, :2]) >= 0
-    except Exception:  # noqa: BLE001  a degenerate footprint: the box test alone
-        inside = np.ones(int(m.sum()), dtype=bool)
-    return float(v[m][inside][:, 2].max()) if inside.any() else None
+        from scipy.spatial import ConvexHull
+        P = foot[ConvexHull(foot).vertices]                      # counter-clockwise
+    except Exception:  # noqa: BLE001  a degenerate footprint
+        return None
+    V = support.world_vertices()
+    T = V[np.asarray(support.faces)]                             # (n, 3, 3)
+    lo, hi = P.min(0), P.max(0)
+    keep = (T[:, :, 0].max(1) >= lo[0]) & (T[:, :, 0].min(1) <= hi[0]) & (T[:, :, 1].max(1) >= lo[1]) & (T[:, :, 1].min(1) <= hi[1])
+    if below is not None:
+        keep &= T[:, :, 2].min(1) < below
+    T = T[keep]
+    if not len(T):
+        return None
+    best = -np.inf
+    E = np.roll(P, -1, axis=0) - P                               # hull edges
+    # triangle vertices inside the hull (left of every edge)
+    pts = T.reshape(-1, 3)
+    cross = E[None, :, 0] * (pts[:, None, 1] - P[None, :, 1]) - E[None, :, 1] * (pts[:, None, 0] - P[None, :, 0])
+    inside = (cross >= -1e-12).all(1)
+    if below is not None:
+        inside &= pts[:, 2] < below
+    if inside.any():
+        best = max(best, float(pts[inside, 2].max()))
+    # hull vertices inside a triangle: the triangle's height there
+    a, b, c = T[:, 0], T[:, 1], T[:, 2]
+    v0, v1 = (b - a)[:, :2], (c - a)[:, :2]
+    den = v0[:, 0] * v1[:, 1] - v0[:, 1] * v1[:, 0]
+    ok = np.abs(den) > 1e-14
+    if ok.any():
+        q = P[None, :, :] - a[ok][:, None, :2]                   # (n, m, 2)
+        u = (q[..., 0] * v1[ok][:, None, 1] - q[..., 1] * v1[ok][:, None, 0]) / den[ok][:, None]
+        v = (v0[ok][:, None, 0] * q[..., 1] - v0[ok][:, None, 1] * q[..., 0]) / den[ok][:, None]
+        hit = (u >= -1e-12) & (v >= -1e-12) & (u + v <= 1 + 1e-12)
+        z = a[ok][:, None, 2] + u * (b - a)[ok][:, None, 2] + v * (c - a)[ok][:, None, 2]
+        if below is not None:
+            hit &= z < below
+        if hit.any():
+            best = max(best, float(z[hit].max()))
+    # crossings of triangle edges with hull edges
+    for s0, s1 in ((a, b), (b, c), (c, a)):
+        d = (s1 - s0)[:, :2]                                     # (n, 2)
+        r = s0[:, None, :2] - P[None, :, :]                      # (n, m, 2)
+        den2 = d[:, None, 0] * E[None, :, 1] - d[:, None, 1] * E[None, :, 0]
+        good = np.abs(den2) > 1e-14
+        t = np.where(good, (E[None, :, 0] * r[..., 1] - E[None, :, 1] * r[..., 0]) / np.where(good, den2, 1.0), -1.0)
+        w = np.where(good, (d[:, None, 0] * r[..., 1] - d[:, None, 1] * r[..., 0]) / np.where(good, den2, 1.0), -1.0)
+        hit = good & (t >= 0) & (t <= 1) & (w >= 0) & (w <= 1)
+        z = s0[:, None, 2] + t * (s1 - s0)[:, None, 2]
+        if below is not None:
+            hit &= z < below
+        if hit.any():
+            best = max(best, float(z[hit].max()))
+    return None if best == -np.inf else best
 
 
 def effective_supports(program: Program, scene: Scene) -> dict:
@@ -228,6 +270,7 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
             dyn_support.append((nm, sup))
     ctx = V1.Ctx(scene, {b.name: k for k, b in enumerate(scene.bodies)}, supports,
                  lambda tok, exclude=(): _bodies(scene, tok, exclude=exclude))
+    ctx.regions = rects_static          # filled below; a disjunction reads a body's own regions when it chooses a side
     for st in program.statements:
         n = st.name
         w = float(st.kw["soft"]) if "soft" in st.kw else None

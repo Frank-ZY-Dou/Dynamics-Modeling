@@ -23,6 +23,7 @@ Text form (one statement per line, '#' comments, `*` = every free body):
       yaw(box, deg=0, mod=90, tol=3)          yaw(board, deg=90, axis=long)       parallel(fork, knife)   # long sides
       # v1: arrangements (members in the order given)
       row(can_1, can_2, can_3, axis=+y, gap=0.02)    align(book_1, book_2, axis=x, edge=max)
+      row(can_1, can_2, can_3, axis=-y, order=height)  # sorted by the compiler: the shortest first along -y
       evenly_spaced(can_1, can_2, can_3, axis=y)     grid(c1, c2, c3, c4, cols=2, dx=0.12, dy=0.12)
       cluster(orange, lime, lemon, r=0.12)           symmetric(fork, knife, plate, axis=y)
       between(cup, plate, bottle, axis=y, gap=0.05)  centered(cup, saucer)
@@ -56,7 +57,7 @@ KEYWORDS = {"no_penetration": {"margin"}, "within": {"inset", "soft"} | REGION_K
             "beside": {"side", "gap", "max", "soft"},
             "approach": {"length", "width", "toward", "x", "y", "soft"},
             "facing": {"axis", "tol", "x", "y", "soft"}, "yaw": {"deg", "tol", "mod", "axis", "soft"}, "parallel": {"mod", "tol", "axis", "soft"},
-            "row": {"axis", "gap", "tol", "soft"}, "align": {"axis", "edge", "tol", "soft"},
+            "row": {"axis", "gap", "tol", "order", "soft"}, "align": {"axis", "edge", "tol", "soft"},
             "evenly_spaced": {"axis", "tol", "soft"}, "grid": {"cols", "dx", "dy", "tol", "soft"}, "cluster": {"r", "soft"},
             "symmetric": {"axis", "tol", "soft"}, "between": {"axis", "gap", "soft"}, "centered": {"tol", "soft"},
             "offset": {"dx", "dy", "frame", "tol", "soft"}, "attach": {"tol", "soft"},
@@ -71,6 +72,7 @@ WORDS = {"axis": {"left_of": {"x", "y"}, "right_of": {"x", "y"}, "in_front_of": 
                   "row": {"x", "y", "+x", "-x", "+y", "-y"}, "facing": {"x", "y", "+x", "-x", "+y", "-y"},
                   "yaw": {"x", "y", "+x", "-x", "+y", "-y", "long", "short"}, "parallel": {"x", "y", "long", "short"}},
          "edge": {"align": {"min", "center", "max"}},
+         "order": {"row": {"height", "-height", "width", "-width", "length", "-length", "mass", "-mass"}},
          "side": {**{op: {"left", "right", "near", "far", "center"} for op in ("within", "keep_out")},
                   "beside": {"left", "right", "near", "far"}},
          "toward": {"approach": {"robot", "near", "far", "left", "right"}},

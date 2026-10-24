@@ -89,9 +89,9 @@ def setting():
         _st("at", a="plate", x=0.55, y=0.0, tol=0.005),
         _st("yaw", a="fork", deg=0, axis="long", tol=3), _st("yaw", a="knife", deg=0, axis="long", tol=3), _st("parallel", a="spoon", b="knife", tol=3),
         _st("symmetric", a="fork", b="knife", c="plate", axis="y", tol=0.005),
-        _st("row", members=["spoon", "knife", "plate", "fork"], axis="+y", gap=0.022),
-        _st("near", a="fork", b="plate", r=0.14), _st("near", a="knife", b="plate", r=0.14),
-        _st("left_of", a="mug", b="fork", gap=0.085), _st("facing", a="mug", axis="-x", tol=10),
+        _st("beside", a="fork", b="plate", side="left", gap=0.025, max=0.045), _st("beside", a="knife", b="plate", side="right", gap=0.025, max=0.045),
+        _st("beside", a="spoon", b="knife", side="right", gap=0.025), _st("beside", a="mug", b="fork", side="left", gap=0.035),
+        _st("facing", a="mug", axis="-x", tol=10),
         _st("in_front_of", a="glass", b="plate", gap=0.12), _st("near", a="glass", b="knife", r=0.14)]}
     return Task("setting", len(objs), objs, {"kind": "heap", "center": (0.55, 0.0), "radius": 0.10}, request, checks, ref)
 

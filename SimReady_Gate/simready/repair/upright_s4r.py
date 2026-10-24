@@ -285,20 +285,9 @@ def _footprint_overlap(scene: Scene, i: int, j: int, nrm: np.ndarray) -> float:
 def _scaled_pairs(st: State, spec: RepairSpec, ds: float):
     """Contact candidates with free bodies scaled by s and fixed bodies at full size."""
     sc = st.scene
-    # Temporarily scale free bodies' vertices for detection (arrays are rebound, not edited).
-    saved = []
-    for k in st.free:
-        b = sc.bodies[k]
-        saved.append(b.verts)
-        b.verts = b.verts * st.scale
-    try:
-        # every pair that can activate within one scale step: the largest margin + ds * (full-scale extents)
-        pre = max([spec.d_hat] + list(spec.margins.values())) + ds * 2.0 * max((b.diag / max(st.scale, 1e-9) for b in sc.free()), default=0.0)
-        pairs = pair_signed_distances(sc.bodies, scale=1.0, prefilter=pre)
-    finally:
-        for k, v in zip(st.free, saved):
-            sc.bodies[k].verts = v
-    return pairs
+    # every pair that can activate within one scale step: the largest margin + ds * (full-scale extents)
+    pre = max([spec.d_hat] + list(spec.margins.values())) + ds * 2.0 * max((b.diag for b in sc.free()), default=0.0)
+    return pair_signed_distances(sc.bodies, prefilter=pre, scales=[1.0 if b.fixed else st.scale for b in sc.bodies])
 
 
 def _solve_qp(n, contact_rows, dsl_rows, elastic_contacts, bounded, cap, yaw_cap, pd_x, q_x, verbose, scale):

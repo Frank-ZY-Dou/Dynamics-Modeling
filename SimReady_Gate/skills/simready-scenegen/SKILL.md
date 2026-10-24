@@ -15,12 +15,24 @@ evaluated (report it; do not retry the same command). `check`, `repair` and `set
 report on stdout; `summarize`, `prompt` and `verify` print text.
 
 ## Procedure
+0. To build a scene from NVIDIA SimReady assets: `python -m simready.cli assets search "coffee mug" --max-size 0.2`
+   lists packages with their size, mass and license; `python -m simready.cli assets fetch <package> ...`
+   downloads them (geometry and physics, checked against each package's bill of materials) into
+   `SIMREADY_ASSETS_DIR`; a layout JSON names them: `{"table": {"package": ..., "position": [x, y, z], "yaw": 90},
+   "objects": [{"name": "mug", "package": "dishware_mug_coffee_a01", "x": ..., "y": ..., "z": ..., "yaw": ...}]}`.
+   The repair, the settle test and the export then use each asset's own friction and mass.
 1. Load or build the scene:
-   `python -m simready.cli summarize <scene.usda|layout.json>` prints the body list with tags and sizes.
+   `python -m simready.cli summarize <scene.usda|layout.json>` prints the body list with tags and sizes
+   (for free bodies also their local size and heading, and the side a SimReady asset's grasp hint is on).
    If loading warns about unresolved assets, or `repair` reports a nonempty `dropped_children`, assets did not resolve;
    stop and report that — a certificate cannot cover a missing container.
 2. Produce the program: run `python -m simready.cli prompt <scene> --request "<text>"`, answer
    the printed prompt with ONE JSON object (schema included in the prompt), save it to `program.json`.
+   State what must hold and let the solver find the poses: footprint gaps with `beside`, lines with
+   `row`, `align`, `evenly_spaced`, `grid`, groups with `cluster`, headings with `yaw`, `parallel`,
+   `facing`, the robot's needs with `reach`, `clearance`, `approach`, zones with `within ... side=` and
+   `keep_out`, small edits with `max_move`, `max_turn`, towers with `stack`. `docs/DSL.md` lists every
+   statement with what it compiles to; `soft=` marks a preference.
 3. Validate and compile: `python -m simready.cli check <scene> program.json` (exit 2 = fix the
    named statement in the JSON: unknown body, self-relation, missing `r`, bad keyword, inset with
    no room). `check` compiles the program exactly as `repair` will.
@@ -38,6 +50,9 @@ report on stdout; `summarize`, `prompt` and `verify` print text.
      in the JSON and rerun step 4.
    - a failed `within`/`inside`: the region is too small for the objects; enlarge the region or
      drop an object. Positions are not statements — do not try to "move" a body by editing.
+   - a failed `keep_out` or `approach` next to a `grid` or a `row`: the side was chosen locally; add
+     `within(..., side=)` for the structure, or a `place` target, so that it starts on the free side.
+   - a failed preference (`failed_preferences`) does not fail the repair; report it.
 6. Certify by settling (G5): `python -m simready.cli settle <scene_repaired.usda> --program program.json`.
    It simulates the repaired scene in MuJoCo with the same proxies a physics engine would use and
    prints `peak_speed`, `peak_disp`, `left_support` (bodies that rolled or tipped off their support)

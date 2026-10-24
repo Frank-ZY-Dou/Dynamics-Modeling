@@ -50,6 +50,7 @@ PROGRAM_SCHEMA = {
                     "tol": {"type": "number", "minimum": 0}, "deg": {"type": "number"}, "mod": {"type": "number", "enum": [90, 180, 360]},
                     "cols": {"type": "integer", "minimum": 1}, "dx": {"type": "number"}, "dy": {"type": "number"},
                     "frame": {"type": "string", "enum": ["world", "local"]}, "edge": {"type": "string", "enum": ["min", "center", "max"]},
+                    "order": {"type": "string", "enum": ["height", "-height", "width", "-width", "length", "-length", "mass", "-mass"]},
                     "side": {"type": "string", "enum": ["left", "right", "near", "far", "center"]},
                     "frac": {"type": "number", "minimum": 0, "maximum": 1}, "depth": {"type": "number", "minimum": 0},
                     "x0": {"type": "number"}, "x1": {"type": "number"}, "y0": {"type": "number"}, "y1": {"type": "number"},
@@ -109,7 +110,7 @@ FIELDS = {
     "approach": {"a", "length", "width", "toward", "x", "y", "soft"},
     "facing": {"a", "b", "axis", "tol", "x", "y", "soft"}, "yaw": {"a", "deg", "tol", "mod", "axis", "soft"},
     "parallel": {"a", "b", "mod", "tol", "axis", "soft"},
-    "row": {"members", "axis", "gap", "tol", "soft"}, "align": {"members", "axis", "edge", "tol", "soft"},
+    "row": {"members", "axis", "gap", "tol", "order", "soft"}, "align": {"members", "axis", "edge", "tol", "soft"},
     "evenly_spaced": {"members", "axis", "tol", "soft"}, "grid": {"members", "cols", "dx", "dy", "tol", "soft"},
     "cluster": {"members", "r", "soft"}, "symmetric": {"a", "b", "c", "axis", "tol", "soft"},
     "between": {"a", "b", "c", "axis", "gap", "soft"}, "centered": {"a", "b", "tol", "soft"},
@@ -121,9 +122,9 @@ FIELDS = {
 NUMERIC = ("gap", "inset", "r", "margin", "w", "x", "y", "yaw", "min", "max", "length", "width", "tol", "deg", "mod", "cols",
            "dx", "dy", "frac", "depth", "x0", "x1", "y0", "y1", "d", "soft")
 SIGNED = ("x", "y", "yaw", "deg", "dx", "dy", "x0", "x1", "y0", "y1")
-WORD_FIELDS = ("axis", "edge", "side", "toward", "frame")
+WORD_FIELDS = ("axis", "edge", "side", "toward", "frame", "order")
 # the order keywords are written in the DSL text of a v1 statement
-KW_ORDER = ("side", "r", "min", "gap", "max", "length", "width", "toward", "axis", "edge", "cols", "dx", "dy", "frame", "deg", "mod",
+KW_ORDER = ("side", "r", "min", "gap", "max", "length", "width", "toward", "axis", "order", "edge", "cols", "dx", "dy", "frame", "deg", "mod",
             "tol", "inset", "frac", "depth", "x0", "x1", "y0", "y1", "x", "y", "d", "margin", "soft")
 
 
@@ -354,6 +355,38 @@ def api_schema(scene=None, ops=None):
     return sch
 
 
+def op_schema(scene=None, ops=None) -> dict:
+    """A program schema with one branch per statement (anyOf on `op`): each branch takes only its
+    statement's fields and requires the ones it cannot do without, so a structured answer cannot
+    give a statement another statement's field. Body names are the scene's when a scene is given."""
+    from .model import REQUIRED, GROUP, WORDS
+    flat = api_schema(scene, ops)
+    props = flat["properties"]["statements"]["items"]["properties"]
+    ops = list(ops or OPS)
+    table = V0_FIELDS if set(ops) <= set(V0_FIELDS) else FIELDS
+    branches = []
+    for op in ops:
+        fields = {"op": {"type": "string", "const": op}}
+        for f in sorted(table[op]):
+            fields[f] = props[f]
+            if f in WORDS and op in WORDS[f]:
+                fields[f] = {"type": "string", "enum": sorted(WORDS[f][op])}     # the words this statement takes
+        if "reason" in props:
+            fields["reason"] = props["reason"]
+        need = ["op"] + (["members"] if op in GROUP else ["a"] if "a" in table[op] and op not in ("no_penetration", "minimize") else [])
+        if op in ("on_support", "inside", "left_of", "right_of", "in_front_of", "behind", "min_distance", "near", "parallel",
+                  "centered", "offset", "attach", "balanced_on", "beside", "symmetric", "between"):
+            need.append("b")
+        if op in ("symmetric", "between"):
+            need.append("c")
+        if op == "place":
+            need += ["x", "y"]
+        need += sorted(k for k in REQUIRED.get(op, set()) if k in table[op])
+        branches.append({"type": "object", "properties": fields, "required": need, "additionalProperties": False})
+    flat["properties"]["statements"]["items"] = {"anyOf": branches}
+    return flat
+
+
 def scene_summary(scene: Scene) -> str:
     """Compact scene description handed to the model."""
     rows = []
@@ -403,9 +436,10 @@ LANGUAGE = """Statements (a, b, c are body names; members is a list of names, in
                                          line, so deg and deg+180 are the same); mod 90 or 180 for shapes
                                          that repeat when turned
   parallel(a, b, tol)                    a's and b's long sides parallel (axis=x: their local x axes)
-  row(members, axis, gap)                on one line, in the order listed, footprints at least gap apart;
+  row(members, axis, gap, order)         on one line, in the order listed, footprints at least gap apart;
                                          axis=+y lists them right to left, -y left to right, +x near to far,
-                                         -x far to near
+                                         -x far to near; order=height|width|length|mass (- for descending)
+                                         sorts the members first, from the bodies' sizes and masses
   align(members, axis, edge)             equal x (or y) of the centres, or of the footprints' min or max edge
   evenly_spaced(members, axis)           equal centre spacing along axis
   grid(members, cols, dx, dy)            rows of cols members: member k at (row*dx, col*dy) from the first;
@@ -466,10 +500,17 @@ def program_schema(ops=None) -> dict:
     return sch
 
 
-def system_prompt(ops=None, language: str | None = None, with_schema: bool = True) -> str:
+V1_NOTES = """
+- Table between two objects ("2 cm between the plate and the fork") is a gap between footprints:
+  beside, row and keep_out measure footprints; left_of, near, min_distance and reach measure centres.
+- To sort by height, width, length or mass, give row an order; the compiler sorts from the sizes."""
+
+
+def system_prompt(ops=None, language: str | None = None, with_schema: bool = True, reasons: bool = True) -> str:
     """The fixed part of the text-to-program prompt: frame, rules, the statements and the schema
     (restricted to `ops` when given, with that statement list). Without `with_schema` the schema is
-    left out, for a caller that hands it to the model as the structured-output format instead."""
+    left out, for a caller that hands it to the model as the structured-output format instead;
+    without `reasons` the justifications are optional (an answer with only the program)."""
     language = language or (LANGUAGE if ops is None else LANGUAGE_V0)
     place_rule = ("Say what must hold and let the solver find the poses. " if ops is None else "")
     return f"""You translate a layout request into a SimReady program: a list of geometric constraints and
@@ -488,8 +529,10 @@ Rules:
   configured shrink scale, where overlaps may remain, and keeps pulling it there as the scale is
   restored; use it for a rough position the request implies and no statement expresses. Do not place
   bodies on top of each other{"; use stack or on_support for that" if ops is None else ""}.
+- Keep within(a=*, b=<support>.top) unless the request lets bodies leave the support.{V1_NOTES if ops is None else ""}
 - Do not invent numbers; when the request is silent, omit the field and it takes a recorded default.
-- Put the words that justify each statement in `reason`. List anything you assumed in `assumptions`.
+- {"Put the words that justify each statement in `reason`. List anything you assumed in `assumptions`." if reasons else
+   "Answer with the statements only: `reason` and `assumptions` are optional, leave them out."}
 
 {language}
 {("" if not with_schema else chr(10) + "Schema:" + chr(10) + json.dumps(program_schema(ops)) + chr(10))}"""
