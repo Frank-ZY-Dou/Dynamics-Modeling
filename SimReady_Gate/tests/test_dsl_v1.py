@@ -76,7 +76,7 @@ class Parsing(unittest.TestCase):
                "yaw(a)", "yaw(a, deg=0, mod=45)", "within(a)", "within(a, t, frac=0.5)", "within(a, t, side=left, frac=1.5)",
                "within(a, t, side=left, frac=0.5, depth=0.1)", "keep_out(a, x0=0.5, x1=0.4)", "symmetric(a, a, b)",
                "left_of(a, b, soft=2)", "reach(a, r=0.3, min=0.5)", "facing(a, b, x=0.1)", "max_turn(a, deg=-1)",
-               "offset(a, b, frame=b)", "approach(a, toward=up)", "within(a, t, side=middle)"]
+               "offset(a, b, frame=b)", "approach(a, toward=up)", "within(a, t, side=middle)", "at(a)", "at(a, z=1)", "beside(a, b)", "beside(a, b, side=up)", "beside(a, b, side=left, gap=0.05, max=0.02)"]
         for s in bad:
             with self.assertRaises(SyntaxError, msg=s):
                 parse_program("program\n  " + s)
@@ -208,7 +208,8 @@ class Repair(unittest.TestCase):
         for extra in ("row(o0, o1, o2, o3, axis=+y, gap=0.02)", "grid(o0, o1, o2, o3, o4, o5, cols=3)", "cluster(o0, o1, o2, r=0.08)",
                       "symmetric(o0, o1, o2, axis=y)  min_distance(o0, o1, r=0.2)", "between(o0, o1, o2, axis=y, gap=0.06)",
                       "keep_out(*, table, x0=0.45, x1=0.65, y0=-0.12, y1=0.12)", "approach(o0, length=0.25, width=0.10)",
-                      "facing(*, axis=+x, tol=10)", "yaw(*, deg=0, mod=90, tol=2)", "reach(*, r=0.6, min=0.45)", "clearance(o0, gap=0.04)",
+                      "facing(*, axis=+x, tol=10)", "yaw(*, deg=0, mod=90, tol=2)", "at(o0, x=0.45, y=0.2, tol=0.005)",
+                      "beside(o0, o1, side=left, gap=0.02, max=0.05)  beside(o2, o1, side=near, gap=0.03)", "reach(*, r=0.6, min=0.45)", "clearance(o0, gap=0.04)",
                       "align(o0, o1, o2, axis=x, edge=max)  evenly_spaced(o3, o4, o5, axis=y)"):
             sc = table_scene(*copy.deepcopy(objs))
             res, preds, rep = repaired(sc, HEAD + "  " + extra + "\n")
@@ -281,6 +282,41 @@ class Repair(unittest.TestCase):
         sc = table_scene(*copy.deepcopy(objs))
         res, preds, _ = repaired(sc, HEAD + "  row(o0, o1, o2, o3, axis=-y, gap=0.02)\n", project_iters=0)
         self.assertFalse(any("solved alone" in n for n in res.notes))
+
+
+class Headings(unittest.TestCase):
+    def test_parallel_is_about_long_sides(self):
+        # a knife authored along its local y and a board along its local x: parallel when the long sides are
+        sc = table_scene(box("knife", (0.03, 0.25, 0.01), (0.45, -0.25, 0.005)), box("board", (0.38, 0.22, 0.02), (0.55, 0.1, 0.01)))
+        res, preds, rep = repaired(sc, HEAD + "  parallel(knife, board, tol=2)\n  yaw(board, deg=90, axis=long, tol=2)\n")
+        self.assertTrue(preds["parallel(knife,board)"][1] and preds["yaw(board,deg=90)"][1])
+        long_k = math.atan2(*(sc["knife"].rotation @ [0.0, 1.0, 0.0])[1::-1])
+        long_b = math.atan2(*(sc["board"].rotation @ [1.0, 0.0, 0.0])[1::-1])
+        self.assertLess(abs(((long_k - long_b) + math.pi / 2) % math.pi - math.pi / 2), math.radians(2.5))
+        self.assertLess(abs((long_b - math.pi / 2 + math.pi / 2) % math.pi - math.pi / 2), math.radians(2.5))
+
+    def test_at_is_a_hard_position(self):
+        sc = table_scene(box("plate", (0.17, 0.17, 0.02), (0.6, 0.2, 0.01)), box("cup", (0.08, 0.08, 0.1), (0.5, 0.0, 0.05)))
+        res, preds, rep = repaired(sc, HEAD + "  at(plate, x=0.5, y=0.0, tol=0.005)\n")
+        self.assertTrue(preds["at(plate)"][1])
+        self.assertLess(float(np.abs(sc["plate"].center[:2] - [0.5, 0.0]).max()), 0.005 + 2e-3)
+        self.assertEqual(rep.pen_pairs, 0)                               # the cup made room
+
+
+class Seating(unittest.TestCase):
+    def test_a_ridge_between_the_corners_is_cleared(self):
+        # a carton whose top has a 1.5 mm ridge across its middle, between a box's corner rays
+        base = trimesh.creation.box(extents=(0.3, 0.3, 0.1))
+        ridge = trimesh.creation.box(extents=(0.004, 0.3, 0.0015)); ridge.apply_translation((0.0, 0.0, 0.05075))
+        m = trimesh.util.concatenate([base, ridge])
+        carton = Body.from_mesh("carton", m.vertices, m.faces, center=np.array([0.5, 0.0, 0.05075]), fixed=False)
+        sc = table_scene(carton, box("top", (0.2, 0.2, 0.1), (0.5, 0.0, 0.16)))
+        from simready.cli import repair_scene
+        prog = parse_program("program\n  no_penetration(*)\n  upright(*)\n  on_support(carton, table)\n  stack(carton, top)\n")
+        out = repair_scene(sc, prog, tail=10)
+        self.assertEqual(out["after"].pen_pairs, 0)
+        self.assertGreaterEqual(float(sc["top"].world_aabb()[0][2]), float(sc["carton"].world_aabb()[1][2]) - 1e-4)
+        self.assertTrue(out["ok"], [p[0] for p in out["hard"] if not p[1]])
 
 
 class Reports(unittest.TestCase):

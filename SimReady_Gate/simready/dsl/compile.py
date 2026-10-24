@@ -27,8 +27,8 @@ from . import statements as V1
 AXIS = {"x": 0, "y": 1}
 REL = {"left_of": ("y", +1), "right_of": ("y", -1), "in_front_of": ("x", +1), "behind": ("x", -1)}
 BINARY = {"on_support", "within", "inside", "min_distance", "near", "parallel", "centered", "offset", "attach",
-          "balanced_on", "keep_out", "facing"} | set(REL)
-V1_ROWS = {"reach", "facing", "yaw", "parallel", "max_turn", "row", "align", "evenly_spaced", "grid", "cluster",
+          "balanced_on", "keep_out", "facing", "beside"} | set(REL)
+V1_ROWS = {"reach", "at", "beside", "facing", "yaw", "parallel", "max_turn", "row", "align", "evenly_spaced", "grid", "cluster",
            "symmetric", "between", "centered", "offset", "attach", "keep_out", "approach", "max_move", "balanced_on", "stack"}
 PLACE_TOL = 0.05     # a placed body that ended within 5 cm of its target counts as placed
 ANGLE_TOL = 0.5      # degrees of slack a heading predicate gets on top of its statement's tolerance
@@ -102,13 +102,27 @@ def _footprint_interval(b: Body, s: float, axis: int):
     return float(p.min()), float(p.max())
 
 
-def _low_footprint(b: Body):
+def _low_footprint(b: Body, interior: int = 6):
     """XY of the body's lowest vertices (within 10 % of its height above the minimum) — where it
-    will touch a surface — used to seat it on the actual support surface."""
+    will touch a surface — used to seat it on the actual support surface, plus a grid of points
+    inside their convex hull: a box's bottom has vertices only at its corners, and a support whose
+    top is not flat (a carton's folds) can rise between them."""
     w = b.world_vertices()
     z = w[:, 2]
     band = z <= z.min() + 0.1 * max(z.max() - z.min(), 1e-6)
-    return w[band][:, :2]
+    pts = w[band][:, :2]
+    if interior and len(pts) >= 3:
+        lo, hi = pts.min(0), pts.max(0)
+        if float(np.min(hi - lo)) > 1e-6:
+            try:
+                from scipy.spatial import Delaunay
+                gx, gy = np.meshgrid(np.linspace(lo[0], hi[0], interior + 2)[1:-1], np.linspace(lo[1], hi[1], interior + 2)[1:-1])
+                grid = np.column_stack([gx.ravel(), gy.ravel()])
+                inside = grid[Delaunay(pts).find_simplex(grid) >= 0]
+                pts = np.vstack([pts, inside])
+            except Exception:  # noqa: BLE001  collinear points: the vertices alone
+                pass
+    return pts
 
 
 def support_height_for(scene: Scene, body: Body, support: Body, require_hit: bool = False):
@@ -118,12 +132,39 @@ def support_height_for(scene: Scene, body: Body, support: Body, require_hit: boo
     vertices and its centre; when none of them meets the support the result is None (the body
     is not over the support at all). Without it, the vertex fallback in `Scene.support_height`
     supplies an initial guess for the repair, which is never used as evidence."""
+    foot = _low_footprint(body)
     if require_hit:
-        pts = np.vstack([_low_footprint(body), body.center[None, :2]])
+        pts = np.vstack([foot, body.center[None, :2]])
         hits = scene._surface_hits(support, pts)
-        return float(hits.max()) if hits.size else None
-    return scene.support_height(support, at=body.center[:2], radius=0.5 * float(np.linalg.norm(body.world_aabb()[1][:2] - body.world_aabb()[0][:2])) + 0.02,
-                                footprint=_low_footprint(body))
+        if not hits.size:
+            return None
+        return max(float(hits.max()), _highest_vertex_under(support, foot, below=float(body.center[2])) or -np.inf)
+    h = scene.support_height(support, at=body.center[:2], radius=0.5 * float(np.linalg.norm(body.world_aabb()[1][:2] - body.world_aabb()[0][:2])) + 0.02,
+                             footprint=foot)
+    hv = _highest_vertex_under(support, foot, below=float(body.center[2]) if body.center[2] > h else None)
+    return max(h, hv) if hv is not None else h
+
+
+def _highest_vertex_under(support: Body, foot: np.ndarray, below: float | None = None):
+    """Highest vertex of the support inside the convex hull of a footprint (and under `below`, the
+    body's centre, when given): with the rays at the footprint's points, the top of a piecewise-flat
+    surface over the footprint, a ridge narrower than the ray grid included. None when no vertex is
+    inside."""
+    if len(foot) < 3:
+        return None
+    v = support.world_vertices()
+    lo, hi = foot.min(0), foot.max(0)
+    m = (v[:, 0] >= lo[0]) & (v[:, 0] <= hi[0]) & (v[:, 1] >= lo[1]) & (v[:, 1] <= hi[1])
+    if below is not None:
+        m &= v[:, 2] < below
+    if not m.any():
+        return None
+    try:
+        from scipy.spatial import Delaunay
+        inside = Delaunay(foot).find_simplex(v[m][:, :2]) >= 0
+    except Exception:  # noqa: BLE001  a degenerate footprint: the box test alone
+        inside = np.ones(int(m.sum()), dtype=bool)
+    return float(v[m][inside][:, 2].max()) if inside.any() else None
 
 
 def effective_supports(program: Program, scene: Scene) -> dict:

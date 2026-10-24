@@ -12,12 +12,14 @@ import json
 import math
 import re
 
+import numpy as np
+
 from ..scene.model import Scene
 from .model import check_statement, GROUP
 
 OPS = ["no_penetration", "place", "fixed", "on_support", "upright", "within", "inside",
        "left_of", "right_of", "in_front_of", "behind", "min_distance", "near", "minimize", "prefer",
-       "reach", "clearance", "approach", "facing", "yaw", "parallel",
+       "reach", "clearance", "approach", "facing", "yaw", "parallel", "at", "beside",
        "row", "align", "evenly_spaced", "grid", "cluster", "symmetric", "between", "centered", "offset", "attach",
        "keep_out", "max_move", "max_turn", "stack", "balanced_on"]
 
@@ -42,8 +44,8 @@ PROGRAM_SCHEMA = {
                     "margin": {"type": "number", "minimum": 0}, "gap": {"type": "number", "minimum": 0},
                     "x": {"type": "number"}, "y": {"type": "number"}, "yaw": {"type": "number"},
                     "inset": {"type": "number", "minimum": 0}, "r": {"type": "number", "minimum": 0},
-                    "axis": {"type": "string", "enum": ["x", "y", "+x", "-x", "+y", "-y"]}, "w": {"type": "number", "minimum": 0},
-                    "min": {"type": "number", "minimum": 0}, "length": {"type": "number", "minimum": 0},
+                    "axis": {"type": "string", "enum": ["x", "y", "+x", "-x", "+y", "-y", "long", "short"]}, "w": {"type": "number", "minimum": 0},
+                    "min": {"type": "number", "minimum": 0}, "max": {"type": "number", "minimum": 0}, "length": {"type": "number", "minimum": 0},
                     "width": {"type": "number", "minimum": 0}, "toward": {"type": "string", "enum": ["robot", "near", "far", "left", "right"]},
                     "tol": {"type": "number", "minimum": 0}, "deg": {"type": "number"}, "mod": {"type": "number", "enum": [90, 180, 360]},
                     "cols": {"type": "integer", "minimum": 1}, "dx": {"type": "number"}, "dy": {"type": "number"},
@@ -68,10 +70,12 @@ DEFAULTS = {"margin": 0.005, "inset": 0.02, "gap": 0.05}
 # defaults of the v1 statements, applied by the compiler when a keyword is omitted (recorded in certificates)
 OP_DEFAULTS = {
     "reach": {"min": 0.0, "x": 0.0, "y": 0.0},
+    "at": {"tol": 0.01},
+    "beside": {"gap": 0.0},
     "approach": {"length": 0.20, "width": 0.10, "toward": "robot", "x": 0.0, "y": 0.0},
     "facing": {"axis": "+x", "tol": 15.0},
-    "yaw": {"tol": 5.0, "mod": 360.0},
-    "parallel": {"mod": 180.0, "tol": 5.0},
+    "yaw": {"tol": 5.0, "mod": 360.0, "axis": "x"},
+    "parallel": {"mod": 180.0, "tol": 5.0, "axis": "long"},
     "row": {"axis": "+y", "gap": 0.01, "tol": 0.01},
     "align": {"axis": "x", "edge": "center", "tol": 0.005},
     "evenly_spaced": {"axis": "y", "tol": 0.005},
@@ -100,10 +104,11 @@ FIELDS = {
     "left_of": {"a", "b", "gap", "axis", "soft"}, "right_of": {"a", "b", "gap", "axis", "soft"},
     "in_front_of": {"a", "b", "gap", "axis", "soft"}, "behind": {"a", "b", "gap", "axis", "soft"},
     "min_distance": {"a", "b", "r", "soft"}, "near": {"a", "b", "r", "soft"}, "minimize": {"a"}, "prefer": {"a", "w"},
-    "reach": {"a", "r", "min", "x", "y", "soft"}, "clearance": {"a", "gap"},
+    "reach": {"a", "r", "min", "x", "y", "soft"}, "clearance": {"a", "gap"}, "at": {"a", "x", "y", "tol", "soft"},
+    "beside": {"a", "b", "side", "gap", "max", "soft"},
     "approach": {"a", "length", "width", "toward", "x", "y", "soft"},
-    "facing": {"a", "b", "axis", "tol", "x", "y", "soft"}, "yaw": {"a", "deg", "tol", "mod", "soft"},
-    "parallel": {"a", "b", "mod", "tol", "soft"},
+    "facing": {"a", "b", "axis", "tol", "x", "y", "soft"}, "yaw": {"a", "deg", "tol", "mod", "axis", "soft"},
+    "parallel": {"a", "b", "mod", "tol", "axis", "soft"},
     "row": {"members", "axis", "gap", "tol", "soft"}, "align": {"members", "axis", "edge", "tol", "soft"},
     "evenly_spaced": {"members", "axis", "tol", "soft"}, "grid": {"members", "cols", "dx", "dy", "tol", "soft"},
     "cluster": {"members", "r", "soft"}, "symmetric": {"a", "b", "c", "axis", "tol", "soft"},
@@ -113,13 +118,13 @@ FIELDS = {
     "max_move": {"a", "d", "soft"}, "max_turn": {"a", "deg", "soft"}, "stack": {"members", "tol"},
     "balanced_on": {"a", "b", "margin", "soft"},
 }
-NUMERIC = ("gap", "inset", "r", "margin", "w", "x", "y", "yaw", "min", "length", "width", "tol", "deg", "mod", "cols",
+NUMERIC = ("gap", "inset", "r", "margin", "w", "x", "y", "yaw", "min", "max", "length", "width", "tol", "deg", "mod", "cols",
            "dx", "dy", "frac", "depth", "x0", "x1", "y0", "y1", "d", "soft")
 SIGNED = ("x", "y", "yaw", "deg", "dx", "dy", "x0", "x1", "y0", "y1")
 WORD_FIELDS = ("axis", "edge", "side", "toward", "frame")
 # the order keywords are written in the DSL text of a v1 statement
-KW_ORDER = ("r", "min", "gap", "length", "width", "toward", "axis", "edge", "cols", "dx", "dy", "frame", "deg", "mod",
-            "tol", "inset", "side", "frac", "depth", "x0", "x1", "y0", "y1", "x", "y", "d", "margin", "soft")
+KW_ORDER = ("side", "r", "min", "gap", "max", "length", "width", "toward", "axis", "edge", "cols", "dx", "dy", "frame", "deg", "mod",
+            "tol", "inset", "frac", "depth", "x0", "x1", "y0", "y1", "x", "y", "d", "margin", "soft")
 
 
 def _fmt(v):
@@ -303,8 +308,8 @@ def _check_shape(obj):
         for k in NUMERIC:
             if k in st:
                 _number(st[k], f"statement {i} ({op}): '{k}'", signed=k in SIGNED)
-        if "axis" in st and st["axis"] not in ("x", "y", "+x", "-x", "+y", "-y"):
-            raise ProgramError(f"statement {i}: axis must be one of x, y, +x, -x, +y, -y")
+        if "axis" in st and st["axis"] not in ("x", "y", "+x", "-x", "+y", "-y", "long", "short"):
+            raise ProgramError(f"statement {i}: axis must be one of x, y, +x, -x, +y, -y, long, short")
     g = obj.get("gate")
     if g is not None:
         if not isinstance(g, dict):
@@ -315,12 +320,12 @@ def _check_shape(obj):
             _number(v, f"gate.{k}")
 
 
-def api_schema(scene=None):
+def api_schema(scene=None, ops=None):
     """PROGRAM_SCHEMA in the subset the structured-outputs API accepts: no $schema, no numeric
     ranges (checked by _check_shape instead), additionalProperties false on every object, and,
-    with a scene, body names constrained to the scene's names plus '*'."""
-    import copy
-    sch = copy.deepcopy(PROGRAM_SCHEMA)
+    with a scene, body names constrained to the scene's names plus '*'; with `ops`, restricted to
+    those statements (program_schema)."""
+    sch = program_schema(ops)
     sch.pop("$schema", None)
 
     def walk(node):
@@ -336,13 +341,16 @@ def api_schema(scene=None):
                 walk(v)
     walk(sch)
     stp = sch["properties"]["statements"]["items"]["properties"]
-    stp["mod"] = {"type": "number"}                     # numeric enums are checked by _check_shape
+    if "mod" in stp:
+        stp["mod"] = {"type": "number"}                 # numeric enums are checked by _check_shape
     if scene is not None:
         names = list(scene.names())
         stp["a"] = {"type": "string", "enum": names + ["*"]}
         stp["b"] = {"type": "string", "enum": names + [n + ".top" for n in names]}
-        stp["c"] = {"type": "string", "enum": names}
-        stp["members"] = {"type": "array", "items": {"type": "string", "enum": names}}
+        if "c" in stp:
+            stp["c"] = {"type": "string", "enum": names}
+        if "members" in stp:
+            stp["members"] = {"type": "array", "items": {"type": "string", "enum": names}}
     return sch
 
 
@@ -358,6 +366,11 @@ def scene_summary(scene: Scene) -> str:
                 f"size {ext[0]:.2f}x{ext[1]:.2f}x{ext[2]:.2f} m; at ({b.center[0]:.2f}, {b.center[1]:.2f}, {b.center[2]:.2f})")
         if b.fixed and "support" in b.tags:
             line += f"; top rect x[{lo[0]:.2f}, {hi[0]:.2f}] y[{lo[1]:.2f}, {hi[1]:.2f}] at z={scene.support_height(b):.3f}"
+        if not b.fixed:
+            # the body's own axes: what yaw, facing and parallel are about
+            loc = np.ptp(b.verts, axis=0)
+            yaw = math.degrees(math.atan2(b.rotation[1, 0], b.rotation[0, 0]))
+            line += f"; local size {loc[0]:.2f}x{loc[1]:.2f}x{loc[2]:.2f} m; heading {yaw:.0f} deg"
         if b.meta.get("grasp_axis"):
             line += f"; handle/grasp side {b.meta['grasp_axis']}"
         rows.append(line)
@@ -374,8 +387,11 @@ LANGUAGE = """Statements (a, b, c are body names; members is a list of names, in
                                          they define it)
   inside(a, b)                           a inside container b
   keep_out(a, b, gap)                    a's footprint stays outside a region (region fields as for within)
+  beside(a, b, side, gap, max)           a's footprint on b's side (left|right|near|far) with between gap and
+                                         max of table between the two footprints (max optional)
   left_of | right_of | in_front_of | behind (a, b, gap)    relations of the centres, gap between centres
   near(a, b, r) | min_distance(a, b, r)  centre distance at most / at least r
+  at(a, x, y, tol)                       a's centre at x and/or y, within tol (default 0.01)
   reach(a, r, min)                       a's centre within r of the robot base (and at least min from it);
                                          x, y move the base
   clearance(a, gap)                      every other body at least gap from a's surface (room for a gripper)
@@ -383,8 +399,10 @@ LANGUAGE = """Statements (a, b, c are body names; members is a list of names, in
                                          robot (toward=robot, default) or toward near|far|left|right
   facing(a, b, axis, tol)                a's local axis (+x, -x, +y, -y: its front, handle or label side)
                                          points at b, or at x, y, or by default at the robot, within tol degrees
-  yaw(a, deg, tol, mod)                  a's heading is deg; mod 90 or 180 for shapes that repeat when turned
-  parallel(a, b, mod, tol)               a and b have the same heading (mod as for yaw, default 180)
+  yaw(a, deg, tol, mod, axis)            the heading of a's local +x is deg (axis=long: of its long side, a
+                                         line, so deg and deg+180 are the same); mod 90 or 180 for shapes
+                                         that repeat when turned
+  parallel(a, b, tol)                    a's and b's long sides parallel (axis=x: their local x axes)
   row(members, axis, gap)                on one line, in the order listed, footprints at least gap apart;
                                          axis=+y lists them right to left, -y left to right, +x near to far,
                                          -x far to near
@@ -408,7 +426,52 @@ Any statement other than no_penetration, fixed, on_support, upright, place, clea
 soft (0 to 1]: a preference with that weight, which may yield; it is reported but not required."""
 
 
-def prompt_for(request: str, scene: Scene) -> str:
+V0_OPS = ["no_penetration", "place", "fixed", "on_support", "upright", "within", "inside", "left_of", "right_of",
+          "in_front_of", "behind", "min_distance", "near", "minimize", "prefer"]
+LANGUAGE_V0 = """Statements (a, b are body names):
+  no_penetration(margin)                 nothing interpenetrates; margin is the clearance the solver keeps
+  fixed(a)                               a does not move
+  on_support(a, b)   upright(a)          a rests on b; a keeps its resting orientation (no roll or pitch)
+  within(a, b, inset)                    a's footprint inside b (b.top: b's top rectangle), inset from its edge
+  inside(a, b)                           a inside container b
+  beside(a, b, side, gap, max)           a's footprint on b's side (left|right|near|far) with between gap and
+                                         max of table between the two footprints (max optional)
+  left_of | right_of | in_front_of | behind (a, b, gap)    relations of the centres, gap between centres
+  near(a, b, r) | min_distance(a, b, r)  centre distance at most / at least r
+  place(a, x, y, yaw)                    a target pose in the shrunken scale-space (a soft pull)
+  prefer(a, w)                           a pull toward a's present pose
+  minimize                               minimum displacement"""
+
+
+# the fields each statement took before v1 (no regions, no preferences)
+V0_FIELDS = {"no_penetration": {"a", "margin"}, "fixed": {"a"}, "on_support": {"a", "b"}, "upright": {"a"},
+             "within": {"a", "b", "inset"}, "inside": {"a", "b", "inset"}, "place": {"a", "x", "y", "yaw", "w"},
+             "left_of": {"a", "b", "gap", "axis"}, "right_of": {"a", "b", "gap", "axis"}, "in_front_of": {"a", "b", "gap", "axis"},
+             "behind": {"a", "b", "gap", "axis"}, "min_distance": {"a", "b", "r"}, "near": {"a", "b", "r"}, "minimize": {"a"},
+             "prefer": {"a", "w"}}
+
+
+def program_schema(ops=None) -> dict:
+    """PROGRAM_SCHEMA restricted to some statements (their ops and the fields they take; the v0
+    statements with their v0 fields)."""
+    import copy
+    sch = copy.deepcopy(PROGRAM_SCHEMA)
+    if ops is None:
+        return sch
+    item = sch["properties"]["statements"]["items"]
+    item["properties"]["op"]["enum"] = list(ops)
+    table = V0_FIELDS if set(ops) <= set(V0_FIELDS) else FIELDS
+    keep = {"op", "reason"}.union(*(table[o] for o in ops))
+    item["properties"] = {k: v for k, v in item["properties"].items() if k in keep}
+    return sch
+
+
+def system_prompt(ops=None, language: str | None = None, with_schema: bool = True) -> str:
+    """The fixed part of the text-to-program prompt: frame, rules, the statements and the schema
+    (restricted to `ops` when given, with that statement list). Without `with_schema` the schema is
+    left out, for a caller that hands it to the model as the structured-output format instead."""
+    language = language or (LANGUAGE if ops is None else LANGUAGE_V0)
+    place_rule = ("Say what must hold and let the solver find the poses. " if ops is None else "")
     return f"""You translate a layout request into a SimReady program: a list of geometric constraints and
 objectives over named bodies. Output ONLY a JSON object matching the schema below.
 
@@ -421,20 +484,24 @@ Rules:
 - Every free body that should rest on a surface gets on_support(a=<body>, b=<support>) and, if it
   should keep its resting orientation (an asset that rests lying flat, such as a remote control,
   stays flat), upright(a=<body>).
-- Say what must hold and let the solver find the poses. place(a, x, y, yaw) puts a body's reference
-  centre at (x, y) on its support at the configured shrink scale, where overlaps may remain, and keeps
-  pulling it there as the scale is restored; use it for a rough position the request implies and no
-  statement expresses. Do not place bodies on top of each other; use stack or on_support for that.
+- {place_rule}place(a, x, y, yaw) puts a body's reference centre at (x, y) on its support at the
+  configured shrink scale, where overlaps may remain, and keeps pulling it there as the scale is
+  restored; use it for a rough position the request implies and no statement expresses. Do not place
+  bodies on top of each other{"; use stack or on_support for that" if ops is None else ""}.
 - Do not invent numbers; when the request is silent, omit the field and it takes a recorded default.
 - Put the words that justify each statement in `reason`. List anything you assumed in `assumptions`.
 
-{LANGUAGE}
+{language}
+{("" if not with_schema else chr(10) + "Schema:" + chr(10) + json.dumps(program_schema(ops)) + chr(10))}"""
 
-Scene:
+
+def user_prompt(request: str, scene: Scene) -> str:
+    return f"""Scene:
 {scene_summary(scene)}
 
 Request: {request}
-
-Schema:
-{json.dumps(PROGRAM_SCHEMA)}
 """
+
+
+def prompt_for(request: str, scene: Scene) -> str:
+    return system_prompt() + "\n" + user_prompt(request, scene)

@@ -56,7 +56,7 @@ def load_any(path: str) -> Scene:
         meta = {"path": path}
         tb = L.get("table")
         if tb and tb.get("package"):                       # a SimReady package as the support
-            bodies.append(body_from_layout_package("table", tb, tb.get("position", (0, 0, 0)), tb.get("yaw", 0.0), fixed=True,
+            bodies.append(body_from_layout_package(tb.get("name", "table"), tb, tb.get("position", (0, 0, 0)), tb.get("yaw", 0.0), fixed=True,
                                                    tags={"support", "fixture"}))
         elif tb and tb.get("usd_path"):
             if not os.path.exists(tb["usd_path"]):
@@ -268,26 +268,26 @@ def cmd_verify(a):
     sys.exit(0 if rep.pen_pairs == 0 else 1)
 
 
-def cmd_repair(a):
-    sc = load_any(a.scene)
-    try:
-        prog, dsl, notes, raw = load_program(a.program, sc)
-        spec = compile_program(prog, sc, s_min=a.s_min, ds_max=a.ds_max, tail_iters=a.tail)
-        before = verify_scene(sc)          # after the program has fixed its bodies: the same pairs as `after`
-    except INPUT_ERRORS as e:
-        fail_input(e)
+def repair_scene(sc: Scene, prog, s_min: float = 0.05, ds_max: float = 0.05, tail: int = 30, proxy_faces: int = 2000,
+                 verbose: bool = False, **spec_overrides) -> dict:
+    """The repair `cmd_repair` runs, on a loaded scene and a parsed program (the scene is changed in
+    place): compile, S4R on decimated proxies and support slabs, re-seat, verify on the full meshes,
+    polish when the proxies left a residual, check every predicate. Returns the parts of the
+    report; raises the INPUT_ERRORS a bad program or input gives."""
+    spec = compile_program(prog, sc, s_min=s_min, ds_max=ds_max, tail_iters=tail, **spec_overrides)
+    before = verify_scene(sc)          # after the program has fixed its bodies: the same pairs as `after`
     t0 = time.time()
     tops = {sup: min(h for b, h in spec.supports.items() if spec.support_of.get(b) == sup) for sup in set(spec.support_of.values())}
     solver_notes = []
     xy_start = {b.name: b.center[:2].copy() for b in sc.free()}
     with quiet_stdout():
-        with MeshProxy(sc, faces=a.proxy_faces, slab_tops=tops):   # repair on decimated meshes + support slabs; verify on full meshes
-            res = repair_upright(sc, spec, verbose=a.verbose)
+        with MeshProxy(sc, faces=proxy_faces, slab_tops=tops):   # repair on decimated meshes + support slabs; verify on full meshes
+            res = repair_upright(sc, spec, verbose=verbose)
         solver_notes += res.notes
         reseat_on_supports(sc, spec)
         after = verify_scene(sc)
         if after.pen_pairs > 0:                       # proxy residuals: polish on the full meshes
-            res2 = polish_full_mesh(sc, spec, iters=a.tail, verbose=a.verbose)
+            res2 = polish_full_mesh(sc, spec, iters=tail, verbose=verbose)
             reseat_on_supports(sc, spec); res.steps += res2.steps; solver_notes += res2.notes
             after = verify_scene(sc)
     preds = check_predicates(prog, sc)
@@ -299,6 +299,19 @@ def cmd_repair(a):
     if "min_gap" in prog.gate.get("G2", {}):
         clearance = check_clearance(sc, prog.gate["G2"]["min_gap"][1], spec.support_of)
         ok = ok and clearance["pass"]
+    return {"ok": ok, "spec": spec, "res": res, "before": before, "after": after, "hard": hard, "prefs": prefs,
+            "rmsd_xy": rmsd_xy, "clearance": clearance, "solver_notes": solver_notes, "time_s": time.time() - t0}
+
+
+def cmd_repair(a):
+    sc = load_any(a.scene)
+    try:
+        prog, dsl, notes, raw = load_program(a.program, sc)
+        out = repair_scene(sc, prog, s_min=a.s_min, ds_max=a.ds_max, tail=a.tail, proxy_faces=a.proxy_faces, verbose=a.verbose)
+    except INPUT_ERRORS as e:
+        fail_input(e)
+    ok, res, before, after, hard, prefs = out["ok"], out["res"], out["before"], out["after"], out["hard"], out["prefs"]
+    rmsd_xy, clearance, solver_notes = out["rmsd_xy"], out["clearance"], out["solver_notes"]
     dropped = list(sc.meta.get("dropped", []))
     if dropped:
         ok = False
@@ -306,7 +319,7 @@ def cmd_repair(a):
     params = {"s_min": a.s_min, "ds_max": a.ds_max, "tail_iters": a.tail, "proxy_faces": a.proxy_faces}
     report = {"ok": ok, "scene": a.scene, "program": a.program, "pen_before": before.pen_pairs, "pen_after": after.pen_pairs,
               "min_score_after": after.min_signed, "contained_after": after.contained, "floating_after": after.floating,
-              "rmsd_xy": rmsd_xy, "steps": res.steps, "time_s": round(time.time() - t0, 2),
+              "rmsd_xy": rmsd_xy, "steps": res.steps, "time_s": round(out["time_s"], 2),
               "predicates": [(n, bool(okp), None if v is None else float(v)) for n, okp, v in hard],
               "failed_predicates": [n for n, okp, _ in hard if not okp],
               "preferences": [(n, bool(okp), None if v is None else float(v)) for n, okp, v in prefs],

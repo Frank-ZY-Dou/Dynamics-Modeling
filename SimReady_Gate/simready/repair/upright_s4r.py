@@ -594,17 +594,57 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
     return RepairResult(scene, pen_before, pen_after, steps, disp, rmsd, trace, notes, relaxed, complete, last_accepted, termination)
 
 
+LIFT_MAX = 3e-3        # a body re-seated into its support's surface is raised at most this far to clear it
+
+
+def _lift_clear(scene: Scene, b: Body, sup: Body) -> float:
+    """Raise b until it no longer penetrates its support (bisection on the height, at most LIFT_MAX):
+    the seat height comes from rays and vertices under b's footprint, and a ridge of the support
+    between them can still reach a fraction of a millimetre into b. Returns the lift applied."""
+    from ..gates.verify import PEN_EPS
+
+    def penetrates():
+        pairs = pair_signed_distances([sup, b], prefilter=1e-3, skip_fixed_pairs=False, containment=False)
+        return bool(pairs) and float(pairs[0][2]) < -PEN_EPS
+    if not penetrates():
+        return 0.0
+    c0 = b.center.copy()
+    b.center = c0 + np.array([0.0, 0.0, LIFT_MAX])
+    if penetrates():                      # not a seating residual: leave it to the verifier
+        b.center = c0
+        return 0.0
+    lo, hi = 0.0, LIFT_MAX
+    for _ in range(14):
+        mid = 0.5 * (lo + hi)
+        b.center = c0 + np.array([0.0, 0.0, mid])
+        if penetrates():
+            lo = mid
+        else:
+            hi = mid
+    b.center = c0 + np.array([0.0, 0.0, hi])
+    return hi
+
+
 def reseat_on_supports(scene: Scene, spec: RepairSpec) -> None:
     """Re-seat every free body on its declared support using its current (full-resolution)
-    mesh and the support height under its final position; call after repair ran on proxies."""
-    for b in scene.free():
+    mesh and the support height under its final position; call after repair ran on proxies.
+    Supports are seated before what rests on them, and a body left a fraction of a millimetre
+    inside its support's surface is raised clear of it (_lift_clear)."""
+    from ..dsl.compile import support_height_for
+
+    def depth(name, seen=()):
+        sup = spec.support_of.get(name)
+        if sup is None or sup in seen or scene[sup].fixed:
+            return 0
+        return 1 + depth(sup, seen + (name,))
+    for b in sorted(scene.free(), key=lambda bb: depth(bb.name)):
         sup = spec.support_of.get(b.name)
         if sup is None:
             continue
-        from ..dsl.compile import support_height_for
         h0 = support_height_for(scene, b, scene[sup])
-        spec.supports[b.name] = h0
         b.center = np.array([b.center[0], b.center[1], h0 + b.support_offset(scene.up)])
+        h0 += _lift_clear(scene, b, scene[sup])
+        spec.supports[b.name] = h0
 
 
 def polish_full_mesh(scene: Scene, spec: RepairSpec, iters: int = 10, verbose: bool = False, on_step=None):

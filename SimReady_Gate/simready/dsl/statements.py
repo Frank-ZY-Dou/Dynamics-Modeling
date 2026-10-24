@@ -32,6 +32,7 @@ INF = np.inf
 AXIS_VEC = {"x": (1.0, 0.0, 0.0), "+x": (1.0, 0.0, 0.0), "-x": (-1.0, 0.0, 0.0),
             "y": (0.0, 1.0, 0.0), "+y": (0.0, 1.0, 0.0), "-y": (0.0, -1.0, 0.0)}
 COL = ("x", "y")
+SIDE_VEC = {"left": (0.0, 1.0), "right": (0.0, -1.0), "far": (1.0, 0.0), "near": (-1.0, 0.0)}
 CORRIDOR_MARGIN = 0.005    # a body counts as out of an approach corridor 5 mm beyond its edge
 POLYGON = 16               # sides of the polygon that stands in for max_move's disc
 
@@ -62,6 +63,17 @@ def heading(R: np.ndarray, axis=(1.0, 0.0, 0.0)) -> float | None:
     if math.hypot(w[0], w[1]) < 1e-6:
         return None
     return math.atan2(w[1], w[0])
+
+
+def body_axis(b, tok: str):
+    """(local axis vector, is_line) for an axis word: 'x', '+x', '-y', ... or 'long' / 'short', the
+    longer / shorter horizontal local axis of the body, which is a line (a turn by 180 degrees maps
+    it onto itself)."""
+    if tok in ("long", "short"):
+        ext = np.ptp(b.verts, axis=0)
+        longer_x = ext[0] >= ext[1]
+        return ((1.0, 0.0, 0.0) if (longer_x == (tok == "long")) else (0.0, 1.0, 0.0)), True
+    return AXIS_VEC[tok], False
 
 
 def projection(b, s: float, u) -> tuple[float, float]:
@@ -196,6 +208,40 @@ def compile_statement(st, ctx: Ctx):
                     _row(out, dict(co), rmin - rho, INF, w)
             return out
         gens.append(gen)
+    elif n == "at":
+        ks = [idx[b] for b in ctx.bodies(st.args[0])]
+        tol = float(kwd(st, "tol"))
+        target = {0: kw.get("x"), 1: kw.get("y")}
+
+        def gen(state):
+            out = []
+            for k in ks:
+                c = _c(state.scene, k)
+                for ax in (0, 1):
+                    if target[ax] is not None:
+                        cur = float(c[ax]) - float(target[ax])
+                        _row(out, {(k, COL[ax]): 1.0}, -tol - cur, tol - cur, w)
+            return out
+        gens.append(gen)
+    elif n == "beside":
+        ka, kb = idx[st.args[0]], idx[st.args[1]]
+        u = np.array(SIDE_VEC[kw["side"]])
+        gap = float(kwd(st, "gap"))
+        top = float(kw["max"]) if "max" in kw else INF
+
+        def gen(state):
+            sc = state.scene
+            lo_a, _ = projection(sc.bodies[ka], state.body_scale(ka), u)
+            _, hi_b = projection(sc.bodies[kb], state.body_scale(kb), u)
+            g = float((_c(sc, ka) - _c(sc, kb)) @ u) + lo_a - hi_b          # table between the footprints along u
+            co = {}
+            for col in (0, 1):
+                if abs(u[col]) > 0:
+                    _acc(co, (ka, COL[col]), float(u[col])); _acc(co, (kb, COL[col]), -float(u[col]))
+            out = []
+            _row(out, co, gap - g, top - g, w)
+            return out
+        gens.append(gen)
     elif n == "facing":
         ks = [idx[b] for b in ctx.bodies(st.args[0], exclude=st.args[1:2])]
         axis = AXIS_VEC[kwd(st, "axis")]
@@ -230,17 +276,21 @@ def compile_statement(st, ctx: Ctx):
             m, tol = math.radians(float(kwd(st, "mod"))), math.radians(float(kwd(st, "tol")))
         kb = idx[st.args[1]] if n == "parallel" else None
         target = math.radians(float(kw["deg"])) if n == "yaw" else None
+        tok = kwd(st, "axis") if n != "max_turn" else "x"
+        axes = {k: body_axis(sc0.bodies[k], tok) for k in ks + ([kb] if kb is not None else [])}
         if n == "max_turn":
             st.ref = {"heading": {k: heading(sc0.bodies[k].rotation) for k in ks}}
 
         def gen(state):
             out = []
             for k in ks:
-                phi = heading(state.scene.bodies[k].rotation)
+                vec, line = axes[k]
+                phi = heading(state.scene.bodies[k].rotation, vec)
                 if phi is None:
                     continue
+                mk = min(m, math.pi) if line else m
                 if n == "yaw":
-                    err = wrap_mod(target - phi, m)
+                    err = wrap_mod(target - phi, mk)
                     _row(out, {(k, "yaw"): 1.0}, err - tol, err + tol, w)
                 elif n == "max_turn":
                     h0 = st.ref["heading"][k]
@@ -248,9 +298,10 @@ def compile_statement(st, ctx: Ctx):
                         err = wrap(h0 - phi)
                         _row(out, {(k, "yaw"): 1.0}, err - tol, err + tol, w)
                 else:
-                    pb = heading(state.scene.bodies[kb].rotation)
+                    vb, line_b = axes[kb]
+                    pb = heading(state.scene.bodies[kb].rotation, vb)
                     if pb is not None:
-                        err = wrap_mod(pb - phi, m)
+                        err = wrap_mod(pb - phi, min(mk, math.pi) if line_b else mk)
                         _row(out, {(k, "yaw"): 1.0, (kb, "yaw"): -1.0}, err - tol, err + tol, w)
             return out
         gens.append(gen)
@@ -599,6 +650,18 @@ def check_v1(st, scene, supports: dict, tol: float, angle_tol: float, bodies_fn)
         for nm in bodies_fn(st.args[0]):
             rho = float(np.linalg.norm(sc[nm].center[:2] - base))
             out.append((f"reach({nm},r={r:g})", rmin - tol <= rho <= r + tol, rho))
+    elif n == "at":
+        tol_s = float(kwd(st, "tol"))
+        for nm in bodies_fn(st.args[0]):
+            c = sc[nm].center[:2]
+            v = max(abs(float(c[0]) - float(kw["x"])) if "x" in kw else 0.0, abs(float(c[1]) - float(kw["y"])) if "y" in kw else 0.0)
+            out.append((f"at({nm})", v <= tol_s + tol, v))
+    elif n == "beside":
+        u = np.array(SIDE_VEC[kw["side"]])
+        a, b = sc[st.args[0]], sc[st.args[1]]
+        g = float((a.center[:2] - b.center[:2]) @ u) + projection(a, 1.0, u)[0] - projection(b, 1.0, u)[1]
+        top = float(kw["max"]) if "max" in kw else INF
+        out.append((f"beside({st.args[0]},{st.args[1]},{kw['side']})", float(kwd(st, "gap")) - tol <= g <= top + tol, g))
     elif n == "clearance":
         gap = float(kw["gap"])
         for nm in bodies_fn(st.args[0]):
@@ -642,15 +705,20 @@ def check_v1(st, scene, supports: dict, tol: float, angle_tol: float, bodies_fn)
             e = abs(math.degrees(wrap(math.atan2(d[1], d[0]) - phi)))
             out.append((f"facing({nm})", e <= tol_s + angle_tol, e))
     elif n in ("yaw", "parallel", "max_turn"):
+        tok = kwd(st, "axis") if n != "max_turn" else "x"
         for nm in bodies_fn(st.args[0], exclude=st.args[1:2]):
-            phi = heading(sc[nm].rotation)
+            vec, line = body_axis(sc[nm], tok)
+            phi = heading(sc[nm].rotation, vec)
             if n == "yaw":
                 m, tol_s = math.radians(float(kwd(st, "mod"))), float(kwd(st, "tol"))
+                m = min(m, math.pi) if line else m
                 e = None if phi is None else abs(math.degrees(wrap_mod(math.radians(float(kw["deg"])) - phi, m)))
                 label = f"yaw({nm},deg={float(kw['deg']):g})"
             elif n == "parallel":
                 m, tol_s = math.radians(float(kwd(st, "mod"))), float(kwd(st, "tol"))
-                pb = heading(sc[st.args[1]].rotation)
+                vb, line_b = body_axis(sc[st.args[1]], tok)
+                pb = heading(sc[st.args[1]].rotation, vb)
+                m = min(m, math.pi) if (line or line_b) else m
                 e = None if phi is None or pb is None else abs(math.degrees(wrap_mod(pb - phi, m)))
                 label = f"parallel({nm},{st.args[1]})"
             else:

@@ -1,0 +1,151 @@
+"""The comparison: the same requests on the same SimReady scenes, answered by the same model through
+isolated CLI calls (llm.py), in three conditions.
+
+  dsl_v1   the model writes a SimReady program (every statement); the gate compiles and repairs it
+  dsl_v0   the same with the statements the language had before v1 (no rows, grids, headings, regions)
+  direct   the model writes the final pose of every free body; no program, no solver
+  (direct+repair, computed from direct's answers without another call: its poses repaired by S4R with
+   only the geometric statements every task shares)
+
+A trial is one task, one seed, one condition. It has up to --rounds rounds; each round is a new call
+whose message repeats the request with the previous answer and what that condition's own check found
+(the gate's report on the program, or the verifier's report on the poses). A trial stops when that
+check passes. The hidden rubric (tasks.py) grades every round's scene; no model sees it.
+
+    python experiments/dsl_vs_direct/run.py --model claude-sonnet-5-5 --seeds 0 1 2 --workers 4 --out results/dsl_vs_direct/sonnet
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import sys
+import time
+import traceback
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parents[1])); sys.path.insert(0, str(HERE))
+
+DIRECT_SYSTEM = """You lay out objects on a table for a robot. Output ONLY a JSON object in the required format: the final pose
+of every free body listed in the scene.
+
+Frame: metres and degrees, z up. The robot base is at (0, 0) and looks along +x: +x is away from the
+robot ("far"), -x toward it ("near"), +y is left, -y right.
+
+For every free body give x and y, the final position of its reference centre (the centre of its
+bounding box, as listed with the scene), and yaw, the final heading in degrees: the turn about z of
+the body's local frame from the scene frame (the scene lists each body's local size and present
+heading; at yaw 0 its local x axis points along +x). The body is set down upright on the surface
+under its footprint, so z is computed for you; to rest a body on top of another, give "on": <that body>.
+Bodies must not interpenetrate and must stay on the support: work out each footprint from the local
+size and the yaw. Satisfy every part of the request; its numbers are in metres and degrees.
+"""
+
+
+def direct_schema(scene, support):
+    names = [b.name for b in scene.free()]
+    return {"type": "object", "properties": {"poses": {"type": "array", "items": {"type": "object", "properties": {
+        "name": {"type": "string", "enum": names}, "x": {"type": "number"}, "y": {"type": "number"}, "yaw": {"type": "number"},
+        "on": {"type": "string", "enum": [support] + names}}, "required": ["name", "x", "y", "yaw"], "additionalProperties": False}}},
+        "required": ["poses"], "additionalProperties": False}
+
+
+def conditions():
+    from simready.dsl.schema import system_prompt, V0_OPS
+    return {"dsl_v1": system_prompt(with_schema=False), "dsl_v0": system_prompt(ops=V0_OPS, with_schema=False), "direct": DIRECT_SYSTEM}
+
+
+def sanitize(obj, home=str(Path.home())):
+    """Results keep no e-mail address and no local directory."""
+    text = json.dumps(obj)
+    text = re.sub(r"[\w.+-]+@[\w-]+\.[\w.]+", "<email>", text)
+    text = text.replace(home, "~")
+    return json.loads(text)
+
+
+def run_trial(job):
+    import tasks as T, scenes as S, pipelines as P, llm
+    from simready.cli import load_any
+    from simready.dsl.schema import user_prompt, api_schema, V0_OPS
+    os.environ.setdefault("OMP_NUM_THREADS", "2")
+    task = {t.key: t for t in T.all_tasks()}[job["task"]]
+    cond, seed = job["condition"], job["seed"]
+    layout = S.build(task, seed, Path(job["out"]) / "layouts")
+    start = load_any(str(layout))
+    system = conditions()[cond]
+    if cond == "direct":
+        schema = direct_schema(start, task.support)
+    else:
+        schema = api_schema(start, ops=V0_OPS if cond == "dsl_v0" else None)
+    base = user_prompt(task.request, start)
+    rounds, prev = [], None
+    for r in range(1, job["rounds"] + 1):
+        msg = base if prev is None else (base + "\nYour previous answer:\n" + json.dumps(prev["answer"]) +
+                                         "\n\nWhat checking it found:\n" + json.dumps(prev["report"]) + "\n\nGive a corrected, complete answer.\n")
+        call = llm.call(system, msg, job["model"], job["effort"], schema=schema, work_root=job["work_root"])
+        answer = call.get("structured")
+        rec = {"round": r, "llm": {k: call.get(k) for k in ("ok", "wall_s", "duration_ms", "duration_api_ms", "cost_usd", "usage", "num_turns", "stop_reason", "error")},
+               "message_chars": len(msg), "answer": answer}
+        if answer is None:
+            report, self_ok, final, t_solve = {"ok": False, "error": "no structured answer"}, False, start, 0.0
+        elif cond == "direct":
+            final, report, self_ok, t_solve = P.run_poses(layout, answer, task.support)
+        else:
+            final, report, self_ok, t_solve = P.run_program(layout, answer, v0_only=cond == "dsl_v0")
+        passed, checks = P.grade(task, final, start)
+        rec.update({"report": report, "self_ok": self_ok, "solve_s": t_solve, "rubric_ok": passed,
+                    "rubric_failed": [c for c in checks if not c[1]],
+                    "answer_items": len(answer.get("statements", answer.get("poses", []))) if isinstance(answer, dict) else None})
+        if cond == "direct" and answer is not None:
+            fixed, gr_ok, t_fix = P.generic_repair(final, task.support)
+            p2, c2 = P.grade(task, fixed, start)
+            rec["direct_repair"] = {"rubric_ok": p2, "self_ok": gr_ok, "solve_s": t_fix, "rubric_failed": [c for c in c2 if not c[1]]}
+        rounds.append(rec)
+        prev = {"answer": answer, "report": report}
+        if self_ok:
+            break
+    out = {"task": task.key, "family": task.name, "n": task.n, "condition": cond, "seed": seed, "model": job["model"], "effort": job["effort"],
+           "rounds": rounds, "n_rounds": len(rounds), "success": rounds[-1]["rubric_ok"], "first_round_success": rounds[0]["rubric_ok"],
+           "self_ok": rounds[-1]["self_ok"]}
+    path = Path(job["out"]) / "trials" / f"{task.key}_{cond}_s{seed}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(sanitize(out), indent=1, default=str))
+    return {k: out[k] for k in ("task", "condition", "seed", "n_rounds", "success", "first_round_success")}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", default="claude-sonnet-5-5"); ap.add_argument("--effort", default="medium")
+    ap.add_argument("--seeds", type=int, nargs="+", default=[0]); ap.add_argument("--rounds", type=int, default=3)
+    ap.add_argument("--conditions", nargs="+", default=["dsl_v1", "dsl_v0", "direct"]); ap.add_argument("--tasks", nargs="*")
+    ap.add_argument("--workers", type=int, default=4); ap.add_argument("--out", required=True)
+    ap.add_argument("--work-root", default=None, help="where the empty per-call working directories go")
+    a = ap.parse_args()
+    import tasks as T, llm
+    out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
+    keys = [t.key for t in T.all_tasks() if not a.tasks or t.key in a.tasks or t.name in a.tasks]
+    jobs = [{"task": k, "condition": c, "seed": s, "model": a.model, "effort": a.effort, "rounds": a.rounds, "out": str(out),
+             "work_root": a.work_root} for k in keys for s in a.seeds for c in a.conditions
+            if not (out / "trials" / f"{k}_{c}_s{s}.json").exists()]
+    meta = {"cli": llm.cli_version(), "model": a.model, "effort": a.effort, "rounds": a.rounds, "seeds": a.seeds, "conditions": a.conditions,
+            "flags": llm.FLAGS, "env_allowlist": list(llm.ENV_KEEP) + ["CLAUDE_CODE_DISABLE_AUTO_MEMORY=1"],
+            "system_prompts": {k: {"chars": len(v)} for k, v in conditions().items()}, "started": time.strftime("%Y-%m-%dT%H:%M:%S")}
+    (out / "run_meta.json").write_text(json.dumps(meta, indent=1))
+    for k, v in conditions().items():
+        (out / f"system_{k}.txt").write_text(v)
+    print(f"{len(jobs)} trials", flush=True)
+    with ProcessPoolExecutor(max_workers=a.workers) as ex:
+        futs = {ex.submit(run_trial, j): j for j in jobs}
+        for f in as_completed(futs):
+            j = futs[f]
+            try:
+                print(json.dumps(f.result()), flush=True)
+            except Exception:  # noqa: BLE001  a crashed trial is reported and left to a rerun
+                print(json.dumps({"task": j["task"], "condition": j["condition"], "seed": j["seed"], "crash": traceback.format_exc()[-1500:]}), flush=True)
+
+
+if __name__ == "__main__":
+    main()
