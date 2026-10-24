@@ -6,7 +6,8 @@ support height, roll/pitch driven to zero by a smooth tilt homotopy for
 bodies tagged upright, and every scale increment solves one minimum-norm QP
 whose rows are (a) frozen-witness contact rows from exact mesh detection and
 (b) extra linear rows supplied by the DSL compiler. Fixed bodies are
-obstacles with no variables.
+obstacles with no variables. A body under a clearance statement keeps that clearance, instead of
+the program's margin, from every body but its support (the contact rows' right-hand side).
 
 The step QP keeps the contact rows hard and the per-step translation and yaw
 trust regions as bounds inside the problem; every DSL row carries a
@@ -18,6 +19,13 @@ step serves the contacts alone: they become elastic, the program rows are set
 aside for that step, every body moves as far as the region allows, and the
 remainder is carried into the next linearization. The scale never advances on
 a failed solve.
+
+A soft statement's rows carry its weight, which scales a slack penalty a hundred times smaller
+than a requirement's: a preference gives way to a requirement and to the contacts, and it does not
+hold up the end of the tail. When pairs still penetrate in the closing fifth of the tail (a program the
+contacts contradict), the rest of the tail serves the contacts alone. With `project_iters`, the program's rows are first solved alone at s_min,
+where every body is small enough to pass the others (the relational counterpart of a place
+target: a row, a grid, a region is reached before the scale is restored).
 """
 from __future__ import annotations
 
@@ -33,6 +41,7 @@ from ..gates.verify import pair_signed_distances
 
 RHO_CONTACT = 1e3     # quadratic penalty on contact-row slack when a step has to relax the contacts
 RHO_DSL = 1e2         # quadratic penalty on DSL-row slack (per m^2); the multiplier over it is the row's residual
+RHO_SOFT = 1.0        # the same for a soft statement's rows, times its weight: a preference gives way to a requirement
 SLACK_EPS = 1e-3      # a DSL slack above 1 mm is a row the step did not meet; below it is the penalty's own residual
 MAX_STEP_FAILURES = 4  # retries of one scale with a halved look-ahead before the continuation stops
 
@@ -77,6 +86,9 @@ class RepairSpec:
     prefer: dict = field(default_factory=dict)  # name -> (target_xy, weight)
     place: dict = field(default_factory=dict)   # name -> (x, y, yaw_deg|None): the pose given at the shrunken scale
     yaw_weight: dict = field(default_factory=dict)  # name -> weight (default size^2)
+    margins: dict = field(default_factory=dict)     # name -> clearance kept from every body but its support
+    project_iters: int = 0                          # program-only solves at s_min before the continuation
+    project_step: float = 0.25                      # trust region of a projection solve (m per axis)
     d_hat: float = 0.01
     ds_max: float = 0.05
     s_min: float = 0.05
@@ -181,12 +193,52 @@ VERTICAL_COS = 0.866   # |n . up| above cos 30 deg: the resting contact carried 
 
 
 def _rows_satisfied(st: State, spec: RepairSpec, tol: float = 1e-4) -> bool:
+    """Every hard program row holds at the current poses (a soft row is a preference)."""
     if spec.rows_fn is None:
         return True
-    for coeffs, lo, hi in spec.rows_fn(st):
+    for row in spec.rows_fn(st):
+        if len(row) > 3 and row[3] is not None:
+            continue
+        coeffs, lo, hi = row
         if lo > tol or hi < -tol:
             return False
     return True
+
+
+def _pair_margin(scene: Scene, i: int, j: int, spec: RepairSpec) -> float:
+    """Clearance a contact row keeps for the pair: the program's margin, or a clearance statement's
+    gap for a body other than the declared support of the other (or a body resting on it)."""
+    if not spec.margins or _is_support_pair(scene, i, j, spec):
+        return spec.d_hat
+    return max(spec.d_hat, spec.margins.get(scene.bodies[i].name, 0.0), spec.margins.get(scene.bodies[j].name, 0.0))
+
+
+def _margins_satisfied(scene: Scene, spec: RepairSpec, tol: float = 1e-4) -> bool:
+    """Every pair under a clearance statement keeps it (the tail does not stop before)."""
+    if not spec.margins:
+        return True
+    reach = max(spec.margins.values())
+    for i, j, s, *_ in pair_signed_distances(scene.bodies, prefilter=reach):
+        m = _pair_margin(scene, i, j, spec)
+        if m > spec.d_hat and s < m - tol:
+            return False
+    return True
+
+
+def _dsl_rows(st: State, spec: RepairSpec):
+    """The program's rows at the current poses as solver rows [(entries, lo, hi, weight)], the
+    columns of fixed bodies dropped; the weight is None for a requirement, a soft statement's
+    weight for a preference."""
+    out = []
+    scene = st.scene
+    for row in (spec.rows_fn(st) if spec.rows_fn is not None else []):
+        coeffs, l, h = row[:3]
+        wgt = float(row[3]) if len(row) > 3 and row[3] is not None else None
+        ent = [(st.var[body] + {"x": 0, "y": 1, "yaw": 2}[v], val) for (body, v), val in coeffs.items()
+               if not scene.bodies[body].fixed and abs(val) >= 1e-12]
+        if ent:
+            out.append((ent, l, h, wgt))
+    return out
 
 
 def _pose_bodies(st: State, spec: RepairSpec):
@@ -240,8 +292,8 @@ def _scaled_pairs(st: State, spec: RepairSpec, ds: float):
         saved.append(b.verts)
         b.verts = b.verts * st.scale
     try:
-        # every pair that can activate within one scale step: d_hat + ds * (full-scale extents)
-        pre = spec.d_hat + ds * 2.0 * max((b.diag / max(st.scale, 1e-9) for b in sc.free()), default=0.0)
+        # every pair that can activate within one scale step: the largest margin + ds * (full-scale extents)
+        pre = max([spec.d_hat] + list(spec.margins.values())) + ds * 2.0 * max((b.diag / max(st.scale, 1e-9) for b in sc.free()), default=0.0)
         pairs = pair_signed_distances(sc.bodies, scale=1.0, prefilter=pre)
     finally:
         for k, v in zip(st.free, saved):
@@ -252,7 +304,7 @@ def _scaled_pairs(st: State, spec: RepairSpec, ds: float):
 def _solve_qp(n, contact_rows, dsl_rows, elastic_contacts, bounded, cap, yaw_cap, pd_x, q_x, verbose, scale):
     """One step QP over x = (dx, dy, dyaw per free body) plus one slack per elastic row.
 
-    contact_rows: [(entries, rhs)] with a.x >= rhs;  dsl_rows: [(entries, lo, hi)]; `bounded`
+    contact_rows: [(entries, rhs)] with a.x >= rhs;  dsl_rows: [(entries, lo, hi[, weight])]; `bounded`
     puts the trust region into the problem (the continuation always does). Returns (status,
     step (n, 3), max contact slack, max DSL slack); status 1 = solved, -1 = failed, -2 = primal
     infeasible (only possible while the contacts are hard)."""
@@ -272,13 +324,15 @@ def _solve_qp(n, contact_rows, dsl_rows, elastic_contacts, bounded, cap, yaw_cap
     for entries, rhs in contact_rows:
         add_row(entries, rhs, np.inf, RHO_CONTACT if elastic_contacts else None)
     n_contact_slack = len(slack)
-    for entries, l, h in dsl_rows:
+    for row in dsl_rows:
+        entries, l, h = row[:3]
+        pen = RHO_SOFT * float(row[3]) if len(row) > 3 and row[3] is not None else RHO_DSL
         # one elastic row per finite bound; a two-sided row (a region) becomes two, so a body wider
         # than its region still gives a valid problem whose slack reports the shortfall
         if l > -np.inf:
-            add_row(entries, l, np.inf, RHO_DSL)
+            add_row(entries, l, np.inf, pen)
         if h < np.inf:
-            add_row(entries, -np.inf, h, RHO_DSL)
+            add_row(entries, -np.inf, h, pen)
     n_slack = len(slack)
     # The slack of a row with penalty rho enters as sigma = sqrt(rho) s, so that its cost is
     # sigma^2 / 2 and P stays near unit diagonal: a.x + sigma / sqrt(rho) >= lo  |  a.x - sigma / sqrt(rho) <= hi.
@@ -349,9 +403,44 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
     notes = []
     contact_relaxed = 0
 
-    def solve_step(tail: bool, ds: float):
+    def objective(pull: bool = True):
+        """Diagonal weights and linear term of the step QP: minimum norm, yaw weighted by size^2,
+        plus (with `pull`) the pull of prefer / place targets."""
+        pd_x, q_x = [], np.zeros(3 * n)
+        for i, k in enumerate(free):
+            b = scene.bodies[k]
+            yw = spec.yaw_weight.get(b.name, max(b.extent_along(np.array([1.0, 0, 0])), b.extent_along(np.array([0, 1.0, 0]))) ** 2)
+            wx = 1.0
+            if pull and b.name in spec.prefer:
+                tgt, w = spec.prefer[b.name]
+                wx += w
+                q_x[3 * i:3 * i + 2] += w * (xy[i] - np.asarray(tgt))
+            pd_x.extend([wx, wx, yw])
+        return pd_x, q_x
+
+    projected = 0
+    if spec.project_iters and spec.rows_fn is not None and n:
+        # the program alone at the shrunken scale: no contact rows (the bodies are small enough to
+        # pass each other), a wide trust region; stops when every hard row holds or a solve fails
+        st.tilt = tilt_schedule(st.scale, spec.s_min)
+        for _ in range(int(spec.project_iters)):
+            _pose_bodies(st, spec)
+            rows = _dsl_rows(st, spec)
+            if not rows or all(lo <= 1e-4 and hi >= -1e-4 for _, lo, hi, _ in rows):
+                break
+            pd_x, q_x = objective()
+            status, step, _, _ = _solve_qp(n, [], rows, False, True, spec.project_step, math.pi / 4, pd_x, q_x, verbose, st.scale)
+            if status != 1:
+                break
+            xy += step[:, :2]
+            yaw += step[:, 2]
+            projected += 1
+        _pose_bodies(st, spec)
+
+    def solve_step(tail: bool, ds: float, program: bool = True):
         """Returns (contact rows, penetrating pairs now, status, contact slack, DSL slack);
-        status 1 = step applied, 0 = nothing to do, -1 = the QP failed and nothing was applied."""
+        status 1 = step applied, 0 = nothing to do, -1 = the QP failed and nothing was applied.
+        Without `program` the step serves the contacts alone (no program rows, no target pull)."""
         nonlocal contact_relaxed
         st.tilt = 0.0 if tail else tilt_schedule(st.scale, spec.s_min)
         _pose_bodies(st, spec)
@@ -375,7 +464,7 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
                 ext += bi.extent_along(nrm, 1.0)
             if not bj.fixed:
                 ext += bj.extent_along(nrm, 1.0)
-            rhs = spec.d_hat - signed + ds * ext
+            rhs = _pair_margin(scene, i, j, spec) - signed + ds * ext
             if rhs <= 0.0:
                 continue
             # A body resting on its declared support meets it with a near-vertical normal; that
@@ -407,24 +496,10 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
                 continue   # no in-plane handle on this pair: nothing the QP can do
             contact_rows.append((entries, rhs))
         n_contact = len(contact_rows)
-        dsl_rows = []
-        for coeffs, l, h in (spec.rows_fn(st) if spec.rows_fn is not None else []):
-            ent = [(var[body] + {"x": 0, "y": 1, "yaw": 2}[v], val) for (body, v), val in coeffs.items()
-                   if not scene.bodies[body].fixed and abs(val) >= 1e-12]
-            if ent:
-                dsl_rows.append((ent, l, h))
-        if not contact_rows and not dsl_rows and not spec.prefer:
+        dsl_rows = _dsl_rows(st, spec) if program else []
+        if not contact_rows and not dsl_rows and not (program and spec.prefer):
             return 0, pen_now, 0, 0.0, 0.0
-        pd_x, q_x = [], np.zeros(3 * n)
-        for i, k in enumerate(free):
-            b = scene.bodies[k]
-            yw = spec.yaw_weight.get(b.name, max(b.extent_along(np.array([1.0, 0, 0])), b.extent_along(np.array([0, 1.0, 0]))) ** 2)
-            wx = 1.0
-            if b.name in spec.prefer:
-                tgt, w = spec.prefer[b.name]
-                wx += w
-                q_x[3 * i:3 * i + 2] += w * (xy[i] - np.asarray(tgt))
-            pd_x.extend([wx, wx, yw])
+        pd_x, q_x = objective(pull=program)
         cap = spec.max_xy_step * (0.6 if tail else 1.0)
         status, step, c_sl, d_sl = _solve_qp(n, contact_rows, dsl_rows, False, True, cap, spec.max_yaw_step, pd_x, q_x, verbose, st.scale)
         if status == -2:
@@ -475,9 +550,16 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
     st.scale = 1.0
     st.tilt = 0.0
     idle = 0
-    for _ in range(spec.tail_iters):
-        n_rows, pen_now, status, c_sl, d_sl = solve_step(tail=True, ds=0.0)
+    cleanup = 0
+    pen_check = None
+    last = max(1, spec.tail_iters // 5)              # the closing steps of the tail
+    for it in range(spec.tail_iters):
+        # the program yields to the contacts: when pairs still penetrate in the closing steps of the
+        # tail, the rest of it serves the contacts alone (no program rows, no target pull)
+        program = cleanup == 0 and not (spec.tail_iters - it <= last and (pen_check if pen_check is not None else 1) > 0)
+        n_rows, pen_now, status, c_sl, d_sl = solve_step(tail=True, ds=0.0, program=program)
         steps += 1
+        cleanup += 0 if program else 1
         trace.append((1.0, n_rows, pen_now, c_sl, d_sl))
         if d_sl > SLACK_EPS:
             relaxed += 1
@@ -493,16 +575,20 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
         if on_step is not None:
             on_step(st)
         pen_check = sum(1 for p in pair_signed_distances(scene.bodies) if p[2] < 0.0)
-        if pen_check == 0 and _rows_satisfied(st, spec, tol=1e-4) and status != -1:
-            break
+        if pen_check == 0 and status != -1 and (cleanup or (_rows_satisfied(st, spec, tol=1e-4) and _margins_satisfied(scene, spec))):
+            break           # done; once the closing steps set the program aside, a clean contact state ends the tail
     _pose_bodies(st, spec)
     pen_after = sum(1 for p in pair_signed_distances(scene.bodies) if p[2] < 0.0)
+    if cleanup:
+        notes.append(f"pairs still penetrated in the closing steps of the tail; {cleanup} step(s) served the contacts alone, the program rows set aside")
     disp = xy - xy0
     rmsd = float(np.sqrt(np.mean(np.sum(disp ** 2, axis=1)))) if n else 0.0
     if relaxed:
         notes.append(f"a program row was not met within the step at {relaxed} step(s) (a contact in the way, or the step's trust region); the predicates report the outcome")
     if contact_relaxed:
         notes.append(f"the contacts exceeded the trust region at {contact_relaxed} step(s); those steps served the contacts alone")
+    if projected:
+        notes.append(f"the program was solved alone at scale {spec.s_min:g} in {projected} step(s) before the scale was restored")
     if verbose:
         print(f"[repair] pen {pen_before} -> {pen_after}, steps={steps}, rmsd={rmsd:.4f}")
     return RepairResult(scene, pen_before, pen_after, steps, disp, rmsd, trace, notes, relaxed, complete, last_accepted, termination)
@@ -525,5 +611,5 @@ def polish_full_mesh(scene: Scene, spec: RepairSpec, iters: int = 10, verbose: b
     """Tail-only pass on the full meshes after a proxy repair: fixes the millimetre
     residuals the decimated proxies could not see. Returns the RepairResult."""
     from dataclasses import replace
-    spec2 = replace(spec, s_min=1.0, tail_iters=iters, place={})    # targets are applied at s_min only
+    spec2 = replace(spec, s_min=1.0, tail_iters=iters, place={}, project_iters=0)    # targets and the projection belong to s_min
     return repair_upright(scene, spec2, verbose=verbose, on_step=on_step)

@@ -29,7 +29,7 @@ from .gates.verify import verify_scene, PEN_EPS, TOUCH_EPS
 from .gates.clearance import check_clearance
 from .dsl.model import parse_program
 from .dsl.compile import compile_program, check_predicates, CompileError
-from .dsl.schema import prompt_for, validate_program_json, scene_summary, ProgramError, DEFAULTS
+from .dsl.schema import prompt_for, validate_program_json, scene_summary, ProgramError, DEFAULTS, OP_DEFAULTS
 from .dsl.text2dsl import strict_json_loads
 from .io.paths import portable, expand
 from .repair.upright_s4r import repair_upright, reseat_on_supports, polish_full_mesh
@@ -182,7 +182,7 @@ def provenance(scene_path, program_path=None, dsl=None, raw=None, params=None, a
     return {"scene": {"path": scene_path, "sha256": sha16(scene_path)}, "assets": assets or {},
             "program": {"path": program_path, "sha256": sha16(program_path) if program_path else None,
             "dsl": dsl, "json": raw}, "params": params or {}, "tolerances": {"pen_eps": PEN_EPS, "touch_eps": TOUCH_EPS, "predicate_tol": 2e-3,
-            "verify_gap_tol": 2e-3, "verify_sink_tol": 1e-3, "defaults": DEFAULTS}, "software": {"git": git, "python": platform.python_version(), **versions},
+            "verify_gap_tol": 2e-3, "verify_sink_tol": 1e-3, "defaults": DEFAULTS, "statement_defaults": OP_DEFAULTS}, "software": {"git": git, "python": platform.python_version(), **versions},
             "time": time.strftime("%Y-%m-%dT%H:%M:%S")}
 
 
@@ -274,9 +274,10 @@ def cmd_repair(a):
             reseat_on_supports(sc, spec); res.steps += res2.steps; solver_notes += res2.notes
             after = verify_scene(sc)
     preds = check_predicates(prog, sc)
+    hard = [p for p in preds if not p.soft]; prefs = [p for p in preds if p.soft]
     moved = [float(np.sum((b.center[:2] - xy_start[b.name]) ** 2)) for b in sc.free()]
     rmsd_xy = float(np.sqrt(np.mean(moved))) if moved else 0.0    # over the whole run, the full-mesh polish included
-    ok = after.pen_pairs == 0 and all(p[1] for p in preds)
+    ok = after.pen_pairs == 0 and all(p[1] for p in hard)
     clearance = None
     if "min_gap" in prog.gate.get("G2", {}):
         clearance = check_clearance(sc, prog.gate["G2"]["min_gap"][1], spec.support_of)
@@ -289,8 +290,10 @@ def cmd_repair(a):
     report = {"ok": ok, "scene": a.scene, "program": a.program, "pen_before": before.pen_pairs, "pen_after": after.pen_pairs,
               "min_score_after": after.min_signed, "contained_after": after.contained, "floating_after": after.floating,
               "rmsd_xy": rmsd_xy, "steps": res.steps, "time_s": round(time.time() - t0, 2),
-              "predicates": [(n, bool(okp), None if v is None else float(v)) for n, okp, v in preds],
-              "failed_predicates": [n for n, okp, _ in preds if not okp],
+              "predicates": [(n, bool(okp), None if v is None else float(v)) for n, okp, v in hard],
+              "failed_predicates": [n for n, okp, _ in hard if not okp],
+              "preferences": [(n, bool(okp), None if v is None else float(v)) for n, okp, v in prefs],
+              "failed_preferences": [n for n, okp, _ in prefs if not okp],
               "clearance": clearance, "notes": notes, "solver_notes": solver_notes, "dropped_children": dropped,
               "continuation": {"complete": res.continuation_complete, "last_accepted_scale": res.last_accepted_scale, "termination": res.termination},
               "synthetic_table": sc.meta.get("synthetic_table"),
@@ -417,7 +420,7 @@ def cmd_settle(a):
     sys.exit(0 if ok else 1)
 
 
-SETTLED_TOL = {"tol": 0.01, "upright_deg": 15.0, "place_tol": 0.10}   # a settled body rests on proxy facets: looser than the repair's
+SETTLED_TOL = {"tol": 0.01, "upright_deg": 15.0, "place_tol": 0.10, "angle_tol": 10.0}   # a settled body rests on proxy facets: looser than the repair's
 
 
 def settled_check(scene: Scene, r, prog) -> dict:
@@ -435,7 +438,9 @@ def settled_check(scene: Scene, r, prog) -> dict:
             b.rotation = Rot.from_quat([q[1], q[2], q[3], q[0]]).as_matrix()
     preds = check_predicates(prog, settled, **SETTLED_TOL)
     rep = verify_scene(settled)
-    return {"failed_predicates": [n for n, okp, _ in preds if not okp],
+    hard = [p for p in preds if not p.soft]
+    return {"failed_predicates": [n for n, okp, _ in hard if not okp],
+            "failed_preferences": [p[0] for p in preds if p.soft and not p[1]],
             "predicates": [(n, bool(okp), None if v is None else float(v)) for n, okp, v in preds],
             "tolerances": dict(SETTLED_TOL),
             "pen_pairs_full_mesh": rep.pen_pairs, "floating": rep.floating}

@@ -3,13 +3,15 @@
 Frame convention = RoboLab's (robot at the origin looking along +x, table in front of it):
   left_of(a,b)     : a.y >= b.y + gap        right_of(a,b)  : a.y <= b.y - gap
   in_front_of(a,b) : a.x >= b.x + gap        behind(a,b)    : a.x <= b.x - gap
-(RoboLab predicates.md: left-of = +Y, front-of = +X.)
+(RoboLab predicates.md: left-of = +Y, front-of = +X.) Regions name their sides near (-x, toward
+the robot), far (+x), left (+y) and right (-y).
 
 Per-step rows are linear in (dx, dy, dyaw) of free bodies. Region rows use the exact
 projection interval of the scaled, yawed footprint (not a symmetric half-extent), and regions
 attached to a free reference body are re-evaluated from that body's current pose every step.
-Defaults for omitted keyword arguments come from dsl.schema.DEFAULTS in both the text and the
-JSON path.
+The v1 statements (reach, row, grid, keep_out, ...) compile in dsl/statements.py. Defaults for
+omitted keyword arguments come from dsl.schema.DEFAULTS and dsl.schema.OP_DEFAULTS in both the
+text and the JSON path.
 """
 from __future__ import annotations
 
@@ -20,15 +22,32 @@ from ..scene.model import Scene, Body
 from ..repair.upright_s4r import RepairSpec, decompose_zyx
 from .model import Program, Statement
 from .schema import DEFAULTS
+from . import statements as V1
 
 AXIS = {"x": 0, "y": 1}
 REL = {"left_of": ("y", +1), "right_of": ("y", -1), "in_front_of": ("x", +1), "behind": ("x", -1)}
-BINARY = {"on_support", "within", "inside", "min_distance", "near"} | set(REL)
+BINARY = {"on_support", "within", "inside", "min_distance", "near", "parallel", "centered", "offset", "attach",
+          "balanced_on", "keep_out", "facing"} | set(REL)
+V1_ROWS = {"reach", "facing", "yaw", "parallel", "max_turn", "row", "align", "evenly_spaced", "grid", "cluster",
+           "symmetric", "between", "centered", "offset", "attach", "keep_out", "approach", "max_move", "balanced_on", "stack"}
 PLACE_TOL = 0.05     # a placed body that ended within 5 cm of its target counts as placed
+ANGLE_TOL = 0.5      # degrees of slack a heading predicate gets on top of its statement's tolerance
 
 
 class CompileError(ValueError):
     pass
+
+
+class Predicate(tuple):
+    """(name, ok, value); `soft` is True for the predicate of a preference (a statement with soft=),
+    which is reported but does not decide whether the scene passes."""
+    soft = False
+
+
+def _pred(name, ok, value, soft=False):
+    p = Predicate((name, bool(ok), value))
+    p.soft = soft
+    return p
 
 
 def _bodies(scene: Scene, tok: str, exclude=()):
@@ -43,6 +62,20 @@ def _ref(tok: str):
     return tok.split(".")[0]
 
 
+def _region(scene: Scene, st: Statement, inset: float):
+    """XY rectangle of a within/inside statement's region: the reference body's world AABB (or the
+    plane, for bounds alone), the part or strip that side= selects, the bounds, then the inset."""
+    ref = _ref(st.args[1]) if len(st.args) > 1 else None
+    try:
+        x0, x1, y0, y1 = V1.region_rect(*V1.reference_rect(scene, ref), st.kw, repr(st))
+    except V1.StatementError as e:
+        raise CompileError(str(e)) from None
+    r = (x0 + inset, x1 - inset, y0 + inset, y1 - inset)
+    if r[0] > r[1] or r[2] > r[3]:
+        raise CompileError(f"inset {inset} leaves no room inside {st.args[1] if ref else 'the region'}")
+    return r
+
+
 def _rect_of(scene: Scene, tok: str, inset: float):
     """XY rectangle of `name` or `name.top` from the body's world AABB, inset."""
     lo, hi = scene[_ref(tok)].world_aabb()
@@ -50,6 +83,16 @@ def _rect_of(scene: Scene, tok: str, inset: float):
     if r[0] > r[1] or r[2] > r[3]:
         raise CompileError(f"inset {inset} leaves no room inside {tok}")
     return r
+
+
+def _inset_of(scene: Scene, st: Statement) -> float:
+    n = st.name
+    inset = float(st.kw.get("inset", DEFAULTS["inset"] if n == "within" and len(st.args) > 1 and not
+                              ({"side", "x0", "x1", "y0", "y1"} & set(st.kw)) else 0.0))
+    if n == "inside":
+        lo, hi = scene[_ref(st.args[1])].world_aabb()
+        inset = max(inset, 0.1 * float(min(hi[0] - lo[0], hi[1] - lo[1])))
+    return inset
 
 
 def _footprint_interval(b: Body, s: float, axis: int):
@@ -83,6 +126,31 @@ def support_height_for(scene: Scene, body: Body, support: Body, require_hit: boo
                                 footprint=_low_footprint(body))
 
 
+def effective_supports(program: Program, scene: Scene) -> dict:
+    """body -> the support it rests on. A body named in on_support or in a stack keeps that support
+    over one that a wildcard on_support(*, ...) gives it, whatever the statement order; between
+    statements of the same kind the later one wins."""
+    out, prio = {}, {}
+    for st in program.statements:
+        if st.name == "on_support":
+            sup = _ref(st.args[1])
+            if sup not in scene.names():
+                raise CompileError(f"unknown support '{sup}'")
+            p = 1 if st.args[0] == "*" else 2
+            pairs = [(nm, sup) for nm in _bodies(scene, st.args[0], exclude=(sup,))]
+        elif st.name == "stack":
+            for nm in st.args:
+                _bodies(scene, nm)
+            p = 2
+            pairs = list(zip(st.args[1:], st.args[:-1]))
+        else:
+            continue
+        for nm, sup in pairs:
+            if p >= prio.get(nm, 0):
+                out[nm], prio[nm] = sup, p
+    return out
+
+
 def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
     spec = RepairSpec(supports={})
     spec.d_hat = DEFAULTS["margin"]
@@ -96,63 +164,57 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
                     raise CompileError("fixed(*) would fix every body")
                 scene[nm].fixed = True
     for st in program.statements:
-        if st.name in BINARY:
-            if len(st.args) < 2:
-                raise CompileError(f"{st.name} needs two arguments: {st!r}")
+        if st.name in BINARY and len(st.args) >= 2:
             if st.args[0] == _ref(st.args[1]) and st.args[0] != "*":
                 raise CompileError(f"{st.name} relates a body to itself: {st!r}")
-            for extra in st.kw:
-                if extra not in ("gap", "axis", "inset", "r", "margin", "x", "y", "yaw", "w"):
-                    raise CompileError(f"unknown keyword '{extra}' in {st!r}")
+        for nm in st.args:
+            if st.name != "minimize" and nm != "*" and _ref(nm) not in scene.names():
+                raise CompileError(f"unknown body '{nm}' in {st!r}")
         if st.name in REL and st.kw.get("axis", REL[st.name][0]) not in AXIS:
             raise CompileError(f"axis must be x or y: {st!r}")
-    rects_static = {}   # body -> [(rect, label)] for fixed references
-    rects_dyn = {}      # body -> [(ref_body, inset, label)] for free references
-    rels = []           # (a, b, axis, sign, gap)
-    dists = []          # (a, b, kind, r)
+    rects_static = {}   # body -> [(rect, label, weight)] for fixed references and bounds
+    rects_dyn = {}      # body -> [(statement, ref_body, inset, label, weight)] for free references
+    rels = []           # (a, b, axis, sign, gap, weight)
+    dists = []          # (a, b, kind, r, weight)
     dyn_support = []    # (body, free support)
+    v1 = []             # row generators of the v1 statements
+    supports = effective_supports(program, scene)
+    for nm, sup in supports.items():
+        b = scene[nm]
+        spec.supports[nm] = support_height_for(scene, b, scene[sup])
+        spec.support_of[nm] = sup
+        if not scene[sup].fixed:
+            dyn_support.append((nm, sup))
+    ctx = V1.Ctx(scene, {b.name: k for k, b in enumerate(scene.bodies)}, supports,
+                 lambda tok, exclude=(): _bodies(scene, tok, exclude=exclude))
     for st in program.statements:
         n = st.name
-        if n in ("fixed", "minimize"):
+        w = float(st.kw["soft"]) if "soft" in st.kw else None
+        if n in ("fixed", "minimize", "on_support"):
             continue
         if n == "no_penetration":
             spec.d_hat = float(st.kw.get("margin", DEFAULTS["margin"]))
-        elif n == "on_support":
-            sup = _ref(st.args[1])
-            if sup not in scene.names():
-                raise CompileError(f"unknown support '{sup}'")
-            for nm in _bodies(scene, st.args[0], exclude=(sup,)):
-                b = scene[nm]
-                spec.supports[nm] = support_height_for(scene, b, scene[sup])
-                spec.support_of[nm] = sup
-                if not scene[sup].fixed:
-                    dyn_support.append((nm, sup))
         elif n == "upright":
             spec.upright.update(_bodies(scene, st.args[0]))
         elif n in ("within", "inside"):
-            inset = float(st.kw.get("inset", DEFAULTS["inset"] if n == "within" else 0.0))
-            ref = _ref(st.args[1])
-            if ref not in scene.names():
-                raise CompileError(f"unknown region body '{ref}'")
-            if n == "inside":
-                lo, hi = scene[ref].world_aabb()
-                inset = max(inset, 0.1 * float(min(hi[0] - lo[0], hi[1] - lo[1])))
-            for nm in _bodies(scene, st.args[0], exclude=(ref,)):
-                if scene[ref].fixed:
-                    rects_static.setdefault(nm, []).append((_rect_of(scene, ref, inset), n))
+            inset = _inset_of(scene, st)
+            ref = _ref(st.args[1]) if len(st.args) > 1 else None
+            for nm in _bodies(scene, st.args[0], exclude=(ref,) if ref else ()):
+                if ref is None or scene[ref].fixed:
+                    rects_static.setdefault(nm, []).append((_region(scene, st, inset), n, w))
                 else:
-                    rects_dyn.setdefault(nm, []).append((ref, inset, n))
+                    rects_dyn.setdefault(nm, []).append((st, ref, inset, n, w))
         elif n in REL:
             axis, sign = REL[n]
             axis = st.kw.get("axis", axis)
             gap = float(st.kw.get("gap", DEFAULTS["gap"]))
             for a in _bodies(scene, st.args[0], exclude=(st.args[1],)):
-                rels.append((a, st.args[1], axis, sign, gap))
+                rels.append((a, st.args[1], axis, sign, gap, w))
         elif n in ("min_distance", "near"):
             if "r" not in st.kw:
                 raise CompileError(f"{n} needs r=: {st!r}")
             for a in _bodies(scene, st.args[0], exclude=(st.args[1],)):
-                dists.append((a, st.args[1], n, float(st.kw["r"])))
+                dists.append((a, st.args[1], n, float(st.kw["r"]), w))
         elif n == "prefer":
             w = float(st.kw.get("w", 0.1))
             for a in _bodies(scene, st.args[0]):
@@ -166,22 +228,35 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
             yaw = float(st.kw["yaw"]) if "yaw" in st.kw else None
             spec.place[a] = (float(st.kw["x"]), float(st.kw["y"]), yaw)
             spec.prefer[a] = (np.array([float(st.kw["x"]), float(st.kw["y"])]), float(st.kw.get("w", 1.0)))
+        elif n == "clearance":
+            for nm in _bodies(scene, st.args[0]):
+                spec.margins[nm] = max(spec.margins.get(nm, 0.0), float(st.kw["gap"]))
+        elif n in V1_ROWS:
+            try:
+                v1.append(V1.compile_statement(st, ctx))
+            except V1.StatementError as e:
+                raise CompileError(str(e)) from None
         else:
             raise CompileError(f"unsupported statement {n}")
+    if v1 and not spec.project_iters and "project_iters" not in overrides:
+        spec.project_iters = 12          # relational layouts are reached at the shrunken scale first
     for a, b, *_ in rels + dists:
         if b not in scene.names():
             raise CompileError(f"unknown body '{b}'")
     idx = {b.name: k for k, b in enumerate(scene.bodies)}
 
-    def region_rows(out, sc, k, b, s, xmin, xmax, ymin, ymax, ref_k=None):
+    def emit(out, co, lo, hi, w):
+        out.append((co, lo, hi) if w is None else (co, lo, hi, w))
+
+    def region_rows(out, sc, k, b, s, xmin, xmax, ymin, ymax, ref_k=None, w=None):
         px0, px1 = _footprint_interval(b, s, 0); py0, py1 = _footprint_interval(b, s, 1)
         cx, cy = b.center[0], b.center[1]
         if ref_k is None:
-            out.append(({(k, "x"): 1.0}, xmin - px0 - cx, xmax - px1 - cx))
-            out.append(({(k, "y"): 1.0}, ymin - py0 - cy, ymax - py1 - cy))
+            emit(out, {(k, "x"): 1.0}, xmin - px0 - cx, xmax - px1 - cx, w)
+            emit(out, {(k, "y"): 1.0}, ymin - py0 - cy, ymax - py1 - cy, w)
         else:   # the region moves with the free reference body: rows couple both columns
-            out.append(({(k, "x"): 1.0, (ref_k, "x"): -1.0}, xmin - px0 - cx, xmax - px1 - cx))
-            out.append(({(k, "y"): 1.0, (ref_k, "y"): -1.0}, ymin - py0 - cy, ymax - py1 - cy))
+            emit(out, {(k, "x"): 1.0, (ref_k, "x"): -1.0}, xmin - px0 - cx, xmax - px1 - cx, w)
+            emit(out, {(k, "y"): 1.0, (ref_k, "y"): -1.0}, ymin - py0 - cy, ymax - py1 - cy, w)
 
     def rows_fn(state):
         out = []
@@ -193,22 +268,22 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
             if b.fixed:
                 continue
             s = state.body_scale(k)
-            for (xmin, xmax, ymin, ymax), _ in lst:
-                region_rows(out, sc, k, b, s, xmin, xmax, ymin, ymax)
+            for (xmin, xmax, ymin, ymax), _, w in lst:
+                region_rows(out, sc, k, b, s, xmin, xmax, ymin, ymax, w=w)
         for nm, lst in rects_dyn.items():
             k = idx[nm]; b = sc.bodies[k]
             if b.fixed:
                 continue
             s = state.body_scale(k)
-            for ref, inset, _ in lst:
-                xmin, xmax, ymin, ymax = _rect_of(sc, ref, inset)
-                region_rows(out, sc, k, b, s, xmin, xmax, ymin, ymax, ref_k=idx[ref])
-        for a, bname, axis, sign, gap in rels:
+            for st, ref, inset, _, w in lst:
+                xmin, xmax, ymin, ymax = _region(sc, st, inset)
+                region_rows(out, sc, k, b, s, xmin, xmax, ymin, ymax, ref_k=idx[ref], w=w)
+        for a, bname, axis, sign, gap, w in rels:
             ka, kb = idx[a], idx[bname]
             ax = AXIS[axis]
             cur = sc.bodies[ka].center[ax] - sc.bodies[kb].center[ax]
-            out.append(({(ka, axis): sign, (kb, axis): -sign}, gap - sign * cur, np.inf))   # sign*(cur + da - db) >= gap
-        for a, bname, kind, r in dists:
+            emit(out, {(ka, axis): sign, (kb, axis): -sign}, gap - sign * cur, np.inf, w)   # sign*(cur + da - db) >= gap
+        for a, bname, kind, r, w in dists:
             ka, kb = idx[a], idx[bname]
             d = sc.bodies[ka].center[:2] - sc.bodies[kb].center[:2]
             dist = float(np.linalg.norm(d))
@@ -220,73 +295,97 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
                 u = d / dist
             coeffs = {(ka, "x"): u[0], (ka, "y"): u[1], (kb, "x"): -u[0], (kb, "y"): -u[1]}
             if kind == "min_distance":
-                out.append((coeffs, r - dist, np.inf))
+                emit(out, coeffs, r - dist, np.inf, w)
             else:
-                out.append((coeffs, -np.inf, r - dist))
+                emit(out, coeffs, -np.inf, r - dist, w)
+        for gen in v1:
+            out.extend(gen(state))
         return out
 
     spec.rows_fn = rows_fn
     return spec
 
 
-def check_predicates(program: Program, scene: Scene, tol: float = 2e-3, upright_deg: float = 1.0, place_tol: float = PLACE_TOL):
-    """Evaluate every statement on the final scene. Returns [(statement, ok, value)].
+def check_predicates(program: Program, scene: Scene, tol: float = 2e-3, upright_deg: float = 1.0, place_tol: float = PLACE_TOL,
+                     angle_tol: float = ANGLE_TOL):
+    """Evaluate every statement on the final scene. Returns [Predicate(name, ok, value)]; the
+    predicates of soft statements have `.soft` set.
     on_support is judged by the body's lowest point against the support SURFACE under its bottom
     (downward rays), a geometric fact independent of the numbers the repair used; a body whose
     bottom is over no part of the support fails with value None, whatever its height.
-    `tol` (m), `upright_deg` and `place_tol` (m) are the tolerances; the repair's verdict uses the
-    defaults, a check on settled poses passes looser ones."""
+    `tol` (m), `upright_deg`, `angle_tol` (degrees, on top of a heading statement's own tolerance)
+    and `place_tol` (m) are the tolerances; the repair's verdict uses the defaults, a check on
+    settled poses passes looser ones. max_move, max_turn and attach are measured from the poses
+    the program was compiled on."""
     out = []
+    supports = effective_supports(program, scene)
+
+    def bodies_fn(tok, exclude=()):
+        return _bodies(scene, tok, exclude=exclude)
+
+    def on_support_pred(nm, sup, label):
+        b = scene[nm]
+        h = support_height_for(scene, b, scene[sup], require_hit=True)
+        if h is None:
+            return _pred(label, False, None)
+        g = float((b.world_vertices() @ scene.up).min()) - h
+        touching = True
+        if abs(g) <= tol:
+            # the rays under the body can meet the support through a hole in the body:
+            # the body's mesh must also come within the tolerance of the support's mesh
+            from ..gates.verify import pair_signed_distances
+            pairs = pair_signed_distances([scene[sup], b], prefilter=tol, skip_fixed_pairs=False, containment=False)
+            touching = bool(pairs) and float(pairs[0][2]) <= tol
+        return _pred(label, abs(g) <= tol and touching, g)
+
     for st in program.statements:
         n = st.name
+        soft = st.soft
         if n == "on_support":
             sup = _ref(st.args[1])
             for nm in _bodies(scene, st.args[0], exclude=(sup,)):
-                b = scene[nm]
-                h = support_height_for(scene, b, scene[sup], require_hit=True)
-                if h is None:
-                    out.append((f"on_support({nm},{sup})", False, None))
-                    continue
-                g = float((b.world_vertices() @ scene.up).min()) - h
-                touching = True
-                if abs(g) <= tol:
-                    # the rays under the body can meet the support through a hole in the body:
-                    # the body's mesh must also come within the tolerance of the support's mesh
-                    from ..gates.verify import pair_signed_distances
-                    pairs = pair_signed_distances([scene[sup], b], prefilter=tol, skip_fixed_pairs=False, containment=False)
-                    touching = bool(pairs) and float(pairs[0][2]) <= tol
-                out.append((f"on_support({nm},{sup})", abs(g) <= tol and touching, g))
+                if st.args[0] == "*" and supports.get(nm) != sup:
+                    continue                  # a body named elsewhere rests on another support
+                out.append(on_support_pred(nm, sup, f"on_support({nm},{sup})"))
+        elif n == "stack":
+            for lower, upper in zip(st.args, st.args[1:]):
+                out.append(on_support_pred(upper, lower, f"stack({upper},{lower}):on"))
+            out.extend(_pred(*p) for p in V1.check_v1(st, scene, supports, tol, angle_tol, bodies_fn))
         elif n == "upright":
             for nm in _bodies(scene, st.args[0]):
                 _, roll, pitch = decompose_zyx(scene[nm].rotation)
                 t = max(abs(roll), abs(pitch))
-                out.append((f"upright({nm})", t <= math.radians(upright_deg), t))
+                out.append(_pred(f"upright({nm})", t <= math.radians(upright_deg), t))
         elif n in ("within", "inside"):
-            inset = float(st.kw.get("inset", DEFAULTS["inset"] if n == "within" else 0.0))
-            ref = _ref(st.args[1])
-            if n == "inside":
-                lo, hi = scene[ref].world_aabb()
-                inset = max(inset, 0.1 * float(min(hi[0] - lo[0], hi[1] - lo[1])))
-            xmin, xmax, ymin, ymax = _rect_of(scene, ref, inset)
-            for nm in _bodies(scene, st.args[0], exclude=(ref,)):
+            inset = _inset_of(scene, st)
+            ref = _ref(st.args[1]) if len(st.args) > 1 else None
+            xmin, xmax, ymin, ymax = _region(scene, st, inset)
+            label = st.args[1] if ref else "region"
+            for nm in _bodies(scene, st.args[0], exclude=(ref,) if ref else ()):
                 lo, hi = scene[nm].world_aabb()
                 viol = max(xmin - lo[0], hi[0] - xmax, ymin - lo[1], hi[1] - ymax, 0.0)
-                out.append((f"{n}({nm},{st.args[1]})", viol <= tol, viol))
+                out.append(_pred(f"{n}({nm},{label})", viol <= tol, viol, soft))
         elif n in REL:
             axis, sign = REL[n]
             axis = st.kw.get("axis", axis); gap = float(st.kw.get("gap", DEFAULTS["gap"]))
             ax = AXIS[axis]
             for a in _bodies(scene, st.args[0], exclude=(st.args[1],)):
                 v = sign * (scene[a].center[ax] - scene[st.args[1]].center[ax]) - gap
-                out.append((f"{n}({a},{st.args[1]},gap={gap:g})", v >= -tol, v))
+                out.append(_pred(f"{n}({a},{st.args[1]},gap={gap:g})", v >= -tol, v, soft))
         elif n in ("min_distance", "near"):
             r = float(st.kw["r"])
             for a in _bodies(scene, st.args[0], exclude=(st.args[1],)):
                 d = float(np.linalg.norm(scene[a].center[:2] - scene[st.args[1]].center[:2]))
                 ok = d >= r - tol if n == "min_distance" else d <= r + tol
-                out.append((f"{n}({a},{st.args[1]},r={r:g})", ok, d))
+                out.append(_pred(f"{n}({a},{st.args[1]},r={r:g})", ok, d, soft))
         elif n == "place":
             a = st.args[0]
             d = float(np.linalg.norm(scene[a].center[:2] - np.array([float(st.kw["x"]), float(st.kw["y"])])))
-            out.append((f"place({a})", d <= place_tol, d))      # a soft target: reported against a loose tolerance
+            out.append(_pred(f"place({a})", d <= place_tol, d))      # a soft target: reported against a loose tolerance
+        elif n == "clearance" or n in V1_ROWS:
+            try:
+                for p in V1.check_v1(st, scene, supports, tol, angle_tol, bodies_fn):
+                    out.append(_pred(*p, soft=soft))
+            except V1.StatementError as e:
+                raise CompileError(str(e)) from None
     return out

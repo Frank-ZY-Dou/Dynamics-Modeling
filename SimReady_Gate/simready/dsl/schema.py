@@ -13,6 +13,13 @@ import math
 import re
 
 from ..scene.model import Scene
+from .model import check_statement, GROUP
+
+OPS = ["no_penetration", "place", "fixed", "on_support", "upright", "within", "inside",
+       "left_of", "right_of", "in_front_of", "behind", "min_distance", "near", "minimize", "prefer",
+       "reach", "clearance", "approach", "facing", "yaw", "parallel",
+       "row", "align", "evenly_spaced", "grid", "cluster", "symmetric", "between", "centered", "offset", "attach",
+       "keep_out", "max_move", "max_turn", "stack", "balanced_on"]
 
 PROGRAM_SCHEMA = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -27,16 +34,24 @@ PROGRAM_SCHEMA = {
                 "type": "object",
                 "required": ["op"],
                 "properties": {
-                    "op": {"type": "string", "enum": [
-                        "no_penetration", "place", "fixed", "on_support", "upright", "within", "inside",
-                        "left_of", "right_of", "in_front_of", "behind", "min_distance", "near",
-                        "minimize", "prefer"]},
+                    "op": {"type": "string", "enum": OPS},
                     "a": {"type": "string", "description": "primary body, or * for every free body"},
                     "b": {"type": "string", "description": "reference body / support / container / region"},
+                    "c": {"type": "string", "description": "third body (symmetric: the centre; between: the other end)"},
+                    "members": {"type": "array", "items": {"type": "string"}, "description": "bodies of a group statement, in order"},
                     "margin": {"type": "number", "minimum": 0}, "gap": {"type": "number", "minimum": 0},
                     "x": {"type": "number"}, "y": {"type": "number"}, "yaw": {"type": "number"},
                     "inset": {"type": "number", "minimum": 0}, "r": {"type": "number", "minimum": 0},
-                    "axis": {"type": "string", "enum": ["x", "y"]}, "w": {"type": "number", "minimum": 0},
+                    "axis": {"type": "string", "enum": ["x", "y", "+x", "-x", "+y", "-y"]}, "w": {"type": "number", "minimum": 0},
+                    "min": {"type": "number", "minimum": 0}, "length": {"type": "number", "minimum": 0},
+                    "width": {"type": "number", "minimum": 0}, "toward": {"type": "string", "enum": ["robot", "near", "far", "left", "right"]},
+                    "tol": {"type": "number", "minimum": 0}, "deg": {"type": "number"}, "mod": {"type": "number", "enum": [90, 180, 360]},
+                    "cols": {"type": "integer", "minimum": 1}, "dx": {"type": "number"}, "dy": {"type": "number"},
+                    "frame": {"type": "string", "enum": ["world", "local"]}, "edge": {"type": "string", "enum": ["min", "center", "max"]},
+                    "side": {"type": "string", "enum": ["left", "right", "near", "far", "center"]},
+                    "frac": {"type": "number", "minimum": 0, "maximum": 1}, "depth": {"type": "number", "minimum": 0},
+                    "x0": {"type": "number"}, "x1": {"type": "number"}, "y0": {"type": "number"}, "y1": {"type": "number"},
+                    "d": {"type": "number", "minimum": 0}, "soft": {"type": "number", "minimum": 0, "maximum": 1},
                     "reason": {"type": "string", "description": "which words in the request justify this statement"}
                 },
                 "additionalProperties": False
@@ -50,11 +65,68 @@ PROGRAM_SCHEMA = {
 }
 
 DEFAULTS = {"margin": 0.005, "inset": 0.02, "gap": 0.05}
+# defaults of the v1 statements, applied by the compiler when a keyword is omitted (recorded in certificates)
+OP_DEFAULTS = {
+    "reach": {"min": 0.0, "x": 0.0, "y": 0.0},
+    "approach": {"length": 0.20, "width": 0.10, "toward": "robot", "x": 0.0, "y": 0.0},
+    "facing": {"axis": "+x", "tol": 15.0},
+    "yaw": {"tol": 5.0, "mod": 360.0},
+    "parallel": {"mod": 180.0, "tol": 5.0},
+    "row": {"axis": "+y", "gap": 0.01, "tol": 0.01},
+    "align": {"axis": "x", "edge": "center", "tol": 0.005},
+    "evenly_spaced": {"axis": "y", "tol": 0.005},
+    "grid": {"tol": 0.01},
+    "symmetric": {"axis": "y", "tol": 0.01},
+    "between": {"axis": "y", "gap": 0.0},
+    "centered": {"tol": 0.01},
+    "offset": {"dx": 0.0, "dy": 0.0, "frame": "world", "tol": 0.01},
+    "attach": {"tol": 0.01, "deg": 2.0},
+    "keep_out": {"gap": 0.0},
+    "region": {"frac": 0.5},
+    "stack": {"tol": 0.01},
+    "balanced_on": {"margin": 0.01},
+}
 NAME_RE = re.compile(r"^[A-Za-z_][\w\-]*(\.[A-Za-z_]\w*)?$")
 
 
 class ProgramError(ValueError):
     pass
+
+
+FIELDS = {
+    "no_penetration": {"a", "margin"}, "fixed": {"a"}, "on_support": {"a", "b"}, "upright": {"a"},
+    "within": {"a", "b", "inset", "side", "frac", "depth", "x0", "x1", "y0", "y1", "soft"},
+    "inside": {"a", "b", "inset", "soft"}, "place": {"a", "x", "y", "yaw", "w"},
+    "left_of": {"a", "b", "gap", "axis", "soft"}, "right_of": {"a", "b", "gap", "axis", "soft"},
+    "in_front_of": {"a", "b", "gap", "axis", "soft"}, "behind": {"a", "b", "gap", "axis", "soft"},
+    "min_distance": {"a", "b", "r", "soft"}, "near": {"a", "b", "r", "soft"}, "minimize": {"a"}, "prefer": {"a", "w"},
+    "reach": {"a", "r", "min", "x", "y", "soft"}, "clearance": {"a", "gap"},
+    "approach": {"a", "length", "width", "toward", "x", "y", "soft"},
+    "facing": {"a", "b", "axis", "tol", "x", "y", "soft"}, "yaw": {"a", "deg", "tol", "mod", "soft"},
+    "parallel": {"a", "b", "mod", "tol", "soft"},
+    "row": {"members", "axis", "gap", "tol", "soft"}, "align": {"members", "axis", "edge", "tol", "soft"},
+    "evenly_spaced": {"members", "axis", "tol", "soft"}, "grid": {"members", "cols", "dx", "dy", "tol", "soft"},
+    "cluster": {"members", "r", "soft"}, "symmetric": {"a", "b", "c", "axis", "tol", "soft"},
+    "between": {"a", "b", "c", "axis", "gap", "soft"}, "centered": {"a", "b", "tol", "soft"},
+    "offset": {"a", "b", "dx", "dy", "frame", "tol", "soft"}, "attach": {"a", "b", "tol", "soft"},
+    "keep_out": {"a", "b", "gap", "side", "frac", "depth", "x0", "x1", "y0", "y1", "soft"},
+    "max_move": {"a", "d", "soft"}, "max_turn": {"a", "deg", "soft"}, "stack": {"members", "tol"},
+    "balanced_on": {"a", "b", "margin", "soft"},
+}
+NUMERIC = ("gap", "inset", "r", "margin", "w", "x", "y", "yaw", "min", "length", "width", "tol", "deg", "mod", "cols",
+           "dx", "dy", "frac", "depth", "x0", "x1", "y0", "y1", "d", "soft")
+SIGNED = ("x", "y", "yaw", "deg", "dx", "dy", "x0", "x1", "y0", "y1")
+WORD_FIELDS = ("axis", "edge", "side", "toward", "frame")
+# the order keywords are written in the DSL text of a v1 statement
+KW_ORDER = ("r", "min", "gap", "length", "width", "toward", "axis", "edge", "cols", "dx", "dy", "frame", "deg", "mod",
+            "tol", "inset", "side", "frac", "depth", "x0", "x1", "y0", "y1", "x", "y", "d", "margin", "soft")
+
+
+def _fmt(v):
+    """A number as the DSL text writes it (integers without a fraction, floats by repr)."""
+    if isinstance(v, int) or (isinstance(v, float) and v.is_integer() and abs(v) < 1e15):
+        return str(int(v))
+    return repr(float(v))
 
 
 def validate_program_json(obj: dict, scene: Scene) -> tuple[str, list[str]]:
@@ -100,29 +172,35 @@ def validate_program_json(obj: dict, scene: Scene) -> tuple[str, list[str]]:
             yaw = f", yaw={st['yaw']}" if "yaw" in st else ""
             w = f", w={st['w']}" if "w" in st else ""
             lines.append(f"  place({a}, x={st['x']}, y={st['y']}{yaw}{w})")
-        elif op == "within":
-            need(a, "a"); need(b, "region")
-            lines.append(f"  within({a}, {b}, inset={st.get('inset', DEFAULTS['inset'])})")
         elif op == "inside":
             need(a, "a"); need(b, "container")
             if "container" not in tags.get(b, set()):
                 notes.append(f"{b} is not tagged as a container; inside() uses its bounding footprint")
-            lines.append(f"  inside({a}, {b}, inset={st['inset']})" if "inset" in st else f"  inside({a}, {b})")
+            kws = [f"inset={st['inset']}"] if "inset" in st else []
+            if "soft" in st:
+                kws.append(f"soft={_fmt(st['soft'])}")
+            lines.append(f"  inside({a}, {b}{''.join(', ' + k for k in kws)})")
         elif op in ("left_of", "right_of", "in_front_of", "behind"):
             need(a, "a"); need(b, "b")
             if a == b:
                 raise ProgramError(f"statement {i}: {op} needs two different bodies")
             axis = f", axis={st['axis']}" if st.get("axis") in ("x", "y") else ""
-            lines.append(f"  {op}({a}, {b}, gap={st.get('gap', DEFAULTS['gap'])}{axis})")
+            if "axis" in st and st["axis"] not in ("x", "y"):
+                raise ProgramError(f"statement {i} ({op}): axis must be x or y")
+            soft = f", soft={_fmt(st['soft'])}" if "soft" in st else ""
+            lines.append(f"  {op}({a}, {b}, gap={st.get('gap', DEFAULTS['gap'])}{axis}{soft})")
         elif op in ("min_distance", "near"):
             need(a, "a"); need(b, "b")
             if "r" not in st:
                 raise ProgramError(f"statement {i} ({op}): needs r")
-            lines.append(f"  {op}({a}, {b}, r={st['r']})")
+            soft = f", soft={_fmt(st['soft'])}" if "soft" in st else ""
+            lines.append(f"  {op}({a}, {b}, r={st['r']}{soft})")
         elif op == "minimize":
             lines.append("  minimize displacement(*)")
         elif op == "prefer":
             need(a, "a"); lines.append(f"  prefer({a}, pose=intent, w={st.get('w', 0.1)})")
+        elif op in FIELDS:
+            lines.append("  " + _v1_line(i, op, st, need, tags, notes))
         else:
             raise ProgramError(f"statement {i}: unknown op {op}")
     if not seen_nopen:
@@ -143,15 +221,44 @@ def validate_program_json(obj: dict, scene: Scene) -> tuple[str, list[str]]:
     return "\n".join(lines), notes
 
 
-FIELDS = {
-    "no_penetration": {"a", "margin"}, "fixed": {"a"}, "on_support": {"a", "b"}, "upright": {"a"},
-    "within": {"a", "b", "inset"}, "inside": {"a", "b", "inset"}, "place": {"a", "x", "y", "yaw", "w"},
-    "left_of": {"a", "b", "gap", "axis"}, "right_of": {"a", "b", "gap", "axis"},
-    "in_front_of": {"a", "b", "gap", "axis"}, "behind": {"a", "b", "gap", "axis"},
-    "min_distance": {"a", "b", "r"}, "near": {"a", "b", "r"}, "minimize": {"a"}, "prefer": {"a", "w"},
-}
-NUMERIC = ("gap", "inset", "r", "margin", "w", "x", "y", "yaw")
-SIGNED = ("x", "y", "yaw")
+def _v1_line(i, op, st, need, tags, notes):
+    """DSL text of a v1 statement (and `within` with a region), after the checks the text parser
+    applies, so that an error names the JSON statement rather than a line of generated text."""
+    if op in GROUP:
+        members = st.get("members")
+        if not isinstance(members, list) or not members:
+            raise ProgramError(f"statement {i} ({op}): needs 'members', a list of body names")
+        for m in members:
+            need(m, "member")
+            if m == "*" or "." in m:
+                raise ProgramError(f"statement {i} ({op}): members are body names, got '{m}'")
+        args = list(members)
+    else:
+        need(st.get("a"), "a")
+        args = [st["a"]]
+        if "b" in st:
+            need(st["b"], "b")
+            args.append(st["b"])
+        elif op in ("parallel", "centered", "offset", "attach", "balanced_on", "symmetric", "between"):
+            raise ProgramError(f"statement {i} ({op}): missing b")
+        if op in ("symmetric", "between"):
+            if "c" not in st:
+                raise ProgramError(f"statement {i} ({op}): missing c")
+            need(st["c"], "c")
+            args.append(st["c"])
+        elif "c" in st:
+            raise ProgramError(f"statement {i} ({op}): field 'c' does not belong to {op}")
+    if op == "within" and len(args) == 2 and "inset" not in st and not (set(st) & {"side", "x0", "x1", "y0", "y1"}):
+        st = dict(st, inset=DEFAULTS["inset"])
+    kw = {k: st[k] for k in KW_ORDER if k in st}
+    try:
+        check_statement(op, args, {k: (float(v) if k in NUMERIC else v) for k, v in kw.items()})
+    except SyntaxError as e:
+        raise ProgramError(f"statement {i} ({op}): {e}") from None
+    if op == "stack" and any("support" in tags.get(m, set()) for m in args[1:]):
+        notes.append(f"stack({', '.join(args)}): a member above the first is tagged as a support; it is stacked like any free body")
+    text = ", ".join(args + [f"{k}={_fmt(v) if k in NUMERIC else v}" for k, v in kw.items()])
+    return f"{op}({text})"
 
 
 def _number(v, label, signed=False):
@@ -188,14 +295,16 @@ def _check_shape(obj):
         unknown = set(st) - FIELDS[op] - {"op", "reason"}
         if unknown:
             raise ProgramError(f"statement {i} ({op}): fields {sorted(unknown)} do not belong to {op}")
-        for k in ("a", "b", "reason"):
+        for k in ("a", "b", "c", "reason") + WORD_FIELDS:
             if k in st and not isinstance(st[k], str):
                 raise ProgramError(f"statement {i} ({op}): '{k}' must be a string")
+        if "members" in st and (not isinstance(st["members"], list) or not all(isinstance(m, str) for m in st["members"])):
+            raise ProgramError(f"statement {i} ({op}): 'members' must be a list of body names")
         for k in NUMERIC:
             if k in st:
                 _number(st[k], f"statement {i} ({op}): '{k}'", signed=k in SIGNED)
-        if "axis" in st and st["axis"] not in ("x", "y"):
-            raise ProgramError(f"statement {i}: axis must be x or y")
+        if "axis" in st and st["axis"] not in ("x", "y", "+x", "-x", "+y", "-y"):
+            raise ProgramError(f"statement {i}: axis must be one of x, y, +x, -x, +y, -y")
     g = obj.get("gate")
     if g is not None:
         if not isinstance(g, dict):
@@ -226,11 +335,14 @@ def api_schema(scene=None):
             for v in node:
                 walk(v)
     walk(sch)
+    stp = sch["properties"]["statements"]["items"]["properties"]
+    stp["mod"] = {"type": "number"}                     # numeric enums are checked by _check_shape
     if scene is not None:
         names = list(scene.names())
-        stp = sch["properties"]["statements"]["items"]["properties"]
         stp["a"] = {"type": "string", "enum": names + ["*"]}
         stp["b"] = {"type": "string", "enum": names + [n + ".top" for n in names]}
+        stp["c"] = {"type": "string", "enum": names}
+        stp["members"] = {"type": "array", "items": {"type": "string", "enum": names}}
     return sch
 
 
@@ -240,32 +352,83 @@ def scene_summary(scene: Scene) -> str:
     for b in scene.bodies:
         lo, hi = b.world_aabb()
         ext = hi - lo
-        line = (f"- {b.name}: {'FIXED ' if b.fixed else ''}{','.join(sorted(b.tags)) or 'object'}; "
+        kind = ','.join(sorted(b.tags)) or 'object'
+        label = b.meta.get("label")
+        line = (f"- {b.name}: {'FIXED ' if b.fixed else ''}{kind}{f' ({label})' if label else ''}; "
                 f"size {ext[0]:.2f}x{ext[1]:.2f}x{ext[2]:.2f} m; at ({b.center[0]:.2f}, {b.center[1]:.2f}, {b.center[2]:.2f})")
         if b.fixed and "support" in b.tags:
             line += f"; top rect x[{lo[0]:.2f}, {hi[0]:.2f}] y[{lo[1]:.2f}, {hi[1]:.2f}] at z={scene.support_height(b):.3f}"
+        if b.meta.get("grasp_axis"):
+            line += f"; handle/grasp side {b.meta['grasp_axis']}"
         rows.append(line)
     return "\n".join(rows)
+
+
+LANGUAGE = """Statements (a, b, c are body names; members is a list of names, in order):
+  no_penetration(margin)                 nothing interpenetrates; margin is the clearance the solver keeps
+  fixed(a)                               a does not move
+  on_support(a, b)   upright(a)          a rests on b; a keeps its resting orientation (no roll or pitch)
+  within(a, b, inset)                    a's footprint inside b (b.top: b's top rectangle). A part of b:
+                                         side=left|right|near|far|center with frac (default 0.5); a strip beside
+                                         b: side with depth. x0, x1, y0, y1 bound the region (any subset; alone
+                                         they define it)
+  inside(a, b)                           a inside container b
+  keep_out(a, b, gap)                    a's footprint stays outside a region (region fields as for within)
+  left_of | right_of | in_front_of | behind (a, b, gap)    relations of the centres, gap between centres
+  near(a, b, r) | min_distance(a, b, r)  centre distance at most / at least r
+  reach(a, r, min)                       a's centre within r of the robot base (and at least min from it);
+                                         x, y move the base
+  clearance(a, gap)                      every other body at least gap from a's surface (room for a gripper)
+  approach(a, length, width, toward)     nothing in the corridor of that length and width from a toward the
+                                         robot (toward=robot, default) or toward near|far|left|right
+  facing(a, b, axis, tol)                a's local axis (+x, -x, +y, -y: its front, handle or label side)
+                                         points at b, or at x, y, or by default at the robot, within tol degrees
+  yaw(a, deg, tol, mod)                  a's heading is deg; mod 90 or 180 for shapes that repeat when turned
+  parallel(a, b, mod, tol)               a and b have the same heading (mod as for yaw, default 180)
+  row(members, axis, gap)                on one line, in the order listed, footprints at least gap apart;
+                                         axis=+y lists them right to left, -y left to right, +x near to far,
+                                         -x far to near
+  align(members, axis, edge)             equal x (or y) of the centres, or of the footprints' min or max edge
+  evenly_spaced(members, axis)           equal centre spacing along axis
+  grid(members, cols, dx, dy)            rows of cols members: member k at (row*dx, col*dy) from the first;
+                                         without dx, dy the pitch is free but shared
+  cluster(members, r)                    every member within r of the group's centre
+  symmetric(a, b, c, axis)               a and b mirror images about c along axis (equal other coordinate)
+  between(a, b, c, axis, gap)            a's centre between b's and c's along axis, gap from each
+  centered(a, b, tol)                    a's centre over b's centre (a cup on its saucer)
+  offset(a, b, dx, dy, frame)            a's centre at (dx, dy) from b's, in the scene frame or, with
+                                         frame=local, in b's own frame
+  attach(a, b)                           a keeps its present pose relative to b
+  stack(members)                         each member rests centred on the one before it
+  balanced_on(a, b, margin)              a's centre of mass over b's top, margin from its edge
+  max_move(a, d)  max_turn(a, deg)       a moves at most d metres / turns at most deg from where it is
+  place(a, x, y, yaw)                    a target pose in the shrunken scale-space (a soft pull)
+  minimize                               minimum displacement
+Any statement other than no_penetration, fixed, on_support, upright, place, clearance and stack takes
+soft (0 to 1]: a preference with that weight, which may yield; it is reported but not required."""
 
 
 def prompt_for(request: str, scene: Scene) -> str:
     return f"""You translate a layout request into a SimReady program: a list of geometric constraints and
 objectives over named bodies. Output ONLY a JSON object matching the schema below.
 
+Frame: metres and degrees, z up. The robot base is at (0, 0) and looks along +x: +x is away from the
+robot ("far"), -x toward it ("near"), +y is left, -y right. RoboLab convention: left_of(a,b) means
+a.y >= b.y + gap; in_front_of(a,b) means a.x >= b.x + gap.
+
 Rules:
-- Use only bodies listed in the scene. `*` means every free body.
+- Use only bodies listed in the scene. `*` means every free body (first argument only).
 - Every free body that should rest on a surface gets on_support(a=<body>, b=<support>) and, if it
-  should keep its resting orientation (no roll or pitch; an asset that rests lying flat, such as a
-  remote control, stays flat), upright(a=<body>).
-- Frame convention (RoboLab): left_of(a,b) means a.y >= b.y + gap; in_front_of(a,b) means a.x >= b.x + gap
-  (the robot looks along +x). Distances in metres.
-- place(a, x, y, yaw) is a placement in the shrunken scale-space: it puts body a's reference centre at
-  (x, y) on its support at the configured shrink scale, where overlaps may remain, and keeps pulling it there as
-  the scale is restored; contacts and the other statements can still move it. Use it to lay a scene
-  out from your understanding of the request; coordinates in the scene frame, yaw in degrees about z,
-  and the supports' top rectangles are listed with the scene. Do not place bodies on top of each other.
+  should keep its resting orientation (an asset that rests lying flat, such as a remote control,
+  stays flat), upright(a=<body>).
+- Say what must hold and let the solver find the poses. place(a, x, y, yaw) puts a body's reference
+  centre at (x, y) on its support at the configured shrink scale, where overlaps may remain, and keeps
+  pulling it there as the scale is restored; use it for a rough position the request implies and no
+  statement expresses. Do not place bodies on top of each other; use stack or on_support for that.
 - Do not invent numbers; when the request is silent, omit the field and it takes a recorded default.
 - Put the words that justify each statement in `reason`. List anything you assumed in `assumptions`.
+
+{LANGUAGE}
 
 Scene:
 {scene_summary(scene)}
