@@ -2,7 +2,9 @@
 
 Every body becomes a MuJoCo mesh geom (MuJoCo convex-hulls mesh geoms; pass
 `pieces` to supply convex pieces per body, e.g. from CoACD, for a PhysX-like
-proxy). Fixed bodies are static geoms in the world body. Reports peak body
+proxy). Fixed bodies are static geoms in the world body. A body that carries its asset's
+physics (a SimReady package: meta['physics']) gets that friction and mass; the others get
+MuJoCo's default friction and a uniform density. Reports peak body
 speed, peak displacement, peak and final tilt, the final displacement and the final
 pose per free body, the number of integration steps actually taken and which bodies
 fell back from CoACD to a single hull.
@@ -50,6 +52,7 @@ class SettleReport:
     engine_warnings: dict = field(default_factory=dict) # MuJoCo warning counters that fired (the engine reset the state), non-finite readings
     final_pose: dict = field(default_factory=dict)      # name -> (xpos (3,), xquat wxyz (4,)) of every free body at the end
     final_tilt_deg: dict = field(default_factory=dict)  # name -> rotation of the body's up axis from its start, at the end
+    asset_physics: list = field(default_factory=list)   # bodies simulated with their asset's friction and mass
 
     def summary(self):
         worst = max(self.final_disp.items(), key=lambda kv: kv[1])[0] if self.final_disp else "-"
@@ -57,6 +60,32 @@ class SettleReport:
                 f"final_disp max={max(self.final_disp.values(), default=0):.4f} m ({worst})  steps={self.steps}"
                 + (f"  left_support={self.left_support}" if self.left_support else "")
                 + (f"  hull_fallback={self.proxy_fallback}" if self.proxy_fallback else ""))
+
+
+DEFAULT_FRICTION = 1.0     # MuJoCo's sliding friction for a body that carries no physics of its own
+DEFAULT_DENSITY = 500.0
+
+
+def body_physics(b, parts) -> tuple[float, float]:
+    """(sliding friction, density) of a body's geoms: the asset's static friction and, for a free
+    body with a known mass, the density that gives the proxy pieces that mass (the inertia still
+    comes from the proxy, see settle_and_measure); the defaults otherwise."""
+    phys = b.meta.get("physics") or {}
+    mu = phys.get("static_friction")
+    mu = float(mu) if mu is not None and mu > 0 else DEFAULT_FRICTION
+    density = DEFAULT_DENSITY
+    mass = phys.get("mass")
+    if mass and not b.fixed:
+        import trimesh
+        vol = 0.0
+        for v, f in parts:
+            try:
+                vol += float(trimesh.Trimesh(v, f, process=False).convex_hull.volume)
+            except Exception:  # noqa: BLE001  a degenerate piece adds nothing
+                pass
+        if vol > 1e-12:
+            density = float(mass) / vol
+    return mu, density
 
 
 _COACD_CACHE: dict = {}
@@ -121,6 +150,7 @@ def settle_and_measure(scene: Scene, seconds: float = 2.0, timestep: float = 2e-
     import trimesh
     from ..scene.model import slab_proxy
     fallback = []
+    with_physics = []
     with tempfile.TemporaryDirectory(prefix="simready_mj_") as tmp:
         assets, bodies_xml = [], []
         for k, b in enumerate(scene.bodies):
@@ -153,12 +183,15 @@ def settle_and_measure(scene: Scene, seconds: float = 2.0, timestep: float = 2e-
                     except Exception:  # noqa: BLE001
                         pass
                 parts = [(v, f)]
+            mu, density = body_physics(b, parts)
+            if b.meta.get("physics"):
+                with_physics.append(b.name)
             for j, (v, f) in enumerate(parts):
                 name = f"m{k}_{j}"
                 path = os.path.join(tmp, name + ".obj")
                 _write_obj(path, v, f)
                 assets.append(f'<mesh name="{name}" file="{path}" inertia="convex" maxhullvert="{max_hull_verts}"/>')
-                geoms.append(f'<geom type="mesh" mesh="{name}" condim="3" friction="1 0.005 0.0001" density="500"/>')
+                geoms.append(f'<geom type="mesh" mesh="{name}" condim="3" friction="{mu:g} 0.005 0.0001" density="{density:g}"/>')
             w, x, y, z = _quat_wxyz(b.rotation)
             pos = f'{b.center[0]:.6f} {b.center[1]:.6f} {b.center[2]:.6f}'
             if b.fixed:
@@ -233,7 +266,7 @@ def settle_and_measure(scene: Scene, seconds: float = 2.0, timestep: float = 2e-
     final_pose = {n: (data.xpos[bid[n]].copy(), data.xquat[bid[n]].copy()) for n in free}
     end_tilt = {n: float(t) for n, t in zip(free, _tilt_deg(data.xquat[ids], z0))} if free else {}
     rep = SettleReport(peak_v, peak_d, final, per_v, done, timestep, left, traj, done * timestep,
-                       float(per_tilt.max()) if free else 0.0, tilt, fallback, warnings, final_pose, end_tilt)
+                       float(per_tilt.max()) if free else 0.0, tilt, fallback, warnings, final_pose, end_tilt, with_physics)
     if verbose:
         print("[settle]", rep.summary())
     return rep

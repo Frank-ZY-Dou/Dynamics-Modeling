@@ -1,4 +1,4 @@
-"""simready CLI: summarize | prompt | check | verify | repair | settle.
+"""simready CLI: summarize | prompt | check | verify | repair | settle | export | assets.
 
 Exit codes: 0 = the requested outcome holds (repair: pen 0, every predicate satisfied and, when
 the program's gate asks for one, the clearance; settle: G5 pass); 1 = it does not; 2 = the
@@ -35,7 +35,7 @@ from .io.paths import portable, expand
 from .repair.upright_s4r import repair_upright, reseat_on_supports, polish_full_mesh
 
 SCENE_EXT = (".usda", ".usd", ".usdc")
-INPUT_ERRORS = (ProgramError, CompileError, SyntaxError, KeyError, ValueError, OSError, GeometryQueryError)
+INPUT_ERRORS = (ProgramError, CompileError, SyntaxError, KeyError, ValueError, OSError, GeometryQueryError, RuntimeError)
 
 
 def load_any(path: str) -> Scene:
@@ -48,13 +48,17 @@ def load_any(path: str) -> Scene:
             L = strict_json_loads(f.read())
         L["base_scene"] = expand(L.get("base_scene"))          # layouts store RoboLab asset paths as <ROBOLAB_DIR>/...
         for o in L["objects"]:
-            o["usd_path"] = expand(o["usd_path"])
-        if isinstance(L.get("table"), dict):
+            if "package" not in o:
+                o["usd_path"] = expand(o["usd_path"])
+        if isinstance(L.get("table"), dict) and "package" not in L["table"]:
             L["table"]["usd_path"] = expand(L["table"].get("usd_path"))
         bodies = []
         meta = {"path": path}
         tb = L.get("table")
-        if tb and tb.get("usd_path"):
+        if tb and tb.get("package"):                       # a SimReady package as the support
+            bodies.append(body_from_layout_package("table", tb, tb.get("position", (0, 0, 0)), tb.get("yaw", 0.0), fixed=True,
+                                                   tags={"support", "fixture"}))
+        elif tb and tb.get("usd_path"):
             if not os.path.exists(tb["usd_path"]):
                 raise FileNotFoundError(f"the layout's table asset does not exist: {tb['usd_path']}")
             bodies.append(body_from_object_usd("table", tb["usd_path"], tb.get("position", (0, 0, 0)), fixed=True, tags={"support", "fixture"}))
@@ -77,9 +81,22 @@ def load_any(path: str) -> Scene:
             bodies.append(Body.from_mesh("table", slab.vertices, slab.faces, center=np.array([0.274, 0.0, -0.02]), fixed=True, tags={"support", "fixture"}))
             meta["synthetic_table"] = "0.8 x 1.0 x 0.04 m slab at (0.274, 0, -0.02): the layout declares no support"
         for o in L["objects"]:
-            bodies.append(body_from_object_usd(o["name"], o["usd_path"], (o["x"], o["y"], o["z"]), yaw_deg=o.get("yaw", 0.0), tags={"object"}))
+            if "package" in o:
+                bodies.append(body_from_layout_package(o["name"], o, (o["x"], o["y"], o["z"]), o.get("yaw", 0.0), tags={"object"}))
+            else:
+                bodies.append(body_from_object_usd(o["name"], o["usd_path"], (o["x"], o["y"], o["z"]), yaw_deg=o.get("yaw", 0.0), tags={"object"}))
         return Scene(bodies, meta=meta)
     raise ValueError(f"unsupported scene file {path} (expected .usda/.usd/.usdc or a layout .json)")
+
+
+def body_from_layout_package(name, entry: dict, position, yaw_deg, fixed=False, tags=None):
+    """A layout entry that names a SimReady package ({"package": ..., "repo": ...}); the package must
+    have been fetched (`python -m simready.cli assets fetch <package>`): a repair never downloads."""
+    from .io.nvidia_assets import package_dir, body_from_package, DEFAULT_REPO, RECORD
+    pkg = package_dir(entry["package"], entry.get("repo", DEFAULT_REPO))
+    if not (pkg / RECORD).exists():
+        raise FileNotFoundError(f"SimReady package {entry['package']} is not in {pkg.parent}; run: python -m simready.cli assets fetch {entry['package']}")
+    return body_from_package(name, pkg, position, yaw_deg=yaw_deg, fixed=fixed, tags=tags)
 
 
 def load_program(path: str, scene: Scene):
@@ -386,7 +403,7 @@ def cmd_settle(a):
                         "final_tilt_deg": {k: round(v, 2) for k, v in r.final_tilt_deg.items()},
                         "final_disp": {k: round(v, 4) for k, v in r.final_disp.items()},
                         "after_settle": after,
-                        "hull_fallback": r.proxy_fallback,
+                        "hull_fallback": r.proxy_fallback, "asset_physics": r.asset_physics,
                         "faster_than_free_fall": r.peak_speed > free_fall_bound + 0.05, "pass": passed}
     if min_gap is not None:
         rep = verify_scene(sc)
@@ -462,6 +479,37 @@ def cmd_export(a):
                      "decomposed": a.decompose}, indent=1))
 
 
+def cmd_assets(a):
+    """SimReady packages: `search` asks SimReady Central, `fetch` downloads packages (without their
+    textures unless --textures) and checks them against their bill of materials, `info` prints a
+    fetched package's size, physics, labels and grasp hint."""
+    from .io import nvidia_assets as NA
+    if a.action == "search":
+        hits = NA.search(" ".join(a.names), limit=a.limit, repo=None if a.repo == "any" else a.repo,
+                         max_size=a.max_size, max_height=a.max_height, max_mass=a.max_mass)
+        print(dump_json({"query": " ".join(a.names), "hits": hits}, indent=1))
+    elif a.action == "fetch":
+        out = []
+        for name in a.names:
+            d = NA.fetch(name, repo=a.repo, revision=a.revision, textures=a.textures)
+            rec = json.loads((d / NA.RECORD).read_text())
+            out.append({"package": name, "dir": portable(str(d)), "revision": rec["revision"], "files": len(rec["files"]),
+                        "bom_checked": rec["bom_checked"], "license": rec["license"]})
+        print(dump_json({"ok": True, "fetched": out}, indent=1))
+    else:
+        out = []
+        for name in a.names:
+            d = Path(name) if os.path.isdir(name) else NA.package_dir(name, a.repo)
+            info = NA.read_package(d)
+            b = NA.body_from_package(d.name, d, (0.0, 0.0, 0.0))
+            info["size_m"] = [float(x) for x in np.ptp(b.verts, axis=0)]
+            info["rests_turned"] = "rest_rotation" in b.meta
+            info["grasp_axis"] = b.meta.get("grasp_axis")
+            info["root_usd"] = portable(info["root_usd"])
+            out.append(info)
+        print(dump_json(out, indent=1))
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="simready")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -482,6 +530,12 @@ def main(argv=None):
     s = sub.add_parser("export"); s.add_argument("scene"); s.add_argument("--out", required=True); s.add_argument("--program")
     s.add_argument("--decompose", action="store_true", help="CoACD pieces for the free bodies instead of one convex hull each")
     s.add_argument("--hull-verts", type=int, default=256); s.set_defaults(fn=cmd_export)
+    s = sub.add_parser("assets", help="search, fetch and inspect SimReady packages")
+    s.add_argument("action", choices=("search", "fetch", "info")); s.add_argument("names", nargs="+", help="search words, or package names")
+    s.add_argument("--repo", default="nvidia/simready-assets", help="Hugging Face dataset (search: 'any' for every dataset SimReady Central indexes)")
+    s.add_argument("--revision", default="main"); s.add_argument("--textures", action="store_true")
+    s.add_argument("--limit", type=int, default=10); s.add_argument("--max-size", type=float); s.add_argument("--max-height", type=float)
+    s.add_argument("--max-mass", type=float); s.set_defaults(fn=cmd_assets)
     a = ap.parse_args(argv)
     try:
         a.fn(a)

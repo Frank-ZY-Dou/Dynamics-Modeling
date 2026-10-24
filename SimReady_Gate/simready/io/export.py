@@ -21,7 +21,8 @@ body whose mesh is a single plane is handled by what it is: a horizontal sheet a
 height, or one tagged `ground`, is the ground and is marked `flat` (the export's ground stands in
 for it); any other sheet (a wall, a shelf board) is written with a small thickness so that every
 engine keeps it as a solid collider, and the manifest records that thickness. Free bodies are
-convex hulls unless `decompose` writes CoACD pieces for them.
+convex hulls unless `decompose` writes CoACD pieces for them. A body that carries its asset's
+physics (a SimReady package) keeps its friction, restitution and mass in all three outputs.
 """
 from __future__ import annotations
 
@@ -126,6 +127,13 @@ def export_scene(scene: Scene, out_dir, decompose: bool = False, max_hull_verts:
         entry = {"name": b.name, "prim": pn, "fixed": bool(b.fixed), "flat": flat, "mesh": mesh_rel, "collision_pieces": pieces,
                  "position": [float(x) for x in b.center], "quaternion_wxyz": _quat_wxyz(b.rotation),
                  "tags": sorted(b.tags), "source": portable(b.source)}
+        if b.meta.get("physics"):
+            # the asset's own friction and mass (a SimReady package); density for MuJoCo from the
+            # collision pieces the export writes
+            from ..gates.settle_mujoco import body_physics
+            mu, rho = body_physics(b, [planned[r] for r in pieces] if pieces else [(verts, faces)])
+            entry["physics"] = {"friction": mu, "density": rho, "mass": b.meta["physics"].get("mass"),
+                                "restitution": b.meta["physics"].get("restitution")}
         if thickness:
             entry["thickened_m"] = thickness
         if note:
@@ -154,10 +162,13 @@ def write_mjcf(manifest: dict, path) -> None:
             continue                       # the floor plane stands in for the ground sheet
         files = b["collision_pieces"] or [b["mesh"]]
         geoms = []
+        phys = b.get("physics") or {}
+        bfr = " ".join(f"{x:g}" for x in [phys["friction"], *manifest["friction"][1:]]) if "friction" in phys else fr
+        rho = phys.get("density", manifest["density"])
         for k, rel in enumerate(files):
             mname = f"{b['prim']}_{k}"
             assets.append(f'<mesh name="{mname}" file="{os.path.relpath(rel, "meshes")}" inertia="convex" maxhullvert="{manifest["max_hull_verts"]}"/>')
-            geoms.append(f'<geom type="mesh" mesh="{mname}" condim="3" friction="{fr}" density="{manifest["density"]:g}"/>')
+            geoms.append(f'<geom type="mesh" mesh="{mname}" condim="3" friction="{bfr}" density="{rho:g}"/>')
         w, x, y, z = b["quaternion_wxyz"]
         pos = " ".join(f"{v:.6f}" for v in b["position"])
         joint = "" if b["fixed"] else "<freejoint/>"
@@ -212,9 +223,22 @@ def write_usd(manifest: dict, path, meshes: dict) -> bool:
         UsdPhysics.CollisionAPI.Apply(m.GetPrim())
         mc = UsdPhysics.MeshCollisionAPI.Apply(m.GetPrim())
         mc.CreateApproximationAttr("none" if b["fixed"] else "convexDecomposition")
+        phys = b.get("physics") or {}
         if not b["fixed"]:
             UsdPhysics.RigidBodyAPI.Apply(xf.GetPrim())
-            UsdPhysics.MassAPI.Apply(xf.GetPrim()).CreateDensityAttr(float(manifest["density"]))
+            mass_api = UsdPhysics.MassAPI.Apply(xf.GetPrim())
+            if phys.get("mass"):
+                mass_api.CreateMassAttr(float(phys["mass"]))
+            else:
+                mass_api.CreateDensityAttr(float(manifest["density"]))
+        if "friction" in phys:
+            from pxr import UsdShade
+            mat = UsdShade.Material.Define(stage, f"/World/{b['prim']}/physicsMaterial")
+            pm = UsdPhysics.MaterialAPI.Apply(mat.GetPrim())
+            pm.CreateStaticFrictionAttr(float(phys["friction"])); pm.CreateDynamicFrictionAttr(float(phys["friction"]))
+            if phys.get("restitution") is not None:
+                pm.CreateRestitutionAttr(float(phys["restitution"]))
+            UsdShade.MaterialBindingAPI.Apply(m.GetPrim()).Bind(mat, UsdShade.Tokens.weakerThanDescendants, "physics")
         xf.GetPrim().SetCustomDataByKey("simready:name", b["name"])
         xf.GetPrim().SetCustomDataByKey("simready:fixed", bool(b["fixed"]))
     stage.GetRootLayer().Save()
