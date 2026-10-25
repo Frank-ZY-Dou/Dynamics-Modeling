@@ -136,6 +136,11 @@ def fetch(package: str, repo: str = DEFAULT_REPO, revision: str = "main", textur
             os.replace(tmp, out)
         got[rel] = _sha256(out)
     bom = _read_json(dest / ".metadata" / "com.nvidia.simready.packaging.bom.json")
+    pkg = _read_json(dest / "com.nvidia.simready.packaging.json") or {}
+    listed = {m.get("name"): (m.get("hash") or {}).get("sha256") for m in pkg.get("metadata", []) if isinstance(m, dict)}
+    bom_rel = ".metadata/com.nvidia.simready.packaging.bom.json"
+    if bom is not None and listed.get("com.nvidia.simready.packaging.bom.json") not in (None, got.get(bom_rel)):
+        raise AssetError(f"{package}: the bill of materials does not match the hash the package records for it")
     mismatch = []
     for item in (bom or {}).get("items", []):
         rel = item["relative_path"]
@@ -143,7 +148,6 @@ def fetch(package: str, repo: str = DEFAULT_REPO, revision: str = "main", textur
             mismatch.append(rel)
     if mismatch:
         raise AssetError(f"{package}: files differ from the bill of materials: {mismatch}")
-    pkg = _read_json(dest / "com.nvidia.simready.packaging.json") or {}
     rec = {"repo": repo, "package": package, "revision": sha, "package_id": pkg.get("package_id"), "license": pkg.get("license"),
            "textures": textures, "bom_checked": bom is not None, "files": got, "fetched": time.strftime("%Y-%m-%dT%H:%M:%S")}
     rec_path.write_text(json.dumps(rec, indent=1))
@@ -162,8 +166,8 @@ def root_usd(pkg: Path) -> Path:
     pkg = Path(pkg)
     roots = _read_json(pkg / ".metadata" / "com.nvidia.simready.root_usds.json")
     if roots and roots.get("entries"):
-        p = pkg / roots["entries"][0]
-        if p.exists():
+        p = (pkg / str(roots["entries"][0])).resolve()
+        if p.exists() and pkg.resolve() in p.parents:                # never a file outside the package
             return p
     cand = sorted(list((pkg / "simready_usd").glob("*.usd")) + list((pkg / "simready_usd").glob("*.usda")))
     if not cand:

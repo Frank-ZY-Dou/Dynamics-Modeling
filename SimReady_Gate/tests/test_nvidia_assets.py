@@ -127,6 +127,13 @@ class Packages(unittest.TestCase):
         self.assertTrue(np.allclose(b.world_aabb()[0][2], 0.0, atol=1e-6))             # the origin is the asset's bottom
         self.assertTrue(np.allclose(b.center[:2], [0.5, 0.1], atol=1e-6))
 
+    def test_root_usd_stays_in_the_package(self):
+        from simready.io.nvidia_assets import root_usd
+        pkg = write_package(self.root, "mug_b01", (0.1, 0.08, 0.1))
+        outside = self.root / "outside.usda"; outside.write_text("#usda 1.0\n")
+        (pkg / ".metadata" / "com.nvidia.simready.root_usds.json").write_text(json.dumps({"entries": ["../../../outside.usda"]}))
+        self.assertEqual(root_usd(pkg).name, "sm_mug_b01_01.usda")       # the listed entry escapes: the package's own root
+
     def test_edge_standing_asset_rests_flat(self):
         from simready.io.nvidia_assets import body_from_package, tipping_deg
         pkg = write_package(self.root, "board_a01", (0.015, 0.22, 0.38), label="cutting board")
@@ -162,6 +169,12 @@ class Packages(unittest.TestCase):
             NA.fetch("pkg_a01")
             self.assertEqual(len(requested), n)                          # the same commit is not fetched twice
             served["sm_pkg_a01_01.usda"] = b"#usda 1.0\n# tampered\n"
+            with self.assertRaises(NA.AssetError):
+                NA.fetch("pkg_a01", force=True)
+            served["sm_pkg_a01_01.usda"] = good                          # a bill of materials the package does not vouch for
+            files.append({"path": "pkg_a01/com.nvidia.simready.packaging.json", "size": 1, "sha256": None})
+            served["com.nvidia.simready.packaging.json"] = json.dumps({"metadata": [{"name": "com.nvidia.simready.packaging.bom.json",
+                                                                                      "hash": {"sha256": "0" * 64}}]}).encode()
             with self.assertRaises(NA.AssetError):
                 NA.fetch("pkg_a01", force=True)
         with self.assertRaises(NA.AssetError):

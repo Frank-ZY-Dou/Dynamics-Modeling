@@ -115,10 +115,17 @@ beside(spoon, knife, side=right, gap=0.02)   beside(mug, fork, side=left, gap=0.
 in_front_of(glass, plate, gap=0.12)   near(glass, knife, r=0.14)
 ```
 
-**Drinks in a row, shortest at the left.**
+**Drinks in a row, shortest at the left, evenly spaced, centred on y = 0.** The compiler sorts the
+members by height; the two ends mirror each other about the table's centre line.
 ```
-row(can_3, can_5, bottle_1, can_1, can_2, can_4, axis=-y, gap=0.025)   evenly_spaced(can_3, can_5, bottle_1, can_1, can_2, can_4, axis=y)
-at(*, x=0.75, tol=0.004)
+row(can_1, can_2, can_3, can_4, can_5, bottle_1, axis=-y, gap=0.025, order=height, spacing=even, tol=0.004)
+at(*, x=0.75, tol=0.004)   symmetric(<shortest>, <tallest>, table, axis=y)
+```
+
+**Dense clutter.** The square's area is 1.12 times the sum of the fourteen fruits' bounding
+rectangles: boxes do not fit, the shapes do, and the mesh contacts pack them.
+```
+no_penetration(*, margin=0.002)   within(*, x0=0.40, x1=0.72, y0=-0.16, y1=0.16)
 ```
 
 **Sorting a heap into zones.**

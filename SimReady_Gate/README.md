@@ -50,6 +50,8 @@
 * [The agent loop](#the-agent-loop)
    * [Scale-space editing](#scale-space-editing)
 * [The language](#the-language)
+   * [What robot scenes ask for](#what-robot-scenes-ask-for)
+* [A program or the poses](#a-program-or-the-poses)
 * [Getting started](#getting-started)
    * [Setup](#setup) · [Command line](#command-line) · [Running the repaired scene in a simulator](#running-the-repaired-scene-in-a-simulator) · [Assets](#assets)
 * [Gates](#gates)
@@ -65,7 +67,8 @@ supports. SimReady Gate is the layer between a scene generator and the simulator
 
 - **Reads the scenes robotics pipelines actually produce.** RoboLab USD scenes (payloads, instance proxies, gprims, MDL materials) through `usd-core`, no Isaac Sim needed; RoboCasa / robosuite MJCF objects compiled by MuJoCo itself, so the geometry is exactly what the simulator collides with.
 - **Measures interpenetration on the meshes, not on proxies.** An FCL evaluator with probed contact normals, a containment test and a resting-contact test: which pairs interpenetrate, which body sits inside another, which body nothing supports.
-- **Repairs with S4R under a typed constraint program.** Bodies shrink about their reference center, grow back through minimum-norm QPs, stay upright on their support, and obey the program: regions, left/right/front/back relations, distances, soft target poses.
+- **Repairs with S4R under a typed constraint program.** Bodies shrink about their reference center, grow back through minimum-norm QPs, stay upright on their support, and obey the program: regions, left/right/front/back relations, distances, soft target poses, and the statements robot scenes ask for: reach, gripper clearance, a free approach corridor, handles facing the robot, rows, grids, mirror images, footprint gaps, keep-out zones, small edits, towers, preferences ([the language](#the-language)).
+- **Reads NVIDIA SimReady packages.** Search through SimReady Central, fetch from the Hugging Face datasets checked against each package's bill of materials, and carry each asset's mass, friction and semantic class into the repair, the settle test and the export ([assets](#assets)).
 - **Lets a language model lay the scene out in scale-space.** At the configured shrink scale overlaps may remain; the model places bodies into a semantic arrangement (`place`), and the continuation restores full scale while resolving what overlaps.
 - **Certifies by settling.** The repaired scene is simulated in MuJoCo with the proxies an engine would use (convex hulls, CoACD pieces); peak speed, displacement and bodies that leave their support are measured against the program's own thresholds.
 - **Leaves a certificate with provenance.** Program text and JSON, scene hash, git commit, library versions, the tolerances, every predicate value, the settle report.
