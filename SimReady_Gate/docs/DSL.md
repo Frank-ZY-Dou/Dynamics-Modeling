@@ -36,9 +36,16 @@ A requirement's slack costs 100 per m² (per rad² for headings), so it yields o
 a preference (`soft=w`) costs `w` and yields to requirements too. Programs that use the v1
 statements are first solved alone at the shrunken scale (`s_min`, where bodies are small enough to
 pass each other): the relational counterpart of `place`, so that a row or a region is reached before
-the scale is restored. When pairs still penetrate in the closing fifth of the tail (a program the
-contacts contradict), the rest of the tail serves the contacts alone: the scene comes out
-penetration-free and the predicate of the statement that could not hold says so.
+the scale is restored. A non-convex statement can stop that solve short from where the bodies start
+(a linearized `min_distance` pushes a body straight away from what it must keep clear of, never
+around it): the program alone is then solved again from other starts of the bodies over their
+supports, and the poses closest to every requirement are kept, the bodies' own start winning a tie.
+When pairs still penetrate in the closing fifth of the tail (a program the contacts contradict), the
+rest of the tail serves the contacts alone: the scene comes out penetration-free and the predicate
+of the statement that could not hold says so. The clearance the contacts keep (the margin of
+`no_penetration`) is the solver's own, not a requirement: when keeping it set the program aside and
+a requirement failed, the repair starts again from the same poses with half the margin, at most
+twice and not below 1 mm, and keeps the attempt that ends best.
 
 Every statement is also a predicate on the final scene. Requirements decide whether a repair is
 `ok`; preferences are reported apart (`preferences`, `failed_preferences`). The repair checks lengths
@@ -176,7 +183,9 @@ the certificate lists under `provenance.tolerances.statement_defaults`.
 
 - A disjunction (`keep_out`, `approach`) picks its side from the current poses. Combined with a rigid
   structure (a fixed-pitch `grid` that would have to leave a keep-out region as a whole), the choice
-  can stall; the scene stays penetration-free and the predicate reports the shortfall.
+  can stall; the other starts of the program's solve at the shrunken scale find another side when
+  the stall is there, and otherwise the scene stays penetration-free and the predicate reports the
+  shortfall.
 - Footprints are the projections of a body's mesh on the plane: corridors, regions and gaps do not
   know heights (a flat sheet in a corridor blocks it).
 - `balanced_on` takes b's top as its footprint rectangle in b's own frame.

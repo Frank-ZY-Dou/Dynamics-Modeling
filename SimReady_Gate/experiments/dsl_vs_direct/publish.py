@@ -44,7 +44,12 @@ def main(src: str, dst: str):
                 shutil.copy2(f, out / "figures" / f.name)
     iso = src_p / "isolation_check.json"
     if iso.exists():
-        (dst_p / "isolation_check.json").write_text(clean_text(iso.read_text(), roots))
+        # the control is a plain launch: its answer quotes whatever the account that ran the check has configured (its
+        # own CLAUDE.md among it), so no answer is published, only what each launch showed of the canaries
+        rec = json.loads(iso.read_text())
+        for run in rec.get("runs", {}).values():
+            run["answer"] = "(not published: the answer of the control quotes the configuration of the account that ran the check)"
+        (dst_p / "isolation_check.json").write_text(clean_text(json.dumps(rec, indent=1), roots))
     print(json.dumps({"published": str(dst_p)}))
 
 
