@@ -29,6 +29,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "s4r"))
 
 from mesh_collision import MeshObject, evaluate_mesh_object_scene, outward_faces  # noqa: E402
+from mesh_collision import _fcl_all_contacts, _contact_witness  # noqa: E402
 from s4r_qp import osqp_solve, qp_status_ok  # noqa: E402
 
 DEFAULT_ASSET_DIR = HERE.parent / "data" / "kubric_pool"
@@ -43,6 +44,7 @@ def scan_eligible_assets(asset_dir: Path) -> list:
 
 
 UP = np.array([0.0, 0.0, 1.0], dtype=np.float64)
+VERTICAL_COS = 0.866   # |n . up| above cos 30 deg: a normal that gives the in-plane step no handle
 
 
 @dataclass
@@ -52,6 +54,7 @@ class AssetInstance:
     faces: np.ndarray
     bbox_center: np.ndarray
     normalize_factor: float
+    bvh: object = None     # FCL BVH of normalize_factor * verts (own frame, unit scale), built on first use
 
 
 def rotz(theta: float) -> np.ndarray:
@@ -143,6 +146,42 @@ def make_objects(
     return objects
 
 
+def _body_bvh(inst: AssetInstance):
+    """The body's FCL BVH, built once in its own frame at unit scale. A pose at a
+    scale reaches it as the transform (R, center / scale): in that frame, shrunk
+    by the scale, distances, depths and contact positions are those of the world
+    divided by the scale (as in s4r_qp), so no step builds a BVH."""
+    if inst.bvh is None:
+        import fcl
+        verts = (inst.normalize_factor * inst.verts).astype(np.float64)
+        model = fcl.BVHModel()
+        model.beginModel(len(verts), len(inst.faces))
+        model.addSubModel(verts, inst.faces.astype(np.int32))
+        model.endModel()
+        inst.bvh = model
+    return inst.bvh
+
+
+def inplane_separation(i: int, j: int, aabb_min, aabb_max, centers) -> np.ndarray:
+    """Horizontal direction that separates two overlapping footprints the
+    fastest: the axis of least footprint overlap, pointing from body i to body
+    j. One centre above the other gives no direction from the geometry; the
+    pair is then pushed apart along that axis, i (the lower index) toward -."""
+    best, best_ov = 0, np.inf
+    for ax in (0, 1):
+        ov = min(aabb_max[i][ax], aabb_max[j][ax]) - max(aabb_min[i][ax], aabb_min[j][ax])
+        if ov < best_ov:
+            best_ov, best = ov, ax
+    d = np.zeros(3)
+    if abs(centers[j][best] - centers[i][best]) >= 1e-9:
+        d[best] = np.sign(centers[j][best] - centers[i][best])
+    else:
+        d[:2] = (centers[j] - centers[i])[:2]
+        if np.linalg.norm(d) <= 1e-12:
+            d[best] = 1.0
+    return d / np.linalg.norm(d)
+
+
 def fcl_contacts(
     instances: list[AssetInstance],
     xy: np.ndarray,
@@ -154,7 +193,6 @@ def fcl_contacts(
 ):
     import fcl
 
-    verts_world: list[np.ndarray] = []
     centers: list[np.ndarray] = []
     rotations: list[np.ndarray] = []
     aabb_min: list[np.ndarray] = []
@@ -165,17 +203,11 @@ def fcl_contacts(
         verts, center, R = world_vertices(
             inst, xy[i], float(yaw[i]), float(roll[i]), float(pitch[i]), scale, tilt_factor
         )
-        verts_world.append(verts)
         centers.append(center)
         rotations.append(R)
         aabb_min.append(verts.min(axis=0))
         aabb_max.append(verts.max(axis=0))
-
-        model = fcl.BVHModel()
-        model.beginModel(len(verts), len(inst.faces))
-        model.addSubModel(verts.astype(np.float64), inst.faces.astype(np.int32))
-        model.endModel()
-        collision_objects.append(fcl.CollisionObject(model, fcl.Transform()))
+        collision_objects.append(fcl.CollisionObject(_body_bvh(inst), fcl.Transform(R, center / scale)))
 
     contacts = []
     n = len(instances)
@@ -187,36 +219,37 @@ def fcl_contacts(
 
             req = fcl.DistanceRequest(enable_nearest_points=True, enable_signed_distance=True)
             res = fcl.DistanceResult()
-            dist = float(fcl.distance(collision_objects[i], collision_objects[j], req, res))
+            dist = float(fcl.distance(collision_objects[i], collision_objects[j], req, res)) * scale
             if dist > 0.0:
-                cp_i = np.asarray(res.nearest_points[0], dtype=np.float64)
-                cp_j = np.asarray(res.nearest_points[1], dtype=np.float64)
+                cp_i = np.asarray(res.nearest_points[0], dtype=np.float64) * scale
+                cp_j = np.asarray(res.nearest_points[1], dtype=np.float64) * scale
                 raw = cp_j - cp_i
                 normal = raw / max(np.linalg.norm(raw), 1e-12)
                 signed = dist
             else:
-                creq = fcl.CollisionRequest(num_max_contacts=32, enable_contact=True)
-                cres = fcl.CollisionResult()
-                fcl.collide(collision_objects[i], collision_objects[j], creq, cres)
-                if not cres.is_collision or not cres.contacts:
+                pair_contacts = _fcl_all_contacts(fcl, collision_objects[i], collision_objects[j])
+                if not pair_contacts:
                     cp_i = 0.5 * (centers[i] + centers[j])
                     cp_j = cp_i.copy()
                     normal = centers[j] - centers[i]
-                    normal = normal / max(np.linalg.norm(normal), 1e-12)
                     signed = 0.0
                 else:
                     # The reported normal is the exit direction of body j
                     # through the crossed triangle; it is kept as is (the
                     # centroid line points the wrong way inside a cavity).
-                    c_best = max(cres.contacts, key=lambda c: c.penetration_depth)
-                    signed = -float(c_best.penetration_depth)
-                    normal = np.asarray(c_best.normal, dtype=np.float64)
+                    depth, normal, pos = _contact_witness(pair_contacts)
+                    signed = -depth * scale
                     if np.linalg.norm(normal) < 1e-12:
                         normal = centers[j] - centers[i]
-                    normal = normal / max(np.linalg.norm(normal), 1e-12)
-                    pos = np.asarray(c_best.pos, dtype=np.float64)
-                    cp_i = pos
-                    cp_j = pos
+                    cp_i = pos * scale
+                    cp_j = cp_i.copy()
+                nn = float(np.linalg.norm(normal))
+                if nn < 1e-12 or (signed < 0.0 and abs(float(normal @ UP)) > VERTICAL_COS * nn):
+                    # no direction (one centre above the other), or a vertical normal that gives the
+                    # in-plane step no handle: separate the footprints instead
+                    normal = inplane_separation(i, j, aabb_min, aabb_max, centers)
+                else:
+                    normal = normal / nn
 
             # Full-scale extents along the current contact normal.  The ds term
             # multiplies these, so scale is intentionally omitted here.

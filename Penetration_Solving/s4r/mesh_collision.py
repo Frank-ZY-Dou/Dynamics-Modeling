@@ -424,6 +424,46 @@ def _nested_signed_distance(mesh_i, mesh_j, cp_i, cp_j, d):
     return None if hit is None else hit[0]
 
 
+def _fcl_all_contacts(fcl_mod, o_i, o_j) -> list:
+    """Every contact FCL reports for two objects whose surfaces cross, not the
+    first few: a witness taken from a truncated list depends on the order in
+    which FCL traverses the two BVHs (a deep overlap of two 1500-face meshes
+    has hundreds of contacts). A list shorter than the first request's cap is
+    already whole; a deep overlap is asked again for all of its contacts.
+    Empty when the surfaces do not cross.
+    """
+    res = fcl_mod.CollisionResult()
+    fcl_mod.collide(o_i, o_j, fcl_mod.CollisionRequest(num_max_contacts=64, enable_contact=True), res)
+    if len(res.contacts) >= 64:
+        res = fcl_mod.CollisionResult()
+        fcl_mod.collide(o_i, o_j, fcl_mod.CollisionRequest(num_max_contacts=1_000_000, enable_contact=True), res)
+    return list(res.contacts) if res.is_collision else []
+
+
+def _contact_witness(contacts: list) -> tuple[float, np.ndarray, np.ndarray]:
+    """(depth, normal, position) standing for a non-empty list of FCL contacts
+    of one pair, whatever order FCL lists them in: the deepest depth, the
+    direction of the sum of the contacts' normals (FCL's own: the exit
+    direction of the second body through each crossed triangle) and the mean
+    of their positions. The deepest contact alone is a poor witness: FCL's
+    depth of a triangle pair grows with the triangles, so the deepest is often
+    an outlier, and its normal is that of one triangle. When the normals cancel
+    (a symmetric overlap), the normal is that of the deepest contact, the
+    nearest to the mean position of the deepest ones (ties by position).
+    """
+    depths = [float(c.penetration_depth) for c in contacts]
+    depth = max(depths)
+    pos = np.mean([np.asarray(c.pos, dtype=np.float64) for c in contacts], axis=0)
+    normal = np.sum([np.asarray(c.normal, dtype=np.float64) for c in contacts], axis=0)
+    if np.linalg.norm(normal) < 1e-9 * len(contacts):
+        tied = [c for c, d in zip(contacts, depths) if d >= depth - 1e-9]
+        w = np.mean([np.asarray(c.pos, dtype=np.float64) for c in tied], axis=0)
+        best = min(tied, key=lambda c: (round(float(np.linalg.norm(np.asarray(c.pos, dtype=np.float64) - w)), 9),
+                                        tuple(np.round(np.asarray(c.pos, dtype=np.float64), 9))))
+        normal = np.asarray(best.normal, dtype=np.float64)
+    return depth, normal / max(np.linalg.norm(normal), 1e-12), pos
+
+
 def _fcl_pair_signed_distance(fcl_mod, bvh_i, bvh_j, mesh_i=None, mesh_j=None) -> float:
     """FCL signed distance between two BVHs whose verts are already in world
     coords: distance() when the surfaces are apart, collide() when they
@@ -447,13 +487,10 @@ def _fcl_pair_signed_distance(fcl_mod, bvh_i, bvh_j, mesh_i=None, mesh_j=None) -
                 return nested
         return float(d)
     # Overlap: use collide() to extract exact penetration depth.
-    creq = fcl_mod.CollisionRequest(num_max_contacts=16, enable_contact=True)
-    cres = fcl_mod.CollisionResult()
-    fcl_mod.collide(o_i, o_j, creq, cres)
-    if not cres.is_collision or not cres.contacts:
+    contacts = _fcl_all_contacts(fcl_mod, o_i, o_j)
+    if not contacts:
         return 0.0
-    c_best = max(cres.contacts, key=lambda c: c.penetration_depth)
-    return -float(c_best.penetration_depth)
+    return -_contact_witness(contacts)[0]
 
 
 def _build_fcl_bvhs(meshes: List[trimesh.Trimesh]):
@@ -813,15 +850,11 @@ class MeshOracle:
             # direction of the second body through the crossed triangle and
             # is used as is (aligning it to the centroid line would flip it
             # inside a cavity of a non-convex body).
-            creq = fcl.CollisionRequest(num_max_contacts=16, enable_contact=True)
-            cres = fcl.CollisionResult()
-            fcl.collide(o_i, o_j, creq, cres)
-            if not cres.is_collision or not cres.contacts:
+            contacts = _fcl_all_contacts(fcl, o_i, o_j)
+            if not contacts:
                 # Distance=0 but not colliding: touching; treat as sd=0.
                 return 0.0, _safe_normalize(cj - ci)
-            c_best = max(cres.contacts, key=lambda c: c.penetration_depth)
-            depth = float(c_best.penetration_depth)
-            raw = np.asarray(c_best.normal, dtype=np.float64)
+            depth, raw, _ = _contact_witness(contacts)
             if np.linalg.norm(raw) < 1e-12:
                 raw = cj - ci
             return -depth, _safe_normalize(raw)

@@ -31,6 +31,7 @@ from mesh_collision import _contains_points as _mesh_contains_points  # noqa: E4
 from mesh_collision import _vertex_components, _nested_component_contact, _piece_layout, _piece_boxes, _any_piece_nested  # noqa: E402
 from mesh_collision import _signed_volume  # noqa: E402
 from mesh_collision import _aabb_candidate_pairs  # noqa: E402
+from mesh_collision import _fcl_all_contacts, _contact_witness  # noqa: E402
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -435,18 +436,15 @@ class PrebuiltFCLOracle:
                     cp_on_a = cp_i_u * s
                     cp_on_b = cp_j_u * s
             else:
-                creq = fcl.CollisionRequest(num_max_contacts=16,
-                                            enable_contact=True)
-                cres = fcl.CollisionResult()
-                fcl.collide(fcl_objs[i], fcl_objs[j], creq, cres)
-                if not cres.is_collision or not cres.contacts:
+                pair_contacts = _fcl_all_contacts(fcl, fcl_objs[i], fcl_objs[j])
+                if not pair_contacts:
                     new_cache[(i, j)] = (0.0, None)
                     continue
                 if all_contacts:
                     # Diagnostic ablation: every reported triangle contact
                     # becomes its own constraint row instead of the single
                     # deepest witness.
-                    for c_k in cres.contacts:
+                    for c_k in pair_contacts:
                         depth_world = float(c_k.penetration_depth) * s
                         n_raw = np.asarray(c_k.normal, dtype=np.float64)
                         nn = np.linalg.norm(n_raw)
@@ -460,10 +458,9 @@ class PrebuiltFCLOracle:
                                          pos_world.copy(),
                                          pos_world + n_k * depth_world))
                     continue
-                c_best = max(cres.contacts, key=lambda c: c.penetration_depth)
-                depth_world = float(c_best.penetration_depth) * s
-                n_raw = np.asarray(c_best.normal, dtype=np.float64)
-                pos_world = np.asarray(c_best.pos, dtype=np.float64) * s
+                depth_u, n_raw, pos_u = _contact_witness(pair_contacts)
+                depth_world = depth_u * s
+                pos_world = pos_u * s
                 cp_on_a = pos_world.copy()
                 cp_on_b = pos_world + n_raw * depth_world
                 d_signed = -depth_world
@@ -1893,17 +1890,14 @@ def _optimize_rotations_fcl(centers, rots, nfs, mverts, mfaces, N,
                     cl_world = cp_i_u * scale
                     d_min_world = d_u * scale
                 else:
-                    creq = fcl.CollisionRequest(num_max_contacts=8, enable_contact=True)
-                    cres = fcl.CollisionResult()
-                    fcl.collide(fcl_objs[i], fcl_objs[j], creq, cres)
-                    if not cres.is_collision or not cres.contacts:
+                    pair_contacts = _fcl_all_contacts(fcl, fcl_objs[i], fcl_objs[j])
+                    if not pair_contacts:
                         continue
-                    c_best = max(cres.contacts, key=lambda c: c.penetration_depth)
                     # The reported normal is the exit direction of body j
                     # (second argument) through the crossed triangle.
-                    n_raw = np.asarray(c_best.normal, dtype=np.float64)
-                    cl_world = np.asarray(c_best.pos, dtype=np.float64) * scale
-                    d_min_world = -float(c_best.penetration_depth) * scale
+                    depth_u, n_raw, pos_u = _contact_witness(pair_contacts)
+                    cl_world = pos_u * scale
+                    d_min_world = -depth_u * scale
                 nn = np.linalg.norm(n_raw)
                 if nn < 1e-12:
                     continue
