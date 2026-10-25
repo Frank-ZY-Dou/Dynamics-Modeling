@@ -1,0 +1,96 @@
+{
+ "task": "setting_n6",
+ "family": "setting",
+ "n": 6,
+ "condition": "direct",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 18.407947063446045,
+    "duration_ms": 17896,
+    "duration_api_ms": 17863,
+    "cost_usd": 0.00204037,
+    "usage": {
+     "input": 2,
+     "cache_creation": 399,
+     "cache_read": 1937,
+     "output": 3882,
+     "thinking": 3628
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1710,
+   "answer": {
+    "poses": [
+     {
+      "name": "plate",
+      "x": 0.55,
+      "y": 0,
+      "yaw": 170
+     },
+     {
+      "name": "fork",
+      "x": 0.55,
+      "y": 0.14,
+      "yaw": 0
+     },
+     {
+      "name": "knife",
+      "x": 0.55,
+      "y": -0.14,
+      "yaw": -90
+     },
+     {
+      "name": "spoon",
+      "x": 0.55,
+      "y": -0.19,
+      "yaw": -90
+     },
+     {
+      "name": "mug",
+      "x": 0.55,
+      "y": 0.25,
+      "yaw": 24.5
+     },
+     {
+      "name": "glass",
+      "x": 0.62,
+      "y": -0.25,
+      "yaw": -135
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "penetrating_pairs": [],
+    "not_resting_on_anything": [],
+    "off_the_support": [],
+    "missing_poses": []
+   },
+   "self_ok": true,
+   "solve_s": 0.598975419998169,
+   "solve_cpu_s": 0.5990259450000001,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 6,
+   "direct_repair": {
+    "rubric_ok": true,
+    "self_ok": true,
+    "solve_s": 2.120203971862793,
+    "solve_cpu_s": 2.1204468690000002,
+    "rubric_failed": []
+   }
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

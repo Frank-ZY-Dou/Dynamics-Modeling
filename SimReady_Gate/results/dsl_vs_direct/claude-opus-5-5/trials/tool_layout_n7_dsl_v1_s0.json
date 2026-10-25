@@ -150,6 +150,7 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -160,21 +161,15 @@
     ]
    },
    "self_ok": true,
-   "solve_s": 13.75267481803894,
-   "solve_cpu_s": 13.753236193999982,
-   "rubric_ok": false,
-   "rubric_failed": [
-    [
-     "row_aligned(6 bodies)",
-     false,
-     0.015
-    ]
-   ],
+   "solve_s": 4.5355308055877686,
+   "solve_cpu_s": 4.536500932999999,
+   "rubric_ok": true,
+   "rubric_failed": [],
    "answer_items": 19
   }
  ],
  "n_rounds": 1,
- "success": false,
- "first_round_success": false,
+ "success": true,
+ "first_round_success": true,
  "self_ok": true
 }

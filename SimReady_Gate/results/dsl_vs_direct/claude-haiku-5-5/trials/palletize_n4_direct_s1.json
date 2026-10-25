@@ -56,209 +56,31 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
-    "ok": false,
-    "penetrating_pairs": [
-     [
-      "pallet",
-      "box_4",
-      -95.4
-     ]
-    ],
-    "not_resting_on_anything": [],
-    "off_the_support": [],
-    "missing_poses": []
-   },
-   "self_ok": false,
-   "solve_s": 0.14528393745422363,
-   "solve_cpu_s": 0.145300337000009,
-   "rubric_ok": false,
-   "rubric_failed": [
-    [
-     "no_penetration",
-     false,
-     1
-    ]
-   ],
-   "answer_items": 4,
-   "direct_repair": {
-    "rubric_ok": true,
-    "self_ok": false,
-    "solve_s": 0.5289797782897949,
-    "solve_cpu_s": 0.5290342090000024,
-    "rubric_failed": []
-   }
-  },
-  {
-   "round": 2,
-   "llm": {
     "ok": true,
-    "wall_s": 6.4144017696380615,
-    "duration_ms": 5836,
-    "duration_api_ms": 5809,
-    "cost_usd": 0.00091073,
-    "usage": {
-     "input": 2,
-     "cache_creation": 1417,
-     "cache_read": 913,
-     "output": 1236,
-     "thinking": 1038
-    },
-    "num_turns": 2,
-    "stop_reason": "tool_use",
-    "error": null
-   },
-   "message_chars": 1517,
-   "answer": {
-    "poses": [
-     {
-      "name": "box_1",
-      "x": 0.5,
-      "y": -0.3,
-      "yaw": 0
-     },
-     {
-      "name": "box_2",
-      "x": 0.5,
-      "y": 0,
-      "yaw": 0
-     },
-     {
-      "name": "box_3",
-      "x": 0.5,
-      "y": 0.3,
-      "yaw": 0
-     },
-     {
-      "name": "box_4",
-      "x": 0.9,
-      "y": 0,
-      "yaw": 0,
-      "on": "pallet"
-     }
-    ]
-   },
-   "report": {
-    "ok": false,
-    "penetrating_pairs": [
-     [
-      "pallet",
-      "box_4",
-      -95.4
-     ]
-    ],
+    "penetrating_pairs": [],
     "not_resting_on_anything": [],
     "off_the_support": [],
     "missing_poses": []
    },
-   "self_ok": false,
-   "solve_s": 0.14318633079528809,
-   "solve_cpu_s": 0.14319806699998594,
-   "rubric_ok": false,
-   "rubric_failed": [
-    [
-     "no_penetration",
-     false,
-     1
-    ]
-   ],
+   "self_ok": true,
+   "solve_s": 0.11980509757995605,
+   "solve_cpu_s": 0.11983189800000105,
+   "rubric_ok": true,
+   "rubric_failed": [],
    "answer_items": 4,
    "direct_repair": {
     "rubric_ok": true,
-    "self_ok": false,
-    "solve_s": 0.5239942073822021,
-    "solve_cpu_s": 0.5240660359999936,
-    "rubric_failed": []
-   }
-  },
-  {
-   "round": 3,
-   "llm": {
-    "ok": true,
-    "wall_s": 10.22243857383728,
-    "duration_ms": 9660,
-    "duration_api_ms": 9631,
-    "cost_usd": 0.0010654899999999999,
-    "usage": {
-     "input": 2,
-     "cache_creation": 400,
-     "cache_read": 1929,
-     "output": 1932,
-     "thinking": 1707
-    },
-    "num_turns": 2,
-    "stop_reason": "tool_use",
-    "error": null
-   },
-   "message_chars": 1517,
-   "answer": {
-    "poses": [
-     {
-      "name": "box_1",
-      "x": 0.5,
-      "y": -0.36,
-      "yaw": 0,
-      "on": "pallet"
-     },
-     {
-      "name": "box_2",
-      "x": 0.5,
-      "y": 0,
-      "yaw": 0,
-      "on": "pallet"
-     },
-     {
-      "name": "box_3",
-      "x": 0.5,
-      "y": 0.36,
-      "yaw": 0,
-      "on": "pallet"
-     },
-     {
-      "name": "box_4",
-      "x": 0.9,
-      "y": 0,
-      "yaw": 0,
-      "on": "pallet"
-     }
-    ]
-   },
-   "report": {
-    "ok": false,
-    "penetrating_pairs": [
-     [
-      "pallet",
-      "box_4",
-      -95.4
-     ]
-    ],
-    "not_resting_on_anything": [],
-    "off_the_support": [],
-    "missing_poses": []
-   },
-   "self_ok": false,
-   "solve_s": 0.14767742156982422,
-   "solve_cpu_s": 0.14768654700000639,
-   "rubric_ok": false,
-   "rubric_failed": [
-    [
-     "no_penetration",
-     false,
-     1
-    ]
-   ],
-   "answer_items": 4,
-   "direct_repair": {
-    "rubric_ok": true,
-    "self_ok": false,
-    "solve_s": 0.5419435501098633,
-    "solve_cpu_s": 0.5420453800000189,
+    "self_ok": true,
+    "solve_s": 0.23068857192993164,
+    "solve_cpu_s": 0.23075854300000742,
     "rubric_failed": []
    }
   }
  ],
- "n_rounds": 3,
- "success": false,
- "first_round_success": false,
- "self_ok": false
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
 }

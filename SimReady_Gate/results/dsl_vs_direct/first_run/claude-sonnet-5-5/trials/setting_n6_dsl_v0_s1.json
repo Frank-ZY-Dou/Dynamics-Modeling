@@ -1,0 +1,151 @@
+{
+ "task": "setting_n6",
+ "family": "setting",
+ "n": 6,
+ "condition": "dsl_v0",
+ "seed": 1,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 13.867827415466309,
+    "duration_ms": 13135,
+    "duration_api_ms": 13096,
+    "cost_usd": 0.0193646,
+    "usage": {
+     "input": 2,
+     "cache_creation": 403,
+     "cache_read": 4986,
+     "output": 1725,
+     "thinking": 1256
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1700,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "no_penetration",
+      "a": "*",
+      "margin": 0.005
+     },
+     {
+      "op": "place",
+      "a": "plate",
+      "x": 0.55,
+      "y": 0,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fork",
+      "x": 0.6,
+      "y": 0.135,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "knife",
+      "x": 0.6,
+      "y": -0.135,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "spoon",
+      "x": 0.6,
+      "y": -0.2,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "glass",
+      "x": 0.7,
+      "y": -0.04,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "mug",
+      "x": 0.55,
+      "y": 0.23,
+      "yaw": 0
+     },
+     {
+      "op": "left_of",
+      "a": "fork",
+      "b": "plate"
+     },
+     {
+      "op": "right_of",
+      "a": "knife",
+      "b": "plate"
+     },
+     {
+      "op": "right_of",
+      "a": "spoon",
+      "b": "knife"
+     },
+     {
+      "op": "in_front_of",
+      "a": "glass",
+      "b": "plate"
+     },
+     {
+      "op": "near",
+      "a": "glass",
+      "b": "knife",
+      "r": 0.15
+     },
+     {
+      "op": "left_of",
+      "a": "mug",
+      "b": "fork"
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 2.25606632232666,
+   "solve_cpu_s": 2.256431913,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "facing(mug)",
+     false,
+     22.6938
+    ]
+   ],
+   "answer_items": 16
+  }
+ ],
+ "n_rounds": 1,
+ "success": false,
+ "first_round_success": false,
+ "self_ok": true
+}

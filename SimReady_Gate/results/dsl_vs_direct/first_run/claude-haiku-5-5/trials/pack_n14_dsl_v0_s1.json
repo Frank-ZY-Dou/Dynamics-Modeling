@@ -1,0 +1,353 @@
+{
+ "task": "pack_n14",
+ "family": "pack",
+ "n": 14,
+ "condition": "dsl_v0",
+ "seed": 1,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 35.85281467437744,
+    "duration_ms": 35359,
+    "duration_api_ms": 35330,
+    "cost_usd": 0.0044188199999999995,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1775,
+     "cache_read": 3962,
+     "output": 8048,
+     "thinking": 6530
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1999,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration",
+      "margin": 0.005
+     },
+     {
+      "op": "place",
+      "a": "fruit_3",
+      "x": 0.56,
+      "y": -0.1,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "fruit_11",
+      "x": 0.56,
+      "y": 0,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "fruit_7",
+      "x": 0.56,
+      "y": 0.1,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "fruit_9",
+      "x": 0.435,
+      "y": -0.12,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_6",
+      "x": 0.435,
+      "y": -0.04,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_13",
+      "x": 0.435,
+      "y": 0.04,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_10",
+      "x": 0.435,
+      "y": 0.12,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_1",
+      "x": 0.685,
+      "y": -0.12,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_14",
+      "x": 0.685,
+      "y": -0.04,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_5",
+      "x": 0.685,
+      "y": 0.04,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_2",
+      "x": 0.685,
+      "y": 0.12,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_4",
+      "x": 0.52,
+      "y": -0.1,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_8",
+      "x": 0.6,
+      "y": 0,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_12",
+      "x": 0.52,
+      "y": 0.1,
+      "yaw": 0
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_3",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_11",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_7",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_9",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_6",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_13",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_10",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_1",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_14",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_5",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_2",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_4",
+      "b": "fruit_3"
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_8",
+      "b": "fruit_11"
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_12",
+      "b": "fruit_7"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_1"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_2"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_3"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_4"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_5"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_6"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_7"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_8"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_9"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_10"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_11"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_12"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_13"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_14"
+     },
+     {
+      "op": "within",
+      "a": "fruit_1",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_2",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_3",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_4",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_5",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_6",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_7",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_8",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_9",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_10",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_11",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_12",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_13",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_14",
+      "b": "table.top"
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "pairs still penetrated in the closing steps of the tail; 3 step(s) served the contacts alone, the program rows set aside"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 9.819803714752197,
+   "solve_cpu_s": 9.820932599000002,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 57
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

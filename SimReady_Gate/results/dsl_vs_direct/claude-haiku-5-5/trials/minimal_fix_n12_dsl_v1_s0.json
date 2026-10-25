@@ -66,6 +66,7 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -74,8 +75,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 14.739373445510864,
-   "solve_cpu_s": 14.735478623999995,
+   "solve_s": 2.9810006618499756,
+   "solve_cpu_s": 2.981263732000002,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 8

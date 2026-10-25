@@ -144,6 +144,7 @@
      "Placement targets keep the corridor |y|<=0.075 for x<0.52 clear, keep the drop zone x[0.25,0.40] y[0.20,0.40] empty, and keep every centre within 0.8 m of the base."
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -152,8 +153,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 8.009765863418579,
-   "solve_cpu_s": 8.004454367999998,
+   "solve_s": 2.462761640548706,
+   "solve_cpu_s": 2.4634391929999992,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 19

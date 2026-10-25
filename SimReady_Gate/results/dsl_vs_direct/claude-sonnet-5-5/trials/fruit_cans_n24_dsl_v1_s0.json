@@ -116,13 +116,14 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": false,
     "error": "ProgramError: statement 12 (min_distance): '*' and name patterns are only allowed in a and in members"
    },
    "self_ok": false,
-   "solve_s": 0.00014328956604003906,
-   "solve_cpu_s": 0.0001409400000014216,
+   "solve_s": 0.00041985511779785156,
+   "solve_cpu_s": 0.0004124619999998913,
    "rubric_ok": false,
    "rubric_failed": [
     [
@@ -138,7 +139,7 @@
     [
      "row_aligned(7 bodies)",
      false,
-     0.2356
+     0.1974
     ],
     [
      "row_gaps(7 bodies)",
@@ -280,19 +281,20 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
     "failed_predicates": [],
     "failed_preferences": [],
     "solver_notes": [
-     "a program row was not met within the step at 3 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "a program row was not met within the step at 5 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
      "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
     ]
    },
    "self_ok": true,
-   "solve_s": 10.308029174804688,
-   "solve_cpu_s": 10.308404565000004,
+   "solve_s": 5.527766942977905,
+   "solve_cpu_s": 5.52555486,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 14

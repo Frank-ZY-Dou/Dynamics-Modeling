@@ -138,20 +138,20 @@
      "The 'entirely at y < 0' and 'entirely at y > 0' limits are met with place targets set far enough from y = 0 to clear each footprint, because there is no half-plane region body to constrain against."
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
     "failed_predicates": [],
     "failed_preferences": [],
     "solver_notes": [
-     "pairs still penetrated in the closing steps of the tail; 3 step(s) served the contacts alone, the program rows set aside",
-     "a program row was not met within the step at 14 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
-     "the contacts exceeded the trust region at 2 step(s); those steps served the contacts alone"
+     "a program row was not met within the step at 10 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts exceeded the trust region at 1 step(s); those steps served the contacts alone"
     ]
    },
    "self_ok": true,
-   "solve_s": 14.352477550506592,
-   "solve_cpu_s": 14.354940825,
+   "solve_s": 1.8039402961730957,
+   "solve_cpu_s": 1.7975792689999963,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 21

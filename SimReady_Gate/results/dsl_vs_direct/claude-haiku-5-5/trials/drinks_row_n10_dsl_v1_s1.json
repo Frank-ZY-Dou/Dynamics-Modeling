@@ -68,6 +68,7 @@
     ],
     "intent": "Arrange all ten drinks in one y-parallel row on the table near x=0.75, ordered shortest-left to tallest-right, evenly spaced with at least 2 cm between neighbours and centred on y=0, each standing upright on the table."
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -79,15 +80,10 @@
     ]
    },
    "self_ok": true,
-   "solve_s": 5.432032346725464,
-   "solve_cpu_s": 5.432396282999999,
+   "solve_s": 3.1478002071380615,
+   "solve_cpu_s": 3.1487220130000004,
    "rubric_ok": false,
    "rubric_failed": [
-    [
-     "row_aligned(10 bodies)",
-     false,
-     0.017
-    ],
     [
      "line_x",
      false,

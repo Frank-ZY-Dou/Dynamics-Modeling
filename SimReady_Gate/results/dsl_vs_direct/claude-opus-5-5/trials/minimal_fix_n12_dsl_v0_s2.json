@@ -159,6 +159,7 @@
      "Likely overlaps: orange/can_2, apple_1/apple_2, and mug/can_1."
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -167,8 +168,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 14.377525568008423,
-   "solve_cpu_s": 14.372434044000002,
+   "solve_s": 2.603468894958496,
+   "solve_cpu_s": 2.5759613729999984,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 28

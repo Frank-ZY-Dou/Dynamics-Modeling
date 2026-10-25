@@ -1,0 +1,94 @@
+{
+ "task": "drinks_row_n10",
+ "family": "drinks_row",
+ "n": 10,
+ "condition": "dsl_v1",
+ "seed": 2,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 7.398482084274292,
+    "duration_ms": 6768,
+    "duration_api_ms": 6739,
+    "cost_usd": 0.0278418,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1631,
+     "cache_read": 10529,
+     "output": 634,
+     "thinking": 416
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1938,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_*",
+       "bottle_*",
+       "glass_*"
+      ],
+      "axis": "y",
+      "start": "left",
+      "order": "height",
+      "gap": 0.02,
+      "spacing": "even",
+      "tol": 0.01,
+      "mid": 0
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "x0": 0.7,
+      "x1": 0.8
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 2 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 4 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 5.2826855182647705,
+   "solve_cpu_s": 5.283041412999999,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 6
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

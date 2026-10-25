@@ -178,6 +178,7 @@
     ],
     "intent": "Arrange the desk so the keyboard sits centred in front of the robot with the mouse, notebook, marker, mug and tape dispenser placed around it as specified, all resting upright on the table without interpenetration."
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -188,8 +189,8 @@
     ]
    },
    "self_ok": true,
-   "solve_s": 13.948388814926147,
-   "solve_cpu_s": 13.950220285,
+   "solve_s": 3.612438201904297,
+   "solve_cpu_s": 3.613065227000007,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 20

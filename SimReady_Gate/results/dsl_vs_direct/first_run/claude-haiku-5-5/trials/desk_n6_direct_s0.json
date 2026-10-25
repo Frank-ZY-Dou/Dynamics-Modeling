@@ -1,0 +1,96 @@
+{
+ "task": "desk_n6",
+ "family": "desk",
+ "n": 6,
+ "condition": "direct",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 14.427107810974121,
+    "duration_ms": 13869,
+    "duration_api_ms": 13833,
+    "cost_usd": 0.00182133,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1500,
+     "cache_read": 913,
+     "output": 3024,
+     "thinking": 2769
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1886,
+   "answer": {
+    "poses": [
+     {
+      "name": "keyboard",
+      "x": 0.45,
+      "y": 0,
+      "yaw": 90
+     },
+     {
+      "name": "mouse",
+      "x": 0.45,
+      "y": -0.395,
+      "yaw": 90
+     },
+     {
+      "name": "notebook",
+      "x": 0.45,
+      "y": 0.405,
+      "yaw": 90
+     },
+     {
+      "name": "marker",
+      "x": 0.56,
+      "y": 0.405,
+      "yaw": 90
+     },
+     {
+      "name": "mug",
+      "x": 0.7,
+      "y": 0,
+      "yaw": 0
+     },
+     {
+      "name": "tape",
+      "x": 0.8,
+      "y": -0.55,
+      "yaw": 0
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "penetrating_pairs": [],
+    "not_resting_on_anything": [],
+    "off_the_support": [],
+    "missing_poses": []
+   },
+   "self_ok": true,
+   "solve_s": 2.574549436569214,
+   "solve_cpu_s": 2.574705141999999,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 6,
+   "direct_repair": {
+    "rubric_ok": true,
+    "self_ok": true,
+    "solve_s": 8.597678184509277,
+    "solve_cpu_s": 8.597260402999979,
+    "rubric_failed": []
+   }
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

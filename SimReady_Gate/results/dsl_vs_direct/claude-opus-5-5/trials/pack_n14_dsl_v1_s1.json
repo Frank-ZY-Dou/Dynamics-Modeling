@@ -65,18 +65,20 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
     "failed_predicates": [],
     "failed_preferences": [],
     "solver_notes": [
-     "a program row was not met within the step at 7 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome"
+     "a program row was not met within the step at 3 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts kept the program's margin of 5 mm and set a requirement aside; the repair started again from the same poses with a margin of 2.5 mm"
     ]
    },
    "self_ok": true,
-   "solve_s": 4.524461030960083,
-   "solve_cpu_s": 4.524994676999995,
+   "solve_s": 4.209185361862183,
+   "solve_cpu_s": 4.2098189420000125,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 7

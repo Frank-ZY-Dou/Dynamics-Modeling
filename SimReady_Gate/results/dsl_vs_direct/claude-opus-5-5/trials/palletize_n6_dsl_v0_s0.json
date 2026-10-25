@@ -127,6 +127,7 @@
      "Neighbouring boxes are spaced about 5 cm apart along y, and the two rows are about 4 cm apart along x."
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -135,8 +136,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 2.3196566104888916,
-   "solve_cpu_s": 2.316899295000013,
+   "solve_s": 0.7248594760894775,
+   "solve_cpu_s": 0.7251826639999877,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 16

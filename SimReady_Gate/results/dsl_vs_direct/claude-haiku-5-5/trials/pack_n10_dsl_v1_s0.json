@@ -60,18 +60,19 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
     "failed_predicates": [],
     "failed_preferences": [],
     "solver_notes": [
-     "a program row was not met within the step at 1 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome"
+     "a program row was not met within the step at 2 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome"
     ]
    },
    "self_ok": true,
-   "solve_s": 2.5977375507354736,
-   "solve_cpu_s": 2.5980765200000064,
+   "solve_s": 1.6310045719146729,
+   "solve_cpu_s": 1.6314545150000015,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 6

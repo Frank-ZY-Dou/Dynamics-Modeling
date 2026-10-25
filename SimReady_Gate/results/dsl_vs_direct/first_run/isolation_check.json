@@ -1,0 +1,180 @@
+{
+ "time": "2026-10-24T22:13:17",
+ "cli": "2.1.310 (Claude Code)",
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "flags": [
+  "--safe-mode",
+  "--no-session-persistence",
+  "--tools",
+  "",
+  "--strict-mcp-config"
+ ],
+ "env_allowlist": [
+  "HOME",
+  "PATH",
+  "USER",
+  "LOGNAME",
+  "LANG",
+  "LC_ALL",
+  "LC_CTYPE",
+  "TERM",
+  "SHELL",
+  "TMPDIR",
+  "CLAUDE_CODE_DISABLE_AUTO_MEMORY=1"
+ ],
+ "planted": {
+  "claude_md": "<work_root>/calls_final/isocheck_9f1xgku9/CLAUDE.md",
+  "auto_memory": "~/.claude/projects/<work_root>-calls-final-isocheck-9f1xgku9/memory/MEMORY.md",
+  "cwd_file": "<work_root>/calls_final/isocheck_9f1xgku9/notes.txt"
+ },
+ "runs": {
+  "isolated": {
+   "found": {
+    "claude_md": false,
+    "auto_memory": false,
+    "cwd_file": false
+   },
+   "answer": "(not published: the answer of the control quotes the configuration of the account that ran the check)",
+   "usage": {
+    "input": 2,
+    "cache_creation": 685,
+    "cache_read": 0
+   },
+   "returncode": 0
+  },
+  "control": {
+   "found": {
+    "claude_md": true,
+    "auto_memory": true,
+    "cwd_file": false
+   },
+   "answer": "(not published: the answer of the control quotes the configuration of the account that ran the check)",
+   "usage": {
+    "input": 2,
+    "cache_creation": 7515,
+    "cache_read": 12427
+   },
+   "returncode": 0
+  }
+ },
+ "isolated_init": {
+  "tools": [
+   "StructuredOutput"
+  ],
+  "mcp_servers": [],
+  "model": "claude-sonnet-5-5",
+  "permissionMode": "default",
+  "slash_commands": [
+   "deep-research",
+   "design",
+   "design-sync",
+   "dataviz",
+   "update-config",
+   "verify",
+   "debug",
+   "code-review",
+   "simplify",
+   "batch",
+   "fewer-permission-prompts",
+   "doctor",
+   "loop",
+   "schedule",
+   "claude-api",
+   "workflow-authoring",
+   "run",
+   "run-skill-generator",
+   "plugin-authoring",
+   "advisor",
+   "agents",
+   "auto-mode-setup",
+   "autocompact",
+   "clear",
+   "color",
+   "compact",
+   "config",
+   "output-style",
+   "context",
+   "effort",
+   "fast",
+   "focus",
+   "heapdump",
+   "init",
+   "mcp",
+   "import",
+   "model",
+   "__remote-workflow",
+   "workflow-launch-exec",
+   "reload-plugins",
+   "reload-skills",
+   "rename",
+   "ultrareview",
+   "security-review",
+   "usage-credits",
+   "extra-usage",
+   "usage",
+   "insights",
+   "recap",
+   "skill-doctor",
+   "goal",
+   "design-consent",
+   "design-revoke",
+   "list-agents",
+   "team-onboarding"
+  ],
+  "agents": [
+   "claude",
+   "Explore",
+   "general-purpose",
+   "Plan",
+   "web-fetch"
+  ],
+  "skills": [
+   "deep-research",
+   "design",
+   "design-sync",
+   "dataviz",
+   "update-config",
+   "verify",
+   "debug",
+   "code-review",
+   "simplify",
+   "batch",
+   "fewer-permission-prompts",
+   "doctor",
+   "loop",
+   "schedule",
+   "claude-api",
+   "workflow-authoring",
+   "run",
+   "run-skill-generator",
+   "plugin-authoring"
+  ],
+  "plugins": [
+   {
+    "name": "cc-plugin-agents-md",
+    "path": "builtin",
+    "source": "cc-plugin-agents-md@builtin"
+   },
+   {
+    "name": "cc-plugin-telemetry",
+    "path": "builtin",
+    "source": "cc-plugin-telemetry@builtin"
+   },
+   {
+    "name": "cc-plugin-plugin-authoring",
+    "path": "builtin",
+    "source": "cc-plugin-plugin-authoring@builtin"
+   }
+  ],
+  "output_style": "default",
+  "cwd": "<work_root>/calls_final/isocheck_9f1xgku9",
+  "apiKeySource": "none"
+ },
+ "pass": true,
+ "canaries": {
+  "claude_md": "CANARY-claude_md...",
+  "auto_memory": "CANARY-auto_memo...",
+  "cwd_file": "CANARY-cwd_file-..."
+ }
+}

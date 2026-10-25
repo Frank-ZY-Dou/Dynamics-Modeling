@@ -163,6 +163,7 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -171,8 +172,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 4.479949951171875,
-   "solve_cpu_s": 4.480706586,
+   "solve_s": 2.113776206970215,
+   "solve_cpu_s": 2.1135895540000007,
    "rubric_ok": false,
    "rubric_failed": [
     [

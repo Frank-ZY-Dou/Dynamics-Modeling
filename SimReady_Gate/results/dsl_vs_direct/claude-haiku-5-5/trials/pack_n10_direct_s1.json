@@ -91,6 +91,7 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": false,
     "penetrating_pairs": [
@@ -105,8 +106,8 @@
     "missing_poses": []
    },
    "self_ok": false,
-   "solve_s": 0.5716142654418945,
-   "solve_cpu_s": 0.571672078000006,
+   "solve_s": 0.45168519020080566,
+   "solve_cpu_s": 0.45195893100000717,
    "rubric_ok": false,
    "rubric_failed": [
     [
@@ -119,8 +120,8 @@
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 2.263429880142212,
-    "solve_cpu_s": 2.263800195000016,
+    "solve_s": 1.0006508827209473,
+    "solve_cpu_s": 1.0008540239999917,
     "rubric_failed": []
    }
   },
@@ -208,13 +209,14 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": false,
     "penetrating_pairs": [
      [
       "fruit_9",
       "fruit_10",
-      -0.8
+      -1.4
      ]
     ],
     "not_resting_on_anything": [],
@@ -222,8 +224,8 @@
     "missing_poses": []
    },
    "self_ok": false,
-   "solve_s": 0.5307283401489258,
-   "solve_cpu_s": 0.5307915289999983,
+   "solve_s": 0.39281249046325684,
+   "solve_cpu_s": 0.3930457259999969,
    "rubric_ok": false,
    "rubric_failed": [
     [
@@ -236,8 +238,8 @@
    "direct_repair": {
     "rubric_ok": false,
     "self_ok": true,
-    "solve_s": 2.2205440998077393,
-    "solve_cpu_s": 2.220761565999993,
+    "solve_s": 0.9339578151702881,
+    "solve_cpu_s": 0.9340570130000003,
     "rubric_failed": [
      [
       "in_square(10 bodies)",
@@ -251,16 +253,16 @@
    "round": 3,
    "llm": {
     "ok": true,
-    "wall_s": 91.71189951896667,
-    "duration_ms": 91106,
-    "duration_api_ms": 91079,
-    "cost_usd": 0.01112123,
+    "wall_s": 180.08326411247253,
+    "duration_ms": 179496,
+    "duration_api_ms": 179465,
+    "cost_usd": 0.019831539999999998,
     "usage": {
      "input": 2,
-     "cache_creation": 1962,
-     "cache_read": 913,
-     "output": 21439,
-     "thinking": 21026
+     "cache_creation": 403,
+     "cache_read": 2474,
+     "output": 39452,
+     "thinking": 39039
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
@@ -271,108 +273,97 @@
     "poses": [
      {
       "name": "fruit_1",
-      "x": 0.665,
+      "x": 0.455,
       "y": -0.105,
       "yaw": 0
      },
      {
       "name": "fruit_2",
-      "x": 0.46,
-      "y": 0.075,
-      "yaw": 0
+      "x": 0.455,
+      "y": 0.07,
+      "yaw": 90
      },
      {
       "name": "fruit_3",
-      "x": 0.465,
+      "x": 0.655,
       "y": -0.055,
       "yaw": 0
      },
      {
       "name": "fruit_4",
-      "x": 0.6,
+      "x": 0.52,
       "y": -0.11,
       "yaw": 0
      },
      {
       "name": "fruit_5",
-      "x": 0.61,
-      "y": 0.07,
+      "x": 0.52,
+      "y": -0.01,
       "yaw": 0
      },
      {
       "name": "fruit_6",
-      "x": 0.665,
-      "y": -0.035,
+      "x": 0.455,
+      "y": -0.025,
       "yaw": 0
      },
      {
       "name": "fruit_7",
-      "x": 0.54,
+      "x": 0.58,
       "y": -0.06,
       "yaw": 0
      },
      {
       "name": "fruit_8",
-      "x": 0.6,
-      "y": -0.05,
+      "x": 0.52,
+      "y": 0.09,
       "yaw": 0
      },
      {
       "name": "fruit_9",
-      "x": 0.67,
-      "y": 0.075,
+      "x": 0.58,
+      "y": 0.085,
       "yaw": 0
      },
      {
       "name": "fruit_10",
-      "x": 0.54,
-      "y": 0.075,
+      "x": 0.655,
+      "y": 0.085,
       "yaw": 0
      }
     ]
    },
+   "answer_from": "called",
    "report": {
-    "ok": false,
-    "penetrating_pairs": [
-     [
-      "fruit_5",
-      "fruit_9",
-      -0.6
-     ]
-    ],
+    "ok": true,
+    "penetrating_pairs": [],
     "not_resting_on_anything": [],
     "off_the_support": [],
     "missing_poses": []
    },
-   "self_ok": false,
-   "solve_s": 0.5936319828033447,
-   "solve_cpu_s": 0.5937678800000015,
-   "rubric_ok": false,
-   "rubric_failed": [
-    [
-     "no_penetration",
-     false,
-     1
-    ]
-   ],
+   "self_ok": true,
+   "solve_s": 0.3811941146850586,
+   "solve_cpu_s": 0.3812998319999963,
+   "rubric_ok": true,
+   "rubric_failed": [],
    "answer_items": 10,
    "direct_repair": {
     "rubric_ok": false,
     "self_ok": true,
-    "solve_s": 2.3081741333007812,
-    "solve_cpu_s": 2.308458712999993,
+    "solve_s": 0.9638597965240479,
+    "solve_cpu_s": 0.9641313129999958,
     "rubric_failed": [
      [
       "in_square(10 bodies)",
       false,
-      0.0136
+      0.0102
      ]
     ]
    }
   }
  ],
  "n_rounds": 3,
- "success": false,
+ "success": true,
  "first_round_success": false,
- "self_ok": false
+ "self_ok": true
 }

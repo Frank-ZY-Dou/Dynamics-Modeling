@@ -150,6 +150,7 @@
     ],
     "intent": "Place the mug 50 cm straight ahead of the robot with its handle facing the base, keep a clear corridor and drop zone, and keep all other objects at least 18 cm from the mug on the table."
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -158,8 +159,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 8.098918199539185,
-   "solve_cpu_s": 8.099979039000004,
+   "solve_s": 2.9789650440216064,
+   "solve_cpu_s": 2.9789366420000007,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 19

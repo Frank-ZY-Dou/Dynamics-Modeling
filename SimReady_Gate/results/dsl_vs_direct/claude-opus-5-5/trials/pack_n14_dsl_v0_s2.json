@@ -141,24 +141,23 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
     "failed_predicates": [],
     "failed_preferences": [],
-    "solver_notes": [
-     "pairs still penetrated in the closing steps of the tail; 7 step(s) served the contacts alone, the program rows set aside"
-    ]
+    "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 5.150318384170532,
-   "solve_cpu_s": 5.1512092859999825,
+   "solve_s": 2.097222328186035,
+   "solve_cpu_s": 2.0974103220000018,
    "rubric_ok": false,
    "rubric_failed": [
     [
      "in_square(14 bodies)",
      false,
-     0.0337
+     0.0275
     ]
    ],
    "answer_items": 18

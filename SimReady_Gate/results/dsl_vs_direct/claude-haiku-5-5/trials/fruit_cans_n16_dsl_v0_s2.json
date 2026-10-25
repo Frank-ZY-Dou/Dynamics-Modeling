@@ -153,24 +153,23 @@
     ],
     "intent": "Cluster the fruit on the left (y>0.25), line up the cans on the right (y<-0.25) along a row parallel to x, and set the bowl and mug between y=\u00b10.20 with the square x 0.30\u20130.50, y \u00b10.10 kept clear."
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
     "failed_predicates": [],
     "failed_preferences": [],
-    "solver_notes": [
-     "pairs still penetrated in the closing steps of the tail; 4 step(s) served the contacts alone, the program rows set aside"
-    ]
+    "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 8.759121179580688,
-   "solve_cpu_s": 8.759025377999997,
+   "solve_s": 4.7559051513671875,
+   "solve_cpu_s": 4.757043037999999,
    "rubric_ok": false,
    "rubric_failed": [
     [
      "in_left(8 bodies)",
      false,
-     0.0073
+     0.0096
     ]
    ],
    "answer_items": 21

@@ -1,0 +1,576 @@
+{
+ "task": "pack_n14",
+ "family": "pack",
+ "n": 14,
+ "condition": "dsl_v0",
+ "seed": 0,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 29.77406644821167,
+    "duration_ms": 29262,
+    "duration_api_ms": 29232,
+    "cost_usd": 0.08563639999999999,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1772,
+     "cache_read": 3962,
+     "output": 3533,
+     "thinking": 1389
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2013,
+   "answer": {
+    "intent": "Pack all 14 fruits so each sits entirely inside the square x 0.40\u20130.72, y -0.16\u20130.16, resting upright on the table, with nothing interpenetrating.",
+    "assumptions": [
+     "The square is not a named body, so it is written as limits on each fruit's centre, measured from the table centre at (0.55, 0.00) and shrunk by that fruit's half-size: 0.04 m for apples and oranges, 0.03 m for tangerines, and 0.085 m for bananas so they stay inside at any heading.",
+     "The fruits start clustered inside the square, so minimize keeps them close to their current positions."
+    ],
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "fruit_*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "in_front_of",
+      "a": "fruit_1",
+      "b": "table",
+      "gap": -0.11
+     },
+     {
+      "op": "behind",
+      "a": "fruit_1",
+      "b": "table",
+      "gap": -0.13
+     },
+     {
+      "op": "left_of",
+      "a": "fruit_1",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "right_of",
+      "a": "fruit_1",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "in_front_of",
+      "a": "fruit_2",
+      "b": "table",
+      "gap": -0.11
+     },
+     {
+      "op": "behind",
+      "a": "fruit_2",
+      "b": "table",
+      "gap": -0.13
+     },
+     {
+      "op": "left_of",
+      "a": "fruit_2",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "right_of",
+      "a": "fruit_2",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "in_front_of",
+      "a": "fruit_3",
+      "b": "table",
+      "gap": -0.065
+     },
+     {
+      "op": "behind",
+      "a": "fruit_3",
+      "b": "table",
+      "gap": -0.085
+     },
+     {
+      "op": "left_of",
+      "a": "fruit_3",
+      "b": "table",
+      "gap": -0.075
+     },
+     {
+      "op": "right_of",
+      "a": "fruit_3",
+      "b": "table",
+      "gap": -0.075
+     },
+     {
+      "op": "in_front_of",
+      "a": "fruit_4",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "behind",
+      "a": "fruit_4",
+      "b": "table",
+      "gap": -0.14
+     },
+     {
+      "op": "left_of",
+      "a": "fruit_4",
+      "b": "table",
+      "gap": -0.13
+     },
+     {
+      "op": "right_of",
+      "a": "fruit_4",
+      "b": "table",
+      "gap": -0.13
+     },
+     {
+      "op": "in_front_of",
+      "a": "fruit_5",
+      "b": "table",
+      "gap": -0.11
+     },
+     {
+      "op": "behind",
+      "a": "fruit_5",
+      "b": "table",
+      "gap": -0.13
+     },
+     {
+      "op": "left_of",
+      "a": "fruit_5",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "right_of",
+      "a": "fruit_5",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "in_front_of",
+      "a": "fruit_6",
+      "b": "table",
+      "gap": -0.11
+     },
+     {
+      "op": "behind",
+      "a": "fruit_6",
+      "b": "table",
+      "gap": -0.13
+     },
+     {
+      "op": "left_of",
+      "a": "fruit_6",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "right_of",
+      "a": "fruit_6",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "in_front_of",
+      "a": "fruit_7",
+      "b": "table",
+      "gap": -0.065
+     },
+     {
+      "op": "behind",
+      "a": "fruit_7",
+      "b": "table",
+      "gap": -0.085
+     },
+     {
+      "op": "left_of",
+      "a": "fruit_7",
+      "b": "table",
+      "gap": -0.075
+     },
+     {
+      "op": "right_of",
+      "a": "fruit_7",
+      "b": "table",
+      "gap": -0.075
+     },
+     {
+      "op": "in_front_of",
+      "a": "fruit_8",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "behind",
+      "a": "fruit_8",
+      "b": "table",
+      "gap": -0.14
+     },
+     {
+      "op": "left_of",
+      "a": "fruit_8",
+      "b": "table",
+      "gap": -0.13
+     },
+     {
+      "op": "right_of",
+      "a": "fruit_8",
+      "b": "table",
+      "gap": -0.13
+     },
+     {
+      "op": "in_front_of",
+      "a": "fruit_9",
+      "b": "table",
+      "gap": -0.11
+     },
+     {
+      "op": "behind",
+      "a": "fruit_9",
+      "b": "table",
+      "gap": -0.13
+     },
+     {
+      "op": "left_of",
+      "a": "fruit_9",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "right_of",
+      "a": "fruit_9",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "in_front_of",
+      "a": "fruit_10",
+      "b": "table",
+      "gap": -0.11
+     },
+     {
+      "op": "behind",
+      "a": "fruit_10",
+      "b": "table",
+      "gap": -0.13
+     },
+     {
+      "op": "left_of",
+      "a": "fruit_10",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "right_of",
+      "a": "fruit_10",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "in_front_of",
+      "a": "fruit_11",
+      "b": "table",
+      "gap": -0.065
+     },
+     {
+      "op": "behind",
+      "a": "fruit_11",
+      "b": "table",
+      "gap": -0.085
+     },
+     {
+      "op": "left_of",
+      "a": "fruit_11",
+      "b": "table",
+      "gap": -0.075
+     },
+     {
+      "op": "right_of",
+      "a": "fruit_11",
+      "b": "table",
+      "gap": -0.075
+     },
+     {
+      "op": "in_front_of",
+      "a": "fruit_12",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "behind",
+      "a": "fruit_12",
+      "b": "table",
+      "gap": -0.14
+     },
+     {
+      "op": "left_of",
+      "a": "fruit_12",
+      "b": "table",
+      "gap": -0.13
+     },
+     {
+      "op": "right_of",
+      "a": "fruit_12",
+      "b": "table",
+      "gap": -0.13
+     },
+     {
+      "op": "in_front_of",
+      "a": "fruit_13",
+      "b": "table",
+      "gap": -0.11
+     },
+     {
+      "op": "behind",
+      "a": "fruit_13",
+      "b": "table",
+      "gap": -0.13
+     },
+     {
+      "op": "left_of",
+      "a": "fruit_13",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "right_of",
+      "a": "fruit_13",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "in_front_of",
+      "a": "fruit_14",
+      "b": "table",
+      "gap": -0.11
+     },
+     {
+      "op": "behind",
+      "a": "fruit_14",
+      "b": "table",
+      "gap": -0.13
+     },
+     {
+      "op": "left_of",
+      "a": "fruit_14",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "right_of",
+      "a": "fruit_14",
+      "b": "table",
+      "gap": -0.12
+     },
+     {
+      "op": "minimize"
+     }
+    ]
+   },
+   "report": {
+    "ok": false,
+    "error": "ProgramError: statement 4 (in_front_of): 'gap' must be non-negative"
+   },
+   "self_ok": false,
+   "solve_s": 5.626678466796875e-05,
+   "solve_cpu_s": 5.394999999452921e-05,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "no_penetration",
+     false,
+     34
+    ]
+   ],
+   "answer_items": 61
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 55.696611404418945,
+    "duration_ms": 55146,
+    "duration_api_ms": 55117,
+    "cost_usd": 0.1461644,
+    "usage": {
+     "input": 2,
+     "cache_creation": 4133,
+     "cache_read": 3962,
+     "output": 5615,
+     "thinking": 4236
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 6581,
+   "answer": {
+    "intent": "Pack all 14 fruits so each sits entirely inside the square x 0.40\u20130.72, y -0.16\u20130.16, resting upright on the table, with nothing interpenetrating.",
+    "assumptions": [
+     "Relations measured from the table centre only take non-negative gaps, so they can't hold a fruit inside a band around that centre. The square's x-limits come from within(table.top, inset 0.18): 0.90 - 0.72 = 0.18 gives the far edge exactly, and the near edge becomes 0.38. The square's y-limits and its exact near edge depend on place targets inside it.",
+     "Planned layout: the three bananas lie along x, side by side, in the near-right part of the square; the tangerines sit in a row along the left edge; the apples and oranges fill a 2x4 grid in the far part."
+    ],
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "fruit_*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.18
+     },
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "place",
+      "a": "fruit_3",
+      "x": 0.485,
+      "y": -0.115,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "fruit_7",
+      "x": 0.485,
+      "y": -0.04,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "fruit_11",
+      "x": 0.485,
+      "y": 0.035,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "fruit_4",
+      "x": 0.43,
+      "y": 0.12
+     },
+     {
+      "op": "place",
+      "a": "fruit_8",
+      "x": 0.49,
+      "y": 0.12
+     },
+     {
+      "op": "place",
+      "a": "fruit_12",
+      "x": 0.55,
+      "y": 0.12
+     },
+     {
+      "op": "place",
+      "a": "fruit_1",
+      "x": 0.615,
+      "y": -0.12
+     },
+     {
+      "op": "place",
+      "a": "fruit_2",
+      "x": 0.68,
+      "y": -0.12
+     },
+     {
+      "op": "place",
+      "a": "fruit_5",
+      "x": 0.615,
+      "y": -0.04
+     },
+     {
+      "op": "place",
+      "a": "fruit_6",
+      "x": 0.68,
+      "y": -0.04
+     },
+     {
+      "op": "place",
+      "a": "fruit_9",
+      "x": 0.615,
+      "y": 0.04
+     },
+     {
+      "op": "place",
+      "a": "fruit_10",
+      "x": 0.68,
+      "y": 0.04
+     },
+     {
+      "op": "place",
+      "a": "fruit_13",
+      "x": 0.615,
+      "y": 0.12
+     },
+     {
+      "op": "place",
+      "a": "fruit_14",
+      "x": 0.68,
+      "y": 0.12
+     },
+     {
+      "op": "minimize"
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 1 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 3.3604836463928223,
+   "solve_cpu_s": 3.3608041180000043,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "in_square(14 bodies)",
+     false,
+     0.011
+    ]
+   ],
+   "answer_items": 19
+  }
+ ],
+ "n_rounds": 2,
+ "success": false,
+ "first_round_success": false,
+ "self_ok": true
+}

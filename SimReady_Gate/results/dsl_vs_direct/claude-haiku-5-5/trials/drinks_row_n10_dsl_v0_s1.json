@@ -207,6 +207,7 @@
      "Ties in height (0.09, 0.10, 0.12 m groups) ordered arbitrarily within the group."
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -215,8 +216,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 4.395087718963623,
-   "solve_cpu_s": 4.395844477999999,
+   "solve_s": 2.0445170402526855,
+   "solve_cpu_s": 2.0449007089999993,
    "rubric_ok": false,
    "rubric_failed": [
     [

@@ -1,0 +1,108 @@
+{
+ "task": "pick_ready_n8",
+ "family": "pick_ready",
+ "n": 8,
+ "condition": "direct",
+ "seed": 1,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 8.588082790374756,
+    "duration_ms": 7980,
+    "duration_api_ms": 7948,
+    "cost_usd": 0.0166013,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1514,
+     "cache_read": 913,
+     "output": 1045,
+     "thinking": 761
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1730,
+   "answer": {
+    "poses": [
+     {
+      "name": "mug",
+      "x": 0.55,
+      "y": 0,
+      "yaw": 0
+     },
+     {
+      "name": "bowl",
+      "x": 0.75,
+      "y": 0.25,
+      "yaw": 0
+     },
+     {
+      "name": "apple",
+      "x": 0.75,
+      "y": -0.25,
+      "yaw": 0
+     },
+     {
+      "name": "can",
+      "x": 0.6,
+      "y": -0.25,
+      "yaw": 0
+     },
+     {
+      "name": "bottle",
+      "x": 0.6,
+      "y": 0.25,
+      "yaw": 0
+     },
+     {
+      "name": "screwdriver",
+      "x": 0.4,
+      "y": -0.3,
+      "yaw": 0
+     },
+     {
+      "name": "tape",
+      "x": 0.4,
+      "y": -0.5,
+      "yaw": 0
+     },
+     {
+      "name": "tumbler",
+      "x": 0.8,
+      "y": 0,
+      "yaw": 0
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "penetrating_pairs": [],
+    "not_resting_on_anything": [],
+    "off_the_support": [],
+    "missing_poses": []
+   },
+   "self_ok": true,
+   "solve_s": 2.204399824142456,
+   "solve_cpu_s": 2.204711455000009,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 8,
+   "direct_repair": {
+    "rubric_ok": true,
+    "self_ok": true,
+    "solve_s": 6.993484020233154,
+    "solve_cpu_s": 6.993659808000004,
+    "rubric_failed": []
+   }
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

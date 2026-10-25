@@ -97,6 +97,7 @@
     ],
     "intent": "Palletize six cardboard boxes on the pallet as two rows of three, each row sharing a common x (line parallel to y), all boxes axis-aligned, 2 cm inside the pallet edges, with at least 1 cm between boxes and no interpenetration."
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -105,8 +106,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 2.401754379272461,
-   "solve_cpu_s": 2.402020998999973,
+   "solve_s": 0.7612042427062988,
+   "solve_cpu_s": 0.7609443879999986,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 11

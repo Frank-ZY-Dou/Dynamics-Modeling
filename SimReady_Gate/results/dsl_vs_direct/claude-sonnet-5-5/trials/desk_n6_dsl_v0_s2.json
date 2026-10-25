@@ -147,17 +147,18 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": false,
     "pen_after": 0,
     "failed_predicates": [
      [
       "place(keyboard)",
-      0.3786
+      0.3796
      ],
      [
       "place(mouse)",
-      0.3786
+      0.3796
      ]
     ],
     "failed_preferences": [],
@@ -167,39 +168,34 @@
     ]
    },
    "self_ok": false,
-   "solve_s": 15.366938829421997,
-   "solve_cpu_s": 15.362693716000024,
+   "solve_s": 6.761813163757324,
+   "solve_cpu_s": 6.763529849000008,
    "rubric_ok": false,
    "rubric_failed": [
     [
      "centre_on(keyboard)",
      false,
-     0.3775
+     0.3796
     ],
     [
      "dist_to_base(keyboard)",
      false,
-     0.5654
+     0.5874
     ],
     [
      "side_of(mouse,keyboard,-y)",
      false,
-     -0.355
+     -0.3592
     ],
     [
      "gap(keyboard->mouse,-y)",
      false,
-     -0.7128
-    ],
-    [
-     "centre_on(mouse)",
-     false,
-     0.0582
+     -0.7125
     ],
     [
      "gap(keyboard->notebook,+y)",
      false,
-     0.4512
+     0.4538
     ],
     [
      "facing(mug)",
@@ -213,16 +209,16 @@
    "round": 2,
    "llm": {
     "ok": true,
-    "wall_s": 18.883278846740723,
-    "duration_ms": 18320,
-    "duration_api_ms": 18272,
-    "cost_usd": 0.0588599,
+    "wall_s": 15.939467191696167,
+    "duration_ms": 15450,
+    "duration_api_ms": 15413,
+    "cost_usd": 0.0470754,
     "usage": {
      "input": 4,
-     "cache_creation": 7554,
-     "cache_read": 10259,
-     "output": 2761,
-     "thinking": 1504
+     "cache_creation": 5472,
+     "cache_read": 12194,
+     "output": 2396,
+     "thinking": 1139
     },
     "num_turns": 3,
     "stop_reason": "tool_use",
@@ -304,7 +300,7 @@
       "a": "notebook",
       "b": "keyboard",
       "axis": "y",
-      "gap": 0.39
+      "gap": 0.38
      },
      {
       "op": "in_front_of",
@@ -318,7 +314,7 @@
       "a": "mug",
       "b": "keyboard",
       "axis": "x",
-      "gap": 0.25
+      "gap": 0.2
      },
      {
       "op": "min_distance",
@@ -352,6 +348,7 @@
      }
     ]
    },
+   "answer_from": "called",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -360,8 +357,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 10.346065044403076,
-   "solve_cpu_s": 10.346694066999987,
+   "solve_s": 3.3904430866241455,
+   "solve_cpu_s": 3.3905389370000023,
    "rubric_ok": false,
    "rubric_failed": [
     [

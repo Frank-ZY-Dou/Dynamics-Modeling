@@ -1,0 +1,132 @@
+{
+ "task": "kitchen_prep_n12",
+ "family": "kitchen_prep",
+ "n": 12,
+ "condition": "direct",
+ "seed": 0,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 22.1150484085083,
+    "duration_ms": 21623,
+    "duration_api_ms": 21594,
+    "cost_usd": 0.035893299999999996,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1892,
+     "cache_read": 913,
+     "output": 2823,
+     "thinking": 2421
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2612,
+   "answer": {
+    "poses": [
+     {
+      "name": "board",
+      "x": 0.45,
+      "y": 0,
+      "yaw": 0
+     },
+     {
+      "name": "knife",
+      "x": 0.45,
+      "y": -0.16,
+      "yaw": 90
+     },
+     {
+      "name": "spoon",
+      "x": 0.45,
+      "y": -0.23,
+      "yaw": 90
+     },
+     {
+      "name": "bowl",
+      "x": 0.45,
+      "y": 0.3,
+      "yaw": 0
+     },
+     {
+      "name": "apple_1",
+      "x": 0.69,
+      "y": 0.12,
+      "yaw": 0
+     },
+     {
+      "name": "apple_2",
+      "x": 0.78,
+      "y": 0.04,
+      "yaw": 0
+     },
+     {
+      "name": "orange",
+      "x": 0.77,
+      "y": 0.12,
+      "yaw": 0
+     },
+     {
+      "name": "banana",
+      "x": 0.72,
+      "y": 0.22,
+      "yaw": 90
+     },
+     {
+      "name": "tangerine",
+      "x": 0.71,
+      "y": 0.05,
+      "yaw": 0
+     },
+     {
+      "name": "bottle",
+      "x": 0.86,
+      "y": -0.2,
+      "yaw": 0
+     },
+     {
+      "name": "can_1",
+      "x": 0.86,
+      "y": -0.1,
+      "yaw": 0
+     },
+     {
+      "name": "can_2",
+      "x": 0.86,
+      "y": 0,
+      "yaw": 0
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "penetrating_pairs": [],
+    "not_resting_on_anything": [],
+    "off_the_support": [],
+    "missing_poses": []
+   },
+   "self_ok": true,
+   "solve_s": 0.9623501300811768,
+   "solve_cpu_s": 0.9624666649999938,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 12,
+   "direct_repair": {
+    "rubric_ok": true,
+    "self_ok": true,
+    "solve_s": 3.5054781436920166,
+    "solve_cpu_s": 3.5024212739999996,
+    "rubric_failed": []
+   }
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

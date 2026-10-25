@@ -2,13 +2,13 @@
  "summary": {
   "direct": {
    "trials": 48,
-   "settle_pass": 0.9375,
-   "rubric_and_settle": 0.7291666666666666
+   "settle_pass": 0.9791666666666666,
+   "rubric_and_settle": 0.875
   },
   "dsl_v0": {
    "trials": 48,
    "settle_pass": 0.9791666666666666,
-   "rubric_and_settle": 0.7291666666666666
+   "rubric_and_settle": 0.7708333333333334
   },
   "dsl_v1": {
    "trials": 48,
@@ -441,7 +441,7 @@
    "settle": {
     "pass": true,
     "peak_speed": 0.073,
-    "peak_disp": 0.005,
+    "peak_disp": 0.0049,
     "left_support": [],
     "hull_fallback": []
    }
@@ -504,9 +504,9 @@
    "seed": 1,
    "rubric_ok": true,
    "settle": {
-    "pass": true,
-    "peak_speed": 0.119,
-    "peak_disp": 0.0123,
+    "pass": false,
+    "peak_speed": 0.703,
+    "peak_disp": 0.1766,
     "left_support": [],
     "hull_fallback": []
    }
@@ -558,7 +558,7 @@
    "settle": {
     "pass": true,
     "peak_speed": 0.119,
-    "peak_disp": 0.0123,
+    "peak_disp": 0.0066,
     "left_support": [],
     "hull_fallback": []
    }
@@ -571,7 +571,7 @@
    "settle": {
     "pass": true,
     "peak_speed": 0.119,
-    "peak_disp": 0.0122,
+    "peak_disp": 0.01,
     "left_support": [],
     "hull_fallback": []
    }
@@ -597,7 +597,7 @@
    "settle": {
     "pass": true,
     "peak_speed": 0.119,
-    "peak_disp": 0.0069,
+    "peak_disp": 0.007,
     "left_support": [],
     "hull_fallback": []
    }
@@ -635,8 +635,8 @@
    "rubric_ok": true,
    "settle": {
     "pass": true,
-    "peak_speed": 0.633,
-    "peak_disp": 0.0541,
+    "peak_speed": 0.738,
+    "peak_disp": 0.0902,
     "left_support": [],
     "hull_fallback": []
    }
@@ -645,7 +645,7 @@
    "task": "fruit_cans_n24",
    "condition": "dsl_v0",
    "seed": 0,
-   "rubric_ok": true,
+   "rubric_ok": false,
    "settle": {
     "pass": true,
     "peak_speed": 0.119,
@@ -661,7 +661,7 @@
    "rubric_ok": true,
    "settle": {
     "pass": true,
-    "peak_speed": 0.095,
+    "peak_speed": 0.119,
     "peak_disp": 0.0123,
     "left_support": [],
     "hull_fallback": []
@@ -688,7 +688,7 @@
    "settle": {
     "pass": true,
     "peak_speed": 0.119,
-    "peak_disp": 0.0123,
+    "peak_disp": 0.0085,
     "left_support": [],
     "hull_fallback": []
    }
@@ -701,7 +701,7 @@
    "settle": {
     "pass": true,
     "peak_speed": 0.119,
-    "peak_disp": 0.0123,
+    "peak_disp": 0.0105,
     "left_support": [],
     "hull_fallback": []
    }
@@ -714,7 +714,7 @@
    "settle": {
     "pass": true,
     "peak_speed": 0.119,
-    "peak_disp": 0.0123,
+    "peak_disp": 0.0083,
     "left_support": [],
     "hull_fallback": []
    }
@@ -779,7 +779,7 @@
    "settle": {
     "pass": true,
     "peak_speed": 0.073,
-    "peak_disp": 0.0046,
+    "peak_disp": 0.005,
     "left_support": [],
     "hull_fallback": []
    }
@@ -788,11 +788,11 @@
    "task": "kitchen_prep_n12",
    "condition": "dsl_v0",
    "seed": 2,
-   "rubric_ok": false,
+   "rubric_ok": true,
    "settle": {
     "pass": true,
     "peak_speed": 0.073,
-    "peak_disp": 0.0046,
+    "peak_disp": 0.005,
     "left_support": [],
     "hull_fallback": []
    }
@@ -817,8 +817,8 @@
    "rubric_ok": true,
    "settle": {
     "pass": true,
-    "peak_speed": 0.068,
-    "peak_disp": 0.0054,
+    "peak_speed": 0.073,
+    "peak_disp": 0.005,
     "left_support": [],
     "hull_fallback": []
    }
@@ -970,11 +970,11 @@
    "task": "pack_n10",
    "condition": "direct",
    "seed": 1,
-   "rubric_ok": false,
+   "rubric_ok": true,
    "settle": {
     "pass": true,
     "peak_speed": 0.119,
-    "peak_disp": 0.0123,
+    "peak_disp": 0.0105,
     "left_support": [],
     "hull_fallback": []
    }
@@ -983,11 +983,11 @@
    "task": "pack_n10",
    "condition": "direct",
    "seed": 2,
-   "rubric_ok": false,
+   "rubric_ok": true,
    "settle": {
     "pass": true,
     "peak_speed": 0.119,
-    "peak_disp": 0.0071,
+    "peak_disp": 0.0066,
     "left_support": [],
     "hull_fallback": []
    }
@@ -1022,7 +1022,7 @@
    "task": "pack_n10",
    "condition": "dsl_v0",
    "seed": 2,
-   "rubric_ok": false,
+   "rubric_ok": true,
    "settle": {
     "pass": true,
     "peak_speed": 0.119,
@@ -1039,7 +1039,7 @@
    "settle": {
     "pass": true,
     "peak_speed": 0.119,
-    "peak_disp": 0.0106,
+    "peak_disp": 0.0066,
     "left_support": [],
     "hull_fallback": []
    }
@@ -1065,7 +1065,7 @@
    "settle": {
     "pass": true,
     "peak_speed": 0.119,
-    "peak_disp": 0.0085,
+    "peak_disp": 0.0105,
     "left_support": [],
     "hull_fallback": []
    }
@@ -1143,7 +1143,7 @@
    "settle": {
     "pass": true,
     "peak_speed": 0.119,
-    "peak_disp": 0.0123,
+    "peak_disp": 0.0102,
     "left_support": [],
     "hull_fallback": []
    }
@@ -1168,7 +1168,7 @@
    "rubric_ok": true,
    "settle": {
     "pass": true,
-    "peak_speed": 0.119,
+    "peak_speed": 0.078,
     "peak_disp": 0.0085,
     "left_support": [],
     "hull_fallback": []
@@ -1204,11 +1204,11 @@
    "task": "palletize_n4",
    "condition": "direct",
    "seed": 1,
-   "rubric_ok": false,
+   "rubric_ok": true,
    "settle": {
     "pass": true,
-    "peak_speed": 0.082,
-    "peak_disp": 0.0043,
+    "peak_speed": 0.04,
+    "peak_disp": 0.0022,
     "left_support": [],
     "hull_fallback": []
    }
@@ -1233,8 +1233,8 @@
    "rubric_ok": true,
    "settle": {
     "pass": true,
-    "peak_speed": 0.087,
-    "peak_disp": 0.0046,
+    "peak_speed": 0.04,
+    "peak_disp": 0.0022,
     "left_support": [],
     "hull_fallback": []
    }
@@ -1259,8 +1259,8 @@
    "rubric_ok": true,
    "settle": {
     "pass": true,
-    "peak_speed": 0.067,
-    "peak_disp": 0.0036,
+    "peak_speed": 0.04,
+    "peak_disp": 0.0022,
     "left_support": [],
     "hull_fallback": []
    }
@@ -1298,8 +1298,8 @@
    "rubric_ok": true,
    "settle": {
     "pass": true,
-    "peak_speed": 0.157,
-    "peak_disp": 0.0036,
+    "peak_speed": 0.04,
+    "peak_disp": 0.0022,
     "left_support": [],
     "hull_fallback": []
    }
@@ -1308,11 +1308,11 @@
    "task": "palletize_n6",
    "condition": "direct",
    "seed": 0,
-   "rubric_ok": false,
+   "rubric_ok": true,
    "settle": {
     "pass": true,
-    "peak_speed": 0.048,
-    "peak_disp": 0.003,
+    "peak_speed": 0.034,
+    "peak_disp": 0.0017,
     "left_support": [],
     "hull_fallback": []
    }
@@ -1324,8 +1324,8 @@
    "rubric_ok": false,
    "settle": {
     "pass": true,
-    "peak_speed": 0.046,
-    "peak_disp": 0.003,
+    "peak_speed": 0.04,
+    "peak_disp": 0.0026,
     "left_support": [],
     "hull_fallback": []
    }
@@ -1334,11 +1334,11 @@
    "task": "palletize_n6",
    "condition": "direct",
    "seed": 2,
-   "rubric_ok": false,
+   "rubric_ok": true,
    "settle": {
     "pass": true,
-    "peak_speed": 0.046,
-    "peak_disp": 0.003,
+    "peak_speed": 0.04,
+    "peak_disp": 0.0026,
     "left_support": [],
     "hull_fallback": []
    }
@@ -1415,8 +1415,8 @@
    "rubric_ok": true,
    "settle": {
     "pass": true,
-    "peak_speed": 0.043,
-    "peak_disp": 0.0026,
+    "peak_speed": 0.034,
+    "peak_disp": 0.0017,
     "left_support": [],
     "hull_fallback": []
    }
@@ -1659,81 +1659,76 @@
    "task": "stack_n6",
    "condition": "direct",
    "seed": 0,
-   "rubric_ok": false,
-   "settle": {
-    "pass": false,
-    "peak_speed": 10.168,
-    "peak_disp": 8.5134,
-    "left_support": [
-     "box_large",
-     "box_medium"
-    ],
-    "hull_fallback": []
-   }
-  },
-  {
-   "task": "stack_n6",
-   "condition": "direct",
-   "seed": 1,
-   "rubric_ok": false,
-   "settle": {
-    "pass": false,
-    "peak_speed": 1.485,
-    "peak_disp": 0.0555,
-    "left_support": [],
-    "hull_fallback": []
-   }
-  },
-  {
-   "task": "stack_n6",
-   "condition": "direct",
-   "seed": 2,
-   "rubric_ok": false,
-   "settle": {
-    "pass": false,
-    "peak_speed": 6.662,
-    "peak_disp": 4.1272,
-    "left_support": [
-     "box_medium"
-    ],
-    "hull_fallback": []
-   }
-  },
-  {
-   "task": "stack_n6",
-   "condition": "dsl_v0",
-   "seed": 0,
-   "rubric_ok": false,
-   "settle": {
-    "pass": true,
-    "peak_speed": 0.103,
-    "peak_disp": 0.0121,
-    "left_support": [],
-    "hull_fallback": []
-   }
-  },
-  {
-   "task": "stack_n6",
-   "condition": "dsl_v0",
-   "seed": 1,
    "rubric_ok": true,
    "settle": {
     "pass": true,
-    "peak_speed": 0.116,
-    "peak_disp": 0.0106,
+    "peak_speed": 0.104,
+    "peak_disp": 0.0114,
     "left_support": [],
     "hull_fallback": []
    }
   },
   {
    "task": "stack_n6",
-   "condition": "dsl_v0",
-   "seed": 2,
+   "condition": "direct",
+   "seed": 1,
    "rubric_ok": true,
    "settle": {
     "pass": true,
     "peak_speed": 0.107,
-    "peak_disp": 0.0108,
+    "peak_disp": 0.0094,
+    "left_support": [],
+    "hull_fallback": []
+   }
+  },
+  {
+   "task": "stack_n6",
+   "condition": "direct",
+   "seed": 2,
+   "rubric_ok": true,
+   "settle": {
+    "pass": true,
+    "peak_speed": 0.106,
+    "peak_disp": 0.011,
+    "left_support": [],
+    "hull_fallback": []
+   }
+  },
+  {
+   "task": "stack_n6",
+   "condition": "dsl_v0",
+   "seed": 0,
+   "rubric_ok": true,
+   "settle": {
+    "pass": true,
+    "peak_speed": 0.11,
+    "peak_disp": 0.0087,
+    "left_support": [],
+    "hull_fallback": []
+   }
+  },
+  {
+   "task": "stack_n6",
+   "condition": "dsl_v0",
+   "seed": 1,
+   "rubric_ok": true,
+   "settle": {
+    "pass": true,
+    "peak_speed": 0.106,
+    "peak_disp": 0.0093,
+    "left_support": [],
+    "hull_fallback": []
+   }
+  },
+  {
+   "task": "stack_n6",
+   "condition": "dsl_v0",
+   "seed": 2,
+   "rubric_ok": true,
+   "settle": {
+    "pass": true,
+    "peak_speed": 0.106,
+    "peak_disp": 0.0111,
     "left_support": [],
     "hull_fallback": []
    }
@@ -1745,8 +1740,8 @@
    "rubric_ok": true,
    "settle": {
     "pass": true,
-    "peak_speed": 0.092,
-    "peak_disp": 0.0102,
+    "peak_speed": 0.106,
+    "peak_disp": 0.0118,
     "left_support": [],
     "hull_fallback": []
    }
@@ -1758,8 +1753,8 @@
    "rubric_ok": true,
    "settle": {
     "pass": true,
-    "peak_speed": 0.108,
-    "peak_disp": 0.0132,
+    "peak_speed": 0.102,
+    "peak_disp": 0.0091,
     "left_support": [],
     "hull_fallback": []
    }
@@ -1771,8 +1766,8 @@
    "rubric_ok": true,
    "settle": {
     "pass": true,
-    "peak_speed": 0.116,
-    "peak_disp": 0.0106,
+    "peak_speed": 0.115,
+    "peak_disp": 0.0094,
     "left_support": [],
     "hull_fallback": []
    }

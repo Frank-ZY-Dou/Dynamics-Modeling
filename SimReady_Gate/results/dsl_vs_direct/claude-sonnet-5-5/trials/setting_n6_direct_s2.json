@@ -67,6 +67,7 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -75,8 +76,8 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 0.6116716861724854,
-   "solve_cpu_s": 0.6117719939999997,
+   "solve_s": 0.4325432777404785,
+   "solve_cpu_s": 0.4323381999999998,
    "rubric_ok": false,
    "rubric_failed": [
     [
@@ -89,9 +90,14 @@
    "direct_repair": {
     "rubric_ok": false,
     "self_ok": true,
-    "solve_s": 2.185234546661377,
-    "solve_cpu_s": 2.1855803519999997,
+    "solve_s": 0.9225730895996094,
+    "solve_cpu_s": 0.922247408,
     "rubric_failed": [
+     [
+      "near(glass,knife)",
+      false,
+      0.1609
+     ],
      [
       "facing(mug)",
       false,

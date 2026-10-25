@@ -120,6 +120,7 @@
      "The bananas get yaw 0 so that their long side lies along y."
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -128,8 +129,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 2.44317889213562,
-   "solve_cpu_s": 2.4435515830000156,
+   "solve_s": 1.0445880889892578,
+   "solve_cpu_s": 1.0447151319999932,
    "rubric_ok": false,
    "rubric_failed": [
     [

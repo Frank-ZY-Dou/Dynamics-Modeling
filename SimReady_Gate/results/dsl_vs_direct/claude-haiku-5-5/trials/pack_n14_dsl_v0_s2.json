@@ -136,26 +136,25 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
     "failed_predicates": [],
     "failed_preferences": [],
     "solver_notes": [
-     "pairs still penetrated in the closing steps of the tail; 3 step(s) served the contacts alone, the program rows set aside",
-     "a program row was not met within the step at 2 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
-     "the contacts exceeded the trust region at 2 step(s); those steps served the contacts alone"
+     "pairs still penetrated in the closing steps of the tail; 7 step(s) served the contacts alone, the program rows set aside"
     ]
    },
    "self_ok": true,
-   "solve_s": 4.812196493148804,
-   "solve_cpu_s": 4.812909798999982,
+   "solve_s": 3.0360209941864014,
+   "solve_cpu_s": 3.036709449,
    "rubric_ok": false,
    "rubric_failed": [
     [
      "in_square(14 bodies)",
      false,
-     0.0724
+     0.0557
     ]
    ],
    "answer_items": 18

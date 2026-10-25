@@ -392,13 +392,14 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": false,
     "error": "ProgramError: statement 4 (in_front_of): 'gap' must be non-negative"
    },
    "self_ok": false,
-   "solve_s": 5.626678466796875e-05,
-   "solve_cpu_s": 5.394999999452921e-05,
+   "solve_s": 0.00012159347534179688,
+   "solve_cpu_s": 0.00011724000000867818,
    "rubric_ok": false,
    "rubric_failed": [
     [
@@ -546,6 +547,7 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -556,8 +558,8 @@
     ]
    },
    "self_ok": true,
-   "solve_s": 3.3604836463928223,
-   "solve_cpu_s": 3.3608041180000043,
+   "solve_s": 1.405456304550171,
+   "solve_cpu_s": 1.4055719840000052,
    "rubric_ok": false,
    "rubric_failed": [
     [

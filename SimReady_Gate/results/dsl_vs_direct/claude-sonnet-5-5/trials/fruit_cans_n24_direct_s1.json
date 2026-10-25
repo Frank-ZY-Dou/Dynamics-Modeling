@@ -175,13 +175,14 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": false,
     "penetrating_pairs": [
      [
       "fruit_7",
       "fruit_11",
-      -1.9
+      -3.5
      ]
     ],
     "not_resting_on_anything": [],
@@ -189,8 +190,8 @@
     "missing_poses": []
    },
    "self_ok": false,
-   "solve_s": 2.5774309635162354,
-   "solve_cpu_s": 2.577338802,
+   "solve_s": 1.7343995571136475,
+   "solve_cpu_s": 1.7349383859999996,
    "rubric_ok": false,
    "rubric_failed": [
     [
@@ -203,8 +204,8 @@
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 9.82911491394043,
-    "solve_cpu_s": 9.830128680000001,
+    "solve_s": 4.871356964111328,
+    "solve_cpu_s": 4.8720422400000025,
     "rubric_failed": []
    }
   },
@@ -212,16 +213,16 @@
    "round": 2,
    "llm": {
     "ok": true,
-    "wall_s": 34.898417234420776,
-    "duration_ms": 34405,
-    "duration_api_ms": 34373,
-    "cost_usd": 0.0585973,
+    "wall_s": 19.539332628250122,
+    "duration_ms": 18855,
+    "duration_api_ms": 18815,
+    "cost_usd": 0.030099499999999998,
     "usage": {
      "input": 2,
-     "cache_creation": 3683,
-     "cache_read": 913,
-     "output": 4377,
-     "thinking": 3592
+     "cache_creation": 404,
+     "cache_read": 4195,
+     "output": 2806,
+     "thinking": 1782
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
@@ -231,88 +232,88 @@
    "answer": {
     "poses": [
      {
-      "name": "fruit_1",
-      "x": 0.465,
-      "y": 0.34,
-      "yaw": 0
-     },
-     {
-      "name": "fruit_2",
-      "x": 0.55,
-      "y": 0.34,
-      "yaw": 0
-     },
-     {
-      "name": "fruit_4",
-      "x": 0.635,
-      "y": 0.34,
-      "yaw": 0
-     },
-     {
-      "name": "fruit_5",
-      "x": 0.38,
-      "y": 0.425,
-      "yaw": 0
-     },
-     {
-      "name": "fruit_6",
-      "x": 0.465,
-      "y": 0.425,
-      "yaw": 0
-     },
-     {
-      "name": "fruit_8",
-      "x": 0.55,
-      "y": 0.425,
-      "yaw": 0
-     },
-     {
-      "name": "fruit_9",
-      "x": 0.635,
-      "y": 0.425,
-      "yaw": 0
-     },
-     {
-      "name": "fruit_10",
-      "x": 0.72,
-      "y": 0.425,
-      "yaw": 0
-     },
-     {
-      "name": "fruit_12",
-      "x": 0.7,
-      "y": 0.52,
-      "yaw": 0
-     },
-     {
-      "name": "fruit_13",
-      "x": 0.62,
-      "y": 0.615,
-      "yaw": 0
-     },
-     {
-      "name": "fruit_14",
-      "x": 0.7,
-      "y": 0.615,
-      "yaw": 0
-     },
-     {
       "name": "fruit_3",
-      "x": 0.4,
-      "y": 0.52,
-      "yaw": 90
+      "x": 0.455,
+      "y": 0.55,
+      "yaw": 0
      },
      {
       "name": "fruit_7",
-      "x": 0.58,
-      "y": 0.52,
+      "x": 0.59,
+      "y": 0.55,
       "yaw": 90
      },
      {
       "name": "fruit_11",
-      "x": 0.5,
-      "y": 0.615,
-      "yaw": 90
+      "x": 0.73,
+      "y": 0.55,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_1",
+      "x": 0.425,
+      "y": 0.41,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_2",
+      "x": 0.51,
+      "y": 0.41,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_4",
+      "x": 0.595,
+      "y": 0.41,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_5",
+      "x": 0.68,
+      "y": 0.41,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_6",
+      "x": 0.425,
+      "y": 0.69,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_8",
+      "x": 0.51,
+      "y": 0.69,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_9",
+      "x": 0.595,
+      "y": 0.69,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_10",
+      "x": 0.68,
+      "y": 0.69,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_12",
+      "x": 0.36,
+      "y": 0.48,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_13",
+      "x": 0.36,
+      "y": 0.625,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_14",
+      "x": 0.36,
+      "y": 0.55,
+      "yaw": 0
      },
      {
       "name": "can_6",
@@ -376,6 +377,7 @@
      }
     ]
    },
+   "answer_from": "called",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -384,22 +386,34 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 2.586932897567749,
-   "solve_cpu_s": 2.584009021,
-   "rubric_ok": true,
-   "rubric_failed": [],
+   "solve_s": 1.7742564678192139,
+   "solve_cpu_s": 1.7734510690000036,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "cluster(14 bodies)",
+     false,
+     0.2131
+    ]
+   ],
    "answer_items": 24,
    "direct_repair": {
-    "rubric_ok": true,
+    "rubric_ok": false,
     "self_ok": true,
-    "solve_s": 10.588451147079468,
-    "solve_cpu_s": 10.584608222,
-    "rubric_failed": []
+    "solve_s": 4.950337886810303,
+    "solve_cpu_s": 4.9500385850000015,
+    "rubric_failed": [
+     [
+      "cluster(14 bodies)",
+      false,
+      0.2131
+     ]
+    ]
    }
   }
  ],
  "n_rounds": 2,
- "success": true,
+ "success": false,
  "first_round_success": false,
  "self_ok": true
 }

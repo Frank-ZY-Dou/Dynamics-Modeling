@@ -91,6 +91,7 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -99,8 +100,8 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 1.4646720886230469,
-   "solve_cpu_s": 1.4648711599999995,
+   "solve_s": 0.9503786563873291,
+   "solve_cpu_s": 0.9505701489999998,
    "rubric_ok": false,
    "rubric_failed": [
     [
@@ -124,8 +125,8 @@
    "direct_repair": {
     "rubric_ok": false,
     "self_ok": true,
-    "solve_s": 4.539412260055542,
-    "solve_cpu_s": 4.540083834000001,
+    "solve_s": 1.8589320182800293,
+    "solve_cpu_s": 1.858984702999999,
     "rubric_failed": [
      [
       "ordered_by_height",

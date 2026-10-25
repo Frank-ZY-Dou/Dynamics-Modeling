@@ -62,6 +62,7 @@
     ],
     "intent": "Separate the overlapping objects on the table without interpenetration, moving each by at most 3 cm and turning each by at most 10 degrees, with everything upright on the table top."
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -70,8 +71,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 10.270475625991821,
-   "solve_cpu_s": 10.26818981300002,
+   "solve_s": 3.1996099948883057,
+   "solve_cpu_s": 3.1881927419999982,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 7

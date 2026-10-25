@@ -151,6 +151,7 @@
     ],
     "intent": "Arrange the keyboard centred in front of the robot with mouse, notebook, marker, mug and tape dispenser placed on the table to the right, left, far side, and clear of each other, all resting upright on the table."
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -159,8 +160,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 10.540263891220093,
-   "solve_cpu_s": 10.541554918999992,
+   "solve_s": 4.326885938644409,
+   "solve_cpu_s": 4.327669112999999,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 19

@@ -1,0 +1,160 @@
+{
+ "task": "tool_layout_n7",
+ "family": "tool_layout",
+ "n": 7,
+ "condition": "dsl_v1",
+ "seed": 1,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 9.384275197982788,
+    "duration_ms": 8743,
+    "duration_api_ms": 8714,
+    "cost_usd": 0.031453800000000004,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1465,
+     "cache_read": 10529,
+     "output": 881,
+     "thinking": 278
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1679,
+   "answer": {
+    "intent": "Line up the screwdrivers, pliers, hammer and markers left to right from shortest to longest, in a row along y with their long sides along x and at least 3 cm apart, all at x < 0.60, and put the tape dispenser at x > 0.70.",
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "row",
+      "members": [
+       "screwdriver_*",
+       "pliers",
+       "hammer",
+       "marker_*"
+      ],
+      "axis": "y",
+      "start": "left",
+      "order": "length",
+      "gap": 0.03,
+      "tol": 0.01
+     },
+     {
+      "op": "yaw",
+      "a": "screwdriver_1",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "yaw",
+      "a": "screwdriver_2",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "yaw",
+      "a": "pliers",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "yaw",
+      "a": "hammer",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "yaw",
+      "a": "marker_1",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "yaw",
+      "a": "marker_2",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "within",
+      "a": "screwdriver_*",
+      "x1": 0.6
+     },
+     {
+      "op": "within",
+      "a": "pliers",
+      "x1": 0.6
+     },
+     {
+      "op": "within",
+      "a": "hammer",
+      "x1": 0.6
+     },
+     {
+      "op": "within",
+      "a": "marker_*",
+      "x1": 0.6
+     },
+     {
+      "op": "within",
+      "a": "tape",
+      "x0": 0.7
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 14.247978925704956,
+   "solve_cpu_s": 14.243318559000016,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "row_aligned(6 bodies)",
+     false,
+     0.015
+    ]
+   ],
+   "answer_items": 16
+  }
+ ],
+ "n_rounds": 1,
+ "success": false,
+ "first_round_success": false,
+ "self_ok": true
+}

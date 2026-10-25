@@ -1,0 +1,120 @@
+{
+ "task": "fruit_cans_n10",
+ "family": "fruit_cans",
+ "n": 10,
+ "condition": "direct",
+ "seed": 1,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 13.002088069915771,
+    "duration_ms": 12369,
+    "duration_api_ms": 12335,
+    "cost_usd": 0.0223233,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1672,
+     "cache_read": 913,
+     "output": 1554,
+     "thinking": 1196
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2016,
+   "answer": {
+    "poses": [
+     {
+      "name": "fruit_3",
+      "x": 0.65,
+      "y": 0.45,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_1",
+      "x": 0.74,
+      "y": 0.39,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_5",
+      "x": 0.74,
+      "y": 0.52,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_2",
+      "x": 0.56,
+      "y": 0.45,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_4",
+      "x": 0.56,
+      "y": 0.52,
+      "yaw": 0
+     },
+     {
+      "name": "can_1",
+      "x": 0.3,
+      "y": -0.45,
+      "yaw": 0
+     },
+     {
+      "name": "can_2",
+      "x": 0.42,
+      "y": -0.45,
+      "yaw": 0
+     },
+     {
+      "name": "can_3",
+      "x": 0.54,
+      "y": -0.45,
+      "yaw": 0
+     },
+     {
+      "name": "can_4",
+      "x": 0.66,
+      "y": -0.45,
+      "yaw": 0
+     },
+     {
+      "name": "bowl",
+      "x": 0.68,
+      "y": 0,
+      "yaw": 0
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "penetrating_pairs": [],
+    "not_resting_on_anything": [],
+    "off_the_support": [],
+    "missing_poses": []
+   },
+   "self_ok": true,
+   "solve_s": 0.6137359142303467,
+   "solve_cpu_s": 0.6138673650000008,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 10,
+   "direct_repair": {
+    "rubric_ok": true,
+    "self_ok": true,
+    "solve_s": 2.5454957485198975,
+    "solve_cpu_s": 2.5461357049999975,
+    "rubric_failed": []
+   }
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

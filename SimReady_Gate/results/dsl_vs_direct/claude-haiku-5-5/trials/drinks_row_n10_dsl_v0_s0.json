@@ -126,6 +126,7 @@
     ],
     "intent": "Arrange all ten drinks in one evenly spaced row along y at x\u22480.75, ordered shortest (+y, left) to tallest (-y, right), centred on y=0, upright and resting on the table without penetration."
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -134,8 +135,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 4.423436641693115,
-   "solve_cpu_s": 4.423877101,
+   "solve_s": 1.9956707954406738,
+   "solve_cpu_s": 1.9956471899999997,
    "rubric_ok": false,
    "rubric_failed": [
     [

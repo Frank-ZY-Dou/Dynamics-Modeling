@@ -67,235 +67,31 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
-    "ok": false,
-    "penetrating_pairs": [
-     [
-      "pallet",
-      "box_5",
-      -27.6
-     ]
-    ],
-    "not_resting_on_anything": [],
-    "off_the_support": [],
-    "missing_poses": []
-   },
-   "self_ok": false,
-   "solve_s": 0.610276460647583,
-   "solve_cpu_s": 0.6103457069999934,
-   "rubric_ok": false,
-   "rubric_failed": [
-    [
-     "no_penetration",
-     false,
-     1
-    ]
-   ],
-   "answer_items": 6,
-   "direct_repair": {
-    "rubric_ok": true,
-    "self_ok": true,
-    "solve_s": 2.1220788955688477,
-    "solve_cpu_s": 2.1190119739999886,
-    "rubric_failed": []
-   }
-  },
-  {
-   "round": 2,
-   "llm": {
     "ok": true,
-    "wall_s": 12.435516119003296,
-    "duration_ms": 11896,
-    "duration_api_ms": 11868,
-    "cost_usd": 0.0017188299999999998,
-    "usage": {
-     "input": 2,
-     "cache_creation": 1615,
-     "cache_read": 913,
-     "output": 2773,
-     "thinking": 2516
-    },
-    "num_turns": 2,
-    "stop_reason": "tool_use",
-    "error": null
-   },
-   "message_chars": 1868,
-   "answer": {
-    "poses": [
-     {
-      "name": "box_1",
-      "x": 0.46,
-      "y": -0.36,
-      "yaw": 90
-     },
-     {
-      "name": "box_2",
-      "x": 0.46,
-      "y": 0,
-      "yaw": 90
-     },
-     {
-      "name": "box_3",
-      "x": 0.46,
-      "y": 0.36,
-      "yaw": 90
-     },
-     {
-      "name": "box_4",
-      "x": 0.78,
-      "y": -0.36,
-      "yaw": 90
-     },
-     {
-      "name": "box_5",
-      "x": 0.78,
-      "y": 0,
-      "yaw": 90
-     },
-     {
-      "name": "box_6",
-      "x": 0.78,
-      "y": 0.36,
-      "yaw": 90
-     }
-    ]
-   },
-   "report": {
-    "ok": false,
     "penetrating_pairs": [],
-    "not_resting_on_anything": [
-     "box_6"
-    ],
-    "off_the_support": [],
-    "missing_poses": []
-   },
-   "self_ok": false,
-   "solve_s": 0.5587258338928223,
-   "solve_cpu_s": 0.5588182479999944,
-   "rubric_ok": false,
-   "rubric_failed": [
-    [
-     "supported",
-     false,
-     1
-    ]
-   ],
-   "answer_items": 6,
-   "direct_repair": {
-    "rubric_ok": false,
-    "self_ok": true,
-    "solve_s": 1.972797155380249,
-    "solve_cpu_s": 1.973163494000005,
-    "rubric_failed": [
-     [
-      "supported",
-      false,
-      1
-     ]
-    ]
-   }
-  },
-  {
-   "round": 3,
-   "llm": {
-    "ok": true,
-    "wall_s": 14.558960914611816,
-    "duration_ms": 13964,
-    "duration_api_ms": 13934,
-    "cost_usd": 0.00195983,
-    "usage": {
-     "input": 2,
-     "cache_creation": 1605,
-     "cache_read": 913,
-     "output": 3259,
-     "thinking": 3002
-    },
-    "num_turns": 2,
-    "stop_reason": "tool_use",
-    "error": null
-   },
-   "message_chars": 1852,
-   "answer": {
-    "poses": [
-     {
-      "name": "box_1",
-      "x": 0.5,
-      "y": -0.36,
-      "yaw": 0
-     },
-     {
-      "name": "box_2",
-      "x": 0.5,
-      "y": 0,
-      "yaw": 0
-     },
-     {
-      "name": "box_3",
-      "x": 0.5,
-      "y": 0.36,
-      "yaw": 0
-     },
-     {
-      "name": "box_4",
-      "x": 0.85,
-      "y": -0.36,
-      "yaw": 0
-     },
-     {
-      "name": "box_5",
-      "x": 0.85,
-      "y": 0,
-      "yaw": 0
-     },
-     {
-      "name": "box_6",
-      "x": 0.85,
-      "y": 0.36,
-      "yaw": 0
-     }
-    ]
-   },
-   "report": {
-    "ok": false,
-    "penetrating_pairs": [
-     [
-      "pallet",
-      "box_5",
-      -32.4
-     ],
-     [
-      "pallet",
-      "box_6",
-      -37.5
-     ]
-    ],
     "not_resting_on_anything": [],
     "off_the_support": [],
     "missing_poses": []
    },
-   "self_ok": false,
-   "solve_s": 0.44110655784606934,
-   "solve_cpu_s": 0.4411324320000176,
-   "rubric_ok": false,
-   "rubric_failed": [
-    [
-     "no_penetration",
-     false,
-     2
-    ]
-   ],
+   "self_ok": true,
+   "solve_s": 0.22593069076538086,
+   "solve_cpu_s": 0.22595875000000376,
+   "rubric_ok": true,
+   "rubric_failed": [],
    "answer_items": 6,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 1.7493500709533691,
-    "solve_cpu_s": 1.74906001399998,
+    "solve_s": 0.6043210029602051,
+    "solve_cpu_s": 0.6041614619999933,
     "rubric_failed": []
    }
   }
  ],
- "n_rounds": 3,
- "success": false,
- "first_round_success": false,
- "self_ok": false
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
 }

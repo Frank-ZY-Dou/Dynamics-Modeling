@@ -115,19 +115,20 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
     "failed_predicates": [],
     "failed_preferences": [],
     "solver_notes": [
-     "a program row was not met within the step at 3 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "a program row was not met within the step at 5 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
      "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
     ]
    },
    "self_ok": true,
-   "solve_s": 10.756877183914185,
-   "solve_cpu_s": 10.758384431000003,
+   "solve_s": 5.906189203262329,
+   "solve_cpu_s": 5.906220309000002,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 14

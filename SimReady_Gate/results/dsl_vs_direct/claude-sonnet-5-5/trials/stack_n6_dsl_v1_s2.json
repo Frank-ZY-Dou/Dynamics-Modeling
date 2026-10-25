@@ -137,6 +137,7 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -144,14 +145,12 @@
     "failed_preferences": [],
     "solver_notes": [
      "pairs still penetrated in the closing steps of the tail; 3 step(s) served the contacts alone, the program rows set aside",
-     "a program row was not met within the step at 19 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
-     "the contacts exceeded the trust region at 2 step(s); those steps served the contacts alone",
      "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
     ]
    },
    "self_ok": true,
-   "solve_s": 14.076364994049072,
-   "solve_cpu_s": 14.07542445300001,
+   "solve_s": 3.218055248260498,
+   "solve_cpu_s": 3.2088288159999934,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 21

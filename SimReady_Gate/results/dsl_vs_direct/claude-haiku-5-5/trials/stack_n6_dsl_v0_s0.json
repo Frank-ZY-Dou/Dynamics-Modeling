@@ -177,6 +177,7 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -184,30 +185,19 @@
     "failed_preferences": [],
     "solver_notes": [
      "a program row was not met within the step at 5 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
-     "the contacts exceeded the trust region at 1 step(s); those steps served the contacts alone"
+     "the contacts exceeded the trust region at 2 step(s); those steps served the contacts alone"
     ]
    },
    "self_ok": true,
-   "solve_s": 5.566123008728027,
-   "solve_cpu_s": 5.567648768999987,
-   "rubric_ok": false,
-   "rubric_failed": [
-    [
-     "centred(box_medium,box_large)",
-     false,
-     0.0244
-    ],
-    [
-     "centred(box_small,box_medium)",
-     false,
-     0.0182
-    ]
-   ],
+   "solve_s": 1.8068151473999023,
+   "solve_cpu_s": 1.801210195000003,
+   "rubric_ok": true,
+   "rubric_failed": [],
    "answer_items": 28
   }
  ],
  "n_rounds": 1,
- "success": false,
- "first_round_success": false,
+ "success": true,
+ "first_round_success": true,
  "self_ok": true
 }

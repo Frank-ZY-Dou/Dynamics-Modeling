@@ -224,13 +224,14 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": false,
     "error": "ProgramError: statement 28 (min_distance): '*' and name patterns are only allowed in a and in members"
    },
    "self_ok": false,
-   "solve_s": 0.00015473365783691406,
-   "solve_cpu_s": 0.00015143099999903598,
+   "solve_s": 0.0002715587615966797,
+   "solve_cpu_s": 0.0002666009999998664,
    "rubric_ok": false,
    "rubric_failed": [
     [
@@ -246,7 +247,7 @@
     [
      "row_aligned(7 bodies)",
      false,
-     0.1921
+     0.1477
     ],
     [
      "row_gaps(7 bodies)",
@@ -482,6 +483,7 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -492,8 +494,8 @@
     ]
    },
    "self_ok": true,
-   "solve_s": 14.19183874130249,
-   "solve_cpu_s": 14.193041324999996,
+   "solve_s": 8.079594373703003,
+   "solve_cpu_s": 8.080202847999999,
    "rubric_ok": false,
    "rubric_failed": [
     [

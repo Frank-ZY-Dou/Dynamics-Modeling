@@ -115,6 +115,7 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": false,
     "pen_after": 0,
@@ -134,8 +135,8 @@
     ]
    },
    "self_ok": false,
-   "solve_s": 2.6270077228546143,
-   "solve_cpu_s": 2.6272395770000116,
+   "solve_s": 1.2111539840698242,
+   "solve_cpu_s": 1.2114064360000043,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 13
@@ -230,6 +231,7 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -240,8 +242,8 @@
     ]
    },
    "self_ok": true,
-   "solve_s": 3.0378212928771973,
-   "solve_cpu_s": 3.0381821260000095,
+   "solve_s": 1.1363661289215088,
+   "solve_cpu_s": 1.1364888430000093,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 11

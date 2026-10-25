@@ -1,0 +1,103 @@
+{
+ "task": "drinks_row_n10",
+ "family": "drinks_row",
+ "n": 10,
+ "condition": "dsl_v1",
+ "seed": 2,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 11.952744007110596,
+    "duration_ms": 11250,
+    "duration_api_ms": 11222,
+    "cost_usd": 0.0013987099999999998,
+    "usage": {
+     "input": 2,
+     "cache_creation": 402,
+     "cache_read": 11761,
+     "output": 2401,
+     "thinking": 2082
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1938,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_1",
+       "can_2",
+       "can_3",
+       "can_4",
+       "can_5",
+       "can_6",
+       "bottle_1",
+       "bottle_2",
+       "glass_1",
+       "glass_2"
+      ],
+      "axis": "y",
+      "order": "height",
+      "start": "left",
+      "gap": 0.02,
+      "spacing": "even",
+      "mid": 0,
+      "tol": 0.01,
+      "reason": "single row parallel to y, ordered by height shortest left, 2 cm gap, evenly spaced, midpoint at y=0"
+     },
+     {
+      "op": "at",
+      "a": "*",
+      "x": 0.75,
+      "tol": 0.04,
+      "reason": "row line between x=0.70 and 0.80"
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 2 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 4 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 5.38155722618103,
+   "solve_cpu_s": 5.382337538,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 6
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

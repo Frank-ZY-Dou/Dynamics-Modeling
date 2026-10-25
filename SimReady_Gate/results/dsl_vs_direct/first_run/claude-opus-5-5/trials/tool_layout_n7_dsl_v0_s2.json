@@ -1,0 +1,168 @@
+{
+ "task": "tool_layout_n7",
+ "family": "tool_layout",
+ "n": 7,
+ "condition": "dsl_v0",
+ "seed": 2,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 18.62966513633728,
+    "duration_ms": 18070,
+    "duration_api_ms": 18036,
+    "cost_usd": 0.0513324,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1464,
+     "cache_read": 3962,
+     "output": 1941,
+     "thinking": 976
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1686,
+   "answer": {
+    "intent": "Line up the six tools in a row parallel to the y axis at x < 0.60, sorted by length from shortest at the left (+y) to longest at the right (-y), each with its long side along x and at least 3 cm apart, and put the tape dispenser at x > 0.70, with everything upright on the table and nothing overlapping.",
+    "assumptions": [
+     "Lengths taken from the long side of each tool's local size: markers 0.11 m, screwdrivers and pliers 0.19 m, hammer 0.30 m. Tied lengths are put in an arbitrary order: marker_1, marker_2, screwdriver_1, screwdriver_2, pliers, hammer.",
+     "A common line at x=0.42 keeps the 0.30 m hammer fully at x<0.60 and still on the table.",
+     "Yaw 0 puts each tool's local long side along x.",
+     "Centre gaps are half-widths plus 0.03 m, so footprints have at least 3 cm of table between them.",
+     "The tape is placed at x=0.80 so its footprint stays above x=0.70."
+    ],
+    "statements": [
+     {
+      "op": "fixed",
+      "a": "table"
+     },
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "place",
+      "a": "marker_1",
+      "x": 0.42,
+      "y": 0.17,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "marker_2",
+      "x": 0.42,
+      "y": 0.13,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "screwdriver_1",
+      "x": 0.42,
+      "y": 0.08,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "screwdriver_2",
+      "x": 0.42,
+      "y": 0.02,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "pliers",
+      "x": 0.42,
+      "y": -0.06,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "hammer",
+      "x": 0.42,
+      "y": -0.175,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "tape",
+      "x": 0.8,
+      "y": 0
+     },
+     {
+      "op": "left_of",
+      "a": "marker_1",
+      "b": "marker_2",
+      "gap": 0.04
+     },
+     {
+      "op": "left_of",
+      "a": "marker_2",
+      "b": "screwdriver_1",
+      "gap": 0.05
+     },
+     {
+      "op": "left_of",
+      "a": "screwdriver_1",
+      "b": "screwdriver_2",
+      "gap": 0.06
+     },
+     {
+      "op": "left_of",
+      "a": "screwdriver_2",
+      "b": "pliers",
+      "gap": 0.08
+     },
+     {
+      "op": "left_of",
+      "a": "pliers",
+      "b": "hammer",
+      "gap": 0.115
+     },
+     {
+      "op": "in_front_of",
+      "a": "tape",
+      "b": "hammer"
+     },
+     {
+      "op": "minimize"
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 13.270427703857422,
+   "solve_cpu_s": 13.270812962000008,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 19
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

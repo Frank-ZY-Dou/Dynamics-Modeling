@@ -122,6 +122,7 @@
      "The square is only about 15% larger than the total fruit footprint, so the four columns use up its full 0.28 m width with almost no slack."
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -130,8 +131,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 2.448939085006714,
-   "solve_cpu_s": 2.449030043999983,
+   "solve_s": 1.0878593921661377,
+   "solve_cpu_s": 1.0880381599999964,
    "rubric_ok": false,
    "rubric_failed": [
     [

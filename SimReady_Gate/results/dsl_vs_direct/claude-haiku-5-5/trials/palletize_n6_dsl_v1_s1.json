@@ -126,6 +126,7 @@
     ],
     "intent": "Palletize six cardboard boxes on the pallet as two y-parallel columns of three, square to the pallet edges, inset 2 cm from the edges and at least 1 cm apart."
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -134,8 +135,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 2.13932466506958,
-   "solve_cpu_s": 2.1396135190000223,
+   "solve_s": 0.7661864757537842,
+   "solve_cpu_s": 0.7663296830000093,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 14

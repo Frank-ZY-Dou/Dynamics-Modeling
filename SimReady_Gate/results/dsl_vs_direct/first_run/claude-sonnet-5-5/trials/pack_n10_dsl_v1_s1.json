@@ -1,0 +1,76 @@
+{
+ "task": "pack_n10",
+ "family": "pack",
+ "n": 10,
+ "condition": "dsl_v1",
+ "seed": 1,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 2.2711331844329834,
+    "duration_ms": 1613,
+    "duration_api_ms": 1586,
+    "cost_usd": 0.0086409,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1496,
+     "cache_read": 10529,
+     "output": 160,
+     "thinking": 0
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1518,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "fruit_*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_*"
+     },
+     {
+      "op": "within",
+      "a": "fruit_*",
+      "b": "table",
+      "x0": 0.42,
+      "x1": 0.7,
+      "y0": -0.14,
+      "y1": 0.14
+     },
+     {
+      "op": "no_penetration"
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 2 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 2.487978219985962,
+   "solve_cpu_s": 2.4883950990000017,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 4
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

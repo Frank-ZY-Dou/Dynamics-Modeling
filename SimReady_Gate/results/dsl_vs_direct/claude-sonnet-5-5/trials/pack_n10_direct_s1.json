@@ -91,6 +91,7 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": false,
     "penetrating_pairs": [
@@ -105,8 +106,8 @@
     "missing_poses": []
    },
    "self_ok": false,
-   "solve_s": 0.591846227645874,
-   "solve_cpu_s": 0.5919445410000037,
+   "solve_s": 0.4756321907043457,
+   "solve_cpu_s": 0.4757972839999951,
    "rubric_ok": false,
    "rubric_failed": [
     [
@@ -119,8 +120,8 @@
    "direct_repair": {
     "rubric_ok": false,
     "self_ok": true,
-    "solve_s": 2.364405393600464,
-    "solve_cpu_s": 2.3648055239999906,
+    "solve_s": 0.9717214107513428,
+    "solve_cpu_s": 0.9719581089999991,
     "rubric_failed": [
      [
       "in_square(10 bodies)",
@@ -214,6 +215,7 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": false,
     "penetrating_pairs": [
@@ -228,8 +230,8 @@
     "missing_poses": []
    },
    "self_ok": false,
-   "solve_s": 0.6415884494781494,
-   "solve_cpu_s": 0.6417114340000012,
+   "solve_s": 0.5206701755523682,
+   "solve_cpu_s": 0.5202537699999965,
    "rubric_ok": false,
    "rubric_failed": [
     [
@@ -242,8 +244,8 @@
    "direct_repair": {
     "rubric_ok": false,
     "self_ok": true,
-    "solve_s": 2.4594428539276123,
-    "solve_cpu_s": 2.456104738999983,
+    "solve_s": 1.0039517879486084,
+    "solve_cpu_s": 1.004212298000013,
     "rubric_failed": [
      [
       "in_square(10 bodies)",
@@ -337,13 +339,14 @@
      }
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": false,
     "penetrating_pairs": [
      [
       "fruit_1",
       "fruit_5",
-      -0.5
+      -0.6
      ],
      [
       "fruit_6",
@@ -356,8 +359,8 @@
     "missing_poses": []
    },
    "self_ok": false,
-   "solve_s": 0.5719313621520996,
-   "solve_cpu_s": 0.5720000599999935,
+   "solve_s": 0.4647667407989502,
+   "solve_cpu_s": 0.464918100999995,
    "rubric_ok": false,
    "rubric_failed": [
     [
@@ -370,8 +373,8 @@
    "direct_repair": {
     "rubric_ok": false,
     "self_ok": true,
-    "solve_s": 2.3373310565948486,
-    "solve_cpu_s": 2.3375424699999883,
+    "solve_s": 1.0169713497161865,
+    "solve_cpu_s": 1.0171114580000022,
     "rubric_failed": [
      [
       "in_square(10 bodies)",

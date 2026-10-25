@@ -67,6 +67,7 @@
      "No statement covers the 10 degree yaw limit, so it is left to the minimize objective."
     ]
    },
+   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -75,8 +76,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 11.407643795013428,
-   "solve_cpu_s": 11.397731562999994,
+   "solve_s": 3.101565361022949,
+   "solve_cpu_s": 3.0847419170000023,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 7

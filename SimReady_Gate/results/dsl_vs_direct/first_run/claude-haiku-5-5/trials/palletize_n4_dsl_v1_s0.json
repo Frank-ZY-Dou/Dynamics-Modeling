@@ -1,0 +1,106 @@
+{
+ "task": "palletize_n4",
+ "family": "palletize",
+ "n": 4,
+ "condition": "dsl_v1",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 20.93681526184082,
+    "duration_ms": 20433,
+    "duration_api_ms": 20407,
+    "cost_usd": 0.00254849,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1175,
+     "cache_read": 10529,
+     "output": 4416,
+     "thinking": 4138
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1079,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "pallet"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "pallet.top",
+      "inset": 0.02
+     },
+     {
+      "op": "yaw",
+      "a": "*",
+      "deg": 0,
+      "tol": 3,
+      "mod": 90
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_1",
+       "box_2",
+       "box_3"
+      ],
+      "axis": "y",
+      "gap": 0.03,
+      "spacing": "even",
+      "mid": 0
+     },
+     {
+      "op": "at",
+      "a": "box_1",
+      "x": 0.5,
+      "tol": 0.01
+     },
+     {
+      "op": "at",
+      "a": "box_4",
+      "x": 0.9,
+      "y": 0,
+      "tol": 0.02
+     },
+     {
+      "op": "no_penetration",
+      "margin": 0.01
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 0.9589869976043701,
+   "solve_cpu_s": 0.9592367299999864,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 8
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

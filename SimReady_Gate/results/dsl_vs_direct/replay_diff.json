@@ -1,0 +1,213 @@
+{
+ "claude-haiku-5-5": {
+  "direct": {
+   "trials": 48,
+   "pass_old": 35,
+   "pass_new": 43,
+   "lost": [],
+   "gained": [
+    "pack_n10_direct_s1",
+    "pack_n10_direct_s2",
+    "palletize_n4_direct_s1",
+    "palletize_n6_direct_s0",
+    "palletize_n6_direct_s2",
+    "stack_n6_direct_s0",
+    "stack_n6_direct_s1",
+    "stack_n6_direct_s2"
+   ],
+   "kept": 51,
+   "called": 3,
+   "wall_old": 88.71509599685669,
+   "cpu_old": 88.72161148300003,
+   "wall_new": 44.25408053398132,
+   "cpu_new": 44.23746145400005
+  },
+  "direct+repair": {
+   "trials": 48,
+   "pass_old": 36,
+   "pass_new": 37,
+   "lost": [
+    "fruit_cans_n16_direct_s1"
+   ],
+   "gained": [
+    "stack_n6_direct_s0",
+    "stack_n6_direct_s2"
+   ],
+   "kept": 51,
+   "called": 3,
+   "wall_old": 336.7647762298584,
+   "cpu_old": 336.781436627,
+   "wall_new": 147.3715763092041,
+   "cpu_new": 147.28944664400012
+  },
+  "dsl_v0": {
+   "trials": 48,
+   "pass_old": 36,
+   "pass_new": 38,
+   "lost": [
+    "fruit_cans_n24_dsl_v0_s0"
+   ],
+   "gained": [
+    "kitchen_prep_n12_dsl_v0_s2",
+    "pack_n10_dsl_v0_s2",
+    "stack_n6_dsl_v0_s0"
+   ],
+   "kept": 49,
+   "called": 5,
+   "wall_old": 342.3293647766113,
+   "cpu_old": 342.349070288,
+   "wall_new": 146.97408485412598,
+   "cpu_new": 146.92867951100007
+  },
+  "dsl_v1": {
+   "trials": 48,
+   "pass_old": 47,
+   "pass_new": 47,
+   "lost": [],
+   "gained": [],
+   "kept": 49,
+   "called": 3,
+   "wall_old": 321.1446101665497,
+   "cpu_old": 321.1642110560002,
+   "wall_new": 134.8432493209839,
+   "cpu_new": 134.77339893200002
+  }
+ },
+ "claude-sonnet-5-5": {
+  "direct": {
+   "trials": 48,
+   "pass_old": 35,
+   "pass_new": 39,
+   "lost": [
+    "fruit_cans_n24_direct_s1",
+    "pack_n10_direct_s2"
+   ],
+   "gained": [
+    "palletize_n4_direct_s1",
+    "palletize_n4_direct_s2",
+    "palletize_n6_direct_s0",
+    "palletize_n6_direct_s1",
+    "stack_n6_direct_s0",
+    "stack_n6_direct_s2"
+   ],
+   "kept": 50,
+   "called": 8,
+   "wall_old": 90.31635475158691,
+   "cpu_old": 90.31433531800006,
+   "wall_new": 49.31007933616638,
+   "cpu_new": 49.30144549500002
+  },
+  "direct+repair": {
+   "trials": 48,
+   "pass_old": 36,
+   "pass_new": 37,
+   "lost": [
+    "fruit_cans_n24_direct_s1",
+    "palletize_n6_direct_s2"
+   ],
+   "gained": [
+    "pack_n14_direct_s1",
+    "stack_n6_direct_s0",
+    "stack_n6_direct_s2"
+   ],
+   "kept": 50,
+   "called": 8,
+   "wall_old": 344.1872675418854,
+   "cpu_old": 344.11632935200004,
+   "wall_new": 153.4519021511078,
+   "cpu_new": 153.35573696700004
+  },
+  "dsl_v0": {
+   "trials": 48,
+   "pass_old": 30,
+   "pass_new": 30,
+   "lost": [
+    "kitchen_prep_n12_dsl_v0_s0"
+   ],
+   "gained": [
+    "stack_n6_dsl_v0_s0"
+   ],
+   "kept": 50,
+   "called": 1,
+   "wall_old": 331.7266049385071,
+   "cpu_old": 331.712441184,
+   "wall_new": 129.01061606407166,
+   "cpu_new": 128.939358149
+  },
+  "dsl_v1": {
+   "trials": 48,
+   "pass_old": 48,
+   "pass_new": 48,
+   "lost": [],
+   "gained": [],
+   "kept": 49,
+   "called": 2,
+   "wall_old": 363.99283027648926,
+   "cpu_old": 363.9093515300001,
+   "wall_new": 147.221773147583,
+   "cpu_new": 147.14415805499993
+  }
+ },
+ "claude-opus-5-5": {
+  "direct": {
+   "trials": 48,
+   "pass_old": 40,
+   "pass_new": 45,
+   "lost": [],
+   "gained": [
+    "palletize_n6_direct_s1",
+    "palletize_n6_direct_s2",
+    "stack_n6_direct_s0",
+    "stack_n6_direct_s1",
+    "stack_n6_direct_s2"
+   ],
+   "kept": 49,
+   "called": 1,
+   "wall_old": 79.28538370132446,
+   "cpu_old": 79.27344577399987,
+   "wall_new": 42.65478801727295,
+   "cpu_new": 42.63576569000001
+  },
+  "direct+repair": {
+   "trials": 48,
+   "pass_old": 39,
+   "pass_new": 39,
+   "lost": [],
+   "gained": [],
+   "kept": 49,
+   "called": 1,
+   "wall_old": 335.7946298122406,
+   "cpu_old": 335.71138174099974,
+   "wall_new": 148.0600266456604,
+   "cpu_new": 147.93819401999997
+  },
+  "dsl_v0": {
+   "trials": 48,
+   "pass_old": 38,
+   "pass_new": 37,
+   "lost": [
+    "pack_n10_dsl_v0_s1"
+   ],
+   "gained": [],
+   "kept": 50,
+   "called": 0,
+   "wall_old": 327.4563238620758,
+   "cpu_old": 327.4107262549999,
+   "wall_new": 115.27033638954163,
+   "cpu_new": 115.19167381199996
+  },
+  "dsl_v1": {
+   "trials": 48,
+   "pass_old": 48,
+   "pass_new": 48,
+   "lost": [],
+   "gained": [],
+   "kept": 49,
+   "called": 0,
+   "wall_old": 332.5613715648651,
+   "cpu_old": 332.52187555700004,
+   "wall_new": 126.52839708328247,
+   "cpu_new": 126.45110978000007
+  }
+ }
+}
