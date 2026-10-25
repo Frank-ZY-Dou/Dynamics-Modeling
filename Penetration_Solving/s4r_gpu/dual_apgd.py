@@ -365,10 +365,7 @@ class DualAPGD:
         L_deg = self._gershgorin_L(contact_i_np, contact_j_np, K, N) * m
         if K <= 1:
             return L_deg
-        try:
-            import scipy.sparse as sp
-        except ImportError:
-            return L_deg
+        import scipy.sparse as sp
         ci = np.asarray(contact_i_np, dtype=np.int64)
         cj = np.asarray(contact_j_np, dtype=np.int64)
         rows = np.repeat(np.arange(K, dtype=np.int64), 6)

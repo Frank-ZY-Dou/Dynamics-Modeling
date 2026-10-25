@@ -1,9 +1,9 @@
 """Triangle-mesh collision oracle for non-convex Kubric objects.
 
 Default pair-signed-distance backend is FCL (both during the solve loop in
-MeshOracle and in the end-of-run evaluator evaluate_world_collision_meshes).
-Trimesh.proximity is kept as a fallback for environments where python-fcl is
-unavailable — set MESH_EVAL_USE_FCL=0 to force the trimesh path.
+MeshOracle and in the end-of-run evaluator evaluate_world_collision_meshes);
+python-fcl is required. MESH_EVAL_USE_FCL=0 (or use_fcl=False) asks for the
+trimesh.proximity path instead.
 Provides SignedDistanceOracle and PenetrationDepthOracle interfaces.
 """
 from __future__ import annotations
@@ -192,24 +192,11 @@ def build_world_collision_meshes(
     return [build_world_collision_mesh(obj, process=process) for obj in objects]
 
 
-def _fallback_inside_test(mesh: trimesh.Trimesh, points: np.ndarray) -> np.ndarray:
-    """Fallback inside/outside test when trimesh.contains is unavailable."""
-    if len(points) == 0:
-        return np.zeros(0, dtype=bool)
-    closest, _, face_idx = trimesh.proximity.closest_point(mesh, points)
-    normals = mesh.face_normals[face_idx]
-    dot = np.sum((points - closest) * normals, axis=1)
-    return dot < 0.0
-
-
 def _contains_points(mesh: trimesh.Trimesh, points: np.ndarray) -> np.ndarray:
-    """Safely run trimesh.contains with a geometric fallback."""
+    """trimesh.contains on any number of points (rtree is required)."""
     if len(points) == 0:
         return np.zeros(0, dtype=bool)
-    try:
-        return np.asarray(mesh.contains(points), dtype=bool)
-    except Exception:
-        return _fallback_inside_test(mesh, points)
+    return np.asarray(mesh.contains(points), dtype=bool)
 
 
 def _pair_signed_distance_from_samples(
@@ -494,13 +481,8 @@ def _fcl_pair_signed_distance(fcl_mod, bvh_i, bvh_j, mesh_i=None, mesh_j=None) -
 
 
 def _build_fcl_bvhs(meshes: List[trimesh.Trimesh]):
-    """Build one FCL BVHModel per world-space trimesh; returns (fcl_mod, [bvh]).
-    Returns (None, None) when python-fcl is unavailable.
-    """
-    try:
-        import fcl as _fcl
-    except ImportError:
-        return None, None
+    """Build one FCL BVHModel per world-space trimesh; returns (fcl_mod, [bvh])."""
+    import fcl as _fcl
     bvhs = []
     for mesh in meshes:
         verts = np.asarray(mesh.vertices, dtype=np.float64)
@@ -522,8 +504,8 @@ def evaluate_world_collision_meshes(
     Default backend is FCL (EVAL_USE_FCL), matching the solver's narrowphase so
     solver/oracle/evaluator agree: surface crossings through collide(), and a
     body lying entirely inside another (invisible to both FCL queries) through
-    a containment test on AABB-nested pairs. Falls back to trimesh.proximity
-    when FCL is unavailable or when ``use_fcl=False`` is requested.
+    a containment test on AABB-nested pairs. ``use_fcl=False`` (or
+    MESH_EVAL_USE_FCL=0) asks for trimesh.proximity instead.
     """
     if use_fcl is None:
         use_fcl = EVAL_USE_FCL
@@ -536,7 +518,6 @@ def evaluate_world_collision_meshes(
     fcl_mod, fcl_bvh = (None, None)
     if use_fcl:
         fcl_mod, fcl_bvh = _build_fcl_bvhs(meshes)
-    use_fcl = fcl_bvh is not None
 
     # ── Vectorized AABB overlap + gap check over all N(N-1)/2 pairs ──
     # Was a Python double-loop with 50M `_aabb_overlap` calls at N=10000;
@@ -619,10 +600,7 @@ def _aabb_candidate_pairs(lo: np.ndarray, hi: np.ndarray, margin: float):
     # neighbour-query distances, proportional to the coordinate magnitude.
     coord = max(float(np.abs(lo).max()), float(np.abs(hi).max()), 1.0)
     radius = radius * (1.0 + 1e-9) + 64.0 * np.finfo(np.float64).eps * (coord + radius) + 1e-12
-    try:
-        from scipy.spatial import cKDTree
-    except ImportError:
-        return np.triu_indices(n, k=1)
+    from scipy.spatial import cKDTree
     pairs = cKDTree(centre).query_pairs(radius, output_type="ndarray")
     if len(pairs) == 0:
         return np.zeros(0, dtype=np.int64), np.zeros(0, dtype=np.int64)
@@ -666,19 +644,14 @@ class MeshOracle:
         # pose is applied via fcl.Transform in _precise_pair_query).
         self._fcl_bvh: List = []
         if self.use_fcl:
-            try:
-                import fcl as _fcl  # noqa: F401
-                self._fcl = _fcl
-                for faces, verts_rot in zip(self._faces, self._rotated_verts):
-                    m = _fcl.BVHModel()
-                    m.beginModel(len(verts_rot), len(faces))
-                    m.addSubModel(verts_rot.astype(np.float64), faces)
-                    m.endModel()
-                    self._fcl_bvh.append(m)
-            except ImportError:
-                # FCL unavailable: fall back to trimesh + _contains_points.
-                self.use_fcl = False
-                self._fcl = None
+            import fcl as _fcl
+            self._fcl = _fcl
+            for faces, verts_rot in zip(self._faces, self._rotated_verts):
+                m = _fcl.BVHModel()
+                m.beginModel(len(verts_rot), len(faces))
+                m.addSubModel(verts_rot.astype(np.float64), faces)
+                m.endModel()
+                self._fcl_bvh.append(m)
         else:
             self._fcl = None
 
@@ -811,9 +784,9 @@ class MeshOracle:
         """Compute signed distance between mesh i and mesh j.
 
         By default uses FCL BVH distance() + collide() (same primitive as
-        \\name's fcl contact backend, so solver/oracle/evaluator agree).
-        Falls back to trimesh.closest_point + _contains_points (ray-cast
-        inside test) if FCL is unavailable.
+        \\name's fcl contact backend, so solver/oracle/evaluator agree);
+        with use_fcl=False, trimesh.closest_point + _contains_points (ray-cast
+        inside test).
 
         Returns (signed_distance, direction_ij) where:
           signed_distance < 0 means penetration
@@ -859,7 +832,7 @@ class MeshOracle:
                 raw = cj - ci
             return -depth, _safe_normalize(raw)
 
-        # ---------- Fallback: trimesh + ray-cast inside test ----------
+        # ---------- use_fcl=False: trimesh + ray-cast inside test ----------
         mesh_i = self._meshes[i]
         mesh_j = self._meshes[j]
         verts_i = self._rotated_verts[i]

@@ -498,19 +498,15 @@ def solve_s4r_gpu(
     pen_pairs = -1
     max_pen = -1.0
     if eval_penetration:
-        try:
-            import trimesh
-            from mesh_collision import evaluate_world_collision_meshes
-            final_meshes = []
-            for i in range(N):
-                v_world = nfs[i] * (rots[i] @ mverts[i].T).T + centers[i]
-                final_meshes.append(trimesh.Trimesh(vertices=v_world, faces=mfaces[i], process=False))
-            stats = evaluate_world_collision_meshes(final_meshes)
-            pen_pairs = int(stats.pen_pairs)
-            max_pen = float(stats.max_penetration)
-        except Exception as e:
-            if verbose:
-                print(f"  [warn] penetration eval failed: {e}", flush=True)
+        import trimesh
+        from mesh_collision import evaluate_world_collision_meshes
+        final_meshes = []
+        for i in range(N):
+            v_world = nfs[i] * (rots[i] @ mverts[i].T).T + centers[i]
+            final_meshes.append(trimesh.Trimesh(vertices=v_world, faces=mfaces[i], process=False))
+        stats = evaluate_world_collision_meshes(final_meshes)
+        pen_pairs = int(stats.pen_pairs)
+        max_pen = float(stats.max_penetration)
     evaluation_time = time.perf_counter() - eval_t0
 
     native_converged = bool(continuation_complete and tail_stop_reason == "feasible")

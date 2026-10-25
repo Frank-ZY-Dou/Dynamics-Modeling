@@ -51,27 +51,26 @@ def qp_status_ok(result) -> bool:
     return status in ('solved', 'solved inaccurate')
 
 
+_OSQP_MAJOR = int(osqp.__version__.split(".")[0])
+_OSQP_06_NAMES = {'polishing': 'polish', 'warm_starting': 'warm_start'}
+
+
 def osqp_solve(P, q, A, l, u, x0=None, **settings):
     """Set up and solve one OSQP problem; returns the OSQP result object.
 
-    Accepts the 1.x setting names (``polishing``, ``warm_starting``) and
-    falls back to the 0.6 names (``polish``, ``warm_start``) when the
-    installed OSQP rejects them, so either version in requirements.txt works.
+    Takes the 1.x setting names (``polishing``, ``warm_starting``). OSQP 0.6
+    names them ``polish`` and ``warm_start`` and its solve() takes no
+    ``raise_error``: with it installed the names are translated, so either
+    version in requirements.txt works.
     """
     solver = osqp.OSQP()
-    try:
+    if _OSQP_MAJOR >= 1:
         solver.setup(P, q, A, l, u, **settings)
-    except Exception:
-        legacy = {'polishing': 'polish', 'warm_starting': 'warm_start'}
-        solver = osqp.OSQP()
-        solver.setup(P, q, A, l, u,
-                     **{legacy.get(k, k): v for k, v in settings.items()})
+    else:
+        solver.setup(P, q, A, l, u, **{_OSQP_06_NAMES.get(k, k): v for k, v in settings.items()})
     if x0 is not None:
         solver.warm_start(x=np.asarray(x0, dtype=np.float64))
-    try:
-        return solver.solve(raise_error=False)
-    except TypeError:
-        return solver.solve()
+    return solver.solve(raise_error=False) if _OSQP_MAJOR >= 1 else solver.solve()
 
 
 _OSQP_STEP = dict(verbose=False, eps_abs=1e-6, eps_rel=1e-6,
@@ -110,21 +109,17 @@ def _admissibility_violations(C, target_fn, block=1024, radius=None):
     N = len(C)
     out = []
     if radius is not None and N >= 2:
-        try:
-            from scipy.spatial import cKDTree
-        except ImportError:
-            cKDTree = None
-        if cKDTree is not None:
-            pairs = cKDTree(C).query_pairs(float(radius), output_type="ndarray")
-            if len(pairs) == 0:
-                return out
-            pairs = np.sort(pairs, axis=1)
-            pairs = pairs[np.lexsort((pairs[:, 1], pairs[:, 0]))]
-            ii = pairs[:, 0]; jj = pairs[:, 1]
-            d = np.linalg.norm(C[ii] - C[jj], axis=1)
-            tgt = np.asarray(target_fn(ii, jj), dtype=np.float64)
-            keep = d < tgt
-            return [(int(i), int(j), float(dd)) for i, j, dd in zip(ii[keep], jj[keep], d[keep])]
+        from scipy.spatial import cKDTree
+        pairs = cKDTree(C).query_pairs(float(radius), output_type="ndarray")
+        if len(pairs) == 0:
+            return out
+        pairs = np.sort(pairs, axis=1)
+        pairs = pairs[np.lexsort((pairs[:, 1], pairs[:, 0]))]
+        ii = pairs[:, 0]; jj = pairs[:, 1]
+        d = np.linalg.norm(C[ii] - C[jj], axis=1)
+        tgt = np.asarray(target_fn(ii, jj), dtype=np.float64)
+        keep = d < tgt
+        return [(int(i), int(j), float(dd)) for i, j, dd in zip(ii[keep], jj[keep], d[keep])]
     for a in range(0, N, block):
         b = min(N, a + block)
         d = np.linalg.norm(C[a:b, None, :] - C[None, :, :], axis=2)  # (b-a, N)
@@ -1796,11 +1791,6 @@ def optimize_rotations_on_manifold(centers, rots, nfs, mverts, mfaces, N,
     'trimesh' is the dependency-free closest-point path.
     """
     use_fcl = contact_backend in ('fcl', 'fcl_prebuilt')
-    if use_fcl:
-        try:
-            import fcl  # noqa: F401
-        except ImportError:
-            use_fcl = False
     if use_fcl:
         return _optimize_rotations_fcl(centers, rots, nfs, mverts, mfaces, N,
                                         d_hat, scale, max_rot_iters,
