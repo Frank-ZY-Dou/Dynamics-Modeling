@@ -189,9 +189,14 @@ def _low_footprint(b: Body, interior: int = 6):
     return pts
 
 
-def support_height_for(scene: Scene, body: Body, support: Body, require_hit: bool = False):
+def support_height_for(scene: Scene, body: Body, support: Body, require_hit: bool = False, from_above: bool = False):
     """Seat height of `body` on `support`: the height of the body's lowest point at which it rests
     on the support's surface, touching it without sinking in (a drop).
+
+    The drop starts at the body's centre, so the seat is on the level of the support under it (a
+    fixture's lower shelf); with `from_above` it starts above the support and the seat is on the
+    highest surface under the body wherever the body is now, as for a body set down on another (a
+    carton on a carton, which the body's starting height says nothing about).
 
     Vertical rays at sample points under the body (its lowest vertices, a grid inside their hull,
     and the support's vertices inside that hull) meet the support's top S going down and the
@@ -201,7 +206,7 @@ def support_height_for(scene: Scene, body: Body, support: Body, require_hit: boo
     under the body meets the support (the body is not over it at all); without it, the vertex
     rule of `Scene.support_height` stands in where no ray meets both surfaces (an initial guess
     for the repair, never used as evidence)."""
-    h = _drop_height(scene, body, support)
+    h = _drop_height(scene, body, support, below=math.inf if from_above else None)
     if require_hit:
         if h is None:
             pts = np.vstack([_low_footprint(body), body.center[None, :2]])
@@ -254,12 +259,14 @@ def _support_samples(support: Body, foot: np.ndarray, below: float) -> np.ndarra
     return np.vstack(out) if out else np.zeros((0, 2))
 
 
-def _drop_height(scene: Scene, body: Body, support: Body):
+def _drop_height(scene: Scene, body: Body, support: Body, below: float | None = None):
     """max over sample points of S - (B - z_low): see support_height_for; None when no point has
-    both surfaces above and below it."""
+    both surfaces above and below it. S is the support's highest surface under `below` (the body's
+    centre by default)."""
+    below = float(body.center[2]) if below is None else below
     foot = _low_footprint(body)
-    P = np.vstack([foot, _support_samples(support, foot, below=float(body.center[2]))])
-    S = scene.vertical_hits(support, P, below=float(body.center[2]))
+    P = np.vstack([foot, _support_samples(support, foot, below=below)])
+    S = scene.vertical_hits(support, P, below=below)
     B = scene.vertical_hits(body, P, upward=True)
     ok = np.isfinite(S) & np.isfinite(B)
     if not ok.any():
@@ -330,7 +337,7 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
     supports = effective_supports(program, scene)
     for nm, sup in supports.items():
         b = scene[nm]
-        spec.supports[nm] = support_height_for(scene, b, scene[sup])
+        spec.supports[nm] = support_height_for(scene, b, scene[sup], from_above=not scene[sup].fixed)
         spec.support_of[nm] = sup
         if not scene[sup].fixed:
             dyn_support.append((nm, sup))
@@ -412,7 +419,7 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
         out = []
         sc = state.scene
         for nm, sup in dyn_support:                      # a body on a free support follows its top
-            spec.supports[nm] = support_height_for(sc, sc[nm], sc[sup])
+            spec.supports[nm] = support_height_for(sc, sc[nm], sc[sup], from_above=True)
         for nm, lst in rects_static.items():
             k = idx[nm]; b = sc.bodies[k]
             if b.fixed:
@@ -476,7 +483,7 @@ def check_predicates(program: Program, scene: Scene, tol: float = 2e-3, upright_
 
     def on_support_pred(nm, sup, label):
         b = scene[nm]
-        h = support_height_for(scene, b, scene[sup], require_hit=True)
+        h = support_height_for(scene, b, scene[sup], require_hit=True, from_above=not scene[sup].fixed)
         if h is None:
             return _pred(label, False, None)
         g = float((b.world_vertices() @ scene.up).min()) - h

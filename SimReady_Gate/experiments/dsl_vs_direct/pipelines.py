@@ -97,10 +97,10 @@ def run_poses(layout_path, obj: dict, support: str = "table", clock: dict | None
             seat(on, depth + 1)
         b = sc[n]
         b.rotation = rotz(math.radians(yaw))
-        # set down from above: the drop meets the top of what it rests on, wherever the body started (left at its
+        b.center = np.array([x, y, b.center[2]])
+        # set down from above: the drop meets the top of what it rests on, wherever the body started (from its
         # starting height, a body moved onto a taller one, a carton onto a carton, met the inside of it)
-        b.center = np.array([x, y, float(sc[on].world_aabb()[1][2]) + b.support_offset(sc.up) + 0.01])
-        h = support_height_for(sc, b, sc[on])
+        h = support_height_for(sc, b, sc[on], from_above=True)
         b.center = np.array([x, y, h + b.support_offset(sc.up)])
         _lift_clear(sc, b, sc[on])      # as the repair's last seat: a residual of the sampled drop is raised clear
         placed.add(n)

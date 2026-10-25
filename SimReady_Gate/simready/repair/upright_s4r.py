@@ -679,7 +679,7 @@ def reseat_on_supports(scene: Scene, spec: RepairSpec) -> None:
         sup = spec.support_of.get(b.name)
         if sup is None:
             continue
-        h0 = support_height_for(scene, b, scene[sup])
+        h0 = support_height_for(scene, b, scene[sup], from_above=not scene[sup].fixed)
         b.center = np.array([b.center[0], b.center[1], h0 + b.support_offset(scene.up)])
         h0 += _lift_clear(scene, b, scene[sup])
         spec.supports[b.name] = h0
