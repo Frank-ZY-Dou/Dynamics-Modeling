@@ -31,8 +31,10 @@ report on stdout; `summarize`, `prompt` and `verify` print text.
    State what must hold and let the solver find the poses: footprint gaps with `beside`, lines with
    `row`, `align`, `evenly_spaced`, `grid`, groups with `cluster`, headings with `yaw`, `parallel`,
    `facing`, the robot's needs with `reach`, `clearance`, `approach`, zones with `within ... side=` and
-   `keep_out`, small edits with `max_move`, `max_turn`, towers with `stack`. `docs/DSL.md` lists every
-   statement with what it compiles to; `soft=` marks a preference.
+   `keep_out`, small edits with `max_move`, `max_turn`, towers with `stack`. Name a group of similar
+   bodies by a pattern (`members: ["can_*", "bottle_1"]`, `a: "fruit_*"`) instead of listing them, so
+   none is left out. `docs/DSL.md` lists every statement with what it compiles to; `soft=` marks a
+   preference.
 3. Validate and compile: `python -m simready.cli check <scene> program.json` (exit 2 = fix the
    named statement in the JSON: unknown body, self-relation, missing `r`, bad keyword, inset with
    no room). `check` compiles the program exactly as `repair` will.

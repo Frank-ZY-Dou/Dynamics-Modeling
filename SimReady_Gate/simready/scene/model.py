@@ -118,29 +118,48 @@ class Scene:
         mesh (a proxy, a decimated copy) or moving it invalidates the entry. Arrays are rebound,
         never edited in place, everywhere in this package.
         """
+        z = self.vertical_hits(support, xy)
+        return z[np.isfinite(z)]
+
+    def vertical_hits(self, body: Body, xy: np.ndarray, upward: bool = False, below: float | None = None) -> np.ndarray:
+        """Per point of `xy`, the z where a vertical ray meets the body's surface: the highest hit of
+        a downward ray (only hits under `below` when given), or with `upward` the lowest hit of a
+        ray from underneath; NaN where the ray misses.
+
+        The world-frame mesh and its ray intersector are cached on the body. The cache key covers
+        the pose (centre and rotation) and the identity of the vertex and face arrays, which the
+        cache keeps alive so that the identity cannot be recycled: replacing a body's mesh (a
+        proxy, a decimated copy) or moving it invalidates the entry. Arrays are rebound, never
+        edited in place, everywhere in this package.
+        """
         import trimesh
         from ..errors import GeometryQueryError
-        key = (id(support), tuple(np.round(support.center, 9)), tuple(np.round(support.rotation.ravel(), 9)),
-               id(support.verts), support.verts.shape, id(support.faces), support.faces.shape)
-        cache = support.meta.setdefault("_ray_cache", {})
+        xy = np.asarray(xy, dtype=np.float64).reshape(-1, 2)
+        out = np.full(len(xy), np.nan)
+        if not len(xy):
+            return out
+        key = (id(body), tuple(np.round(body.center, 9)), tuple(np.round(body.rotation.ravel(), 9)),
+               id(body.verts), body.verts.shape, id(body.faces), body.faces.shape)
+        cache = body.meta.setdefault("_ray_cache", {})
         if key not in cache:
             cache.clear()
-            m = trimesh.Trimesh(support.world_vertices(), support.faces, process=False)
-            cache[key] = (m, m.ray, support.verts, support.faces)
+            m = trimesh.Trimesh(body.world_vertices(), body.faces, process=False)
+            cache[key] = (m, m.ray, body.verts, body.faces)
         m, ray, _, _ = cache[key]
-        top = float(m.bounds[1][2]) + 1.0
-        origins = np.column_stack([xy, np.full(len(xy), top)])
-        dirs = np.tile(np.array([[0.0, 0.0, -1.0]]), (len(xy), 1))
+        start = float(m.bounds[0][2]) - 1.0 if upward else float(m.bounds[1][2]) + 1.0
+        origins = np.column_stack([xy, np.full(len(xy), start)])
+        dirs = np.tile(np.array([[0.0, 0.0, 1.0 if upward else -1.0]]), (len(xy), 1))
         try:
             loc, idx_ray, _ = ray.intersects_location(origins, dirs, multiple_hits=True)
         except Exception as exc:  # a failed query is not a miss
-            raise GeometryQueryError(f"downward ray query on {support.name} failed: {type(exc).__name__}: {exc}") from exc
-        if len(loc) == 0:
-            return np.zeros(0)
-        best = {}
+            raise GeometryQueryError(f"vertical ray query on {body.name} failed: {type(exc).__name__}: {exc}") from exc
         for pnt, r in zip(loc, idx_ray):
-            best[r] = max(best.get(r, -np.inf), float(pnt[2]))
-        return np.array(list(best.values()))
+            z = float(pnt[2])
+            if upward:
+                out[r] = z if np.isnan(out[r]) else min(out[r], z)
+            elif below is None or z < below:
+                out[r] = z if np.isnan(out[r]) else max(out[r], z)
+        return out
 
 
 def slab_proxy(body: Body, thickness: float = 0.05, up=None, top: float | None = None) -> Body:

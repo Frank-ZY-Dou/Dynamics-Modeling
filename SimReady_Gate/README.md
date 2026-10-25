@@ -322,7 +322,7 @@ program
   clearance(mug, gap=0.03)       keep_out(*, x0=0.25, x1=0.40, y0=0.20, y1=0.40)
   at(plate, x=0.55, y=0.0)       beside(fork, plate, side=left, gap=0.02, max=0.05)   symmetric(fork, knife, plate, axis=y)
   yaw(fork, deg=0, axis=long)    parallel(spoon, knife)
-  row(can_1, can_2, can_3, can_4, axis=-y, gap=0.02, order=height)   evenly_spaced(can_1, can_2, can_3, can_4, axis=y)
+  row(can_*, start=left, gap=0.02, order=height, spacing=even, mid=0)   evenly_spaced(jar_1, jar_2, jar_3, axis=x)
   grid(box_1, box_2, box_3, box_4, box_5, box_6, cols=3)   cluster(apple, orange, lime, r=0.12)
   within(apple, table.top, side=left, frac=0.33)   stack(box_large, box_medium, box_small)   balanced_on(box_medium, box_large)
   max_move(*, d=0.03)   max_turn(*, deg=10)   left_of(cup, plate, gap=0.10, soft=0.5)

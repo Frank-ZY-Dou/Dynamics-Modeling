@@ -19,7 +19,7 @@
   "orange": ["food_produce_orange_d01", "food_produce_orange_j01"],
   "tangerine": ["food_produce_tangerine_d01"],
   "banana": ["food_produce_banana_e01", "food_produce_banana_g01"],
-  "can": ["food_beverage_can_n01", "food_beverage_can_h01", "food_beverage_can_l01", "food_beverage_can_b01", "food_beverage_can_k01", "food_canned_soup_a02"],
+  "can": ["food_beverage_can_n01", "food_beverage_can_h01", "food_beverage_can_l01", "food_beverage_can_b01", "food_beverage_can_k01", "food_canned_soup_a02", "food_beverage_can_d01"],
   "bottle": ["food_beverage_bottledWater_l01", "misc_bottle_corked_a01", "food_beverage_whiskyBottle_c01"],
   "jar": ["paint_container_jar_pink_a01", "paint_container_jar_green_a01", "paint_container_jar_orange_a01", "paint_container_jar_violet_a01"],
   "box": ["box_cube_a01", "box_cube_a03", "box_cardboard_d01", "box_cardboard_d02", "box_cardboard_d03", "box_printer_a08", "box_flat_a09"],

@@ -48,6 +48,15 @@ def kwd(st, key):
     return OP_DEFAULTS.get(st.name, {}).get(key)
 
 
+START_AXIS = {"left": "-y", "right": "+y", "near": "+x", "far": "-x"}     # the end a row's first member is at
+
+
+def row_axis(st) -> str:
+    """A row's signed axis, the direction its list runs in: away from the end start= names, else
+    toward +axis."""
+    return START_AXIS[st.kw["start"]] if "start" in st.kw else "+" + kwd(st, "axis")
+
+
 def wrap(a: float) -> float:
     return (a + math.pi) % (2.0 * math.pi) - math.pi
 
@@ -308,13 +317,14 @@ def compile_statement(st, ctx: Ctx):
         gens.append(gen)
     elif n == "row":
         ks = [idx[b] for b in sorted_members(st, sc0)]
-        tok = kwd(st, "axis")
+        tok = row_axis(st)
         ax = 0 if tok.endswith("x") else 1
         sgn = -1.0 if tok.startswith("-") else 1.0
         pa = 1 - ax
         u = np.zeros(2); u[ax] = sgn
         gap, tol = float(kwd(st, "gap")), float(kwd(st, "tol"))
         even = kw.get("spacing") == "even"
+        mid = float(kw["mid"]) if "mid" in kw else None
 
         def gen(state):
             out, sc = [], state.scene
@@ -322,6 +332,9 @@ def compile_statement(st, ctx: Ctx):
             for k in ks[1:]:
                 cur = float(_c(sc, k)[pa] - _c(sc, k0)[pa])
                 _row(out, {(k, COL[pa]): 1.0, (k0, COL[pa]): -1.0}, -tol - cur, tol - cur, w)
+            if mid is not None:                  # the midpoint of the end members, along the row
+                cur = 0.5 * float(_c(sc, ks[0])[ax] + _c(sc, ks[-1])[ax])
+                _row(out, {(ks[0], COL[ax]): 0.5, (ks[-1], COL[ax]): 0.5}, mid - tol - cur, mid + tol - cur, w)
             for ki, kj in zip(ks, ks[1:]):
                 _, hi_i = projection(sc.bodies[ki], state.body_scale(ki), u)
                 lo_j, _ = projection(sc.bodies[kj], state.body_scale(kj), u)
@@ -803,7 +816,7 @@ def check_v1(st, scene, supports: dict, tol: float, angle_tol: float, bodies_fn)
         P = np.array([sc[x].center[:2] for x in members])
         label = f"{n}({','.join(st.args)})"
         if n == "row":
-            tok = kwd(st, "axis")
+            tok = row_axis(st)
             ax = 0 if tok.endswith("x") else 1
             sgn = -1.0 if tok.startswith("-") else 1.0
             u = np.zeros(2); u[ax] = sgn
@@ -815,6 +828,9 @@ def check_v1(st, scene, supports: dict, tol: float, angle_tol: float, bodies_fn)
             if kw.get("spacing") == "even" and len(members) >= 3:
                 v = even_error(P[:, ax])
                 out.append((label + ":even", v <= float(kwd(st, "tol")) + tol, v))
+            if "mid" in kw:
+                v = abs(0.5 * float(P[0, ax] + P[-1, ax]) - float(kw["mid"]))
+                out.append((label + ":mid", v <= float(kwd(st, "tol")) + tol, v))
         elif n == "align":
             ax = 0 if kwd(st, "axis") == "x" else 1
             u = np.zeros(2); u[ax] = 1.0

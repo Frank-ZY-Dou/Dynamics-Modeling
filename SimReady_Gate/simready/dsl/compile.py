@@ -15,12 +15,15 @@ text and the JSON path.
 """
 from __future__ import annotations
 
+import fnmatch
 import math
+import re
+
 import numpy as np
 
 from ..scene.model import Scene, Body
 from ..repair.upright_s4r import RepairSpec, decompose_zyx
-from .model import Program, Statement
+from .model import ARITY, GROUP, Program, Statement, is_wildcard
 from .schema import DEFAULTS
 from . import statements as V1
 
@@ -50,12 +53,73 @@ def _pred(name, ok, value, soft=False):
     return p
 
 
+def natural_key(name: str):
+    """Sort key that orders the numbers in a name by value: can_2 before can_10."""
+    return [int(t) if t.isdigit() else t for t in re.split(r"(\d+)", name)]
+
+
+def _matches(scene: Scene, tok: str):
+    """The free bodies a pattern (can_*, fruit_?) matches, in natural order; one must match."""
+    hits = sorted((b.name for b in scene.free() if fnmatch.fnmatchcase(b.name, tok)), key=natural_key)
+    if not hits:
+        raise CompileError(f"'{tok}' matches no free body (free: {', '.join(b.name for b in scene.free())})")
+    return hits
+
+
 def _bodies(scene: Scene, tok: str, exclude=()):
     if tok == "*":
         return [b.name for b in scene.free() if b.name not in exclude]
+    if is_wildcard(tok):
+        return [n for n in _matches(scene, tok) if n not in exclude]
     if tok not in scene.names():
         raise CompileError(f"unknown body '{tok}' (known: {', '.join(scene.names())})")
     return [tok]
+
+
+# a wildcard first argument of these makes one statement per body
+EXPAND_EACH = {"beside", "attach", "balanced_on"}
+
+
+def expand_names(program: Program, scene: Scene) -> Program:
+    """The program with the wildcards ('*', can_*) among a group's members replaced by the free
+    bodies they match, in natural order, without the bodies the statement names itself (row(can_3,
+    can_*) puts can_3 first, then the other cans); and a statement of EXPAND_EACH whose first
+    argument is a wildcard replaced by one statement per body. Other first arguments are resolved by
+    _bodies. The expansion is kept on the original statement for each set of free bodies, so that
+    the rows compiled and the predicates checked come from the same statements (max_move, max_turn
+    and attach record their reference poses on them)."""
+    free = tuple(b.name for b in scene.free())
+    out = []
+    for st in program.statements:
+        if (st.name in GROUP and any(is_wildcard(a) for a in st.args)) or (st.name in EXPAND_EACH and is_wildcard(st.args[0])):
+            cache = st.__dict__.setdefault("_expanded", {})
+            if free not in cache:
+                cache[free] = _expand(st, scene)
+            out.extend(cache[free])
+        else:
+            out.append(st)
+    return Program(statements=out, gate=program.gate, source=program.source)
+
+
+def _expand(st: Statement, scene: Scene) -> list:
+    if st.name in EXPAND_EACH:
+        ref = _ref(st.args[1])
+        return [Statement(st.name, [nm] + list(st.args[1:]), dict(st.kw), st.line) for nm in _bodies(scene, st.args[0], exclude=(ref,))]
+    named = {a for a in st.args if not is_wildcard(a)}
+    members = []
+    for a in st.args:
+        if not is_wildcard(a):
+            hits = [a]
+        elif a == "*":
+            hits = sorted((b.name for b in scene.free()), key=natural_key)
+        else:
+            hits = _matches(scene, a)
+        for nm in hits:
+            if nm not in members and (nm == a or nm not in named):
+                members.append(nm)
+    if len(members) < ARITY[st.name][0]:
+        raise CompileError(f"{st!r} stands for {len(members)} bodies ({', '.join(members)}); {st.name} needs at least {ARITY[st.name][0]}")
+    return [Statement(st.name, members, dict(st.kw), st.line)]
 
 
 def _ref(tok: str):
@@ -126,105 +190,101 @@ def _low_footprint(b: Body, interior: int = 6):
 
 
 def support_height_for(scene: Scene, body: Body, support: Body, require_hit: bool = False):
-    """Seat height of `body` on `support` from the support surface under the body's bottom.
+    """Seat height of `body` on `support`: the height of the body's lowest point at which it rests
+    on the support's surface, touching it without sinking in (a drop).
 
-    With `require_hit` the height is taken only from downward rays under the body's lowest
-    vertices and its centre; when none of them meets the support the result is None (the body
-    is not over the support at all). Without it, the vertex fallback in `Scene.support_height`
-    supplies an initial guess for the repair, which is never used as evidence."""
-    foot = _low_footprint(body)
+    Vertical rays at sample points under the body (its lowest vertices, a grid inside their hull,
+    and the support's vertices inside that hull) meet the support's top S going down and the
+    body's underside B going up; the seat is the largest S - (B - lowest point of B). A flat box
+    on a ridge rests on the ridge; a carton with a bulging bottom over the slats of a pallet
+    settles until its flat parts meet them. With `require_hit` the result is None when no ray
+    under the body meets the support (the body is not over it at all); without it, the vertex
+    rule of `Scene.support_height` stands in where no ray meets both surfaces (an initial guess
+    for the repair, never used as evidence)."""
+    h = _drop_height(scene, body, support)
     if require_hit:
-        pts = np.vstack([foot, body.center[None, :2]])
-        hits = scene._surface_hits(support, pts)
-        if not hits.size:
-            return None
-        return max(float(hits.max()), _highest_vertex_under(support, foot, below=float(body.center[2])) or -np.inf)
-    h = scene.support_height(support, at=body.center[:2], radius=0.5 * float(np.linalg.norm(body.world_aabb()[1][:2] - body.world_aabb()[0][:2])) + 0.02,
-                             footprint=foot)
-    hv = _highest_vertex_under(support, foot, below=float(body.center[2]) if body.center[2] > h else None)
-    return max(h, hv) if hv is not None else h
+        if h is None:
+            pts = np.vstack([_low_footprint(body), body.center[None, :2]])
+            hits = scene._surface_hits(support, pts)
+            return float(hits.max()) if hits.size else None
+        return h
+    if h is not None:
+        return h
+    return scene.support_height(support, at=body.center[:2], radius=0.5 * float(np.linalg.norm(body.world_aabb()[1][:2] - body.world_aabb()[0][:2])) + 0.02,
+                                footprint=_low_footprint(body))
 
 
-def _highest_vertex_under(support: Body, foot: np.ndarray, below: float | None = None):
-    """Top of the support's surface over the convex hull of a footprint (under `below`, the body's
-    centre, when given), exactly: the highest point of each support triangle over the hull is a
-    vertex of their intersection, i.e. a triangle vertex inside the hull, a hull vertex inside the
-    triangle, or a crossing of their edges. A ridge narrower than any sampling between the
-    footprint's points is included. None when no triangle reaches over the hull."""
+def _support_samples(support: Body, foot: np.ndarray, below: float) -> np.ndarray:
+    """XY where the support's surface can rise highest under a footprint: its vertices inside the
+    footprint's hull and the points where its triangles' edges cross the hull's boundary (moved
+    1 mm inward, so that the vertical rays meet both bodies there). A ridge narrower than the
+    footprint's sampling is caught where it crosses the boundary."""
     if len(foot) < 3 or not len(support.faces):
-        return None
+        return np.zeros((0, 2))
     try:
         from scipy.spatial import ConvexHull
-        P = foot[ConvexHull(foot).vertices]                      # counter-clockwise
+        P = foot[ConvexHull(foot).vertices]                       # counter-clockwise
     except Exception:  # noqa: BLE001  a degenerate footprint
-        return None
-    V = support.world_vertices()
-    T = V[np.asarray(support.faces)]                             # (n, 3, 3)
+        return np.zeros((0, 2))
+    T = support.world_vertices()[np.asarray(support.faces)]
     lo, hi = P.min(0), P.max(0)
-    keep = (T[:, :, 0].max(1) >= lo[0]) & (T[:, :, 0].min(1) <= hi[0]) & (T[:, :, 1].max(1) >= lo[1]) & (T[:, :, 1].min(1) <= hi[1])
-    if below is not None:
-        keep &= T[:, :, 2].min(1) < below
+    keep = ((T[:, :, 0].max(1) >= lo[0]) & (T[:, :, 0].min(1) <= hi[0]) & (T[:, :, 1].max(1) >= lo[1]) & (T[:, :, 1].min(1) <= hi[1])
+            & (T[:, :, 2].min(1) < below))
     T = T[keep]
     if not len(T):
-        return None
-    best = -np.inf
-    E = np.roll(P, -1, axis=0) - P                               # hull edges
-    # triangle vertices inside the hull (left of every edge)
-    pts = T.reshape(-1, 3)
+        return np.zeros((0, 2))
+    out = []
+    E = np.roll(P, -1, axis=0) - P
+    pts = T.reshape(-1, 3)[:, :2]
     cross = E[None, :, 0] * (pts[:, None, 1] - P[None, :, 1]) - E[None, :, 1] * (pts[:, None, 0] - P[None, :, 0])
-    inside = (cross >= -1e-12).all(1)
-    if below is not None:
-        inside &= pts[:, 2] < below
-    if inside.any():
-        best = max(best, float(pts[inside, 2].max()))
-    # hull vertices inside a triangle: the triangle's height there
-    a, b, c = T[:, 0], T[:, 1], T[:, 2]
-    v0, v1 = (b - a)[:, :2], (c - a)[:, :2]
-    den = v0[:, 0] * v1[:, 1] - v0[:, 1] * v1[:, 0]
-    ok = np.abs(den) > 1e-14
-    if ok.any():
-        q = P[None, :, :] - a[ok][:, None, :2]                   # (n, m, 2)
-        u = (q[..., 0] * v1[ok][:, None, 1] - q[..., 1] * v1[ok][:, None, 0]) / den[ok][:, None]
-        v = (v0[ok][:, None, 0] * q[..., 1] - v0[ok][:, None, 1] * q[..., 0]) / den[ok][:, None]
-        hit = (u >= -1e-12) & (v >= -1e-12) & (u + v <= 1 + 1e-12)
-        z = a[ok][:, None, 2] + u * (b - a)[ok][:, None, 2] + v * (c - a)[ok][:, None, 2]
-        if below is not None:
-            hit &= z < below
-        if hit.any():
-            best = max(best, float(z[hit].max()))
-    # crossings of triangle edges with hull edges
-    for s0, s1 in ((a, b), (b, c), (c, a)):
-        d = (s1 - s0)[:, :2]                                     # (n, 2)
-        r = s0[:, None, :2] - P[None, :, :]                      # (n, m, 2)
-        den2 = d[:, None, 0] * E[None, :, 1] - d[:, None, 1] * E[None, :, 0]
-        good = np.abs(den2) > 1e-14
-        t = np.where(good, (E[None, :, 0] * r[..., 1] - E[None, :, 1] * r[..., 0]) / np.where(good, den2, 1.0), -1.0)
-        w = np.where(good, (d[:, None, 0] * r[..., 1] - d[:, None, 1] * r[..., 0]) / np.where(good, den2, 1.0), -1.0)
+    out.append(pts[(cross >= -1e-12).all(1)])
+    centroid = P.mean(0)
+    for s0, s1 in ((T[:, 0], T[:, 1]), (T[:, 1], T[:, 2]), (T[:, 2], T[:, 0])):
+        d = (s1 - s0)[:, :2]
+        r = s0[:, None, :2] - P[None, :, :]
+        den = d[:, None, 0] * E[None, :, 1] - d[:, None, 1] * E[None, :, 0]
+        good = np.abs(den) > 1e-14
+        t = np.where(good, (E[None, :, 0] * r[..., 1] - E[None, :, 1] * r[..., 0]) / np.where(good, den, 1.0), -1.0)
+        w = np.where(good, (d[:, None, 0] * r[..., 1] - d[:, None, 1] * r[..., 0]) / np.where(good, den, 1.0), -1.0)
         hit = good & (t >= 0) & (t <= 1) & (w >= 0) & (w <= 1)
-        z = s0[:, None, 2] + t * (s1 - s0)[:, None, 2]
-        if below is not None:
-            hit &= z < below
         if hit.any():
-            best = max(best, float(z[hit].max()))
-    return None if best == -np.inf else best
+            xy = (s0[:, None, :2] + t[..., None] * d[:, None, :])[hit]
+            v = centroid - xy
+            out.append(xy + 1e-3 * v / np.maximum(np.linalg.norm(v, axis=1, keepdims=True), 1e-12))
+    return np.vstack(out) if out else np.zeros((0, 2))
+
+
+def _drop_height(scene: Scene, body: Body, support: Body):
+    """max over sample points of S - (B - z_low): see support_height_for; None when no point has
+    both surfaces above and below it."""
+    foot = _low_footprint(body)
+    P = np.vstack([foot, _support_samples(support, foot, below=float(body.center[2]))])
+    S = scene.vertical_hits(support, P, below=float(body.center[2]))
+    B = scene.vertical_hits(body, P, upward=True)
+    ok = np.isfinite(S) & np.isfinite(B)
+    if not ok.any():
+        return None
+    z_low = float(body.world_vertices()[:, 2].min())
+    return float(np.max(S[ok] - (B[ok] - z_low)))
 
 
 def effective_supports(program: Program, scene: Scene) -> dict:
     """body -> the support it rests on. A body named in on_support or in a stack keeps that support
-    over one that a wildcard on_support(*, ...) gives it, whatever the statement order; between
-    statements of the same kind the later one wins."""
+    over one that a pattern gives it (on_support(can_*, tray)), and a pattern's over the one of
+    on_support(*, ...), whatever the statement order; between statements of the same kind the later
+    one wins."""
     out, prio = {}, {}
-    for st in program.statements:
+    for st in expand_names(program, scene).statements:
         if st.name == "on_support":
             sup = _ref(st.args[1])
             if sup not in scene.names():
                 raise CompileError(f"unknown support '{sup}'")
-            p = 1 if st.args[0] == "*" else 2
+            p = 1 if st.args[0] == "*" else 2 if is_wildcard(st.args[0]) else 3
             pairs = [(nm, sup) for nm in _bodies(scene, st.args[0], exclude=(sup,))]
         elif st.name == "stack":
             for nm in st.args:
                 _bodies(scene, nm)
-            p = 2
+            p = 3
             pairs = list(zip(st.args[1:], st.args[:-1]))
         else:
             continue
@@ -242,19 +302,25 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
     # `fixed` statements first: wildcards must not depend on statement order
     for st in program.statements:
         if st.name == "fixed":
-            for nm in st.args:
-                if nm == "*":
+            for tok in st.args:
+                if tok == "*":
                     raise CompileError("fixed(*) would fix every body")
-                scene[nm].fixed = True
+                for nm in _bodies(scene, tok):
+                    scene[nm].fixed = True
     for st in program.statements:
         if st.name in BINARY and len(st.args) >= 2:
-            if st.args[0] == _ref(st.args[1]) and st.args[0] != "*":
+            if st.args[0] == _ref(st.args[1]) and not is_wildcard(st.args[0]):
                 raise CompileError(f"{st.name} relates a body to itself: {st!r}")
         for nm in st.args:
-            if st.name != "minimize" and nm != "*" and _ref(nm) not in scene.names():
+            if st.name == "minimize":
+                continue
+            if is_wildcard(nm):
+                _bodies(scene, nm)               # a pattern must match a free body
+            elif _ref(nm) not in scene.names():
                 raise CompileError(f"unknown body '{nm}' in {st!r}")
         if st.name in REL and st.kw.get("axis", REL[st.name][0]) not in AXIS:
             raise CompileError(f"axis must be x or y: {st!r}")
+    program = expand_names(program, scene)
     rects_static = {}   # body -> [(rect, label, weight)] for fixed references and bounds
     rects_dyn = {}      # body -> [(statement, ref_body, inset, label, weight)] for free references
     rels = []           # (a, b, axis, sign, gap, weight)
@@ -402,6 +468,7 @@ def check_predicates(program: Program, scene: Scene, tol: float = 2e-3, upright_
     settled poses passes looser ones. max_move, max_turn and attach are measured from the poses
     the program was compiled on."""
     out = []
+    program = expand_names(program, scene)
     supports = effective_supports(program, scene)
 
     def bodies_fn(tok, exclude=()):
@@ -428,7 +495,7 @@ def check_predicates(program: Program, scene: Scene, tol: float = 2e-3, upright_
         if n == "on_support":
             sup = _ref(st.args[1])
             for nm in _bodies(scene, st.args[0], exclude=(sup,)):
-                if st.args[0] == "*" and supports.get(nm) != sup:
+                if is_wildcard(st.args[0]) and supports.get(nm) != sup:
                     continue                  # a body named elsewhere rests on another support
                 out.append(on_support_pred(nm, sup, f"on_support({nm},{sup})"))
         elif n == "stack":

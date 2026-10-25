@@ -60,7 +60,7 @@ class Parsing(unittest.TestCase):
     def test_v1_statements_parse(self):
         text = ("program\n  reach(mug, r=0.75, min=0.3)  clearance(mug, gap=0.03)  approach(mug, length=0.2, width=0.1, toward=robot)\n"
                 "  facing(mug, axis=-x, tol=20)  facing(mug, bowl)  yaw(box, deg=-30, mod=90, tol=3)  parallel(fork, knife)\n"
-                "  row(a, b, c, axis=-y, gap=0.02)  align(a, b, axis=x, edge=max)  evenly_spaced(a, b, c, axis=y)\n"
+                "  row(a, b, c, start=left, gap=0.02)  align(a, b, axis=x, edge=max)  evenly_spaced(a, b, c, axis=y)\n"
                 "  grid(a, b, c, d, cols=2, dx=0.1, dy=-0.1)  cluster(a, b, r=0.1)  symmetric(fork, knife, plate, axis=y)\n"
                 "  between(cup, plate, bottle, axis=y, gap=0.05)  centered(cup, saucer)  offset(fork, plate, dy=0.15, frame=local)\n"
                 "  attach(lid, pot)  within(apple, table.top, side=left, frac=0.5)  within(apple, x0=0.3, y1=0.2)\n"
@@ -72,7 +72,7 @@ class Parsing(unittest.TestCase):
         self.assertFalse(prog.statements[0].soft)
 
     def test_v1_errors_are_syntax_errors(self):
-        bad = ["row(a)", "row(*, b)", "row(a, a)", "row(a, b, axis=z)", "grid(a, b)", "grid(a, b, cols=1.5)", "cluster(a, b)",
+        bad = ["row(a)", "left_of(a, can_*)", "centered(*, b)", "place(can_*, x=0.1, y=0.1)", "row(can_*, can_*)", "row(a, a)", "row(a, b, axis=z)", "grid(a, b)", "grid(a, b, cols=1.5)", "cluster(a, b)",
                "yaw(a)", "yaw(a, deg=0, mod=45)", "within(a)", "within(a, t, frac=0.5)", "within(a, t, side=left, frac=1.5)",
                "within(a, t, side=left, frac=0.5, depth=0.1)", "keep_out(a, x0=0.5, x1=0.4)", "symmetric(a, a, b)",
                "left_of(a, b, soft=2)", "reach(a, r=0.3, min=0.5)", "facing(a, b, x=0.1)", "max_turn(a, deg=-1)",
@@ -85,7 +85,7 @@ class Parsing(unittest.TestCase):
         sc = table_scene(box("mug", (0.08, 0.08, 0.1), (0.5, 0.1, 0.05)), box("bowl", (0.15, 0.15, 0.06), (0.6, -0.1, 0.03)),
                          box("cup", (0.07, 0.07, 0.08), (0.45, -0.2, 0.04)))
         obj = {"statements": [
-            {"op": "row", "members": ["mug", "bowl", "cup"], "axis": "-y", "gap": 0.02, "reason": "a row"},
+            {"op": "row", "members": ["mug", "bowl", "cup"], "start": "left", "gap": 0.02, "reason": "a row"},
             {"op": "reach", "a": "*", "r": 0.8},
             {"op": "symmetric", "a": "mug", "b": "cup", "c": "bowl"},
             {"op": "within", "a": "mug", "b": "table.top", "side": "left", "frac": 0.3},
@@ -94,7 +94,7 @@ class Parsing(unittest.TestCase):
             {"op": "grid", "members": ["mug", "bowl", "cup"], "cols": 3},
             {"op": "left_of", "a": "mug", "b": "bowl", "soft": 0.5}]}
         dsl, notes = validate_program_json(obj, sc)
-        self.assertIn("row(mug, bowl, cup, gap=0.02, axis=-y)", dsl)
+        self.assertIn("row(mug, bowl, cup, gap=0.02, start=left)", dsl)
         self.assertIn("symmetric(mug, cup, bowl)", dsl)
         self.assertIn("within(mug, table.top, side=left, frac=0.3)", dsl)
         self.assertIn("within(cup, table.top, inset=0.02)", dsl)          # a whole region keeps the recorded default inset
@@ -109,7 +109,8 @@ class Parsing(unittest.TestCase):
                  {"op": "symmetric", "a": "mug", "b": "bowl"}, {"op": "grid", "members": ["mug", "bowl"]},
                  {"op": "centered", "a": "mug", "b": "bowl", "c": "mug"}, {"op": "yaw", "a": "mug", "deg": True},
                  {"op": "within", "a": "mug", "b": "table.top", "frac": 0.5}, {"op": "row", "members": ["mug", "bowl"], "axis": "z"},
-                 {"op": "row", "members": ["mug", "*"]}, {"op": "facing", "a": "mug", "b": "bowl", "x": 0.2}]
+                 {"op": "row", "members": ["mug", "box_*"]}, {"op": "left_of", "a": "mug", "b": "bo*"},
+                 {"op": "facing", "a": "mug", "b": "bowl", "x": 0.2}]
         for st in cases:
             with self.assertRaises(ProgramError, msg=st) as cm:
                 validate_program_json({"statements": [st]}, sc)
@@ -119,7 +120,7 @@ class Parsing(unittest.TestCase):
         sc = table_scene(box("mug", (0.08, 0.08, 0.1), (0.5, 0.1, 0.05)))
         sch = api_schema(sc)
         items = sch["properties"]["statements"]["items"]["properties"]
-        self.assertEqual(set(items["members"]["items"]["enum"]), {"table", "mug"})
+        self.assertEqual(set(items["members"]["items"]["enum"]), {"table", "mug", "*"})
         self.assertNotIn("minimum", json.dumps(sch))
         text = prompt_for("put the mug on the left", sc)
         for word in ("row(members, axis, gap)", "keep_out", "soft (0 to 1]", "near (-x"):
@@ -205,7 +206,7 @@ class Repair(unittest.TestCase):
         for i in range(6):
             e = rng.uniform(0.04, 0.08, 3); e[2] = rng.uniform(0.05, 0.1)
             objs.append(box(f"o{i}", e, (0.55 + rng.normal(0, 0.05), rng.normal(0, 0.05), e[2] / 2), yaw=rng.uniform(-0.5, 0.5)))
-        for extra in ("row(o0, o1, o2, o3, axis=+y, gap=0.02)", "grid(o0, o1, o2, o3, o4, o5, cols=3)", "cluster(o0, o1, o2, r=0.08)",
+        for extra in ("row(o0, o1, o2, o3, axis=y, gap=0.02)", "grid(o0, o1, o2, o3, o4, o5, cols=3)", "cluster(o0, o1, o2, r=0.08)",
                       "symmetric(o0, o1, o2, axis=y)  min_distance(o0, o1, r=0.2)", "between(o0, o1, o2, axis=y, gap=0.06)",
                       "keep_out(*, table, x0=0.45, x1=0.65, y0=-0.12, y1=0.12)", "approach(o0, length=0.25, width=0.10)",
                       "facing(*, axis=+x, tol=10)", "yaw(*, deg=0, mod=90, tol=2)", "at(o0, x=0.45, y=0.2, tol=0.005)",
@@ -277,10 +278,10 @@ class Repair(unittest.TestCase):
     def test_projection_is_reported_and_optional(self):
         objs = [box(f"o{i}", (0.05, 0.05, 0.05), (0.5 + 0.01 * i, 0.01 * i, 0.025)) for i in range(4)]
         sc = table_scene(*copy.deepcopy(objs))
-        res, preds, _ = repaired(sc, HEAD + "  row(o0, o1, o2, o3, axis=-y, gap=0.02)\n")
+        res, preds, _ = repaired(sc, HEAD + "  row(o0, o1, o2, o3, start=left, gap=0.02)\n")
         self.assertTrue(any("solved alone" in n for n in res.notes))
         sc = table_scene(*copy.deepcopy(objs))
-        res, preds, _ = repaired(sc, HEAD + "  row(o0, o1, o2, o3, axis=-y, gap=0.02)\n", project_iters=0)
+        res, preds, _ = repaired(sc, HEAD + "  row(o0, o1, o2, o3, start=left, gap=0.02)\n", project_iters=0)
         self.assertFalse(any("solved alone" in n for n in res.notes))
 
 
@@ -308,7 +309,7 @@ class Ordering(unittest.TestCase):
         objs = [box("tall", (0.06, 0.06, 0.15), (0.5, -0.1, 0.075)), box("short", (0.06, 0.06, 0.06), (0.5, 0.0, 0.03)),
                 box("mid", (0.06, 0.06, 0.10), (0.5, 0.1, 0.05))]
         sc = table_scene(*objs)
-        res, preds, rep = repaired(sc, HEAD + "  row(tall, short, mid, axis=-y, gap=0.02, order=height, spacing=even, tol=0.005)\n")
+        res, preds, rep = repaired(sc, HEAD + "  row(tall, short, mid, start=left, gap=0.02, order=height, spacing=even, tol=0.005)\n")
         self.assertIn("row(tall,short,mid):even", preds)
         self.assertTrue(all(p[1] for p in preds.values()), [n for n, p in preds.items() if not p[1]])
         ys = {n: float(sc[n].center[1]) for n in ("short", "mid", "tall")}
@@ -317,6 +318,82 @@ class Ordering(unittest.TestCase):
         from simready.dsl.statements import sorted_members
         st = parse_program("program\n  row(tall, short, mid, order=-mass)").statements[0]
         self.assertEqual(sorted_members(st, sc), ["short", "mid", "tall"])
+
+
+class Patterns(unittest.TestCase):
+    """A pattern (can_*) stands for the free bodies whose names match, in natural order."""
+
+    @staticmethod
+    def scene():
+        cans = [box(f"can_{i}", (0.06, 0.06, 0.1), (0.45 + 0.02 * i, 0.3 - 0.05 * i, 0.05)) for i in (1, 2, 10)]
+        return table_scene(*cans, box("bottle_1", (0.07, 0.07, 0.2), (0.7, 0.0, 0.1)), box("tray", (0.3, 0.2, 0.02), (0.5, -0.3, 0.01)))
+
+    def test_groups_expand_in_natural_order(self):
+        from simready.dsl.compile import expand_names
+        sc = self.scene()
+        prog = parse_program("program\n  row(can_*, bottle_1, start=left)  row(can_10, can_*)  cluster(*, r=0.5)  beside(can_?, bottle_1, side=left)")
+        got = [(st.name, st.args) for st in expand_names(prog, sc).statements]
+        self.assertEqual(got[0], ("row", ["can_1", "can_2", "can_10", "bottle_1"]))
+        self.assertEqual(got[1], ("row", ["can_10", "can_1", "can_2"]))      # a named member keeps its place
+        self.assertEqual(got[2], ("cluster", ["bottle_1", "can_1", "can_2", "can_10", "tray"]))
+        self.assertEqual(got[3:], [("beside", ["can_1", "bottle_1"]), ("beside", ["can_2", "bottle_1"])])   # one per body
+        compile_program(prog, sc)
+        with self.assertRaises(CompileError):
+            compile_program(parse_program("program\n  evenly_spaced(can_?, axis=y)"), self.scene())        # two bodies
+        with self.assertRaises(CompileError):
+            compile_program(parse_program("program\n  upright(box_*)"), self.scene())
+
+    def test_a_pattern_support_ranks_between_star_and_a_name(self):
+        prog = parse_program("program\n  on_support(can_*, tray)  on_support(*, table)  on_support(can_2, table)")
+        sup = effective_supports(prog, self.scene())
+        self.assertEqual([sup[n] for n in ("can_1", "can_2", "can_10", "bottle_1")], ["tray", "table", "tray", "table"])
+
+    def test_json_patterns(self):
+        sc = self.scene()
+        dsl, _ = validate_program_json({"statements": [{"op": "row", "members": ["can_*", "bottle_1"], "start": "left"},
+                                                        {"op": "within", "a": "can_*", "b": "table.top", "side": "left"}]}, sc)
+        self.assertIn("row(can_*, bottle_1, start=left)", dsl)
+        self.assertIn("within(can_*, table.top, side=left)", dsl)
+        for st in ({"op": "centered", "a": "can_*", "b": "tray"}, {"op": "place", "a": "can_*", "x": 0.5, "y": 0.0}):
+            with self.assertRaises(ProgramError, msg=st):
+                validate_program_json({"statements": [st]}, sc)
+        enum = api_schema(sc)["properties"]["statements"]["items"]["properties"]["members"]["items"]["enum"]
+        self.assertIn("can_*", enum); self.assertNotIn("bottle_*", enum)       # one bottle is not a group
+
+    def test_a_pattern_repairs_like_the_names(self):
+        text = HEAD + "  row({}, start=left, gap=0.02)\n  {}\n"
+        a, b = self.scene(), self.scene()
+        _, preds_a, rep_a = repaired(a, text.format("can_*, bottle_1", "at(can_*, x=0.6, tol=0.005)  at(bottle_1, x=0.6, tol=0.005)"))
+        _, preds_b, _ = repaired(b, text.format("can_1, can_2, can_10, bottle_1", "  ".join(f"at({n}, x=0.6, tol=0.005)" for n in ("can_1", "can_2", "can_10", "bottle_1"))))
+        self.assertEqual(set(preds_a), set(preds_b))
+        self.assertTrue(all(p[1] for p in preds_a.values()), [n for n, p in preds_a.items() if not p[1]])
+        self.assertEqual(rep_a.pen_pairs, 0)
+        for n in ("can_1", "can_2", "can_10", "bottle_1"):
+            self.assertTrue(np.allclose(a[n].center, b[n].center, atol=1e-9), n)
+
+
+class RowMid(unittest.TestCase):
+    @staticmethod
+    def drinks():
+        return [box("tall", (0.06, 0.06, 0.15), (0.5, -0.1, 0.075)), box("short", (0.06, 0.06, 0.06), (0.5, 0.0, 0.03)),
+                box("middle", (0.06, 0.06, 0.10), (0.5, 0.1, 0.05))]
+
+    def test_mid_centres_the_ends_the_order_chooses(self):
+        sc = table_scene(*self.drinks())
+        res, preds, rep = repaired(sc, HEAD + "  row(tall, short, middle, start=left, gap=0.02, order=height, mid=0.1, tol=0.005)\n")
+        self.assertTrue(all(p[1] for p in preds.values()), [n for n, p in preds.items() if not p[1]])
+        self.assertIn("row(tall,short,middle):mid", preds)
+        self.assertAlmostEqual(0.5 * float(sc["short"].center[1] + sc["tall"].center[1]), 0.1, delta=0.005 + 2e-3)   # the ends, not the listed ones
+        dsl, _ = validate_program_json({"statements": [{"op": "row", "members": ["tall", "short"], "mid": -0.2}]}, sc)
+        self.assertIn("row(tall, short, mid=-0.2)", dsl)
+        self.assertGreater(float(sc["short"].center[1]), float(sc["tall"].center[1]))       # the shortest at the left
+        sc2 = table_scene(*self.drinks())
+        _, preds2, _ = repaired(sc2, HEAD + "  row(tall, short, middle, axis=y, start=right, gap=0.02, order=height, tol=0.005)\n")
+        self.assertTrue(all(p[1] for p in preds2.values()), [n for n, p in preds2.items() if not p[1]])
+        self.assertLess(float(sc2["short"].center[1]), float(sc2["tall"].center[1]))
+        for bad in ("row(a, b, axis=x, start=left)", "row(a, b, axis=-y)"):
+            with self.assertRaises(SyntaxError, msg=bad):
+                parse_program("program\n  " + bad)
 
 
 class EvenSpacing(unittest.TestCase):
@@ -328,7 +405,7 @@ class EvenSpacing(unittest.TestCase):
         ok = {tol: check_predicates(parse_program(f"program\n  evenly_spaced({names}, axis=y, tol={tol})"), sc)[0][1] for tol in (0.005, 0.0105)}
         self.assertEqual(ok, {0.005: False, 0.0105: True})
         sc = table_scene(*copy.deepcopy(objs))
-        res, preds, rep = repaired(sc, HEAD + f"  row({names}, axis=+y, gap=0.02, spacing=even, tol=0.002)\n")
+        res, preds, rep = repaired(sc, HEAD + f"  row({names}, axis=y, gap=0.02, spacing=even, tol=0.002)\n")
         ys = np.diff([float(sc[b.name].center[1]) for b in objs])
         self.assertLess(float(np.abs(ys - ys.mean()).max()), 0.002 + 2e-3)
 

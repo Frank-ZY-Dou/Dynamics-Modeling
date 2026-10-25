@@ -47,8 +47,13 @@ and 10 degrees.
 
 ## Statements
 
-`a`, `b`, `c` are body names (`b.top` is b's top rectangle); `*` (first argument only) is every free
-body; group statements take a list of named bodies in order.
+`a`, `b`, `c` are body names (`b.top` is b's top rectangle); group statements take a list of bodies
+in order. In the first argument and among a group's members, `*` is every free body and a pattern
+(`can_*`, `fruit_?`) every free body whose name matches, in natural order (`can_2` before `can_10`).
+A pattern leaves out the bodies its statement names itself: `row(can_3, can_*)` puts can_3 first and
+the other cans after it. `beside`, `attach` and `balanced_on` with a pattern are one statement per
+body; `place`, `centered`, `offset`, `symmetric` and `between` take one named body. A pattern that
+matches no free body is an error, so a misspelt group is not silently empty.
 
 ### The robot and the task
 
@@ -67,7 +72,7 @@ body; group statements take a list of named bodies in order.
 | statement | holds when | use |
 |---|---|---|
 | `beside(a, b, side, gap=0, max)` | a's footprint on b's `side` with between `gap` and `max` of table between the two footprints | "the fork 2 to 5 cm left of the plate" |
-| `row(m1, m2, ..., axis=+y, gap=0.01, tol=0.01, order, spacing)` | the members on one line, in the order listed along `axis` (`+y`: the list runs right to left, `-y` left to right, `+x` near to far), footprints at least `gap` apart; `order=height` / `width` / `length` / `mass` (`-` descending) sorts them first; `spacing=even` keeps every centre spacing within `tol` of the mean | drinks on a shelf, cans in a line |
+| `row(m1, m2, ..., axis=y, start, gap=0.01, tol=0.01, order, spacing, mid)` | the members on one line along `axis` (`x` or `y`), in the order listed from the end `start` names (`left` or `right` for a line along y, `near` or `far` along x; without it the list runs toward +y or +x), footprints at least `gap` apart; `order=height` / `width` / `length` / `mass` (`-` descending) sorts them first; `spacing=even` keeps every centre spacing within `tol` of the mean; `mid` puts the midpoint of the two end members' centres at that coordinate along `axis`, whichever members the order puts at the ends | drinks on a shelf, cans in a line |
 | `align(m1, ..., axis=x, edge=center, tol=0.005)` | equal x (or y) of the centres or of the footprints' `min` / `max` edge | flush backs, spines in line |
 | `evenly_spaced(m1, m2, m3, ..., axis=y, tol=0.005)` | every centre spacing within `tol` of the mean spacing | spice jars, test tubes |
 | `grid(m1, ..., cols, dx, dy, tol=0.01)` | rows of `cols` members, member k at `(row dx, col dy)` from the first; a free shared pitch without `dx`, `dy` | trays, racks, egg cartons |
@@ -94,7 +99,8 @@ body; group statements take a list of named bodies in order.
 `no_penetration(*, margin)`, `fixed(a)`, `on_support(a, b)`, `upright(a)`, `within(a, b, inset)`,
 `inside(a, b)`, `left_of`, `right_of`, `in_front_of`, `behind` `(a, b, gap)`, `min_distance` and
 `near` `(a, b, r)`, `place(a, x, y, yaw)`, `prefer(a, w)`, `minimize displacement(*)`. A body named in
-`on_support` or in a `stack` keeps that support over one `on_support(*, ...)` gives it.
+`on_support` or in a `stack` keeps that support over one a pattern gives it (`on_support(can_*, tray)`),
+and a pattern's support wins over the one `on_support(*, ...)` gives.
 
 ## Recipes
 
@@ -115,11 +121,12 @@ beside(spoon, knife, side=right, gap=0.02)   beside(mug, fork, side=left, gap=0.
 in_front_of(glass, plate, gap=0.12)   near(glass, knife, r=0.14)
 ```
 
-**Drinks in a row, shortest at the left, evenly spaced, centred on y = 0.** The compiler sorts the
-members by height; the two ends mirror each other about the table's centre line.
+**Drinks in a row, shortest at the left, evenly spaced, centred on y = 0.** The patterns list every
+drink, the compiler sorts them by height, and `mid` centres the two ends it chose on the table's centre
+line. With only drinks on the table, `row(*, ...)` says the same.
 ```
-row(can_1, can_2, can_3, can_4, can_5, bottle_1, axis=-y, gap=0.025, order=height, spacing=even, tol=0.004)
-at(*, x=0.75, tol=0.004)   symmetric(<shortest>, <tallest>, table, axis=y)
+row(can_*, bottle_*, glass_*, start=left, gap=0.025, order=height, spacing=even, mid=0, tol=0.004)
+at(*, x=0.75, tol=0.004)
 ```
 
 **Dense clutter.** The square's area is 1.12 times the sum of the fourteen fruits' bounding
@@ -128,10 +135,12 @@ rectangles: boxes do not fit, the shapes do, and the mesh contacts pack them.
 no_penetration(*, margin=0.002)   within(*, x0=0.40, x1=0.72, y0=-0.16, y1=0.16)
 ```
 
-**Sorting a heap into zones.**
+**Sorting a heap into zones.** The patterns keep the program the same size however many fruits and
+cans there are: 11, 13 and 16 statements for the 10, 16 and 24 objects of the comparison's three
+sizes, against 18, 25 and 35 with every body named.
 ```
-within(fruit_1, table.top, y0=0.27)  ...   cluster(fruit_1, fruit_2, fruit_3, fruit_4, fruit_5, r=0.10)
-within(can_1, table.top, y1=-0.27)  ...   row(can_1, can_2, can_3, can_4, axis=+x, gap=0.025)
+within(fruit_*, table.top, y0=0.27)   cluster(fruit_*, r=0.10)
+within(can_*, table.top, y1=-0.27)   row(can_*, start=near, gap=0.025)
 within(bowl, y0=-0.18, y1=0.18)   reach(bowl, r=0.75, min=0.57)   keep_out(*, x0=0.29, x1=0.51, y0=-0.11, y1=0.11)
 ```
 
@@ -149,7 +158,7 @@ max_move(*, d=0.028)   max_turn(*, deg=8)
 **Palletizing.**
 ```
 within(*, pallet.top, inset=0.03)   yaw(*, deg=0, mod=90, tol=2)   clearance(*, gap=0.015)
-row(box_1, box_2, box_3, axis=+y, gap=0.02)   row(box_4, box_5, box_6, axis=+y, gap=0.02)   in_front_of(box_4, box_1, gap=0.30)
+row(box_1, box_2, box_3, start=right, gap=0.02)   row(box_4, box_5, box_6, start=right, gap=0.02)   in_front_of(box_4, box_1, gap=0.30)
 ```
 
 **A tower.**

@@ -8,6 +8,7 @@ show what was assumed.
 """
 from __future__ import annotations
 
+import fnmatch
 import json
 import math
 import re
@@ -15,7 +16,7 @@ import re
 import numpy as np
 
 from ..scene.model import Scene
-from .model import check_statement, GROUP
+from .model import check_statement, is_wildcard, GROUP, PATTERN_RE
 
 OPS = ["no_penetration", "place", "fixed", "on_support", "upright", "within", "inside",
        "left_of", "right_of", "in_front_of", "behind", "min_distance", "near", "minimize", "prefer",
@@ -37,10 +38,10 @@ PROGRAM_SCHEMA = {
                 "required": ["op"],
                 "properties": {
                     "op": {"type": "string", "enum": OPS},
-                    "a": {"type": "string", "description": "primary body, or * for every free body"},
+                    "a": {"type": "string", "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"},
                     "b": {"type": "string", "description": "reference body / support / container / region"},
                     "c": {"type": "string", "description": "third body (symmetric: the centre; between: the other end)"},
-                    "members": {"type": "array", "items": {"type": "string"}, "description": "bodies of a group statement, in order"},
+                    "members": {"type": "array", "items": {"type": "string"}, "description": "bodies of a group statement, in order; * or a pattern (can_*) stands for the free bodies it matches"},
                     "margin": {"type": "number", "minimum": 0}, "gap": {"type": "number", "minimum": 0},
                     "x": {"type": "number"}, "y": {"type": "number"}, "yaw": {"type": "number"},
                     "inset": {"type": "number", "minimum": 0}, "r": {"type": "number", "minimum": 0},
@@ -52,6 +53,8 @@ PROGRAM_SCHEMA = {
                     "frame": {"type": "string", "enum": ["world", "local"]}, "edge": {"type": "string", "enum": ["min", "center", "max"]},
                     "order": {"type": "string", "enum": ["height", "-height", "width", "-width", "length", "-length", "mass", "-mass"]},
                     "spacing": {"type": "string", "enum": ["even"]},
+                    "start": {"type": "string", "enum": ["left", "right", "near", "far"], "description": "row: the end the first member is at (left or right for a line along y, near or far along x)"},
+                    "mid": {"type": "number", "description": "row: where along its axis the midpoint of the two end members' centres lies"},
                     "side": {"type": "string", "enum": ["left", "right", "near", "far", "center"]},
                     "frac": {"type": "number", "minimum": 0, "maximum": 1}, "depth": {"type": "number", "minimum": 0},
                     "x0": {"type": "number"}, "x1": {"type": "number"}, "y0": {"type": "number"}, "y1": {"type": "number"},
@@ -78,7 +81,7 @@ OP_DEFAULTS = {
     "facing": {"axis": "+x", "tol": 15.0},
     "yaw": {"tol": 5.0, "mod": 360.0, "axis": "x"},
     "parallel": {"mod": 180.0, "tol": 5.0, "axis": "long"},
-    "row": {"axis": "+y", "gap": 0.01, "tol": 0.01},
+    "row": {"axis": "y", "gap": 0.01, "tol": 0.01},
     "align": {"axis": "x", "edge": "center", "tol": 0.005},
     "evenly_spaced": {"axis": "y", "tol": 0.005},
     "grid": {"tol": 0.01},
@@ -111,7 +114,7 @@ FIELDS = {
     "approach": {"a", "length", "width", "toward", "x", "y", "soft"},
     "facing": {"a", "b", "axis", "tol", "x", "y", "soft"}, "yaw": {"a", "deg", "tol", "mod", "axis", "soft"},
     "parallel": {"a", "b", "mod", "tol", "axis", "soft"},
-    "row": {"members", "axis", "gap", "tol", "order", "spacing", "soft"}, "align": {"members", "axis", "edge", "tol", "soft"},
+    "row": {"members", "axis", "start", "gap", "tol", "order", "spacing", "mid", "soft"}, "align": {"members", "axis", "edge", "tol", "soft"},
     "evenly_spaced": {"members", "axis", "tol", "soft"}, "grid": {"members", "cols", "dx", "dy", "tol", "soft"},
     "cluster": {"members", "r", "soft"}, "symmetric": {"a", "b", "c", "axis", "tol", "soft"},
     "between": {"a", "b", "c", "axis", "gap", "soft"}, "centered": {"a", "b", "tol", "soft"},
@@ -121,11 +124,11 @@ FIELDS = {
     "balanced_on": {"a", "b", "margin", "soft"},
 }
 NUMERIC = ("gap", "inset", "r", "margin", "w", "x", "y", "yaw", "min", "max", "length", "width", "tol", "deg", "mod", "cols",
-           "dx", "dy", "frac", "depth", "x0", "x1", "y0", "y1", "d", "soft")
-SIGNED = ("x", "y", "yaw", "deg", "dx", "dy", "x0", "x1", "y0", "y1")
-WORD_FIELDS = ("axis", "edge", "side", "toward", "frame", "order", "spacing")
+           "dx", "dy", "frac", "depth", "x0", "x1", "y0", "y1", "d", "mid", "soft")
+SIGNED = ("x", "y", "yaw", "deg", "dx", "dy", "x0", "x1", "y0", "y1", "mid")
+WORD_FIELDS = ("axis", "edge", "side", "toward", "frame", "order", "spacing", "start")
 # the order keywords are written in the DSL text of a v1 statement
-KW_ORDER = ("side", "r", "min", "gap", "max", "length", "width", "toward", "axis", "order", "spacing", "edge", "cols", "dx", "dy", "frame", "deg", "mod",
+KW_ORDER = ("side", "r", "min", "gap", "max", "length", "width", "toward", "axis", "start", "order", "spacing", "mid", "edge", "cols", "dx", "dy", "frame", "deg", "mod",
             "tol", "inset", "frac", "depth", "x0", "x1", "y0", "y1", "x", "y", "d", "margin", "soft")
 
 
@@ -152,11 +155,17 @@ def validate_program_json(obj: dict, scene: Scene) -> tuple[str, list[str]]:
                 raise ProgramError(f"statement {i} ({op}): missing {role}")
             if not isinstance(x, str):
                 raise ProgramError(f"statement {i} ({op}): {role} must be a body name")
-            if x == "*" and role != "a":
-                raise ProgramError(f"statement {i} ({op}): '*' is only allowed as the first argument")
-            if x != "*" and x.split(".")[0] not in names:
+            if is_wildcard(x):
+                if role not in ("a", "member"):
+                    raise ProgramError(f"statement {i} ({op}): '*' and name patterns are only allowed in a and in members")
+                if not PATTERN_RE.match(x):
+                    raise ProgramError(f"statement {i} ({op}): pattern '{x}' cannot be written in the DSL")
+                if x != "*" and not any(fnmatch.fnmatchcase(n, x) for n in free):
+                    raise ProgramError(f"statement {i} ({op}): '{x}' matches no free body. Free: {sorted(free)}")
+                return
+            if x.split(".")[0] not in names:
                 raise ProgramError(f"statement {i} ({op}): unknown body '{x}'. Known: {sorted(names)}")
-            if x != "*" and not NAME_RE.match(x):
+            if not NAME_RE.match(x):
                 raise ProgramError(f"statement {i} ({op}): body name '{x}' cannot be written in the DSL")
         if b is not None and a == b:
             raise ProgramError(f"statement {i}: {op} needs two different bodies")
@@ -174,7 +183,7 @@ def validate_program_json(obj: dict, scene: Scene) -> tuple[str, list[str]]:
             need(a, "a"); lines.append(f"  upright({a})")
         elif op == "place":
             need(a, "a")
-            if a == "*" or "x" not in st or "y" not in st:
+            if is_wildcard(a) or "x" not in st or "y" not in st:
                 raise ProgramError(f"statement {i}: place needs one body and x, y")
             yaw = f", yaw={st['yaw']}" if "yaw" in st else ""
             w = f", w={st['w']}" if "w" in st else ""
@@ -237,8 +246,8 @@ def _v1_line(i, op, st, need, tags, notes):
             raise ProgramError(f"statement {i} ({op}): needs 'members', a list of body names")
         for m in members:
             need(m, "member")
-            if m == "*" or "." in m:
-                raise ProgramError(f"statement {i} ({op}): members are body names, got '{m}'")
+            if "." in m:
+                raise ProgramError(f"statement {i} ({op}): members are bodies, got '{m}'")
         args = list(members)
     else:
         need(st.get("a"), "a")
@@ -325,7 +334,8 @@ def _check_shape(obj):
 def api_schema(scene=None, ops=None):
     """PROGRAM_SCHEMA in the subset the structured-outputs API accepts: no $schema, no numeric
     ranges (checked by _check_shape instead), additionalProperties false on every object, and,
-    with a scene, body names constrained to the scene's names plus '*'; with `ops`, restricted to
+    with a scene, body names constrained to the scene's names plus '*' and the patterns of its numbered
+    names (name_patterns); with `ops`, restricted to
     those statements (program_schema)."""
     sch = program_schema(ops)
     sch.pop("$schema", None)
@@ -347,13 +357,25 @@ def api_schema(scene=None, ops=None):
         stp["mod"] = {"type": "number"}                 # numeric enums are checked by _check_shape
     if scene is not None:
         names = list(scene.names())
-        stp["a"] = {"type": "string", "enum": names + ["*"]}
+        stems = name_patterns(scene)
+        stp["a"] = {"type": "string", "enum": names + ["*"] + stems}
         stp["b"] = {"type": "string", "enum": names + [n + ".top" for n in names]}
         if "c" in stp:
             stp["c"] = {"type": "string", "enum": names}
         if "members" in stp:
-            stp["members"] = {"type": "array", "items": {"type": "string", "enum": names}}
+            stp["members"] = {"type": "array", "items": {"type": "string", "enum": names + ["*"] + stems}}
     return sch
+
+
+def name_patterns(scene: Scene) -> list:
+    """The patterns a scene's numbered names suggest: can_* for can_1, can_2, ... (two or more free
+    bodies), for the name enums of a schema bound to that scene."""
+    stems = {}
+    for b in scene.free():
+        m = re.match(r"^(.*?)\d+$", b.name)
+        if m and m.group(1):
+            stems[m.group(1)] = stems.get(m.group(1), 0) + 1
+    return [f"{p}*" for p, k in sorted(stems.items()) if k >= 2]
 
 
 def op_schema(scene=None, ops=None) -> dict:
@@ -411,7 +433,9 @@ def scene_summary(scene: Scene) -> str:
     return "\n".join(rows)
 
 
-LANGUAGE = """Statements (a, b, c are body names; members is a list of names, in order):
+LANGUAGE = """Statements (a, b, c are body names; members is a list of names, in order; in a and in members,
+* is every free body and a pattern such as can_* or fruit_? every free body whose name matches, in
+natural order (can_2 before can_10), leaving out bodies the statement names itself):
   no_penetration(margin)                 nothing interpenetrates; margin is the clearance the solver keeps
   fixed(a)                               a does not move
   on_support(a, b)   upright(a)          a rests on b; a keeps its resting orientation (no roll or pitch)
@@ -437,11 +461,14 @@ LANGUAGE = """Statements (a, b, c are body names; members is a list of names, in
                                          line, so deg and deg+180 are the same); mod 90 or 180 for shapes
                                          that repeat when turned
   parallel(a, b, tol)                    a's and b's long sides parallel (axis=x: their local x axes)
-  row(members, axis, gap, order, spacing)  on one line (aligned), in the order listed, footprints at least gap
-                                         apart; axis=+y lists them right to left, -y left to right, +x near to
-                                         far, -x far to near; order=height|width|length|mass (- for descending)
-                                         sorts the members first, from the bodies' sizes and masses;
-                                         spacing=even makes every centre spacing equal to the mean within tol
+  row(members, axis, start, gap, order, spacing, mid)  on one line along axis (x or y, default y), in the
+                                         order listed from the end start names (left|right along y, near|far
+                                         along x; default right, near), footprints at least gap apart;
+                                         order=height|width|length|mass (- for descending) sorts the members
+                                         first, from the bodies' sizes and masses;
+                                         spacing=even makes every centre spacing equal to the mean within tol;
+                                         mid puts the midpoint of the two end members' centres at that y (x for
+                                         an x row), whichever members the order puts at the ends
   align(members, axis, edge)             equal x (or y) of the centres, or of the footprints' min or max edge
   evenly_spaced(members, axis, tol)      every centre spacing along axis within tol of the mean spacing
   grid(members, cols, dx, dy)            rows of cols members: member k at (row*dx, col*dy) from the first;
@@ -506,8 +533,8 @@ V1_NOTES = """
 - Table between two objects ("2 cm between the plate and the fork") is a gap between footprints:
   beside, row and keep_out measure footprints; left_of, near, min_distance and reach measure centres.
 - To sort by height, width, length or mass, give row an order; the compiler sorts from the sizes.
-  A row already aligns its members; spacing=even spaces them evenly in that order. Do not repeat a
-  row's members in align or evenly_spaced."""
+  A row already aligns its members; spacing=even spaces them evenly in that order and mid centres
+  it. Do not repeat a row's members in align or evenly_spaced."""
 
 
 def system_prompt(ops=None, language: str | None = None, with_schema: bool = True, reasons: bool = True) -> str:
@@ -517,6 +544,8 @@ def system_prompt(ops=None, language: str | None = None, with_schema: bool = Tru
     without `reasons` the justifications are optional (an answer with only the program)."""
     language = language or (LANGUAGE if ops is None else LANGUAGE_V0)
     place_rule = ("Say what must hold and let the solver find the poses. " if ops is None else "")
+    wild_rule = ("A group of similar bodies is a pattern: members=[\"can_*\",\n  \"bottle_1\"] lists every can, then the bottle."
+                 if ops is None else "`*` means every free body (first argument only).")
     return f"""You translate a layout request into a SimReady program: a list of geometric constraints and
 objectives over named bodies. Output ONLY a JSON object matching the schema below.
 
@@ -525,7 +554,7 @@ robot ("far"), -x toward it ("near"), +y is left, -y right. RoboLab convention: 
 a.y >= b.y + gap; in_front_of(a,b) means a.x >= b.x + gap.
 
 Rules:
-- Use only bodies listed in the scene. `*` means every free body (first argument only).
+- Use only bodies listed in the scene. {wild_rule}
 - Every free body that should rest on a surface gets on_support(a=<body>, b=<support>) and, if it
   should keep its resting orientation (an asset that rests lying flat, such as a remote control,
   stays flat), upright(a=<body>).

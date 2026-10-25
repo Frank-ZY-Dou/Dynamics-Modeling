@@ -98,8 +98,8 @@ def setting():
 def drinks_row(n=6):
     if n <= 6:
         objs = group("can", ["can"], n - 1) + [("bottle_1", pkg("bottle", 0))]
-    else:
-        objs = group("can", ["can"], 6) + [("bottle_1", pkg("bottle", 0)), ("bottle_2", pkg("bottle", 1)),
+    else:       # the pool's sixth can holds soup, not a drink: its seventh stands in
+        objs = group("can", ["can"], 5) + [("can_6", pkg("can", 6)), ("bottle_1", pkg("bottle", 0)), ("bottle_2", pkg("bottle", 1)),
                                            ("glass_1", pkg("glass", 0)), ("glass_2", pkg("glass", 1))]
     request = ("Line up all the drinks in a single row parallel to the y axis: their centres within 1 cm of a common line parallel to the "
                "y axis, that line between x = 0.70 and x = 0.80; ordered by height from the shortest at the left end to the tallest at the "
@@ -118,11 +118,8 @@ def drinks_row(n=6):
             ("ordered_by_height", ordered, hs), ("line_x", 0.70 - R.SLACK <= xs <= 0.80 + R.SLACK, float(xs)),
             R.evenly(sc, names, "y", 0.01), ("row_middle_on_y0", abs(0.5 * (ys[0] + ys[-1])) <= 0.02 + R.SLACK, 0.5 * (ys[0] + ys[-1]))]
         return out + R.generic(sc)
-    def ref(sc):
-        seq = sorted(names, key=lambda n_: float(np.ptp(sc[n_].world_vertices()[:, 2])))          # shortest first, at the left
-        return {"statements": BASE + [_st("row", members=names, axis="-y", gap=0.025, order="height", spacing="even", tol=0.004),
-                                      _st("at", a="*", x=0.75, tol=0.004),
-                                      _st("symmetric", a=seq[0], b=seq[-1], c="table", axis="y", tol=0.004)]}
+    ref = {"statements": BASE + [_st("row", members=names, start="left", gap=0.025, order="height", spacing="even", mid=0.0, tol=0.004),
+                                 _st("at", a="*", x=0.75, tol=0.004)]}
     return Task("drinks_row", len(objs), objs, {"kind": "heap", "center": (0.55, 0.15), "radius": 0.12}, request, checks, ref)
 
 
@@ -158,7 +155,7 @@ def fruit_cans(n=10):
         return out + R.generic(sc)
     ref = {"statements": BASE + [
         _st("within", a=f, b="table.top", y0=0.27) for f in fn] + [_st("cluster", members=fn, r=r - 0.02)] + [
-        _st("within", a=c, b="table.top", y1=-0.27) for c in cn] + [_st("row", members=cn, axis="+x", gap=0.025, tol=0.005)] + [
+        _st("within", a=c, b="table.top", y1=-0.27) for c in cn] + [_st("row", members=cn, start="near", gap=0.025, tol=0.005)] + [
         _st("within", a="bowl", y0=-0.18, y1=0.18), _st("reach", a="bowl", r=0.75, min=0.57),
         _st("keep_out", a="*", x0=0.29, x1=0.51, y0=-0.11, y1=0.11)] + (
         [_st("near", a="mug", b="bowl", r=0.18), _st("within", a="mug", y0=-0.18, y1=0.18)] if n >= 16 else []) + (
@@ -241,7 +238,7 @@ def palletize(n=4):
     rows = [names[:2], names[2:]] if n == 4 else [names[i:i + 3] for i in range(0, len(names), 3)]
     ref = {"statements": [_st("no_penetration", margin=0.005), _st("on_support", a="*", b="pallet"), _st("upright", a="*"),
                           _st("within", a="*", b="pallet.top", inset=0.03), _st("yaw", a="*", deg=0, mod=90, tol=2),
-                          _st("clearance", a="*", gap=0.015)] + [_st("row", members=r_, axis="+y", gap=0.02, tol=0.005) for r_ in rows] + (
+                          _st("clearance", a="*", gap=0.015)] + [_st("row", members=r_, start="right", gap=0.02, tol=0.005) for r_ in rows] + (
         [_st("in_front_of", a=rows[1][0], b=rows[0][0], gap=0.30)] if len(rows) > 1 else [])}
     return Task("palletize", n, objs, {"kind": "heap", "center": (0.70, 0.0), "radius": 0.15}, request, checks, ref, support="pallet")
 
@@ -274,10 +271,10 @@ def kitchen_prep():
     ref = {"statements": BASE + [
         _st("at", a="board", x=0.45, y=0.0, tol=0.01), _st("yaw", a="board", deg=0, axis="long", tol=3),
         _st("parallel", a="knife", b="board", tol=3), _st("parallel", a="spoon", b="knife", tol=3),
-        _st("row", members=["spoon", "knife", "board"], axis="+y", gap=0.03), _st("near", a="knife", b="board", r=0.17),
+        _st("row", members=["spoon", "knife", "board"], start="right", gap=0.03), _st("near", a="knife", b="board", r=0.17),
         _st("left_of", a="bowl", b="board", gap=0.32), _st("cluster", members=fn, r=0.10)] + [
         _st("in_front_of", a=f, b="bowl", gap=0.12) for f in fn] + [
-        _st("row", members=dn, axis="+y", gap=0.03, tol=0.005), _st("reach", a="bottle", r=0.88, min=0.79),
+        _st("row", members=dn, start="right", gap=0.03, tol=0.005), _st("reach", a="bottle", r=0.88, min=0.79),
         _st("reach", a="can_1", r=0.88, min=0.79), _st("reach", a="can_2", r=0.88, min=0.79)] + [
         _st("min_distance", a=o[0], b="board", r=0.27) for o in objs if o[0] not in ("board", "knife", "spoon")]}
     return Task("kitchen_prep", len(objs), objs, {"kind": "heap", "center": (0.55, 0.0), "radius": 0.13}, request, checks, ref)
@@ -298,6 +295,73 @@ def pack(n=10):
     return Task("pack", n, fruit, {"kind": "heap", "center": (0.56, 0.0), "radius": 0.12}, request, checks, ref)
 
 
+# ----------------------------------------------------------------------------------------------
+# Held out: written once the language was frozen, after the pilots on the tasks above had led to
+# its last revisions, and run only in the final comparison.
+HELD_OUT = {"tool_layout", "desk"}
+
+
+def tool_layout():
+    tools = [("screwdriver_1", pkg("screwdriver", 0)), ("screwdriver_2", pkg("screwdriver", 1)), ("pliers", pkg("pliers")),
+             ("hammer", pkg("hammer")), ("marker_1", pkg("marker", 0)), ("marker_2", pkg("marker", 1))]
+    objs = tools + [("tape", pkg("tape"))]
+    request = ("Lay the tools out for the robot to pick: the two screwdrivers, the pliers, the hammer and the two markers in one row "
+               "parallel to the y axis, their centres within 1 cm of a common line parallel to the y axis; sorted by length, from the "
+               "shortest at the left end to the longest at the right end; at least 3 cm of table between neighbouring tools; each tool's "
+               "long side parallel to the x axis (within 5 degrees); every tool entirely at x < 0.60. The tape dispenser entirely at "
+               "x > 0.70. Nothing interpenetrates; everything rests upright on the table.")
+    tn = [t[0] for t in tools]
+
+    def checks(sc, st):
+        seq = sorted(tn, key=lambda n_: -sc[n_].center[1])                 # left (+y) to right
+        ls = [float(np.ptp(sc[n_].verts[:, :2], axis=0).max()) for n_ in seq]
+        out = R.row(sc, tn, axis="y", min_gap=0.03, align_tol=0.01) + [
+            ("ordered_by_length", all(ls[i] <= ls[i + 1] + 0.005 for i in range(len(ls) - 1)), ls)]
+        out += [R.long_axis_along(sc, t, "x", 5) for t in tn]
+        out += [R.in_region(sc, tn, x1=0.60, label="near"), R.in_region(sc, ["tape"], x0=0.70, label="far")]
+        return out + R.generic(sc)
+    ref = {"statements": BASE + [_st("row", members=tn, start="left", order="length", gap=0.035, tol=0.005)] + [
+        _st("yaw", a=t, deg=0, axis="long", tol=3) for t in tn] + [_st("within", a=t, x1=0.58) for t in tn] + [
+        _st("within", a="tape", x0=0.72)]}
+    return Task("tool_layout", len(objs), objs, {"kind": "heap", "center": (0.55, 0.0), "radius": 0.12}, request, checks, ref,
+                tags={"split": "held_out"})
+
+
+def desk():
+    objs = [("keyboard", pkg("keyboard")), ("mouse", pkg("mouse")), ("notebook", pkg("notebook")), ("marker", pkg("marker")),
+            ("mug", pkg("mug")), ("tape", pkg("tape"))]
+    request = ("Set up the desk for the robot. The keyboard with its centre on y = 0 (within 1 cm), 40 to 50 cm from the robot base, its "
+               "long side parallel to the y axis (within 5 degrees). The mouse on the right of the keyboard with 3 to 8 cm of table between "
+               "them, the x of its centre within 2 cm of the x of the keyboard's centre. The notebook on the left of the keyboard with 5 to "
+               "10 cm of table between them, its long side parallel to the keyboard's long side (within 5 degrees). The marker beyond the "
+               "notebook (farther from the robot), parallel to the notebook's long side (within 5 degrees), with 1 to 4 cm of table between "
+               "them. The mug farther from the robot than the keyboard with at least 5 cm of table between them, its handle pointing at "
+               "the robot base (within 20 degrees). The tape dispenser's centre at least 20 cm from every other object's centre. Nothing "
+               "interpenetrates; everything rests upright on the table.")
+
+    def checks(sc, st):
+        kx = float(sc["keyboard"].center[0])
+        out = [R.centre_on(sc, "keyboard", y=0.0, tol=0.01), R.dist_to_base(sc, "keyboard", 0.40, 0.50), R.long_axis_along(sc, "keyboard", "y", 5),
+               R.side_of(sc, "mouse", "keyboard", "-y"), R.footprint_gap(sc, "keyboard", "mouse", "-y", 0.03, 0.08),
+               R.centre_on(sc, "mouse", x=kx, tol=0.02),
+               R.side_of(sc, "notebook", "keyboard", "+y"), R.footprint_gap(sc, "keyboard", "notebook", "+y", 0.05, 0.10),
+               R.parallel_long(sc, "notebook", "keyboard", 5),
+               R.side_of(sc, "marker", "notebook", "+x"), R.footprint_gap(sc, "notebook", "marker", "+x", 0.01, 0.04),
+               R.parallel_long(sc, "marker", "notebook", 5),
+               R.side_of(sc, "mug", "keyboard", "+x"), R.footprint_gap(sc, "keyboard", "mug", "+x", 0.05), R.facing(sc, "mug", "-x", (0.0, 0.0), 20)]
+        out += [R.apart(sc, o.name, "tape", 0.20) for o in sc.free() if o.name != "tape"]
+        return out + R.generic(sc)
+    ref = {"statements": BASE + [
+        _st("at", a="keyboard", y=0.0, tol=0.005), _st("reach", a="keyboard", r=0.48, min=0.42), _st("yaw", a="keyboard", deg=90, axis="long", tol=3),
+        _st("beside", a="mouse", b="keyboard", side="right", gap=0.04, max=0.07), _st("align", members=["keyboard", "mouse"], axis="x", tol=0.01),
+        _st("beside", a="notebook", b="keyboard", side="left", gap=0.06, max=0.09), _st("parallel", a="notebook", b="keyboard", tol=3),
+        _st("beside", a="marker", b="notebook", side="far", gap=0.015, max=0.035), _st("parallel", a="marker", b="notebook", tol=3),
+        _st("beside", a="mug", b="keyboard", side="far", gap=0.06), _st("facing", a="mug", axis="-x", tol=10),
+        _st("min_distance", a="*", b="tape", r=0.21)]}
+    return Task("desk", len(objs), objs, {"kind": "heap", "center": (0.55, 0.0), "radius": 0.12}, request, checks, ref,
+                tags={"split": "held_out"})
+
+
 def all_tasks():
     return [setting(), drinks_row(6), drinks_row(10), fruit_cans(10), fruit_cans(16), fruit_cans(24), pick_ready(), minimal_fix(),
-            stack(), palletize(4), palletize(6), kitchen_prep(), pack(10), pack(14)]
+            stack(), palletize(4), palletize(6), kitchen_prep(), pack(10), pack(14), tool_layout(), desk()]

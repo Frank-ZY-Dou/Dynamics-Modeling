@@ -22,8 +22,8 @@ Text form (one statement per line, '#' comments, `*` = every free body):
       facing(mug, axis=-x, tol=20)            # the mug's local -x (its handle) points at the robot (or at b / x=, y=)
       yaw(box, deg=0, mod=90, tol=3)          yaw(board, deg=90, axis=long)       parallel(fork, knife)   # long sides
       # v1: arrangements (members in the order given)
-      row(can_1, can_2, can_3, axis=+y, gap=0.02)    align(book_1, book_2, axis=x, edge=max)
-      row(can_1, can_2, can_3, axis=-y, order=height, spacing=even)  # sorted by the compiler, equal centre spacing
+      row(can_1, can_2, can_3, axis=y, gap=0.02)     align(book_1, book_2, axis=x, edge=max)
+      row(can_*, start=left, order=height, spacing=even, mid=0)  # every can, sorted by the compiler, shortest at the left
       evenly_spaced(can_1, can_2, can_3, axis=y)     grid(c1, c2, c3, c4, cols=2, dx=0.12, dy=0.12)
       cluster(orange, lime, lemon, r=0.12)           symmetric(fork, knife, plate, axis=y)
       between(cup, plate, bottle, axis=y, gap=0.05)  centered(cup, saucer)
@@ -47,6 +47,15 @@ import re
 from dataclasses import dataclass, field
 
 NAME_RE = re.compile(r"^[A-Za-z_][\w\-]*(\.[A-Za-z_]\w*)?$")
+# '*' and name patterns (can_*, fruit_?): free bodies, in natural order (can_2 before can_10)
+PATTERN_RE = re.compile(r"^[\w\-*?]*[*?][\w\-*?]*$")
+
+
+def is_wildcard(tok: str) -> bool:
+    """'*' or a name pattern: it stands for free bodies, not for one named body."""
+    return "*" in tok or "?" in tok
+
+
 REGION_KW = {"side", "frac", "depth", "x0", "x1", "y0", "y1"}
 KEYWORDS = {"no_penetration": {"margin"}, "within": {"inset", "soft"} | REGION_KW, "inside": {"inset", "soft"},
             "place": {"x", "y", "yaw", "w"},
@@ -57,23 +66,24 @@ KEYWORDS = {"no_penetration": {"margin"}, "within": {"inset", "soft"} | REGION_K
             "beside": {"side", "gap", "max", "soft"},
             "approach": {"length", "width", "toward", "x", "y", "soft"},
             "facing": {"axis", "tol", "x", "y", "soft"}, "yaw": {"deg", "tol", "mod", "axis", "soft"}, "parallel": {"mod", "tol", "axis", "soft"},
-            "row": {"axis", "gap", "tol", "order", "spacing", "soft"}, "align": {"axis", "edge", "tol", "soft"},
+            "row": {"axis", "start", "gap", "tol", "order", "spacing", "mid", "soft"}, "align": {"axis", "edge", "tol", "soft"},
             "evenly_spaced": {"axis", "tol", "soft"}, "grid": {"cols", "dx", "dy", "tol", "soft"}, "cluster": {"r", "soft"},
             "symmetric": {"axis", "tol", "soft"}, "between": {"axis", "gap", "soft"}, "centered": {"tol", "soft"},
             "offset": {"dx", "dy", "frame", "tol", "soft"}, "attach": {"tol", "soft"},
             "keep_out": {"gap", "soft"} | REGION_KW, "max_move": {"d", "soft"}, "max_turn": {"deg", "soft"},
             "stack": {"tol"}, "balanced_on": {"margin", "soft"}}
 NUMERIC_KW = {"margin", "inset", "x", "y", "yaw", "w", "gap", "r", "min", "max", "length", "width", "tol", "deg", "mod", "cols",
-              "dx", "dy", "frac", "depth", "x0", "x1", "y0", "y1", "d", "soft"}
-SIGNED_KW = {"x", "y", "yaw", "deg", "dx", "dy", "x0", "x1", "y0", "y1"}
+              "dx", "dy", "frac", "depth", "x0", "x1", "y0", "y1", "d", "soft", "mid"}
+SIGNED_KW = {"x", "y", "yaw", "deg", "dx", "dy", "x0", "x1", "y0", "y1", "mid"}
 # keywords whose value is a word, and the words each statement accepts
 WORDS = {"axis": {"left_of": {"x", "y"}, "right_of": {"x", "y"}, "in_front_of": {"x", "y"}, "behind": {"x", "y"},
                   "align": {"x", "y"}, "evenly_spaced": {"x", "y"}, "symmetric": {"x", "y"}, "between": {"x", "y"},
-                  "row": {"x", "y", "+x", "-x", "+y", "-y"}, "facing": {"x", "y", "+x", "-x", "+y", "-y"},
+                  "row": {"x", "y"}, "facing": {"x", "y", "+x", "-x", "+y", "-y"},
                   "yaw": {"x", "y", "+x", "-x", "+y", "-y", "long", "short"}, "parallel": {"x", "y", "long", "short"}},
          "edge": {"align": {"min", "center", "max"}},
          "order": {"row": {"height", "-height", "width", "-width", "length", "-length", "mass", "-mass"}},
          "spacing": {"row": {"even"}},
+         "start": {"row": {"left", "right", "near", "far"}},
          "side": {**{op: {"left", "right", "near", "far", "center"} for op in ("within", "keep_out")},
                   "beside": {"left", "right", "near", "far"}},
          "toward": {"approach": {"robot", "near", "far", "left", "right"}},
@@ -95,8 +105,13 @@ ARITY = {"no_penetration": (1, 1), "place": (1, 1), "fixed": (1, None), "on_supp
          "row": (2, None), "align": (2, None), "evenly_spaced": (3, None), "grid": (2, None), "cluster": (2, None),
          "symmetric": (3, 3), "between": (3, 3), "centered": (2, 2), "offset": (2, 2), "attach": (2, 2),
          "keep_out": (1, 2), "max_move": (1, 1), "max_turn": (1, 1), "stack": (2, None), "balanced_on": (2, 2)}
-# statements over a list of distinct named bodies, in the order given ('*' is not a member)
+# statements over a list of distinct bodies, in the order given; '*' and patterns among the members
+# stand for the free bodies they match that the statement does not name itself
 GROUP = {"row", "align", "evenly_spaced", "grid", "cluster", "stack"}
+# the line a row runs along, from the end its first member is at
+START_LINE = {"left": "y", "right": "y", "near": "x", "far": "x"}
+# statements whose first argument is one named body ('*' or a pattern would put every body at one spot)
+ONE_BODY = {"place", "centered", "offset", "symmetric", "between"}
 # keywords a statement cannot do without
 REQUIRED = {"reach": {"r"}, "clearance": {"gap"}, "beside": {"side"}, "yaw": {"deg"}, "grid": {"cols"}, "cluster": {"r"},
             "max_move": {"d"}, "max_turn": {"deg"}, "min_distance": {"r"}, "near": {"r"}}
@@ -162,6 +177,8 @@ def check_statement(name: str, args: list, kw: dict, where: str = "") -> None:
     SyntaxError naming the statement."""
     at = f"{where}: " if where else ""
     lo_n, hi_n = ARITY[name]
+    if name in GROUP and any(is_wildcard(a) for a in args):
+        lo_n = 1                              # counted once the wildcards are expanded on a scene
     if len(args) < lo_n or (hi_n is not None and len(args) > hi_n):
         want = f"{lo_n}" if lo_n == hi_n else (f"at least {lo_n}" if hi_n is None else f"{lo_n}-{hi_n}")
         raise SyntaxError(f"{at}{name} takes {want} argument(s), got {len(args)}")
@@ -169,12 +186,12 @@ def check_statement(name: str, args: list, kw: dict, where: str = "") -> None:
     if missing:
         raise SyntaxError(f"{at}{name} needs {', '.join(sorted(k + '=' for k in missing))}")
     if name in GROUP:
-        if "*" in args:
-            raise SyntaxError(f"{at}{name} takes named bodies, not '*'")
         if len(set(args)) != len(args):
             raise SyntaxError(f"{at}{name} lists a body twice")
-    elif "*" in args[1:]:
-        raise SyntaxError(f"{at}'*' is only allowed as the first argument")
+    elif any(is_wildcard(a) for a in args[1:]):
+        raise SyntaxError(f"{at}'*' and name patterns are only allowed as the first argument or among a group's members")
+    elif name in ONE_BODY and args and is_wildcard(args[0]):
+        raise SyntaxError(f"{at}{name} takes one named body, not '{args[0]}'")
     if name in ("symmetric", "between") and len(set(args)) != 3:
         raise SyntaxError(f"{at}{name} needs three different bodies")
     for k, v in kw.items():
@@ -188,6 +205,8 @@ def check_statement(name: str, args: list, kw: dict, where: str = "") -> None:
         raise SyntaxError(f"{at}{name}: frac= and depth= go with side=")
     if "frac" in kw and "depth" in kw:
         raise SyntaxError(f"{at}{name}: give frac= (a part of the region) or depth= (a strip beside it), not both")
+    if "start" in kw and "axis" in kw and START_LINE[kw["start"]] != kw["axis"]:
+        raise SyntaxError(f"{at}{name}: a line along {kw['axis']} starts at {' or '.join(e for e, a in START_LINE.items() if a == kw['axis'])}")
     if name == "beside" and "max" in kw and kw["max"] < kw.get("gap", 0.0):
         raise SyntaxError(f"{at}beside: max= is smaller than gap=")
     if "side" in kw and len(args) < 2:
@@ -282,7 +301,7 @@ def parse_program(text: str) -> Program:
                     kw[k] = val
                 else:
                     a = a.strip()
-                    if a != "*" and not NAME_RE.match(a):
+                    if not (NAME_RE.match(a) or PATTERN_RE.match(a)):
                         raise SyntaxError(f"line {ln}: bad body name '{a}'")
                     args.append(a)
             if name == "minimize" and args != ["displacement", "*"]:

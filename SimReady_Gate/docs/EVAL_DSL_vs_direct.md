@@ -11,7 +11,7 @@ from the tracked trial files under `results/dsl_vs_direct/`.
 
 ## Tasks
 
-Fourteen tasks in nine families, each a heap or a scatter of SimReady packages (`assets.json`, 59
+Sixteen tasks in eleven families, each a heap or a scatter of SimReady packages (`assets.json`, 60
 packages of `nvidia/simready-assets` pinned to commit `524747d9`) on the stainless prep table turned
 to span y in front of the robot (top x in [0.20, 0.90], y in [-0.90, 0.90], z = 0), or on a pallet:
 
@@ -26,6 +26,16 @@ to span y in front of the robot (top x in [0.20, 0.90], y in [-0.90, 0.90], z = 
 | `palletize` | 4, 6 | cartons on a pallet in rows parallel to y of at most 3, rows aligned within 1 cm, sides square to the pallet, 1 cm between boxes, 2 cm in from its edges |
 | `kitchen_prep` | 12 | a cutting board placed and oriented, knife and spoon beside it with gaps, bowl beside it, fruit grouped beyond the bowl, drinks in a row at the far edge, nothing else near the board |
 | `pack` | 10, 14 | all the fruit inside a square whose area is only 1.25 (1.12) times the sum of the fruit's bounding rectangles: dense clutter, where boxes do not fit but the shapes do |
+| `tool_layout` (held out) | 7 | six tools in one row parallel to y, sorted by length from the left, 3 cm gaps, each pointing at the robot, all on the near part of the table; the tape dispenser on the far part |
+| `desk` (held out) | 6 | the keyboard placed and turned along y, the mouse and the notebook beside it with gaps, the marker beyond the notebook, the mug beyond the keyboard with its handle at the robot, the tape dispenser 20 cm from everything |
+
+The language's last revisions came from pilots with Haiku on the first fourteen tasks: name patterns
+(`can_*`), after a model left a can out of a listed row; `row`'s `start` (the end the first member is
+at) and `mid` (where the two end members are centred), after programs reversed a row or could not
+centre one whose ends only the compiler's sort decides. The same pilots showed that the sixth can of
+`drinks_row` held soup, which a model rightly kept out of "all the drinks"; a beverage can replaced
+it. The two held-out tasks were written after that, with the language frozen, and were run only in
+the final comparison; the tables report them apart. The pilots are not part of the results.
 
 A request states every number its rubric checks, in the frame both conditions are told (+x away
 from the robot, +y to its left). The rubric (`tasks.py`, `rubric.py`) is a list of geometric
@@ -40,7 +50,9 @@ shown to no model: the tasks are feasible.
 The model gets a fixed system prompt per condition (`results/dsl_vs_direct/<model>/system_*.txt`)
 and a message with the scene summary (`python -m simready.cli summarize`: every body's size, local
 size, heading, tags, the support's top rectangle) and the request. The answer format is given as a
-JSON schema (structured output), with body names restricted to the scene's.
+JSON schema (structured output), one per condition: body names are checked against the scene when
+the answer is validated, not listed in the schema, so that every call of a condition shares one
+cached prompt prefix.
 
 - `dsl_v1`, `dsl_v0`: the answer is a program; the gate validates it against the scene, compiles
   it and repairs the starting scene with S4R (`simready.cli.repair_scene`, what `repair` runs:

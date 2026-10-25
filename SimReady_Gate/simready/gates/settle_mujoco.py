@@ -93,11 +93,22 @@ _COACD_CACHE: dict = {}
 
 def coacd_pieces_info(b, threshold: float = 0.05, max_hulls: int = 32):
     """(convex pieces of a body's mesh in the model frame via CoACD, used_fallback), cached on
-    the mesh content. When CoACD fails the single convex hull stands in and used_fallback is True."""
+    the mesh content: in memory, and on disk under $SIMREADY_CACHE_DIR/coacd when that is set
+    (a decomposition takes seconds to a minute per asset). When CoACD fails the single convex hull
+    stands in and used_fallback is True."""
     import coacd, trimesh, hashlib
-    key = (hashlib.sha1(np.ascontiguousarray(b.verts).tobytes() + np.ascontiguousarray(b.faces).tobytes()).hexdigest(), threshold, max_hulls)
+    digest = hashlib.sha1(np.ascontiguousarray(b.verts).tobytes() + np.ascontiguousarray(b.faces).tobytes()).hexdigest()
+    key = (digest, threshold, max_hulls)
     if key in _COACD_CACHE:
         return _COACD_CACHE[key]
+    path = None
+    if os.environ.get("SIMREADY_CACHE_DIR"):
+        path = os.path.join(os.environ["SIMREADY_CACHE_DIR"], "coacd", f"{digest}_{threshold:g}_{max_hulls}.npz")
+        if os.path.exists(path):
+            with np.load(path, allow_pickle=False) as z:
+                out = ([(z[f"v{i}"], z[f"f{i}"]) for i in range(int(z["n"]))], bool(z["fallback"]))
+            _COACD_CACHE[key] = out
+            return out
     m = trimesh.Trimesh(b.verts, b.faces, process=False)
     try:
         parts = coacd.run_coacd(coacd.Mesh(np.asarray(m.vertices, dtype=np.float64), np.asarray(m.faces, dtype=np.int64)),
@@ -106,6 +117,12 @@ def coacd_pieces_info(b, threshold: float = 0.05, max_hulls: int = 32):
     except Exception:  # noqa: BLE001
         h = m.convex_hull; out = ([(np.asarray(h.vertices), np.asarray(h.faces))], True)
     _COACD_CACHE[key] = out
+    if path is not None:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        arrays = {f"{t}{i}": a for i, (v, f) in enumerate(out[0]) for t, a in (("v", v), ("f", f))}
+        tmp = f"{path}.{os.getpid()}.tmp.npz"          # concurrent runs: write aside, then rename
+        np.savez(tmp, n=len(out[0]), fallback=out[1], **arrays)
+        os.replace(tmp, path)
     return out
 
 

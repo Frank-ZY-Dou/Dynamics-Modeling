@@ -92,20 +92,23 @@ def run_trial(job):
         answer = call.get("structured")
         rec = {"round": r, "llm": {k: call.get(k) for k in ("ok", "wall_s", "duration_ms", "duration_api_ms", "cost_usd", "usage", "num_turns", "stop_reason", "error")},
                "message_chars": len(msg), "answer": answer}
+        clock = {}
         if answer is None:
             report, self_ok, final, t_solve = {"ok": False, "error": "no structured answer"}, False, start, 0.0
         elif cond == "direct":
-            final, report, self_ok, t_solve = P.run_poses(layout, answer, task.support)
+            final, report, self_ok, t_solve = P.run_poses(layout, answer, task.support, clock=clock)
         else:
-            final, report, self_ok, t_solve = P.run_program(layout, answer, v0_only=cond == "dsl_v0")
+            final, report, self_ok, t_solve = P.run_program(layout, answer, v0_only=cond == "dsl_v0", clock=clock)
         passed, checks = P.grade(task, final, start)
-        rec.update({"report": report, "self_ok": self_ok, "solve_s": t_solve, "rubric_ok": passed,
+        rec.update({"report": report, "self_ok": self_ok, "solve_s": t_solve, "solve_cpu_s": clock.get("cpu_s", 0.0), "rubric_ok": passed,
                     "rubric_failed": [c for c in checks if not c[1]],
                     "answer_items": len(answer.get("statements", answer.get("poses", []))) if isinstance(answer, dict) else None})
         if cond == "direct" and answer is not None:
-            fixed, gr_ok, t_fix = P.generic_repair(final, task.support)
+            fix_clock = {}
+            fixed, gr_ok, t_fix = P.generic_repair(final, task.support, clock=fix_clock)
             p2, c2 = P.grade(task, fixed, start)
-            rec["direct_repair"] = {"rubric_ok": p2, "self_ok": gr_ok, "solve_s": t_fix, "rubric_failed": [c for c in c2 if not c[1]]}
+            rec["direct_repair"] = {"rubric_ok": p2, "self_ok": gr_ok, "solve_s": t_fix, "solve_cpu_s": fix_clock.get("cpu_s", 0.0),
+                                    "rubric_failed": [c for c in c2 if not c[1]]}
         rounds.append(rec)
         prev = {"answer": answer, "report": report}
         if self_ok:

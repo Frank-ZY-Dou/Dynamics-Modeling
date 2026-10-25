@@ -1,6 +1,7 @@
 """The final scene of every trial, rebuilt from its recorded answer (the pipelines are deterministic;
-no model is called), settled in MuJoCo (G5, convex-hull proxies, 2 s, the assets' friction and mass)
-and drawn from above.
+no model is called), settled in MuJoCo (G5, 2 s, the assets' friction and mass, every free body as
+its CoACD convex pieces: one hull would fill a banana's curve and push out the fruit resting in it)
+and drawn from above. Set SIMREADY_CACHE_DIR to keep the decompositions between runs.
 
     python experiments/dsl_vs_direct/finals.py results/dsl_vs_direct/claude-sonnet-5-5 [--draw task_key ...]
 
@@ -34,11 +35,15 @@ def final_scene(task, trial, layout_dir):
 def settle(sc, support):
     from simready.gates.settle_mujoco import settle_and_measure
     from simready.cli import quiet_stdout
-    tops = {support: sc.support_height(sc[support], at=np.mean([b.center[:2] for b in sc.free()], axis=0), radius=1.0)}
+    from simready.dsl.statements import footprint_hull
+    # the slab's top: the highest surface under the bodies' outlines (a pallet's top boards, not
+    # the gap between two of them)
+    tops = {support: max(sc.support_height(sc[support], footprint=footprint_hull(b)) for b in sc.free())}
     with quiet_stdout():
-        r = settle_and_measure(sc, seconds=2.0, support_tops=tops)
+        r = settle_and_measure(sc, seconds=2.0, support_tops=tops, decompose_free=True)
     return {"pass": (not r.left_support) and r.peak_speed <= 1.0 and r.peak_disp <= 0.15 and not r.engine_warnings,
-            "peak_speed": round(r.peak_speed, 3), "peak_disp": round(r.peak_disp, 4), "left_support": r.left_support}
+            "peak_speed": round(r.peak_speed, 3), "peak_disp": round(r.peak_disp, 4), "left_support": r.left_support,
+            "hull_fallback": r.proxy_fallback}
 
 
 def draw(sc, path, title):
