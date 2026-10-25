@@ -122,6 +122,17 @@ def run_trial(job):
     return {k: out[k] for k in ("task", "condition", "seed", "n_rounds", "success", "first_round_success")}
 
 
+def code_version() -> dict:
+    """The commit the harness runs from, and whether the package's tree differs from it."""
+    import subprocess
+    try:
+        head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=HERE, capture_output=True, text=True, timeout=10).stdout.strip()
+        changes = subprocess.run(["git", "status", "--porcelain", "--", "."], cwd=HERE.parents[1], capture_output=True, text=True, timeout=10).stdout
+        return {"commit": head or None, "local_changes": bool(changes.strip())}
+    except (OSError, subprocess.SubprocessError):
+        return {"commit": None, "local_changes": None}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="claude-sonnet-5-5"); ap.add_argument("--effort", default="medium")
@@ -138,7 +149,9 @@ def main():
             if not (out / "trials" / f"{k}_{c}_s{s}.json").exists()]
     meta = {"cli": llm.cli_version(), "model": a.model, "effort": a.effort, "rounds": a.rounds, "seeds": a.seeds, "conditions": a.conditions,
             "flags": llm.FLAGS, "env_allowlist": list(llm.ENV_KEEP) + ["CLAUDE_CODE_DISABLE_AUTO_MEMORY=1"],
-            "system_prompts": {k: {"chars": len(v)} for k, v in conditions().items()}, "started": time.strftime("%Y-%m-%dT%H:%M:%S")}
+            "system_prompts": {k: {"chars": len(v)} for k, v in conditions().items()}, "started": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "code": code_version(), "assets_revision": T.ASSETS["revision"], "tasks": keys, "held_out": sorted(T.HELD_OUT),
+            "workers": a.workers, "cpus": sorted(os.sched_getaffinity(0)), "omp_threads": os.environ.get("OMP_NUM_THREADS")}
     (out / "run_meta.json").write_text(json.dumps(meta, indent=1))
     for k, v in conditions().items():
         (out / f"system_{k}.txt").write_text(v)
