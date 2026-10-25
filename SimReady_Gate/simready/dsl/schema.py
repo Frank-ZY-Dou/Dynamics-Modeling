@@ -441,9 +441,9 @@ LANGUAGE = """Statements (a, b, c are body names; members is a list of names, in
                                          apart; axis=+y lists them right to left, -y left to right, +x near to
                                          far, -x far to near; order=height|width|length|mass (- for descending)
                                          sorts the members first, from the bodies' sizes and masses;
-                                         spacing=even makes the centre spacing equal, in the row's order
+                                         spacing=even makes every centre spacing equal to the mean within tol
   align(members, axis, edge)             equal x (or y) of the centres, or of the footprints' min or max edge
-  evenly_spaced(members, axis)           equal centre spacing along axis
+  evenly_spaced(members, axis, tol)      every centre spacing along axis within tol of the mean spacing
   grid(members, cols, dx, dy)            rows of cols members: member k at (row*dx, col*dy) from the first;
                                          without dx, dy the pitch is free but shared
   cluster(members, r)                    every member within r of the group's centre

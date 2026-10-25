@@ -3,9 +3,7 @@ semantics and the grasp hint read from the UsdPhysics schemas, the resting frame
 authored on its edge, the bill-of-materials check, layouts that name packages, and the settle test
 using the asset's friction and mass.
 """
-import contextlib
 import hashlib
-import io
 import json
 import os
 import sys
@@ -170,7 +168,7 @@ class Packages(unittest.TestCase):
             NA.fetch("../escape")
 
     def test_layout_with_packages_and_settle_physics(self):
-        from simready.cli import load_any, main
+        from simready.cli import load_any
         from simready.io.paths import portable
         write_package(self.root, "mug_a01", (0.08, 0.08, 0.1), friction=0.3, mass=0.3)
         write_package(self.root, "slab_table_a01", (0.7, 1.0, 0.05), label="table", mass=20.0)

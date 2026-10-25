@@ -11,7 +11,7 @@ from the tracked trial files under `results/dsl_vs_direct/`.
 
 ## Tasks
 
-Twelve tasks in eight families, each a heap or a scatter of SimReady packages (`assets.json`, 59
+Fourteen tasks in nine families, each a heap or a scatter of SimReady packages (`assets.json`, 59
 packages of `nvidia/simready-assets` pinned to commit `524747d9`) on the stainless prep table turned
 to span y in front of the robot (top x in [0.20, 0.90], y in [-0.90, 0.90], z = 0), or on a pallet:
 
@@ -25,6 +25,7 @@ to span y in front of the robot (top x in [0.20, 0.90], y in [-0.90, 0.90], z = 
 | `stack` | 6 | three cartons stacked largest to smallest, centred within 1 cm, the tower on the right half, the rest on the left |
 | `palletize` | 4, 6 | cartons on a pallet in rows parallel to y of at most 3, rows aligned within 1 cm, sides square to the pallet, 1 cm between boxes, 2 cm in from its edges |
 | `kitchen_prep` | 12 | a cutting board placed and oriented, knife and spoon beside it with gaps, bowl beside it, fruit grouped beyond the bowl, drinks in a row at the far edge, nothing else near the board |
+| `pack` | 10, 14 | all the fruit inside a square whose area is only 1.25 (1.12) times the sum of the fruit's bounding rectangles: dense clutter, where boxes do not fit but the shapes do |
 
 A request states every number its rubric checks, in the frame both conditions are told (+x away
 from the robot, +y to its left). The rubric (`tasks.py`, `rubric.py`) is a list of geometric

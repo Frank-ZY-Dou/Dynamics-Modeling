@@ -147,7 +147,7 @@ class Rows(unittest.TestCase):
                              box("c", (0.05, 0.05, 0.05), (0.4, -0.2, 0.025)))
             sc["a"].meta["com"] = np.array([0.02, -0.01, 0.0])
             prog = parse_program("program\n  " + text)
-            spec = compile_program(prog, sc)
+            compile_program(prog, sc)                                  # records the statement's reference poses
             st = prog.statements[0]
             ctx = V1.Ctx(sc, {b.name: k for k, b in enumerate(sc.bodies)}, {}, lambda tok, exclude=(): [b.name for b in sc.free()] if tok == "*" else [tok])
             gen = V1.compile_statement(st, ctx)
@@ -317,6 +317,20 @@ class Ordering(unittest.TestCase):
         from simready.dsl.statements import sorted_members
         st = parse_program("program\n  row(tall, short, mid, order=-mass)").statements[0]
         self.assertEqual(sorted_members(st, sc), ["short", "mid", "tall"])
+
+
+class EvenSpacing(unittest.TestCase):
+    def test_every_spacing_within_tol_of_the_mean(self):
+        # spacings 0.10, 0.12, 0.10, 0.12: second differences of 0.02 but every spacing 0.01 from the mean
+        objs = [box(f"c{i}", (0.05, 0.05, 0.1), (0.5, y, 0.05)) for i, y in enumerate((0.0, 0.10, 0.22, 0.32, 0.44))]
+        sc = table_scene(*objs)
+        names = ", ".join(b.name for b in objs)
+        ok = {tol: check_predicates(parse_program(f"program\n  evenly_spaced({names}, axis=y, tol={tol})"), sc)[0][1] for tol in (0.005, 0.0105)}
+        self.assertEqual(ok, {0.005: False, 0.0105: True})
+        sc = table_scene(*copy.deepcopy(objs))
+        res, preds, rep = repaired(sc, HEAD + f"  row({names}, axis=+y, gap=0.02, spacing=even, tol=0.002)\n")
+        ys = np.diff([float(sc[b.name].center[1]) for b in objs])
+        self.assertLess(float(np.abs(ys - ys.mean()).max()), 0.002 + 2e-3)
 
 
 class Seating(unittest.TestCase):

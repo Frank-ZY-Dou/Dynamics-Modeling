@@ -67,9 +67,9 @@ body; group statements take a list of named bodies in order.
 | statement | holds when | use |
 |---|---|---|
 | `beside(a, b, side, gap=0, max)` | a's footprint on b's `side` with between `gap` and `max` of table between the two footprints | "the fork 2 to 5 cm left of the plate" |
-| `row(m1, m2, ..., axis=+y, gap=0.01, tol=0.01)` | the members on one line, in the order listed along `axis` (`+y`: the list runs right to left, `-y` left to right, `+x` near to far), footprints at least `gap` apart | drinks on a shelf, cans in a line |
+| `row(m1, m2, ..., axis=+y, gap=0.01, tol=0.01, order, spacing)` | the members on one line, in the order listed along `axis` (`+y`: the list runs right to left, `-y` left to right, `+x` near to far), footprints at least `gap` apart; `order=height` / `width` / `length` / `mass` (`-` descending) sorts them first; `spacing=even` keeps every centre spacing within `tol` of the mean | drinks on a shelf, cans in a line |
 | `align(m1, ..., axis=x, edge=center, tol=0.005)` | equal x (or y) of the centres or of the footprints' `min` / `max` edge | flush backs, spines in line |
-| `evenly_spaced(m1, m2, m3, ..., axis=y, tol=0.005)` | equal centre spacing | spice jars, test tubes |
+| `evenly_spaced(m1, m2, m3, ..., axis=y, tol=0.005)` | every centre spacing within `tol` of the mean spacing | spice jars, test tubes |
 | `grid(m1, ..., cols, dx, dy, tol=0.01)` | rows of `cols` members, member k at `(row dx, col dy)` from the first; a free shared pitch without `dx`, `dy` | trays, racks, egg cartons |
 | `cluster(m1, ..., r)` | every member within `r` of the group's centre | "the fruit together" |
 | `symmetric(a, b, c, axis=y, tol=0.01)` | a and b mirror images about c | fork and knife about the plate |

@@ -1,22 +1,23 @@
 """Rows and predicates of the v1 statements.
 
 `compile_statement(st, ctx)` turns one statement into a callable gen(state) -> [row] that the
-repair calls at every step, with the bodies posed at the step's scale; `check_statement(st,
-scene, ...)` evaluates the statement on a final scene. A row is (coeffs, lo, hi): coeffs maps
+repair calls at every step, with the bodies posed at the step's scale; `check_v1(st, scene, ...)`
+evaluates the statement on a final scene. A row is (coeffs, lo, hi): coeffs maps
 (body index, 'x' | 'y' | 'yaw') to the coefficient of that body's step, and the step must satisfy
 lo <= sum(coeffs * step) <= hi. A soft statement's rows carry its weight as a fourth element.
 
 How each kind of statement becomes rows:
-  linear in the poses (align, evenly_spaced, grid, symmetric, between, centered, offset in the scene
-    frame, yaw windows, regions): exact rows, re-evaluated at each step only because footprints
-    change with the scale and the heading;
+  linear in the poses (at, beside, row, align, evenly_spaced, grid, symmetric, between, centered,
+    offset in the scene frame, yaw windows, regions): exact rows, re-evaluated at each step only
+    because footprints change with the scale and the heading;
   convex but not linear (reach's outer radius, cluster, balanced_on with a centre of mass off the
     reference centre): the tangent half-plane at the current poses, a superset that tightens as the
     steps re-linearise;
   non-convex (reach's inner radius, facing, offset in a body's frame, attach): the first-order
     expansion at the current poses;
   disjunctions (keep_out, approach: one of several sides must hold): the side that needs the least
-    motion at the current poses, chosen again at every step;
+    motion at the current poses, chosen again at every step (for keep_out, among the sides that
+    leave the body room in its own required regions);
   max_move: a 16-gon inscribed in the allowed disc, exact rows that are at most 2 % conservative.
 """
 from __future__ import annotations
@@ -25,7 +26,6 @@ import math
 
 import numpy as np
 
-from ..repair.upright_s4r import decompose_zyx
 from .schema import OP_DEFAULTS
 
 INF = np.inf
@@ -328,11 +328,7 @@ def compile_statement(st, ctx: Ctx):
                 cur = sgn * float(_c(sc, kj)[ax] - _c(sc, ki)[ax]) + lo_j - hi_i
                 _row(out, {(kj, COL[ax]): sgn, (ki, COL[ax]): -sgn}, gap - cur, INF, w)
             if even:
-                for a, b, c in zip(ks, ks[1:], ks[2:]):
-                    cur = float(_c(sc, c)[ax] - 2.0 * _c(sc, b)[ax] + _c(sc, a)[ax])
-                    co = {}
-                    _acc(co, (c, COL[ax]), 1.0); _acc(co, (b, COL[ax]), -2.0); _acc(co, (a, COL[ax]), 1.0)
-                    _row(out, co, -tol - cur, tol - cur, w)
+                even_rows(out, sc, ks, ax, tol, w)
             return out
         gens.append(gen)
     elif n == "align":
@@ -361,10 +357,8 @@ def compile_statement(st, ctx: Ctx):
         tol = float(kwd(st, "tol"))
 
         def gen(state):
-            out, sc = [], state.scene
-            for a, b, c in zip(ks, ks[1:], ks[2:]):
-                cur = float(_c(sc, c)[ax] - 2.0 * _c(sc, b)[ax] + _c(sc, a)[ax])
-                _row(out, {(c, COL[ax]): 1.0, (b, COL[ax]): -2.0, (a, COL[ax]): 1.0}, -tol - cur, tol - cur, w)
+            out = []
+            even_rows(out, state.scene, ks, ax, tol, w)
             return out
         gens.append(gen)
     elif n == "grid":
@@ -634,6 +628,28 @@ def compile_statement(st, ctx: Ctx):
     return all_rows
 
 
+def even_rows(out, sc, ks, ax, tol, w):
+    """Every spacing of consecutive members within tol of the mean spacing (c_last - c_first)/(n-1):
+    linear in the centres, one row per spacing."""
+    n = len(ks)
+    if n < 3:
+        return
+    c = [float(_c(sc, k)[ax]) for k in ks]
+    mean = (c[-1] - c[0]) / (n - 1)
+    for i in range(n - 1):
+        co = {}
+        _acc(co, (ks[i + 1], COL[ax]), 1.0); _acc(co, (ks[i], COL[ax]), -1.0)
+        _acc(co, (ks[-1], COL[ax]), -1.0 / (n - 1)); _acc(co, (ks[0], COL[ax]), 1.0 / (n - 1))
+        cur = (c[i + 1] - c[i]) - mean
+        _row(out, co, -tol - cur, tol - cur, w)
+
+
+def even_error(values) -> float:
+    """Largest deviation of a consecutive spacing from the mean spacing."""
+    d = np.diff(np.asarray(values, dtype=np.float64))
+    return float(np.abs(d - d.mean()).max()) if len(d) else 0.0
+
+
 def member_key(b, prop: str) -> float:
     """A body's height, width (shorter side), length (longer side) or mass (its asset's, else its
     volume at unit density) for ordering a group."""
@@ -797,7 +813,7 @@ def check_v1(st, scene, supports: dict, tol: float, angle_tol: float, bodies_fn)
             out.append((label + ":aligned", spread <= float(kwd(st, "tol")) + tol, spread))
             out.append((label + ":order", min(gaps) >= float(kwd(st, "gap")) - tol, min(gaps)))
             if kw.get("spacing") == "even" and len(members) >= 3:
-                v = float(np.abs(np.diff(P[:, ax], 2)).max())
+                v = even_error(P[:, ax])
                 out.append((label + ":even", v <= float(kwd(st, "tol")) + tol, v))
         elif n == "align":
             ax = 0 if kwd(st, "axis") == "x" else 1
@@ -809,7 +825,7 @@ def check_v1(st, scene, supports: dict, tol: float, angle_tol: float, bodies_fn)
             out.append((label, v <= float(kwd(st, "tol")) + tol, v))
         elif n == "evenly_spaced":
             ax = 0 if kwd(st, "axis") == "x" else 1
-            v = float(np.abs(np.diff(P[:, ax], 2)).max())
+            v = even_error(P[:, ax])
             out.append((label, v <= float(kwd(st, "tol")) + tol, v))
         elif n == "grid":
             cols = int(kw["cols"])

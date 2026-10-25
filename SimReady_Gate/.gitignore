@@ -8,6 +8,11 @@ results/*
 !results/*.json
 !results/layouts/
 !results/layouts/*.json
+!results/dsl_vs_direct/
+!results/dsl_vs_direct/**/
+!results/dsl_vs_direct/**/*.json
+!results/dsl_vs_direct/**/*.txt
+!results/dsl_vs_direct/**/*.md
 
 # never commit credentials
 .env
