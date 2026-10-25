@@ -24,6 +24,7 @@ import sys
 import time
 import traceback
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures.process import BrokenProcessPool
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -152,19 +153,32 @@ def main():
             "system_prompts": {k: {"chars": len(v)} for k, v in conditions().items()}, "started": time.strftime("%Y-%m-%dT%H:%M:%S"),
             "code": code_version(), "assets_revision": T.ASSETS["revision"], "tasks": keys, "held_out": sorted(T.HELD_OUT),
             "workers": a.workers, "cpus": sorted(os.sched_getaffinity(0)), "omp_threads": os.environ.get("OMP_NUM_THREADS")}
+    if (out / "run_meta.json").exists():                 # a rerun of the trials a crash left out: keep the first record
+        first = json.loads((out / "run_meta.json").read_text())
+        first.setdefault("resumed", []).append({k: meta[k] for k in ("started", "code", "cli", "cpus", "workers")} | {"trials": len(jobs)})
+        meta = first
     (out / "run_meta.json").write_text(json.dumps(meta, indent=1))
     for k, v in conditions().items():
         (out / f"system_{k}.txt").write_text(v)
         (out / f"schema_{k}.json").write_text(json.dumps(schemas()[k], indent=1))
     print(f"{len(jobs)} trials", flush=True)
+    crashed = 0
     with ProcessPoolExecutor(max_workers=a.workers) as ex:
         futs = {ex.submit(run_trial, j): j for j in jobs}
         for f in as_completed(futs):
             j = futs[f]
             try:
                 print(json.dumps(f.result()), flush=True)
+            except BrokenProcessPool:        # a worker died (killed, out of memory): stop, do not grade a partial run
+                print(json.dumps({"task": j["task"], "condition": j["condition"], "seed": j["seed"], "crash": "a worker process died"}), flush=True)
+                for g in futs:
+                    g.cancel()
+                sys.exit(4)
             except Exception:  # noqa: BLE001  a crashed trial is reported and left to a rerun
+                crashed += 1
                 print(json.dumps({"task": j["task"], "condition": j["condition"], "seed": j["seed"], "crash": traceback.format_exc()[-1500:]}), flush=True)
+    if crashed:
+        sys.exit(3)                         # the trials without a file run again when run.py is started again
 
 
 if __name__ == "__main__":

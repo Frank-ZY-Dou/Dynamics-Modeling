@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from pathlib import Path
 
 import numpy as np
@@ -109,5 +110,7 @@ def build(task, seed: int, out_dir: Path) -> Path:
               "table": support_entry(task.support), "objects": objs}
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"{task.key}_s{seed}.json"
-    path.write_text(json.dumps(layout, indent=1))
+    tmp = path.with_name(f".{path.name}.{os.getpid()}")       # the conditions of a seed build it at once: write aside, then rename
+    tmp.write_text(json.dumps(layout, indent=1))
+    os.replace(tmp, path)
     return path

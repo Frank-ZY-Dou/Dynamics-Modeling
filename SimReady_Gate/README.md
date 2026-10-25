@@ -355,12 +355,15 @@ palletizing and towers.
 ### Setup
 
 ```
-pip install numpy scipy trimesh rtree python-fcl osqp mujoco coacd usd-core   # Python 3.10+
-python -m unittest discover tests                                            # regression tests
+pip install numpy scipy trimesh rtree fast-simplification python-fcl osqp mujoco coacd usd-core   # Python 3.10+
+python -m unittest discover tests                                                                # regression tests
 ```
 
 `rtree` is what trimesh's ray and point-in-mesh queries run on; without it those queries fail,
-and a failed query is reported as an error (exit code 2), never as "no hit". Optional: `anthropic`
+and a failed query is reported as an error (exit code 2), never as "no hit". `fast-simplification`
+is trimesh's mesh decimator: the continuation runs on 2000-face copies of the bodies and verifies on
+the full meshes; without it the repair warns and runs on the full meshes, several times slower and
+with gigabytes of collision structures for assets of 50k-130k faces. Optional: `anthropic`
 for the SDK backend, which reads `ANTHROPIC_API_KEY` from the environment only (nothing in this
 repository holds a credential, and `.env` files are ignored); Blender 3.6 for the renders in
 `viz/` (`BLENDER=/path/to/blender`).

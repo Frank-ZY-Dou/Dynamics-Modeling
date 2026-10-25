@@ -37,6 +37,9 @@ from collections import OrderedDict
 
 _BVH_CACHE: OrderedDict = OrderedDict()
 _BVH_CACHE_MAX = 512      # least recently used first out: a continuation step's scaled BVHs are not used again
+_BVH_FACES = 0                 # triangles held now
+_BVH_CACHE_FACES = 1_000_000   # and at most this many triangles in all (about 0.5 GB of BVHs): a process that repairs
+                               # scene after scene keeps the full-mesh BVHs of the present one, not of every earlier one
 
 
 def _fcl_object(body: Body, scale: float):
@@ -50,14 +53,17 @@ def _fcl_object(body: Body, scale: float):
     if hit is not None:
         _BVH_CACHE.move_to_end(key)
     else:
-        while len(_BVH_CACHE) >= _BVH_CACHE_MAX:
-            _BVH_CACHE.popitem(last=False)
+        global _BVH_FACES
+        while _BVH_CACHE and (len(_BVH_CACHE) >= _BVH_CACHE_MAX or _BVH_FACES + len(body.faces) > _BVH_CACHE_FACES):
+            _, (_, _, old_faces) = _BVH_CACHE.popitem(last=False)
+            _BVH_FACES -= len(old_faces)
         m = fcl.BVHModel()
         m.beginModel(len(body.verts), len(body.faces))
         m.addSubModel((scale * body.verts).astype(np.float64), np.asarray(body.faces, dtype=np.int32))
         m.endModel()
         hit = (m, body.verts, body.faces)
         _BVH_CACHE[key] = hit
+        _BVH_FACES += len(body.faces)
     return fcl.CollisionObject(hit[0], fcl.Transform(np.asarray(body.rotation, dtype=np.float64), np.asarray(body.center, dtype=np.float64)))
 
 

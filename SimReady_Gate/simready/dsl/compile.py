@@ -142,7 +142,7 @@ def _region(scene: Scene, st: Statement, inset: float):
 
 def _rect_of(scene: Scene, tok: str, inset: float):
     """XY rectangle of `name` or `name.top` from the body's world AABB, inset."""
-    lo, hi = scene[_ref(tok)].world_aabb()
+    lo, hi = V1.body_aabb(scene[_ref(tok)])
     r = (lo[0] + inset, hi[0] - inset, lo[1] + inset, hi[1] - inset)
     if r[0] > r[1] or r[2] > r[3]:
         raise CompileError(f"inset {inset} leaves no room inside {tok}")
@@ -154,7 +154,7 @@ def _inset_of(scene: Scene, st: Statement) -> float:
     inset = float(st.kw.get("inset", DEFAULTS["inset"] if n == "within" and len(st.args) > 1 and not
                               ({"side", "x0", "x1", "y0", "y1"} & set(st.kw)) else 0.0))
     if n == "inside":
-        lo, hi = scene[_ref(st.args[1])].world_aabb()
+        lo, hi = V1.body_aabb(scene[_ref(st.args[1])])
         inset = max(inset, 0.1 * float(min(hi[0] - lo[0], hi[1] - lo[1])))
     return inset
 
@@ -162,7 +162,7 @@ def _inset_of(scene: Scene, st: Statement) -> float:
 def _footprint_interval(b: Body, s: float, axis: int):
     """[min, max] of the body's projection on world axis x/y at continuation scale s,
     relative to its reference centre (exact for any footprint shape)."""
-    p = (b.rotation @ (s * b.verts).T).T[:, axis]
+    p = (b.rotation @ (s * V1.footprint_verts(b)).T).T[:, axis]
     return float(p.min()), float(p.max())
 
 

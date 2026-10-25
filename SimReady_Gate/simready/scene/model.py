@@ -180,9 +180,21 @@ def slab_proxy(body: Body, thickness: float = 0.05, up=None, top: float | None =
                           meta=dict(body.meta, proxy_of=body.name))
 
 
+_WARNED = set()
+
+
+def _warn_once(key: str, message: str) -> None:
+    if key not in _WARNED:
+        _WARNED.add(key)
+        import warnings
+        warnings.warn(message, RuntimeWarning, stacklevel=3)
+
+
 class MeshProxy:
     """Context manager: swap free bodies' meshes for decimated copies (and supports for
-    slabs) during repair, then restore the full meshes for verification."""
+    slabs) during repair, then restore the full meshes for verification. A decimated body keeps
+    its own vertices in meta['full_verts'] meanwhile: the contacts run on the copy, footprints are
+    measured on the mesh the predicates will see (decimation moves a silhouette by millimetres)."""
 
     def __init__(self, scene: Scene, faces: int = 2000, slab_supports: bool = True, slab_tops: dict | None = None):
         self.scene, self.faces, self.slab_supports = scene, faces, slab_supports
@@ -202,7 +214,11 @@ class MeshProxy:
                     m = trimesh.Trimesh(b.verts, b.faces, process=False).simplify_quadric_decimation(face_count=self.faces)
                     v = np.asarray(m.vertices, dtype=np.float64); f = np.asarray(m.faces, dtype=np.int32)
                     if len(f) > 20:
+                        b.meta["full_verts"] = b.verts      # what footprints are measured on meanwhile
                         b.verts, b.faces = v, f       # same frame: decimation keeps coordinates
+                except ImportError as e:             # trimesh decimates through fast_simplification
+                    _warn_once("decimation", f"mesh decimation is unavailable ({e}); the repair runs on the full meshes, "
+                                             "slower and with more memory (pip install fast-simplification)")
                 except Exception:  # noqa: BLE001
                     pass
         return self.scene
@@ -211,6 +227,7 @@ class MeshProxy:
         for b in self.scene.bodies:
             v, f, c, R = self.saved[b.name]
             b.verts, b.faces = v, f
+            b.meta.pop("full_verts", None)
             if b.fixed:
                 b.center, b.rotation = c, R   # free bodies keep their repaired poses
         return False

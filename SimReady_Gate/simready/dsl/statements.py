@@ -74,12 +74,24 @@ def heading(R: np.ndarray, axis=(1.0, 0.0, 0.0)) -> float | None:
     return math.atan2(w[1], w[0])
 
 
+def footprint_verts(b) -> np.ndarray:
+    """The model-frame vertices a footprint is measured on: the body's own mesh, also while a
+    repair runs its contacts on a decimated copy (scene.model.MeshProxy)."""
+    return b.meta.get("full_verts", b.verts)
+
+
+def body_aabb(b):
+    """World bounding box of the body's own mesh (see footprint_verts)."""
+    w = (b.rotation @ footprint_verts(b).T).T + b.center
+    return w.min(axis=0), w.max(axis=0)
+
+
 def body_axis(b, tok: str):
     """(local axis vector, is_line) for an axis word: 'x', '+x', '-y', ... or 'long' / 'short', the
     longer / shorter horizontal local axis of the body, which is a line (a turn by 180 degrees maps
     it onto itself)."""
     if tok in ("long", "short"):
-        ext = np.ptp(b.verts, axis=0)
+        ext = np.ptp(footprint_verts(b), axis=0)
         longer_x = ext[0] >= ext[1]
         return ((1.0, 0.0, 0.0) if (longer_x == (tok == "long")) else (0.0, 1.0, 0.0)), True
     return AXIS_VEC[tok], False
@@ -88,14 +100,14 @@ def body_axis(b, tok: str):
 def projection(b, s: float, u) -> tuple[float, float]:
     """[min, max] of the body's footprint at scale s along the horizontal unit direction u,
     relative to its reference centre (exact for any footprint)."""
-    p = (b.rotation @ (s * b.verts).T).T[:, :2] @ np.asarray(u, dtype=np.float64)
+    p = (b.rotation @ (s * footprint_verts(b)).T).T[:, :2] @ np.asarray(u, dtype=np.float64)
     return float(p.min()), float(p.max())
 
 
 def footprint_hull(b) -> np.ndarray:
     """Convex hull (counter-clockwise) of the body's footprint in the plane."""
     from scipy.spatial import ConvexHull
-    xy = b.world_vertices()[:, :2]
+    xy = ((b.rotation @ footprint_verts(b).T).T + b.center)[:, :2]
     try:
         h = ConvexHull(xy)
         return xy[h.vertices]
@@ -170,7 +182,7 @@ def reference_rect(scene, tok: str | None):
     """(lo, hi) of a region reference: the body's world bounding box in the plane, or the whole plane."""
     if tok is None:
         return (-INF, -INF), (INF, INF)
-    lo, hi = scene[tok.split(".")[0]].world_aabb()
+    lo, hi = body_aabb(scene[tok.split(".")[0]])
     return lo[:2], hi[:2]
 
 
