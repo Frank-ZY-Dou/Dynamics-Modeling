@@ -7,6 +7,8 @@ scipy>=1.10
 trimesh>=4.0
 python-fcl>=0.7
 osqp>=0.6
+pillow>=9.0     # trimesh reads the materials of the bundled meshes with it
+rtree>=1.0      # trimesh's containment tests (nested bodies) query an R-tree
 
 # ── Optional extras (NOT installed by the line above) ──
 # GPU-native solver (s4r_gpu/, requires an NVIDIA GPU):
