@@ -54,7 +54,9 @@ def per_trial(t):
              "self_ok": bool(t["self_ok"]), "prompt": u["input"] + u["cache_creation"] + u["cache_read"],
              "prompt_fresh": u["input"] + u["cache_creation"], "output": u["output"], "thinking": u["thinking"], "cost": u["cost"],
              "llm_s": u["llm_s"], "solve_s": u["solve_s"], "solve_cpu_s": u["solve_cpu_s"], "items": rounds[-1].get("answer_items"),
-             "split": "held_out" if t["family"] in HELD_OUT else "development"}]
+             "split": "held_out" if t["family"] in HELD_OUT else "development",
+             "recorded_rounds": sum(r.get("answer_from") == "recorded" for r in rounds),
+             "called_rounds": sum(r.get("answer_from", "called") == "called" for r in rounds)}]
     if t["condition"] == "direct" and rounds[-1].get("direct_repair"):
         dr = rounds[-1]["direct_repair"]
         r2 = dict(rows[0]); r2["condition"] = "direct+repair"
@@ -86,6 +88,7 @@ def summarize(rows, key=lambda r: r["condition"]):
         n, s = len(g), sum(r["success"] for r in g)
         tot = {f: float(sum(r[f] for r in g)) for f in ("prompt", "prompt_fresh", "output", "thinking", "cost", "llm_s", "solve_s", "solve_cpu_s")}
         out[k] = {"trials": n, "passed": s, "passed_as_run": sum(r["success_run"] for r in g), "success_rate": s / n, "success_ci95": wilson(s, n),
+                  "rounds_recorded": sum(r["recorded_rounds"] for r in g), "rounds_called": sum(r["called_rounds"] for r in g),
                   "first_round_rate": sum(r["first"] for r in g) / n,
                   "self_check_rate": sum(r["self_ok"] for r in g) / n, "rounds_mean": float(np.mean([r["rounds"] for r in g])),
                   "per_trial": {f: v / n for f, v in tot.items()}, "per_success": {f: (v / s if s else None) for f, v in tot.items()},

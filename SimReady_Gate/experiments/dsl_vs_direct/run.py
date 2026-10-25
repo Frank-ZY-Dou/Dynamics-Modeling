@@ -85,14 +85,28 @@ def run_trial(job):
     system = conditions()[cond]
     schema = schemas()[cond]
     base = user_prompt(task.request, start)
-    rounds, prev = [], None
+    # a replay (--replay) keeps the recorded answer of every round whose message is the recorded one: the first
+    # (task and scene alone), and a later one when the answer before it was the recorded one and checking it found
+    # word for word what it found then; any other round calls the model, as a run does
+    recorded = json.loads(Path(job["replay_of"]).read_text())["rounds"] if job.get("replay_of") else None
+    rounds, prev, prev_recorded = [], None, True
+    canon = lambda x: json.dumps(x, sort_keys=True)
     for r in range(1, job["rounds"] + 1):
         msg = base if prev is None else (base + "\nYour previous answer:\n" + json.dumps(prev["answer"]) +
                                          "\n\nWhat checking it found:\n" + json.dumps(prev["report"]) + "\n\nGive a corrected, complete answer.\n")
-        call = llm.call(system, msg, job["model"], job["effort"], schema=schema, work_root=job["work_root"])
-        answer = call.get("structured")
-        rec = {"round": r, "llm": {k: call.get(k) for k in ("ok", "wall_s", "duration_ms", "duration_api_ms", "cost_usd", "usage", "num_turns", "stop_reason", "error")},
-               "message_chars": len(msg), "answer": answer}
+        old = recorded[r - 1] if recorded is not None and r <= len(recorded) else None
+        same = (old is not None and prev_recorded and len(msg) == old["message_chars"]
+                and (r == 1 or canon(sanitize(prev["report"])) == canon(recorded[r - 2]["report"])))
+        if same:
+            answer, llm_rec = old["answer"], old["llm"]
+        else:
+            call = llm.call(system, msg, job["model"], job["effort"], schema=schema, work_root=job["work_root"])
+            answer = call.get("structured")
+            llm_rec = {k: call.get(k) for k in ("ok", "wall_s", "duration_ms", "duration_api_ms", "cost_usd", "usage", "num_turns", "stop_reason", "error")}
+        prev_recorded = same
+        rec = {"round": r, "llm": llm_rec, "message_chars": len(msg), "answer": answer}
+        if recorded is not None:
+            rec["answer_from"] = "recorded" if same else "called"
         clock = {}
         if answer is None:
             report, self_ok, final, t_solve = {"ok": False, "error": "no structured answer"}, False, start, 0.0
@@ -141,18 +155,29 @@ def main():
     ap.add_argument("--conditions", nargs="+", default=["dsl_v1", "dsl_v0", "direct"]); ap.add_argument("--tasks", nargs="*")
     ap.add_argument("--workers", type=int, default=4); ap.add_argument("--out", required=True)
     ap.add_argument("--work-root", default=None, help="where the empty per-call working directories go")
+    ap.add_argument("--replay", help="a recorded run: its trials again with the present pipelines, keeping each recorded "
+                                     "answer whose message is unchanged (model, effort, rounds and seeds come from its record)")
     a = ap.parse_args()
+    replay_meta = None
+    if a.replay:
+        replay_meta = json.loads((Path(a.replay) / "run_meta.json").read_text())
+        a.model, a.effort, a.rounds = replay_meta["model"], replay_meta["effort"], replay_meta["rounds"]
+        a.seeds, a.conditions = replay_meta["seeds"], replay_meta["conditions"]
     import tasks as T, llm
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     keys = [t.key for t in T.all_tasks() if not a.tasks or t.key in a.tasks or t.name in a.tasks]
     jobs = [{"task": k, "condition": c, "seed": s, "model": a.model, "effort": a.effort, "rounds": a.rounds, "out": str(out),
-             "work_root": a.work_root} for k in keys for s in a.seeds for c in a.conditions
+             "work_root": a.work_root} | ({"replay_of": str(Path(a.replay) / "trials" / f"{k}_{c}_s{s}.json")} if a.replay else {})
+            for k in keys for s in a.seeds for c in a.conditions
             if not (out / "trials" / f"{k}_{c}_s{s}.json").exists()]
     meta = {"cli": llm.cli_version(), "model": a.model, "effort": a.effort, "rounds": a.rounds, "seeds": a.seeds, "conditions": a.conditions,
             "flags": llm.FLAGS, "env_allowlist": list(llm.ENV_KEEP) + ["CLAUDE_CODE_DISABLE_AUTO_MEMORY=1"],
             "system_prompts": {k: {"chars": len(v)} for k, v in conditions().items()}, "started": time.strftime("%Y-%m-%dT%H:%M:%S"),
             "code": code_version(), "assets_revision": T.ASSETS["revision"], "tasks": keys, "held_out": sorted(T.HELD_OUT),
             "workers": a.workers, "cpus": sorted(os.sched_getaffinity(0)), "omp_threads": os.environ.get("OMP_NUM_THREADS")}
+    if replay_meta is not None:
+        meta["replay_of"] = {"run": os.path.basename(os.path.normpath(a.replay)), "started": replay_meta["started"],
+                             "code": replay_meta.get("code"), "cli": replay_meta.get("cli")}
     if (out / "run_meta.json").exists():                 # a rerun of the trials a crash left out: keep the first record
         first = json.loads((out / "run_meta.json").read_text())
         first.setdefault("resumed", []).append({k: meta[k] for k in ("started", "code", "cli", "cpus", "workers")} | {"trials": len(jobs)})
