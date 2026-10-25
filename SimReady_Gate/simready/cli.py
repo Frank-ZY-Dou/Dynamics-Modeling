@@ -49,7 +49,7 @@ def load_any(path: str) -> Scene:
             L = strict_json_loads(f.read())
         L["base_scene"] = expand(L.get("base_scene"))          # layouts store RoboLab asset paths as <ROBOLAB_DIR>/...
         for o in L["objects"]:
-            if "package" not in o:
+            if "package" not in o and "scenario" not in o:
                 o["usd_path"] = expand(o["usd_path"])
         if isinstance(L.get("table"), dict) and "package" not in L["table"]:
             L["table"]["usd_path"] = expand(L["table"].get("usd_path"))
@@ -84,6 +84,9 @@ def load_any(path: str) -> Scene:
         for o in L["objects"]:
             if "package" in o:
                 bodies.append(body_from_layout_package(o["name"], o, (o["x"], o["y"], o["z"]), o.get("yaw", 0.0), tags={"object"}))
+            elif "scenario" in o:
+                from .io.scenario_assets import body_from_scenario
+                bodies.append(body_from_scenario(o["name"], o["scenario"], (o["x"], o["y"], o["z"]), yaw_deg=o.get("yaw", 0.0), tags={"object"}))
             else:
                 bodies.append(body_from_object_usd(o["name"], o["usd_path"], (o["x"], o["y"], o["z"]), yaw_deg=o.get("yaw", 0.0), tags={"object"}))
         return Scene(bodies, meta=meta)
@@ -285,9 +288,10 @@ def repair_scene(sc: Scene, prog, s_min: float = 0.05, ds_max: float = 0.05, tai
         tops = {sup: min(h for b, h in spec.supports.items() if spec.support_of.get(b) == sup) for sup in set(spec.support_of.values())}
         solver_notes = []
         with quiet_stdout():
-            with MeshProxy(sc, faces=proxy_faces, slab_tops=tops):   # repair on decimated meshes + support slabs; verify on full meshes
+            proxy = MeshProxy(sc, faces=proxy_faces, slab_tops=tops)
+            with proxy:                   # repair on decimated meshes + support slabs; verify on full meshes
                 res = repair_upright(sc, spec, verbose=verbose)
-            solver_notes += res.notes
+            solver_notes += proxy.notes + res.notes
             reseat_on_supports(sc, spec)
             after = verify_scene(sc)
             if after.pen_pairs > 0:                       # proxy residuals: polish on the full meshes
@@ -535,15 +539,32 @@ def cmd_export(a):
 def cmd_assets(a):
     """SimReady packages: `search` asks SimReady Central, `fetch` downloads packages (without their
     textures unless --textures) and checks them against their bill of materials, `info` prints a
-    fetched package's size, physics, labels and grasp hint."""
+    fetched package's size, physics, labels and grasp hint. A name `scenario:<asset>` is an asset of
+    the Scenario 3D Collection (simready/data/scenario_assets.json), and `list scenario` lists them."""
     from .io import nvidia_assets as NA
-    if a.action == "search":
+    from .io import scenario_assets as SA
+    if a.action != "list" and not a.names:
+        raise ValueError(f"assets {a.action} needs names")
+    if a.action == "list":
+        if a.names != ["scenario"]:
+            raise ValueError("assets list takes one source: scenario")
+        m = SA.manifest()
+        print(dump_json({"repo": m["repo"], "revision": m["revision"], "license": m["license"], "credit": m["credit"],
+                         "assets": [{"name": n, "label": e["label"], **{k: e[k] for k in ("height_m", "width_m", "length_m", "mass_kg") if k in e},
+                                     "fetched": (SA.asset_dir(n) / SA.RECORD).exists()} for n, e in m["assets"].items()]}, indent=1))
+    elif a.action == "search":
         hits = NA.search(" ".join(a.names), limit=a.limit, repo=None if a.repo == "any" else a.repo,
                          max_size=a.max_size, max_height=a.max_height, max_mass=a.max_mass)
         print(dump_json({"query": " ".join(a.names), "hits": hits}, indent=1))
     elif a.action == "fetch":
         out = []
         for name in a.names:
+            if name.startswith("scenario:"):
+                d = SA.fetch(name.split(":", 1)[1])
+                rec = json.loads((d / SA.RECORD).read_text())
+                out.append({"asset": name, "dir": portable(str(d)), "revision": rec["revision"], "faces": rec["faces"],
+                            "faces_source": rec["faces_source"], "decimation_deviation": rec["decimation_deviation"], "license": rec["license"]})
+                continue
             d = NA.fetch(name, repo=a.repo, revision=a.revision, textures=a.textures)
             rec = json.loads((d / NA.RECORD).read_text())
             out.append({"package": name, "dir": portable(str(d)), "revision": rec["revision"], "files": len(rec["files"]),
@@ -552,6 +573,15 @@ def cmd_assets(a):
     else:
         out = []
         for name in a.names:
+            if name.startswith("scenario:"):
+                asset = name.split(":", 1)[1]
+                info = SA.read_asset(asset)
+                b = SA.body_from_scenario(asset, asset, (0.0, 0.0, 0.0))
+                out.append({"asset": name, "label": info["label"], "material": info["material"], "physics": info["physics"],
+                            "size_m": [float(x) for x in np.ptp(b.verts, axis=0)], "rests_turned": "rest_rotation" in b.meta,
+                            "grasp_axis": b.meta.get("grasp_axis"), "container": "container" in b.tags,
+                            "mesh": portable(str(info["mesh"])), "record": info["record"]})
+                continue
             d = Path(name) if os.path.isdir(name) else NA.package_dir(name, a.repo)
             info = NA.read_package(d)
             b = NA.body_from_package(d.name, d, (0.0, 0.0, 0.0))
@@ -583,8 +613,9 @@ def main(argv=None):
     s = sub.add_parser("export"); s.add_argument("scene"); s.add_argument("--out", required=True); s.add_argument("--program")
     s.add_argument("--decompose", action="store_true", help="CoACD pieces for the free bodies instead of one convex hull each")
     s.add_argument("--hull-verts", type=int, default=256); s.set_defaults(fn=cmd_export)
-    s = sub.add_parser("assets", help="search, fetch and inspect SimReady packages")
-    s.add_argument("action", choices=("search", "fetch", "info")); s.add_argument("names", nargs="+", help="search words, or package names")
+    s = sub.add_parser("assets", help="search, fetch and inspect SimReady packages and Scenario assets")
+    s.add_argument("action", choices=("search", "fetch", "info", "list"))
+    s.add_argument("names", nargs="*", help="search words, package names, scenario:<asset>, or (list) the source: scenario")
     s.add_argument("--repo", default="nvidia/simready-assets", help="Hugging Face dataset (search: 'any' for every dataset SimReady Central indexes)")
     s.add_argument("--revision", default="main"); s.add_argument("--textures", action="store_true")
     s.add_argument("--limit", type=int, default=10); s.add_argument("--max-size", type=float); s.add_argument("--max-height", type=float)

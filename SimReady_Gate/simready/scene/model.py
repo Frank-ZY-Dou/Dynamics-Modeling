@@ -248,26 +248,27 @@ def slab_proxy(body: Body, thickness: float = 0.05, up=None, top: float | None =
                           meta=dict(body.meta, proxy_of=body.name))
 
 
-_WARNED = set()
-
-
-def _warn_once(key: str, message: str) -> None:
-    if key not in _WARNED:
-        _WARNED.add(key)
-        import warnings
-        warnings.warn(message, RuntimeWarning, stacklevel=3)
+PROXY_BOX_TOL_M = 0.01      # a decimated copy keeps every side of the body's box within this,
+PROXY_BOX_TOL_FRAC = 0.05   # or within this fraction of the box's diagonal, whichever is larger
 
 
 class MeshProxy:
     """Context manager: swap free bodies' meshes for decimated copies (and supports for
     slabs) during repair, then restore the full meshes for verification. A decimated body keeps
     its own vertices in meta['full_verts'] meanwhile: the contacts run on the copy, footprints are
-    measured on the mesh the predicates will see (decimation moves a silhouette by millimetres)."""
+    measured on the mesh the predicates will see (decimation moves a silhouette by millimetres).
+
+    A copy must keep the body's bounding box (PROXY_BOX_TOL_M, PROXY_BOX_TOL_FRAC): quadric
+    decimation can collapse a whole flat part of a body made of several (a carton's sides under a
+    detailed cap), and the repair seats a body by its copy's lowest point. A copy that loses part
+    of the body is made again with twice the faces; a body no copy keeps runs on its own mesh.
+    `notes` says which bodies needed either."""
 
     def __init__(self, scene: Scene, faces: int = 2000, slab_supports: bool = True, slab_tops: dict | None = None):
         self.scene, self.faces, self.slab_supports = scene, faces, slab_supports
         self.slab_tops = slab_tops or {}     # support name -> plate height (else the mesh max)
         self.saved = {}
+        self.notes = []
 
     def __enter__(self):
         import trimesh
@@ -277,18 +278,30 @@ class MeshProxy:
                 if self.slab_supports and "support" in b.tags:
                     px = slab_proxy(b, top=self.slab_tops.get(b.name)); b.verts, b.faces, b.center, b.rotation = px.verts, px.faces, px.center, px.rotation
                 continue
-            if len(b.faces) > self.faces:
+            if len(b.faces) <= self.faces:
+                continue
+            full = trimesh.Trimesh(b.verts, b.faces, process=False)
+            lo, hi = b.verts.min(0), b.verts.max(0)
+            tol = max(PROXY_BOX_TOL_M, PROXY_BOX_TOL_FRAC * float(np.linalg.norm(hi - lo)))
+            budget, copy = self.faces, None
+            while budget < len(b.faces):
                 try:
-                    m = trimesh.Trimesh(b.verts, b.faces, process=False).simplify_quadric_decimation(face_count=self.faces)
-                    v = np.asarray(m.vertices, dtype=np.float64); f = np.asarray(m.faces, dtype=np.int32)
-                    if len(f) > 20:
-                        b.meta["full_verts"] = b.verts      # what footprints are measured on meanwhile
-                        b.verts, b.faces = v, f       # same frame: decimation keeps coordinates
+                    m = full.simplify_quadric_decimation(face_count=budget)
                 except ImportError as e:             # trimesh decimates through fast_simplification
-                    _warn_once("decimation", f"mesh decimation is unavailable ({e}); the repair runs on the full meshes, "
-                                             "slower and with more memory (pip install fast-simplification)")
-                except Exception:  # noqa: BLE001
-                    pass
+                    raise ImportError(f"mesh decimation needs fast-simplification ({e}): pip install fast-simplification") from e
+                v = np.asarray(m.vertices, dtype=np.float64); f = np.asarray(m.faces, dtype=np.int32)
+                used = v[f.reshape(-1)]                  # the box of what the faces keep, not of every vertex left
+                if len(f) and max(float(np.abs(used.min(0) - lo).max()), float(np.abs(used.max(0) - hi).max())) <= tol:
+                    copy = (v, f)
+                    break
+                budget *= 2
+            if copy is None:
+                self.notes.append(f"{b.name}: no decimated copy kept its bounding box; the repair ran on its {len(b.faces)} faces")
+                continue
+            if budget > self.faces:
+                self.notes.append(f"{b.name}: a copy of {self.faces} faces lost part of the body; the repair ran on one of {budget}")
+            b.meta["full_verts"] = b.verts      # what footprints are measured on meanwhile
+            b.verts, b.faces = copy             # same frame: decimation keeps coordinates
         return self.scene
 
     def __exit__(self, *exc):

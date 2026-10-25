@@ -33,6 +33,7 @@
 
 ## 📢 Updates
 
+* [October 2026] **Scenario 3D Collection assets.** 37 AI-generated tabletop objects of [scenario-labs/3d-collection](https://huggingface.co/datasets/scenario-labs/3d-collection) (CC BY 4.0, credit: Scenario) can be named in layouts: mugs, teapots, a kettle, bowls, vases, jugs, a milk carton, books, cameras, a radio, a telephone, a globe, a lantern, plants and more. `assets fetch scenario:<name>` downloads an asset at a pinned commit, checks its sha256, turns it +z up, scales it to a real size and decimates it; the repair, the settle test and the export read the mass, friction and handle side the curated list gives, estimates for each kind of object, since the meshes carry no physics ([assets](#assets)). Two guards of the repair came with them: a decimated copy that loses part of a body (a carton's sides under its detailed cap) is made again with more faces instead of being used, and the last seat keeps a body on the level of the fixture the repair held it at, not on a shelf under it.
 * [October 2026] **S4R, repaired and faster.** Seating meets the meshes through a grid of their triangles instead of casting rays, contacts need no new BVH for each scale of the continuation, and the deepest contact of an overlap is taken over all its contacts; a program that stops short at the shrunken scale is solved again from other starts, the clearance the solver keeps yields to the requirements, and a body on a carton is seated on its top from the start. A repair in the comparison below takes 2.6-3.1 s per trial instead of 6.7-7.6 s, with the same verdicts on the programs ([details](docs/EVAL_DSL_vs_direct.md#the-first-run-and-the-replay)).
 * [October 2026] **SimReady assets, a larger language, and programs against typed poses.** Layouts name NVIDIA SimReady packages, fetched from Hugging Face against their bill of materials, and each asset's mass, friction and semantic class reach the repair, the settle test and the export ([assets](#assets)). The language gains 23 statements for what robot scenes ask for (reach, gripper clearance, approach corridors, handles facing the robot, rows sorted by size, grids, keep-out zones, small edits, towers, preferences) and name patterns ([the language](#what-robot-scenes-ask-for)). In isolated `claude -p` calls on sixteen tasks, programs pass 143 / 144 against 127 / 144 for poses the model types, with 3.2-5.2 times fewer output tokens and 2.7-4.0 times less time per passing scene ([results](#a-program-or-the-poses)).
 * [September 2026] **Into the engines.** `export` writes a repaired scene as meshes, a manifest, an MJCF file and a USD stage with physics schemas; `examples/run_mujoco.py`, `run_genesis.py` and `run_isaac.py` load it and simulate it. The twenty-object layout runs in MuJoCo, Genesis and Isaac Sim with no body leaving the table ([details](#running-the-repaired-scene-in-a-simulator)).
@@ -530,6 +531,28 @@ restitution in USD) instead of the defaults, and `balanced_on` uses its centre o
 files live under `SIMREADY_ASSETS_DIR` and are written as `<SIMREADY_ASSETS_DIR>/...` in layouts,
 certificates and manifests; a repair never downloads.
 
+**Scenario 3D Collection.** `simready/data/scenario_assets.json` lists 37 tabletop objects chosen
+from [scenario-labs/3d-collection](https://huggingface.co/datasets/scenario-labs/3d-collection),
+1,342 AI-generated assets under CC BY 4.0 (credit: Scenario), pinned to commit `55b4c002`. For each
+it gives the GLB and its sha256, the class, one real dimension, the mass, the material's friction and
+restitution, the side of the handle and whether other objects can be put inside. The meshes carry no
+physics and no real size, so these values are estimates for each kind of object, not measurements.
+`python -m simready.cli assets list scenario` lists them. `assets fetch scenario:<name>` downloads an
+asset, checks its sha256, turns glTF's +y up to +z, scales it to its dimension, puts its origin at the
+centre of its footprint on its lowest point and decimates a mesh above 40,000 faces; the record keeps
+how far the decimated surface lies from the original (at most 4.9 mm, on the radio; 2 mm or less on
+the others). `assets info scenario:<name>` prints what the gate reads. A layout names an asset with
+`scenario`:
+
+```json
+{"name": "mug", "scenario": "mug_white", "x": 0.45, "y": 0.10, "z": 0.0, "yaw": 0}
+```
+
+The list keeps single rigid objects a robot meets on a table. It leaves out the collection's
+characters and scenes, generated objects that come in many loose pieces (an hourglass, a typewriter),
+those with a separate part beside them (a bottle and its cap), and its Gaussian splats, which have no
+mesh.
+
 RoboLab and RoboCasa assets are not redistributed here. The experiments and the video drivers read
 them from their own checkouts: set `ROBOLAB_DIR` to a checkout of
 [NVLabs/RoboLab](https://github.com/NVLabs/RoboLab) (with its LFS assets pulled) and
@@ -586,6 +609,8 @@ simready/            the library
   dsl/               model.py (parser)  schema.py (JSON schema, prompt)  compile.py  statements.py (the v1 statements' rows and predicates)  text2dsl.py  anthropic_backend.py
   io/                usd_io.py (RoboLab USD read/write)  mjcf_io.py (RoboCasa MJCF via MuJoCo)  export.py (meshes, manifest, MJCF, USD for the engines)
                      nvidia_assets.py (SimReady packages: search, fetch, physics and semantics)
+                     scenario_assets.py (Scenario 3D Collection: fetch, normalize, bodies with the curated physics)
+  data/              asset_rest_orientations.json, scenario_assets.json (the curated Scenario assets)
   errors.py          GeometryQueryError: a query that could not be evaluated is an error, not a result
   cli.py             summarize | prompt | check | verify | repair | settle | export
 examples/            run_mujoco.py, run_genesis.py, run_isaac.py: load an export and simulate it

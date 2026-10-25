@@ -680,6 +680,11 @@ def reseat_on_supports(scene: Scene, spec: RepairSpec) -> None:
         sup = spec.support_of.get(b.name)
         if sup is None:
             continue
+        level = spec.supports.get(b.name)
+        if scene[sup].fixed and level is not None:
+            # the drop starts no lower than where the body stands on the level the repair held it at:
+            # a body that sank under that level is not seated on a shelf below it
+            b.center = np.array([b.center[0], b.center[1], max(float(b.center[2]), level + b.support_offset(scene.up))])
         h0 = support_height_for(scene, b, scene[sup], from_above=not scene[sup].fixed)
         b.center = np.array([b.center[0], b.center[1], h0 + b.support_offset(scene.up)])
         h0 += _lift_clear(scene, b, scene[sup])
