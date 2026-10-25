@@ -332,10 +332,15 @@ program
 |---|---|---|
 | the robot | `reach`, `clearance`, `approach`, `facing` | the tangent half-plane of the distance to the base; the contact rows' margin; the free side of a corridor toward the robot; first-order rows on the heading toward a point |
 | positions and headings | `at`, `beside`, `yaw`, `parallel`, `max_turn` | exact rows on centres, footprint projections and headings (`axis=long`: a body's long side) |
-| arrangements | `row` (with `order=height` / `width` / `length` / `mass` sorted by the compiler), `align`, `evenly_spaced`, `grid`, `cluster`, `symmetric`, `between`, `centered`, `offset`, `attach` | exact rows on centres and footprints; the tangent row of each member for `cluster`; first-order rows for an offset in a body's own frame |
+| arrangements | `row` (from the end `start=` names, with `order=height` / `width` / `length` / `mass` sorted by the compiler, `spacing=even`, `mid` where its two ends are centred), `align`, `evenly_spaced`, `grid`, `cluster`, `symmetric`, `between`, `centered`, `offset`, `attach` | exact rows on centres and footprints; the tangent row of each member for `cluster`; first-order rows for an offset in a body's own frame |
 | regions | `within(a, b, side, frac, depth, x0..y1)`, `keep_out` | rectangle rows on the footprint; for `keep_out`, the side that needs the least motion and leaves the body room in its own regions |
 | edits and stacks | `max_move`, `stack`, `balanced_on` | a 16-gon inscribed in the allowed disc; supports that follow the body below, centring rows; the centre of mass inside the base's rectangle in its own frame |
 | preferences | `soft=w` on any of them | the same rows with a slack weight a hundred times smaller: reported, not required |
+
+A pattern (`can_*`, `fruit_?`) stands for every free body whose name matches, in natural order, as
+a first argument or among a group's members, so a program stays the same length as the scene grows:
+sorting a heap takes 11, 13 and 16 statements at 10, 16 and 24 objects, against 18, 25 and 35 with
+every body named, and no member of a group can be left out by a slip.
 
 A program with these statements is first solved alone at the shrunken scale, where the bodies can
 pass each other, before the scale is restored (the relational counterpart of `place`); a program
