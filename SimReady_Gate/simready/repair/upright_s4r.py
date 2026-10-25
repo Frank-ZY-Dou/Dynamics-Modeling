@@ -637,8 +637,9 @@ LIFT_MAX = 3e-3        # a body re-seated into its support's surface is raised a
 
 def _lift_clear(scene: Scene, b: Body, sup: Body) -> float:
     """Raise b until it no longer penetrates its support (bisection on the height, at most LIFT_MAX):
-    the seat height comes from rays and vertices under b's footprint, and a ridge of the support
-    between them can still reach a fraction of a millimetre into b. Returns the lift applied."""
+    the seat height comes from vertical lines through points under b's footprint, and a ridge of
+    the support between them can still reach a fraction of a millimetre into b. Returns the lift
+    applied."""
     from ..gates.verify import PEN_EPS
 
     def penetrates():

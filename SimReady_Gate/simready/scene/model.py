@@ -85,14 +85,14 @@ class Scene:
         return [b for b in self.bodies if b.fixed]
 
     def support_height(self, support: Body, at=None, radius: float = 0.05, footprint=None) -> float:
-        """Height of the support SURFACE under a body, along `up` (z up assumed for rays).
+        """Height of the support SURFACE under a body, along `up` (z up assumed).
 
         With `footprint` (an (m, 2) array of xy sample points, normally the xy of the body's
-        lowest vertices), downward rays are cast at those points and the highest hit is the seat
-        height: the surface a body's bottom actually meets, on a coarse top face (no vertices
-        under the body), on a rim-less shelf, or on the floor of a container. Without hits the
-        vertex rule is used: the highest support vertex within `radius` of `at`, else the global
-        maximum."""
+        lowest vertices), vertical lines through those points meet the support and the highest
+        crossing is the seat height: the surface a body's bottom actually meets, on a coarse top
+        face (no vertices under the body), on a rim-less shelf, or on the floor of a container.
+        Without crossings the vertex rule is used: the highest support vertex within `radius` of
+        `at`, else the global maximum."""
         if footprint is not None and len(footprint):
             hits = self._surface_hits(support, np.asarray(footprint, dtype=np.float64)[:, :2])
             if hits.size:

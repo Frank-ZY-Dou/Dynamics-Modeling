@@ -198,13 +198,13 @@ def support_height_for(scene: Scene, body: Body, support: Body, require_hit: boo
     highest surface under the body wherever the body is now, as for a body set down on another (a
     carton on a carton, which the body's starting height says nothing about).
 
-    Vertical rays at sample points under the body (its lowest vertices, a grid inside their hull,
+    Vertical lines at sample points under the body (its lowest vertices, a grid inside their hull,
     and the support's vertices inside that hull) meet the support's top S going down and the
     body's underside B going up; the seat is the largest S - (B - lowest point of B). A flat box
     on a ridge rests on the ridge; a carton with a bulging bottom over the slats of a pallet
-    settles until its flat parts meet them. With `require_hit` the result is None when no ray
+    settles until its flat parts meet them. With `require_hit` the result is None when no line
     under the body meets the support (the body is not over it at all); without it, the vertex
-    rule of `Scene.support_height` stands in where no ray meets both surfaces (an initial guess
+    rule of `Scene.support_height` stands in where no line meets both surfaces (an initial guess
     for the repair, never used as evidence)."""
     h = _drop_height(scene, body, support, below=math.inf if from_above else None)
     if require_hit:
@@ -222,7 +222,7 @@ def support_height_for(scene: Scene, body: Body, support: Body, require_hit: boo
 def _support_samples(support: Body, foot: np.ndarray, below: float) -> np.ndarray:
     """XY where the support's surface can rise highest under a footprint: its vertices inside the
     footprint's hull and the points where its triangles' edges cross the hull's boundary (moved
-    1 mm inward, so that the vertical rays meet both bodies there). A ridge narrower than the
+    1 mm inward, so that the vertical lines meet both bodies there). A ridge narrower than the
     footprint's sampling is caught where it crosses the boundary."""
     if len(foot) < 3 or not len(support.faces):
         return np.zeros((0, 2))
@@ -468,7 +468,7 @@ def check_predicates(program: Program, scene: Scene, tol: float = 2e-3, upright_
     """Evaluate every statement on the final scene. Returns [Predicate(name, ok, value)]; the
     predicates of soft statements have `.soft` set.
     on_support is judged by the body's lowest point against the support SURFACE under its bottom
-    (downward rays), a geometric fact independent of the numbers the repair used; a body whose
+    (vertical lines down), a geometric fact independent of the numbers the repair used; a body whose
     bottom is over no part of the support fails with value None, whatever its height.
     `tol` (m), `upright_deg`, `angle_tol` (degrees, on top of a heading statement's own tolerance)
     and `place_tol` (m) are the tolerances; the repair's verdict uses the defaults, a check on

@@ -107,7 +107,9 @@ matches no free body is an error, so a misspelt group is not silently empty.
 `inside(a, b)`, `left_of`, `right_of`, `in_front_of`, `behind` `(a, b, gap)`, `min_distance` and
 `near` `(a, b, r)`, `place(a, x, y, yaw)`, `prefer(a, w)`, `minimize displacement(*)`. A body named in
 `on_support` or in a `stack` keeps that support over one a pattern gives it (`on_support(can_*, tray)`),
-and a pattern's support wins over the one `on_support(*, ...)` gives.
+and a pattern's support wins over the one `on_support(*, ...)` gives. On a fixed support a body rests
+on the level under it (a shelf below the fixture's top); on a free one (a carton on a carton, fruit in
+a bowl) it rests on the highest surface under it, wherever it starts.
 
 ## Recipes
 
