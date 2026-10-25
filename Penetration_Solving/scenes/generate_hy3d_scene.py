@@ -41,11 +41,7 @@ def scan_eligible_hy3d(
     cache_path = hy3d_dir / "_good_pool.json"
     good_set = None
     if require_watertight and cache_path.exists():
-        try:
-            cached = _load_json_relaxed(cache_path)
-            good_set = set(cached.get("good_meshes", []))
-        except Exception:
-            good_set = None
+        good_set = set(_load_json_relaxed(cache_path)["good_meshes"])
     out: List[Path] = []
     for d in sorted(hy3d_dir.iterdir()):
         if not d.is_dir():
@@ -54,25 +50,20 @@ def scan_eligible_hy3d(
         cg = d / "collision_geometry.obj"
         if not (dj.exists() and cg.exists()):
             continue
-        try:
-            data = _load_json_relaxed(dj)
-            nf = int(data.get("num_faces", 0))
-            if nf < min_faces or nf > max_faces:
-                continue
-            if require_watertight:
-                if good_set is not None:
-                    if d.name not in good_set:
-                        continue
-                else:
-                    # No cache: do the actual trimesh check (slow).
-                    import trimesh as _tm
-                    m = _tm.load(str(cg), process=False)
-                    if not (isinstance(m, _tm.Trimesh)
-                            and m.is_watertight and m.is_volume):
-                        continue
-            out.append(d)
-        except Exception:
+        nf = int(_load_json_relaxed(dj)["num_faces"])
+        if nf < min_faces or nf > max_faces:
             continue
+        if require_watertight:
+            if good_set is not None:
+                if d.name not in good_set:
+                    continue
+            else:
+                # No cache: do the actual trimesh check (slow).
+                m = trimesh.load(str(cg), process=False)
+                if not (isinstance(m, trimesh.Trimesh)
+                        and m.is_watertight and m.is_volume):
+                    continue
+        out.append(d)
     return out
 
 

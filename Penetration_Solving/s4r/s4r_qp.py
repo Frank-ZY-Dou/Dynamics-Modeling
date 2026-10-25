@@ -1400,14 +1400,12 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
             if binding.any():
                 A_bind = A_c[binding]
                 dd_bind = dd_ds[binding]
-                try:
-                    G = (A_bind @ A_bind.T).tocsc() + 1e-8 * sp.identity(int(binding.sum()), format='csc')
-                    d_lambda = spla.spsolve(G, dd_bind)
-                    sens = -(A_bind.T @ d_lambda)
-                    if np.all(np.isfinite(sens)):
-                        prev_sensitivity = np.asarray(sens).reshape(-1)
-                except Exception:
-                    prev_sensitivity = None
+                G = (A_bind @ A_bind.T).tocsc() + 1e-8 * sp.identity(int(binding.sum()), format='csc')
+                d_lambda = spla.spsolve(G, dd_bind)
+                sens = np.asarray(-(A_bind.T @ d_lambda)).reshape(-1)
+                if not np.all(np.isfinite(sens)):
+                    raise RuntimeError(f"step {step + 1}: the sensitivity dq*/ds of the binding contact rows is not finite")
+                prev_sensitivity = sens
         prev_active_bodies = set(active_bodies)
         prev_dof_per_body = dof_per_body
 

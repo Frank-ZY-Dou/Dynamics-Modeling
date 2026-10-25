@@ -175,10 +175,7 @@ def build_world_collision_mesh(
         pieces = getattr(obj, "_s4r_pieces", None)
         if pieces is None:
             pieces = _vertex_components(obj.collision_faces, len(obj.collision_verts_model))
-            try:
-                obj._s4r_pieces = pieces
-            except Exception:
-                pass
+            obj._s4r_pieces = pieces
         mesh._cache["s4r_components"] = pieces
     return mesh
 
@@ -980,14 +977,10 @@ def scan_eligible_objects(
         coll_path = d / "collision_geometry.obj"
         if not (data_path.exists() and coll_path.exists()):
             continue
-        try:
-            data = _load_json_relaxed(data_path)
-            nv = data.get("metadata", {}).get("nr_vertices", 0)
-            if nv < 500 or nv > max_verts:
-                continue
-            eligible.append(d)
-        except Exception:
+        nv = _load_json_relaxed(data_path)["metadata"]["nr_vertices"]
+        if nv < 500 or nv > max_verts:
             continue
+        eligible.append(d)
 
     return eligible
 

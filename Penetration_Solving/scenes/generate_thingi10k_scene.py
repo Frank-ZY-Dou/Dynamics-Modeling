@@ -64,10 +64,8 @@ def valid_thingi10k_indices(max_facets: int | None = None,
     cache = {}
     import json, time
     if os.path.exists(_VALID_IDX_CACHE) and not rebuild:
-        try:
-            cache = json.load(open(_VALID_IDX_CACHE))
-        except Exception:
-            cache = {}
+        with open(_VALID_IDX_CACHE) as f:
+            cache = json.load(f)
     if key in cache:
         return list(cache[key])
 
@@ -78,8 +76,8 @@ def valid_thingi10k_indices(max_facets: int | None = None,
         try:
             _ = load_thingi10k_object(i, target_size=0.1)
             good.append(i)
-        except Exception:
-            pass
+        except ValueError:
+            pass  # a mesh load_thingi10k_object rejects: unreadable, not triangles, or degenerate
         if (i + 1) % 50 == 0:
             print(f"[Thingi10K] validating {i+1}/{len(ds)} "
                   f"good={len(good)} ({time.time()-t0:.1f}s)", flush=True)
@@ -137,11 +135,11 @@ def load_thingi10k_object(idx: int, target_size: float = 0.1) -> dict:
     # Geometric sanity: some meshes have collinear-triangle issues that make
     # trimesh.proximity (used by our evaluator) crash on bounds_tree. Probe
     # it cheaply before accepting.
-    import trimesh  # local import, already imported above
+    from rtree.exceptions import RTreeError
     tm = trimesh.Trimesh(vertices=verts, faces=faces, process=False)
     try:
         _ = tm.triangles_tree  # lazy — forces bounds_tree evaluation
-    except Exception as exc:
+    except RTreeError as exc:
         raise ValueError(
             f"thingi10k idx={idx}: degenerate geometry — "
             f"triangles_tree failed: {exc}") from exc
@@ -196,7 +194,7 @@ def generate_thingi10k_scene(
         ang = rng.uniform(0, 2 * np.pi, 3)
         try:
             info = load_thingi10k_object(int(idx), target_size)
-        except Exception as e:
+        except ValueError as e:
             print(f"  skipping idx={idx}: {e}", flush=True)
             continue
         R = euler_to_rotation_matrix(*ang)

@@ -96,51 +96,34 @@ order.
 
 ## The first run and the replay
 
-The comparison was first run on 2026-10-24 (`results/dsl_vs_direct/first_run/`). The solver was then
-repaired: seating no longer casts rays (it took most of a repair), contacts are measured without a
-new BVH for each scale of the continuation, the deepest contact of an overlap is taken over all its
-contacts instead of the first 32 (which made it depend on the order FCL traverses them), a body
-centred over another is separated along their axis of least overlap, a program that stops short at
-the shrunken scale is solved again from other starts, the margin the contacts keep yields to the
-requirements, and a body resting on a surface the sampled heights miss is recognised as resting.
+The comparison was first run on 2026-10-24 (`results/dsl_vs_direct/first_run/`) and replayed on
+2026-10-25 with the current solver: seating through a grid of the meshes' triangles, contacts without
+a new BVH for each scale of the continuation, the contact witness over all of FCL's contacts, a body
+centred over another separated along their axis of least overlap, a program that stops short at the
+shrunken scale solved again from other starts, the contacts' margin yielding to the requirements,
+and a body recognised as resting on a surface the sampled heights miss.
 
-Checking the replay below against the first run found three faults in how a body is set down, two of
-them in the pipeline of typed poses; the first run has all three:
+Typed poses are set down as the repair sets a body down: from above what the body rests on, and
+seated clear of it at the end. The first run set them down from their starting height, so a carton
+put on a taller carton, or a fruit on a fruit, met the inside of it (every typed tower, 9 / 9, though
+the answers stacked them as asked), and a drop residual of a fraction of a millimetre counted as
+interpenetration; its results for typed towers, pallets and fruit set on fruit carry this. The
+ablation that repairs typed poses with the shared statements keeps the supports the answer named (the
+first run set every body on the table). What a model receives is unchanged: the system prompts, the
+formats and the first message of every trial (the request and the scene) are the same, byte for byte.
 
-- A typed pose kept the body's starting height while the body was moved, and its drop onto what it
-  rests on started from there. A carton put on a taller carton, or a fruit put on another fruit, met
-  the inside of it: every tower of typed poses interpenetrated in the first run (9 / 9), though the
-  answers stacked the cartons as asked. A typed pose is now set down from above what it rests on.
-- The drop is sampled under the body and can leave it a fraction of a millimetre inside its support.
-  The repair's last seat raises such a body clear (by at most 3 mm); the seat of typed poses did not,
-  and a carton 0.6 mm into the pallet's deck counted as interpenetrating it (FCL measures the overlap
-  of two nearly coplanar faces as deep as 98 mm, and the next round was told so). Typed poses are now
-  seated as the repair seats a body last.
-- In the solver, a body on a free support (a carton on a carton) was first seated on whichever inner
-  face of the support lay below its starting height, and the repair reached the support's top only
-  when the body left the support's footprint for a step (the programs' towers passed all the same).
-  It is now seated on the highest surface under it from the start.
-
-The ablation that repairs typed poses with the shared statements also set every body on the table,
-taking the towers apart; it now keeps the supports the answer named. None of this touches what a
-model receives: the system prompts, the formats and the first message of every trial (the request and
-the scene) are the same, byte for byte. The first run's results for typed towers, pallets and fruit
-set on fruit carry the first two faults.
-
-The comparison was then run again as a replay (`run.py --replay`, on 2026-10-25): every trial again,
-with the recorded answer kept for each round whose message is the recorded one (the first round
-always; a later round when the answer before it was the recorded one and checking it found word for
-word what it found then), and the model called, as a run calls it, for any other round: where the
-repaired pipelines' report differs from the recorded report, or where the recorded trial had stopped
-and the repaired check does not pass. The replay ran in two passes: the first with the repaired
-solver; after the faults above were found in it and fixed, the second replayed the first the same way
-(the first pass's records are not kept: its typed poses carry the faults; each `run_meta.json` names
-the commits of the replay, of the pass it replays and of the first run). The passes called the model
-for 59 and 3 rounds; of the replay's 469 rounds, 446 keep the first run's answer and 23 hold an answer
-of such a call (`answer_from` in each round), and each answers exactly the message that the final code
-sends. The first answer of every trial is the first run's, so the two runs share their samples. The
-results below are the replay's, and `results/dsl_vs_direct/replay_diff.md` lists every trial whose
-verdict changed.
+The replay (`run.py --replay`) runs every trial again, keeping the recorded answer for each round
+whose message is the recorded one (the first round always; a later round when the answer before it
+was the recorded one and checking it found word for word what it found then), and calls the model, as
+a run does, for any other round: where the current report differs from the recorded one, or where the
+recorded trial had stopped and the current check does not pass. It ran in two passes, the second
+replaying the first after the seating of typed poses was updated (the first pass's records are not
+kept; each `run_meta.json` names the commits of the replay, of the pass it replays and of the first
+run). The passes called the model for 59 and 3 rounds; of the replay's 469 rounds, 446 keep the first
+run's answer and 23 hold an answer of such a call (`answer_from` in each round), and each answers
+exactly the message that the final code sends. The first answer of every trial is the first run's, so
+the two runs share their samples. The results below are the replay's, and
+`results/dsl_vs_direct/replay_diff.md` lists every trial whose verdict changed.
 
 ## Isolation
 

@@ -37,7 +37,7 @@ scenes for downstream robot policy training.</sub></p>
 
 ## 📢 Updates
 
-* [October 2026] **The contact witness no longer depends on the order of FCL's contacts.** A crossing pair's witness was the deepest of the first 8 to 32 contacts FCL listed, and that list follows FCL's traversal of the two BVHs: the same pair stored in another frame gave depths up to 13 times apart and normals up to 179° apart (the 500-object scene, seed 42). It is now taken from every contact: the deepest depth, the direction of the sum of the contacts' normals and their mean position. When the normals cancel (a symmetric overlap, such as two co-centred plates), the normal is the direction along which the pair parts with the least translation, found by a search over the sphere, and the depth is that translation; this does not occur in the benchmarks. On the same machine the CPU solver moves the objects less from N = 500 on and runs up to 1.6 times faster (N = 3000: RMSD 0.0388 → 0.0381, 29.0 s → 18.7 s); the GPU solver's results are unchanged. The timing tables are now measured on an Intel Core Ultra 7 265K and an RTX 5080. `requirements.txt` adds Pillow and rtree, which the quick-start needed, and a missing dependency is an error instead of a silent switch to another code path.
+* [October 2026] The contact witness is taken over all of FCL's contacts, and the CPU solver is up to 1.6 times faster at large N. Timing tables re-measured on an Intel Core Ultra 7 265K and an RTX 5080.
 * [September 2026] Optional anchor term that pulls each object back toward its input position at every step, suggested by [Sarvex Jatasra](https://www.linkedin.com/in/sarvex/); see [Anchoring to the input layout](#anchoring-to-the-input-layout-optional).
 * [September 2026] **SimReady Gate** — an agentic, language-driven layer on top of S4R that turns generated RoboLab and RoboCasa scenes into certified simulation-ready ones: a request becomes a typed constraint program, S4R repairs under it in scale-space, a probed mesh-level evaluator and a MuJoCo settle decide, and a certificate with provenance is written. Measured on RoboLab's 68 shipped scenes, on layouts from RoboLab's own placement solver, and on RoboCasa's counter regions with RoboCasa's own placement test. A separate project in this repository: [`../SimReady_Gate/`](../SimReady_Gate/).
 * [September 2026] Timing tables extended to N = 2000 and 3000 on both the CPU and the GPU solver, with the hardware noted.
@@ -218,10 +218,7 @@ python examples/run_kubric.py --N 1000 --seed 42
 
 Every run ends with `status = converged`. The tail stops at zero
 penetration: a pair may end with a positive gap smaller than d_hat, and no
-clearance is guaranteed. With the previous contact witness (the deepest of
-the first contacts FCL listed) the same machine gave RMSD 0.0366, 0.0359,
-0.0365, 0.0380 and 0.0388 for N = 100 to 3000, in 0.40, 2.4, 6.3, 13.8 and
-29.0 s.
+clearance is guaranteed.
 
 ### GPU solver
 

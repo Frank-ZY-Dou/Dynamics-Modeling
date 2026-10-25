@@ -2,7 +2,7 @@
 
 Written by `experiments/dsl_vs_direct/` (see `docs/EVAL_DSL_vs_direct.md`): one run per model,
 sixteen tasks (two held out), three conditions, three seeds. The run at the top level is the replay
-of 2026-10-25, with the repaired solver and the repaired seating of typed poses; `first_run/` is the
+of 2026-10-25, with the current solver and seating of typed poses; `first_run/` is the
 run of 2026-10-24 that it replays, with the same layout of files (and `regrade.json`, the verdicts
 of the corrected line check).
 
