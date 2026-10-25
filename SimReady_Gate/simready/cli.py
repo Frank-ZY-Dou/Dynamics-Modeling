@@ -35,6 +35,7 @@ from .io.paths import portable, expand
 from .repair.upright_s4r import repair_upright, reseat_on_supports, polish_full_mesh
 
 SCENE_EXT = (".usda", ".usd", ".usdc")
+MIN_MARGIN = 1e-3         # m: the least clearance a repair keeps when it lowers the program's margin (repair_scene)
 INPUT_ERRORS = (ProgramError, CompileError, SyntaxError, KeyError, ValueError, OSError, GeometryQueryError, RuntimeError)
 
 
@@ -277,30 +278,69 @@ def repair_scene(sc: Scene, prog, s_min: float = 0.05, ds_max: float = 0.05, tai
     spec = compile_program(prog, sc, s_min=s_min, ds_max=ds_max, tail_iters=tail, **spec_overrides)
     before = verify_scene(sc)          # after the program has fixed its bodies: the same pairs as `after`
     t0 = time.time()
-    tops = {sup: min(h for b, h in spec.supports.items() if spec.support_of.get(b) == sup) for sup in set(spec.support_of.values())}
-    solver_notes = []
+    poses = {b.name: (b.center.copy(), b.rotation.copy()) for b in sc.bodies}
     xy_start = {b.name: b.center[:2].copy() for b in sc.free()}
-    with quiet_stdout():
-        with MeshProxy(sc, faces=proxy_faces, slab_tops=tops):   # repair on decimated meshes + support slabs; verify on full meshes
-            res = repair_upright(sc, spec, verbose=verbose)
-        solver_notes += res.notes
-        reseat_on_supports(sc, spec)
-        after = verify_scene(sc)
-        if after.pen_pairs > 0:                       # proxy residuals: polish on the full meshes
-            res2 = polish_full_mesh(sc, spec, iters=tail, verbose=verbose)
-            reseat_on_supports(sc, spec); res.steps += res2.steps; solver_notes += res2.notes
+
+    def attempt(spec):
+        tops = {sup: min(h for b, h in spec.supports.items() if spec.support_of.get(b) == sup) for sup in set(spec.support_of.values())}
+        solver_notes = []
+        with quiet_stdout():
+            with MeshProxy(sc, faces=proxy_faces, slab_tops=tops):   # repair on decimated meshes + support slabs; verify on full meshes
+                res = repair_upright(sc, spec, verbose=verbose)
+            solver_notes += res.notes
+            reseat_on_supports(sc, spec)
             after = verify_scene(sc)
-    preds = check_predicates(prog, sc)
-    hard = [p for p in preds if not p.soft]; prefs = [p for p in preds if p.soft]
-    moved = [float(np.sum((b.center[:2] - xy_start[b.name]) ** 2)) for b in sc.free()]
-    rmsd_xy = float(np.sqrt(np.mean(moved))) if moved else 0.0    # over the whole run, the full-mesh polish included
-    ok = after.pen_pairs == 0 and all(p[1] for p in hard)
-    clearance = None
-    if "min_gap" in prog.gate.get("G2", {}):
-        clearance = check_clearance(sc, prog.gate["G2"]["min_gap"][1], spec.support_of)
-        ok = ok and clearance["pass"]
-    return {"ok": ok, "spec": spec, "res": res, "before": before, "after": after, "hard": hard, "prefs": prefs,
-            "rmsd_xy": rmsd_xy, "clearance": clearance, "solver_notes": solver_notes, "time_s": time.time() - t0}
+            if after.pen_pairs > 0:                       # proxy residuals: polish on the full meshes
+                res2 = polish_full_mesh(sc, spec, iters=tail, verbose=verbose)
+                reseat_on_supports(sc, spec); res.steps += res2.steps; solver_notes += res2.notes
+                after = verify_scene(sc)
+        preds = check_predicates(prog, sc)
+        hard = [p for p in preds if not p.soft]; prefs = [p for p in preds if p.soft]
+        moved = [float(np.sum((b.center[:2] - xy_start[b.name]) ** 2)) for b in sc.free()]
+        rmsd_xy = float(np.sqrt(np.mean(moved))) if moved else 0.0    # over the whole run, the full-mesh polish included
+        ok = after.pen_pairs == 0 and all(p[1] for p in hard)
+        clearance = None
+        if "min_gap" in prog.gate.get("G2", {}):
+            clearance = check_clearance(sc, prog.gate["G2"]["min_gap"][1], spec.support_of)
+            ok = ok and clearance["pass"]
+        return {"ok": ok, "spec": spec, "res": res, "before": before, "after": after, "hard": hard, "prefs": prefs,
+                "rmsd_xy": rmsd_xy, "clearance": clearance, "solver_notes": solver_notes,
+                "poses": {b.name: (b.center.copy(), b.rotation.copy()) for b in sc.bodies}}
+
+    def worse(a, b):
+        """Whether attempt a ends worse than b: penetration first, then the requirements that fail, then by how much."""
+        key = lambda o: (not o["ok"], o["after"].pen_pairs, sum(not p[1] for p in o["hard"]),
+                         sum(abs(float(p[2])) for p in o["hard"] if not p[1] and p[2] is not None))
+        return key(a) > key(b)
+
+    out = best = attempt(spec)
+    margin, tried = spec.d_hat, []
+    # The clearance the solver keeps between bodies is a margin of its own, not a requirement (a requirement is a
+    # predicate; no predicate asks for it). When the contacts with that margin have set the program aside in the
+    # closing steps and a requirement fails, the repair starts again from the same poses with half the margin, at
+    # most twice and not below MIN_MARGIN, and keeps the attempt that ends best.
+    while (not out["ok"] and out["after"].pen_pairs == 0 and margin > MIN_MARGIN + 1e-12
+           and any("closing steps" in n for n in out["solver_notes"]) and margin > spec.d_hat / 4 + 1e-12):
+        margin = max(MIN_MARGIN, margin / 2)
+        for b in sc.bodies:
+            b.center, b.rotation = poses[b.name][0].copy(), poses[b.name][1].copy()
+        spec2 = compile_program(prog, sc, s_min=s_min, ds_max=ds_max, tail_iters=tail, **spec_overrides)
+        spec2.d_hat = margin
+        tried.append(margin)
+        out = attempt(spec2)
+        out["solver_notes"].append(f"the contacts kept the program's margin of {1000 * spec.d_hat:g} mm and set a requirement aside; "
+                                   f"the repair started again from the same poses with a margin of {1000 * margin:g} mm")
+        if worse(best, out):
+            best = out
+    if best is not out:
+        for b in sc.bodies:
+            b.center, b.rotation = best["poses"][b.name][0].copy(), best["poses"][b.name][1].copy()
+    if tried and best["spec"].d_hat == spec.d_hat:
+        best["solver_notes"].append("the repair also started again with margins of " + " and ".join(f"{1000 * m:g} mm" for m in tried)
+                                    + ", and ended no better")
+    best.pop("poses")
+    best["time_s"] = time.time() - t0
+    return best
 
 
 def cmd_repair(a):

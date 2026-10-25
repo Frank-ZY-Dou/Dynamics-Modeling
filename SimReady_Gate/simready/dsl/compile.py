@@ -480,14 +480,28 @@ def check_predicates(program: Program, scene: Scene, tol: float = 2e-3, upright_
         if h is None:
             return _pred(label, False, None)
         g = float((b.world_vertices() @ scene.up).min()) - h
-        touching = True
+        from ..gates.verify import pair_signed_distances
+
+        def gap(down: float = 0.0) -> float:
+            """Signed distance of the meshes with the body lowered by `down`."""
+            c0 = b.center
+            b.center = c0 - down * np.asarray(scene.up, dtype=np.float64)
+            try:
+                pairs = pair_signed_distances([scene[sup], b], prefilter=down + tol, skip_fixed_pairs=False, containment=False)
+            finally:
+                b.center = c0
+            return float(pairs[0][2]) if pairs else math.inf
+
         if abs(g) <= tol:
-            # the rays under the body can meet the support through a hole in the body:
+            # the lines under the body can meet the support through a hole in the body:
             # the body's mesh must also come within the tolerance of the support's mesh
-            from ..gates.verify import pair_signed_distances
-            pairs = pair_signed_distances([scene[sup], b], prefilter=tol, skip_fixed_pairs=False, containment=False)
-            touching = bool(pairs) and float(pairs[0][2]) <= tol
-        return _pred(label, abs(g) <= tol and touching, g)
+            ok = gap() <= tol
+        else:
+            # the sampled surface under the body can miss its highest point (a board's edge, a fold of a base), and the
+            # repair lifts a body clear of what it would cut into: a body higher than the sampled surface rests all the
+            # same when its mesh touches the support's and lowering it by twice the tolerance cuts into the support
+            ok = g > tol and abs(gap()) <= tol and gap(2.0 * tol) < 0.0
+        return _pred(label, ok, g)
 
     for st in program.statements:
         n = st.name
