@@ -422,6 +422,60 @@ class RotationHelper(unittest.TestCase):
         self.assertGreater(self.gap(centers, rotations, verts, faces), before)
 
 
+class ContactWitness(unittest.TestCase):
+    """The witness of a crossing pair (depth, normal, position) is taken from
+    every contact FCL reports, so it does not depend on the order of the
+    contacts, which follows FCL's traversal of the two BVHs."""
+
+    @staticmethod
+    def _pair():
+        import fcl
+        from scipy.spatial.transform import Rotation
+        a = trimesh.creation.icosphere(subdivisions=4, radius=0.1)
+        b = trimesh.creation.icosphere(subdivisions=4, radius=0.08)
+        R = Rotation.from_rotvec([0.3, -0.5, 0.7]).as_matrix()
+        t = np.array([0.09, 0.03, -0.02])
+        return fcl, a, b, R, t
+
+    def test_witness_does_not_depend_on_the_order_of_the_contacts(self):
+        from mesh_collision import _contact_witness, _fcl_all_contacts
+        fcl, a, b, R, t = self._pair()
+        oa = fcl.CollisionObject(_bvh(a.vertices, a.faces), fcl.Transform())
+        ob = fcl.CollisionObject(_bvh(b.vertices, b.faces), fcl.Transform(R, t))
+        contacts = _fcl_all_contacts(fcl, oa, ob)
+        self.assertGreater(len(contacts), 64)                # the complete second query ran
+        d0, n0, p0 = _contact_witness(contacts)
+        rng = np.random.default_rng(0)
+        for _ in range(3):
+            d, n, p = _contact_witness([contacts[k] for k in rng.permutation(len(contacts))])
+            self.assertEqual(d, d0)
+            np.testing.assert_allclose(n, n0, rtol=0, atol=1e-12)
+            np.testing.assert_allclose(p, p0, rtol=0, atol=1e-12)
+
+    def test_witness_does_not_depend_on_the_frame_of_the_bvh(self):
+        # world-space vertices (as the evaluator builds them) against body-frame
+        # vertices with the pose as FCL's transform (as PrebuiltFCLOracle does)
+        from mesh_collision import _contact_witness, _fcl_all_contacts
+        fcl, a, b, R, t = self._pair()
+        oa = fcl.CollisionObject(_bvh(a.vertices, a.faces), fcl.Transform())
+        world = fcl.CollisionObject(_bvh(np.asarray(b.vertices) @ R.T + t, b.faces), fcl.Transform())
+        posed = fcl.CollisionObject(_bvh(b.vertices, b.faces), fcl.Transform(R, t))
+        d1, n1, p1 = _contact_witness(_fcl_all_contacts(fcl, oa, world))
+        d2, n2, p2 = _contact_witness(_fcl_all_contacts(fcl, oa, posed))
+        self.assertAlmostEqual(d1, d2, delta=1e-9 * max(d1, 1e-12))
+        self.assertLess(float(np.degrees(np.arccos(np.clip(n1 @ n2, -1.0, 1.0)))), 1e-5)
+        np.testing.assert_allclose(p1, p2, rtol=0, atol=1e-9)
+
+
+def _bvh(verts, faces):
+    import fcl
+    m = fcl.BVHModel()
+    m.beginModel(len(verts), len(faces))
+    m.addSubModel(np.asarray(verts, dtype=np.float64), np.asarray(faces, dtype=np.int32))
+    m.endModel()
+    return m
+
+
 class Evaluator(unittest.TestCase):
     def test_touching_outside_is_not_penetration(self):
         big = trimesh.creation.box(extents=[1, 1, 1])

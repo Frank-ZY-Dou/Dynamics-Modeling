@@ -37,6 +37,7 @@ scenes for downstream robot policy training.</sub></p>
 
 ## 📢 Updates
 
+* [October 2026] **The contact witness no longer depends on the order of FCL's contacts.** A crossing pair's witness was the deepest of the first 8 to 32 contacts FCL listed, and that list follows FCL's traversal of the two BVHs: the same pair stored in another frame gave depths up to 4.8 times apart and normals up to 179° apart. It is now taken from every contact: the deepest depth, the direction of the sum of the contacts' normals and their mean position. On the same machine the CPU solver moves the objects less from N = 500 on and runs up to 1.6 times faster (N = 3000: RMSD 0.0388 → 0.0381, 29.0 s → 18.7 s); the GPU solver's results are unchanged. The timing tables are now measured on an Intel Core Ultra 7 265K and an RTX 5080. `requirements.txt` adds Pillow and rtree, which the quick-start needed, and a missing dependency is an error instead of a silent switch to another code path.
 * [September 2026] Optional anchor term that pulls each object back toward its input position at every step, suggested by [Sarvex Jatasra](https://www.linkedin.com/in/sarvex/); see [Anchoring to the input layout](#anchoring-to-the-input-layout-optional).
 * [September 2026] **SimReady Gate** — an agentic, language-driven layer on top of S4R that turns generated RoboLab and RoboCasa scenes into certified simulation-ready ones: a request becomes a typed constraint program, S4R repairs under it in scale-space, a probed mesh-level evaluator and a MuJoCo settle decide, and a certificate with provenance is written. Measured on RoboLab's 68 shipped scenes, on layouts from RoboLab's own placement solver, and on RoboCasa's counter regions with RoboCasa's own placement test. A separate project in this repository: [`../SimReady_Gate/`](../SimReady_Gate/).
 * [September 2026] Timing tables extended to N = 2000 and 3000 on both the CPU and the GPU solver, with the hardware noted.
@@ -194,8 +195,9 @@ OSQP status handling:
 python -m unittest discover tests      # GPU tests skip without a CUDA device
 ```
 
-All timings below were measured on an Intel Xeon E5-2680 v4 CPU
-(2.40 GHz) and an NVIDIA GeForce RTX 2080 Ti GPU.
+All timings below were measured on one performance core of an Intel Core
+Ultra 7 265K and an NVIDIA GeForce RTX 5080 (16 GB), Ubuntu 22.04, driver
+580.65.06.
 
 ### CPU solver at more sizes
 
@@ -207,24 +209,26 @@ python examples/run_kubric.py --N 1000 --seed 42
 
 | N | init pen. | final pen. | RMSD | solve |
 |---|---|---|---|---|
-| 40 | 30 | 0 | 0.0400 | 0.35 s |
-| 100 | 80 | 0 | 0.0366 | 0.98 s |
-| 500 | 371 | 0 | 0.0359 | 6.0 s |
-| 1000 | 760 | 0 | 0.0365 | 15.7 s |
-| 2000 | 1587 | 0 | 0.0380 | 37.2 s |
-| 3000 | 2423 | 0 | 0.0388 | 79.1 s |
+| 40 | 30 | 0 | 0.0400 | 0.15 s |
+| 100 | 80 | 0 | 0.0371 | 0.40 s |
+| 500 | 371 | 0 | 0.0348 | 2.2 s |
+| 1000 | 760 | 0 | 0.0355 | 4.9 s |
+| 2000 | 1587 | 0 | 0.0367 | 10.2 s |
+| 3000 | 2423 | 0 | 0.0381 | 18.7 s |
 
-Every run ends with `status = converged`. The RMSD values are a few
-percent above those of the previous revision because the broad phase now
-keeps every pair within the d_hat band available to the correction QP.
-The tail stops at zero penetration: a pair may end with a positive gap
-smaller than d_hat, and no clearance is guaranteed.
+Every run ends with `status = converged`. The tail stops at zero
+penetration: a pair may end with a positive gap smaller than d_hat, and no
+clearance is guaranteed. With the previous contact witness (the deepest of
+the first contacts FCL listed) the same machine gave RMSD 0.0366, 0.0359,
+0.0365, 0.0380 and 0.0388 for N = 100 to 3000, in 0.40, 2.4, 6.3, 13.8 and
+29.0 s.
 
 ### GPU solver
 
-Requires an NVIDIA GPU and `warp-lang`; the first call in a process pays
-a one-time kernel-compilation and allocation cost, included in the times
-below.
+Requires an NVIDIA GPU and `warp-lang`. Warp compiles its kernels once and
+keeps them in its cache (`~/.cache/warp`); the times below were taken with
+the cache filled, so they include each process's set-up and allocation but
+not that one-time compilation.
 
 ```bash
 python examples/run_kubric.py --N 40   --seed 42 --solver gpu
@@ -233,12 +237,12 @@ python examples/run_kubric.py --N 1000 --seed 42 --solver gpu
 
 | N | init pen. | final pen. | RMSD | total |
 |---|---|---|---|---|
-| 40 | 30 | 0 | 0.0372 | 6.7 s |
-| 100 | 80 | 0 | 0.0356 | 7.1 s |
-| 500 | 371 | 0 | 0.0346 | 10.7 s |
-| 1000 | 760 | 0 | 0.0346 | 17.0 s |
-| 2000 | 1587 | 0 | 0.0358 | 31.2 s |
-| 3000 | 2423 | 0 | 0.0362 | 54.4 s |
+| 40 | 30 | 0 | 0.0372 | 0.60 s |
+| 100 | 80 | 0 | 0.0356 | 0.77 s |
+| 500 | 371 | 0 | 0.0346 | 2.3 s |
+| 1000 | 760 | 0 | 0.0346 | 4.6 s |
+| 2000 | 1587 | 0 | 0.0358 | 10.2 s |
+| 3000 | 2423 | 0 | 0.0362 | 19.5 s |
 
 Every run ends with `status = converged` and `fcl_verified = True`; the
 totals include the exact FCL re-check at full scale.
@@ -283,7 +287,7 @@ In Python, pass `anchor_alpha=1.0, revalidate_interval=1` to
 the final RMSD drops by 3–4% on Kubric scenes (N = 40 and 100) and by
 3% on a dense ball of 100 HY3D objects, compared with the default
 objective at the same `revalidate_interval=1`; runs take 1.2× and 2.5×
-as long. Background and a side-by-side video:
+as long (measured before the October 2026 change of the contact witness). Background and a side-by-side video:
 [project page](https://frank-zy-dou.github.io/projects/S4R/#community).
 
 ## Data
