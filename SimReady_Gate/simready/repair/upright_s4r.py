@@ -270,6 +270,11 @@ def _inplane_separation(scene: Scene, i: int, j: int, nrm: np.ndarray) -> np.nda
     ci, cj = bi.center, bj.center
     if best is None or abs(cj[best] - ci[best]) < 1e-9:
         d[:2] = (cj - ci)[:2]
+        if np.linalg.norm(d) <= 1e-12:
+            # one centre above the other: no direction from the geometry, and a vertical normal gives the in-plane QP
+            # no handle; break the symmetry along the axis of least overlap, ordered by name (the same choice whichever
+            # body comes first)
+            d[0 if best is None else best] = 1.0 if bi.name < bj.name else -1.0
     else:
         d[best] = np.sign(cj[best] - ci[best])
     n = np.linalg.norm(d)

@@ -157,17 +157,29 @@ class GeometryQueries(unittest.TestCase):
                 raise RuntimeError("backend missing")
         with self.assertRaises(GeometryQueryError):
             _contained(np.zeros((4, 3)), Broken())
-        sup = box("shelf", (1.0, 1.0, 0.05), (0.0, 0.0, 0.0), fixed=True)
-        sc = Scene([sup])
-        sc._surface_hits(sup, np.array([[0.0, 0.0]]))
-        (key, entry), = sup.meta["_ray_cache"].items()
 
-        class BrokenRay:
-            def intersects_location(self, *a, **k):
-                raise RuntimeError("no ray backend")
-        sup.meta["_ray_cache"][key] = (entry[0], BrokenRay(), entry[2], entry[3])
-        with self.assertRaises(GeometryQueryError):
-            sc._surface_hits(sup, np.array([[0.0, 0.0]]))
+    def test_vertical_lines_meet_the_mesh_where_rays_do(self):
+        # the binned index of vertical lines against trimesh's rays: the same hits and misses, the same heights,
+        # for a body turned about z (indexed in its own frame) and for a tilted one (indexed in the world frame)
+        import trimesh
+        rng = np.random.default_rng(3)
+        sc = Scene([])
+        m = trimesh.creation.icosphere(subdivisions=3, radius=0.1)
+        m.apply_translation((0.02, 0.0, 0.0))
+        for R in (rotz(0.7), rotz(0.7) @ np.array([[1, 0, 0], [0, np.cos(0.4), -np.sin(0.4)], [0, np.sin(0.4), np.cos(0.4)]])):
+            b = Body.from_mesh("s", m.vertices, m.faces, center=np.array([0.3, -0.1, 0.2]), rotation=R)
+            world = trimesh.Trimesh(b.world_vertices(), b.faces, process=False)
+            xy = rng.uniform(-0.15, 0.15, size=(400, 2)) + b.center[:2]
+            for upward in (False, True):
+                start = world.bounds[0][2] - 1.0 if upward else world.bounds[1][2] + 1.0
+                loc, idx, _ = world.ray.intersects_location(np.column_stack([xy, np.full(len(xy), start)]),
+                                                            np.tile([0.0, 0.0, 1.0 if upward else -1.0], (len(xy), 1)))
+                ref = np.full(len(xy), np.nan)
+                for p, r in zip(loc, idx):
+                    ref[r] = p[2] if np.isnan(ref[r]) else (min if upward else max)(ref[r], p[2])
+                got = sc.vertical_hits(b, xy, upward=upward)
+                self.assertTrue(np.array_equal(np.isnan(ref), np.isnan(got)))
+                self.assertLess(float(np.nanmax(np.abs(ref - got))), 1e-9)
 
     def test_same_centre_min_distance_has_a_direction(self):
         a = box("a", (0.1, 0.1, 0.1), (0.2, 0.0, 0.05)); b = box("b", (0.1, 0.1, 0.1), (0.2, 0.0, 0.05))

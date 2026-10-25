@@ -6,6 +6,7 @@ Fixed bodies (fixtures, containers declared fixed) act as obstacles only.
 """
 from __future__ import annotations
 
+from collections import OrderedDict
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -110,56 +111,123 @@ class Scene:
         return float(h.max())
 
     def _surface_hits(self, support: Body, xy: np.ndarray) -> np.ndarray:
-        """Highest z of the support surface hit by a downward ray at each xy (empty if none).
-
-        The world-frame mesh and its ray intersector are cached on the support body. The cache
-        key covers the pose (centre and rotation) and the identity of the vertex and face arrays,
-        which the cache keeps alive so that the identity cannot be recycled: replacing a body's
-        mesh (a proxy, a decimated copy) or moving it invalidates the entry. Arrays are rebound,
-        never edited in place, everywhere in this package.
-        """
+        """Highest z of the support's surface on the vertical line through each xy, for the points whose line meets
+        it (vertical_hits; empty if none does)."""
         z = self.vertical_hits(support, xy)
         return z[np.isfinite(z)]
 
     def vertical_hits(self, body: Body, xy: np.ndarray, upward: bool = False, below: float | None = None) -> np.ndarray:
-        """Per point of `xy`, the z where a vertical ray meets the body's surface: the highest hit of
-        a downward ray (only hits under `below` when given), or with `upward` the lowest hit of a
-        ray from underneath; NaN where the ray misses.
+        """Per point of `xy`, the z where a vertical line through it meets the body's surface: the highest crossing
+        (only those under `below` when given), or with `upward` the lowest; NaN where the line misses the body.
 
-        The world-frame mesh and its ray intersector are cached on the body. The cache key covers
-        the pose (centre and rotation) and the identity of the vertex and face arrays, which the
-        cache keeps alive so that the identity cannot be recycled: replacing a body's mesh (a
-        proxy, a decimated copy) or moving it invalidates the entry. Arrays are rebound, never
-        edited in place, everywhere in this package.
-        """
-        import trimesh
-        from ..errors import GeometryQueryError
+        No rays are cast: the triangles are binned on a grid of the plane (_VerticalIndex) and each point is tested
+        against the triangles of its cell. A body turned about z alone, as every body that a repair moves is, is
+        indexed once in its own frame and the points are brought into it, so a new pose costs nothing; a body tilted
+        otherwise is indexed in the world frame, again for each pose."""
         xy = np.asarray(xy, dtype=np.float64).reshape(-1, 2)
         out = np.full(len(xy), np.nan)
         if not len(xy):
             return out
-        key = (id(body), tuple(np.round(body.center, 9)), tuple(np.round(body.rotation.ravel(), 9)),
-               id(body.verts), body.verts.shape, id(body.faces), body.faces.shape)
-        cache = body.meta.setdefault("_ray_cache", {})
-        if key not in cache:
-            cache.clear()
-            m = trimesh.Trimesh(body.world_vertices(), body.faces, process=False)
-            cache[key] = (m, m.ray, body.verts, body.faces)
-        m, ray, _, _ = cache[key]
-        start = float(m.bounds[0][2]) - 1.0 if upward else float(m.bounds[1][2]) + 1.0
-        origins = np.column_stack([xy, np.full(len(xy), start)])
-        dirs = np.tile(np.array([[0.0, 0.0, 1.0 if upward else -1.0]]), (len(xy), 1))
-        try:
-            loc, idx_ray, _ = ray.intersects_location(origins, dirs, multiple_hits=True)
-        except Exception as exc:  # a failed query is not a miss
-            raise GeometryQueryError(f"vertical ray query on {body.name} failed: {type(exc).__name__}: {exc}") from exc
-        for pnt, r in zip(loc, idx_ray):
-            z = float(pnt[2])
-            if upward:
-                out[r] = z if np.isnan(out[r]) else min(out[r], z)
-            elif below is None or z < below:
-                out[r] = z if np.isnan(out[r]) else max(out[r], z)
+        R = body.rotation
+        if abs(float(R[2, 2]) - 1.0) < 1e-9:
+            index = vertical_index(body.verts, body.faces)
+            pi, z = index.crossings((xy - body.center[:2]) @ R[:2, :2])
+            z = z + float(body.center[2])
+        else:
+            key = (tuple(np.round(body.center, 9)), tuple(np.round(R.ravel(), 9)), id(body.verts), body.verts.shape,
+                   id(body.faces), body.faces.shape)
+            cache = body.meta.setdefault("_vertical_cache", {})
+            if key not in cache:
+                cache.clear()
+                cache[key] = (_VerticalIndex(body.world_vertices(), body.faces), body.verts, body.faces)
+            pi, z = cache[key][0].crossings(xy)
+        if not upward and below is not None:
+            keep = z < below
+            pi, z = pi[keep], z[keep]
+        if len(pi):
+            acc = np.full(len(xy), np.inf if upward else -np.inf)
+            (np.minimum if upward else np.maximum).at(acc, pi, z)
+            hit = np.isfinite(acc)
+            out[hit] = acc[hit]
         return out
+
+
+class _VerticalIndex:
+    """A mesh's triangles binned on a grid of the plane by their xy bounding boxes, to find where vertical lines meet
+    the mesh: a point is tested only against the triangles of its cell, by its barycentric coordinates in the plane
+    (inclusive within 1e-9 on the edges, so that a line through an edge or a vertex meets it); a triangle seen edge-on
+    from above has no area to meet and is left out."""
+
+    def __init__(self, verts: np.ndarray, faces: np.ndarray):
+        T = np.asarray(verts, dtype=np.float64)[np.asarray(faces, dtype=np.int64)]
+        a, b, c = T[:, 0], T[:, 1], T[:, 2]
+        d = (b[:, 0] - a[:, 0]) * (c[:, 1] - a[:, 1]) - (c[:, 0] - a[:, 0]) * (b[:, 1] - a[:, 1])
+        ext = np.ptp(T[:, :, :2], axis=1).max(axis=1)
+        keep = np.abs(d) > 1e-12 * np.maximum(ext * ext, 1e-30)
+        self.a, self.b, self.c, self.d = a[keep], b[keep], c[keep], d[keep]
+        self.n = int(keep.sum())
+        if not self.n:
+            return
+        lo, hi = T[keep][:, :, :2].min(axis=1), T[keep][:, :, :2].max(axis=1)
+        self.origin = lo.min(axis=0)
+        span = np.maximum(hi.max(axis=0) - self.origin, 1e-9)
+        # a cell about twice the typical triangle, and at most 1024 cells along the longer side
+        self.size = max(2.0 * float(np.median(hi - lo, axis=0).max()), float(span.max()) / 1024.0, 1e-9)
+        self.shape = (int(span[0] / self.size) + 1, int(span[1] / self.size) + 1)
+        i0 = ((lo - self.origin) / self.size).astype(np.int64)
+        i1 = np.minimum(((hi - self.origin) / self.size).astype(np.int64), np.array(self.shape) - 1)
+        nx, ny = i1[:, 0] - i0[:, 0] + 1, i1[:, 1] - i0[:, 1] + 1
+        counts = nx * ny
+        tri = np.repeat(np.arange(self.n), counts)
+        k = np.arange(int(counts.sum())) - np.repeat(np.cumsum(counts) - counts, counts)
+        cell = (i0[tri, 0] + k % nx[tri]) * self.shape[1] + (i0[tri, 1] + k // nx[tri])
+        order = np.argsort(cell, kind="stable")
+        self.tri = tri[order]
+        self.ptr = np.searchsorted(cell[order], np.arange(self.shape[0] * self.shape[1] + 1))
+
+    def crossings(self, xy: np.ndarray):
+        """(index of the point, z) of every crossing of the vertical lines through `xy` (model frame) with the mesh."""
+        empty = (np.zeros(0, dtype=np.int64), np.zeros(0))
+        if not self.n or not len(xy):
+            return empty
+        g = np.floor((xy - self.origin) / self.size).astype(np.int64)
+        on = (g[:, 0] >= 0) & (g[:, 1] >= 0) & (g[:, 0] < self.shape[0]) & (g[:, 1] < self.shape[1])
+        pts = np.nonzero(on)[0]
+        cell = g[pts, 0] * self.shape[1] + g[pts, 1]
+        first, cnt = self.ptr[cell], self.ptr[cell + 1] - self.ptr[cell]
+        if not int(cnt.sum()):
+            return empty
+        pi = np.repeat(pts, cnt)
+        ti = self.tri[np.repeat(first, cnt) + np.arange(int(cnt.sum())) - np.repeat(np.cumsum(cnt) - cnt, cnt)]
+        p, a, b, c, d = xy[pi], self.a[ti], self.b[ti], self.c[ti], self.d[ti]
+        wa = ((b[:, 0] - p[:, 0]) * (c[:, 1] - p[:, 1]) - (c[:, 0] - p[:, 0]) * (b[:, 1] - p[:, 1])) / d
+        wb = ((c[:, 0] - p[:, 0]) * (a[:, 1] - p[:, 1]) - (a[:, 0] - p[:, 0]) * (c[:, 1] - p[:, 1])) / d
+        wc = 1.0 - wa - wb
+        hit = (wa >= -1e-9) & (wb >= -1e-9) & (wc >= -1e-9)
+        return pi[hit], (wa * a[:, 2] + wb * b[:, 2] + wc * c[:, 2])[hit]
+
+
+_VINDEX: OrderedDict = OrderedDict()   # (identity of the vertex and face arrays) -> (index, verts, faces)
+_VINDEX_FACES = 0
+_VINDEX_MAX_FACES = 2_000_000          # least recently used out beyond this many triangles in all
+
+
+def vertical_index(verts: np.ndarray, faces: np.ndarray) -> _VerticalIndex:
+    """The _VerticalIndex of a mesh in its own frame, kept for the identity of its arrays (rebound, never edited in
+    place, in this package; the entry keeps them alive so that the identity cannot be recycled)."""
+    global _VINDEX_FACES
+    key = (id(verts), id(faces), verts.shape, faces.shape)
+    hit = _VINDEX.get(key)
+    if hit is not None:
+        _VINDEX.move_to_end(key)
+        return hit[0]
+    while _VINDEX and _VINDEX_FACES + len(faces) > _VINDEX_MAX_FACES:
+        _, (_, _, old_faces) = _VINDEX.popitem(last=False)
+        _VINDEX_FACES -= len(old_faces)
+    index = _VerticalIndex(verts, faces)
+    _VINDEX[key] = (index, verts, faces)
+    _VINDEX_FACES += len(faces)
+    return index
 
 
 def slab_proxy(body: Body, thickness: float = 0.05, up=None, top: float | None = None) -> Body:

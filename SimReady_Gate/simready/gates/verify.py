@@ -42,12 +42,14 @@ _BVH_CACHE_FACES = 1_000_000   # and at most this many triangles in all (about 0
                                # scene after scene keeps the full-mesh BVHs of the present one, not of every earlier one
 
 
-def _fcl_object(body: Body, scale: float):
+def _fcl_object(body: Body, scale: float, frame: float = 1.0):
     """FCL object of a body at a scale: the BVH is built once on the body's own (scaled) vertices and
     kept, keyed on the identity of its vertex and face arrays (rebound, never edited in place, in this
     package; the cache keeps them alive so the identity cannot be recycled); the pose is the
-    object's transform. A continuation step reuses every BVH whose body and scale did not change."""
+    object's transform. In a frame shrunk by `frame` (pair_signed_distances) the body is at scale
+    scale / frame and its centre at centre / frame."""
     import fcl
+    scale = scale / frame
     key = (id(body.verts), id(body.faces), body.verts.shape, body.faces.shape, round(float(scale), 12))
     hit = _BVH_CACHE.get(key)
     if hit is not None:
@@ -64,7 +66,8 @@ def _fcl_object(body: Body, scale: float):
         hit = (m, body.verts, body.faces)
         _BVH_CACHE[key] = hit
         _BVH_FACES += len(body.faces)
-    return fcl.CollisionObject(hit[0], fcl.Transform(np.asarray(body.rotation, dtype=np.float64), np.asarray(body.center, dtype=np.float64)))
+    return fcl.CollisionObject(hit[0], fcl.Transform(np.asarray(body.rotation, dtype=np.float64),
+                                                     np.asarray(body.center, dtype=np.float64) / frame))
 
 
 def _score(oi, oj):
@@ -82,9 +85,14 @@ def _score(oi, oj):
         if nr < 1e-9:                      # numerically touching: no direction from the witnesses
             return 0.0, None, None, None
         return d, raw / nr, wi, wj
-    creq = fcl.CollisionRequest(num_max_contacts=32, enable_contact=True)
+    # every contact, not the first few: the deepest of a truncated list depends on the order of FCL's traversal, which
+    # changes with the BVH (a deep overlap of two 2000-face proxies has hundreds of contacts). A list shorter than the
+    # first request's cap is already whole; a deep overlap is asked again for all of its contacts.
     cres = fcl.CollisionResult()
-    fcl.collide(oi, oj, creq, cres)
+    fcl.collide(oi, oj, fcl.CollisionRequest(num_max_contacts=64, enable_contact=True), cres)
+    if len(cres.contacts) >= 64:
+        cres = fcl.CollisionResult()
+        fcl.collide(oi, oj, fcl.CollisionRequest(num_max_contacts=1_000_000, enable_contact=True), cres)
     if not cres.is_collision or not cres.contacts:
         return 0.0, None, None, None
     deepest = max(c.penetration_depth for c in cres.contacts)
@@ -97,6 +105,14 @@ def _score(oi, oj):
     nrm = np.asarray(c.normal, dtype=np.float64)
     nrm = nrm / max(np.linalg.norm(nrm), 1e-12)
     return -float(deepest), nrm, w, w.copy()
+
+
+def _intersect(oi, oj) -> bool:
+    """Whether the surfaces of two FCL objects intersect: the sign of _score below zero, without its contacts."""
+    import fcl
+    res = fcl.CollisionResult()
+    fcl.collide(oi, oj, fcl.CollisionRequest(num_max_contacts=1, enable_contact=False), res)
+    return bool(res.is_collision)
 
 
 def _touch_normal(oi, oj, ci, cj, up, eps=1e-3):
@@ -158,7 +174,6 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
     normal points from body i toward body j in the sense that moving j along +normal separates
     the pair (checked by a probe for penetrating pairs).
     """
-    import fcl
     n = len(bodies)
     sc_of = list(scales) if scales is not None else [scale] * n
     verts = [b.world_vertices(sc_of[k]) for k, b in enumerate(bodies)]
@@ -166,13 +181,22 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
     hi = [v.max(axis=0) for v in verts]
     built = {}
 
-    class _Objects:
-        """FCL objects built on first use: only bodies in a candidate pair need one."""
-        def __getitem__(self, k):
-            if k not in built:
-                built[k] = _fcl_object(bodies[k], sc_of[k])
-            return built[k]
-    objs = _Objects()
+    def obj(k, f):
+        """FCL object of body k in the frame shrunk by f, built on first use: only bodies in a
+        candidate pair need one."""
+        if (k, f) not in built:
+            built[(k, f)] = _fcl_object(bodies[k], sc_of[k], f)
+        return built[(k, f)]
+
+    def frame_of(i, j):
+        """The pair is measured in a frame shrunk by the scale of one of its bodies, whose BVH is then
+        its full-size one (built once, whatever the scale): two bodies at the same scale (the
+        continuation's free bodies) need no BVH of a new scale at all, and of a pair at two scales
+        the body with fewer faces (a fixed body's slab) takes the ratio. Distances, witnesses and
+        probes scale with the frame; directions and signs do not."""
+        if sc_of[i] == sc_of[j]:
+            return sc_of[i]
+        return sc_of[i] if len(bodies[i].faces) >= len(bodies[j].faces) else sc_of[j]
     tmesh = {}
 
     def mesh_of(k):
@@ -207,7 +231,12 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
             if float(gap.max()) > thr:
                 continue
             ci, cj = bodies[i].center, bodies[j].center
-            signed, nrm, wi, wj = _score(objs[i], objs[j])
+            f = frame_of(i, j)
+            oi, oj = obj(i, f), obj(j, f)
+            signed, nrm, wi, wj = _score(oi, oj)
+            signed = f * signed
+            if wi is not None:
+                wi, wj = f * wi, f * wj
             inside = False
             if signed > 0.0:
                 # separated surfaces: FCL's witness direction is exact; but one body may be
@@ -247,15 +276,15 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
             elif nrm is None:
                 # touching without contact points: probe whether it is a resting contact
                 wi = 0.5 * (ci + cj); wj = wi.copy()
-                nrm = _touch_normal(objs[i], objs[j], ci, cj, np.array([0.0, 0.0, 1.0]), eps=probe_eps)
+                nrm = _touch_normal(oi, oj, ci, cj, np.array([0.0, 0.0, 1.0]), eps=probe_eps / f)
                 inner = None
             else:
                 # intersecting surfaces: FCL's contact normal has no reliable orientation;
                 # keep the sign for which moving body j along +normal separates the pair
-                t0 = np.asarray(objs[j].getTranslation(), dtype=np.float64)
-                objs[j].setTranslation(t0 + probe_eps * nrm); s_plus = _score(objs[i], objs[j])[0]
-                objs[j].setTranslation(t0 - probe_eps * nrm); s_minus = _score(objs[i], objs[j])[0]
-                objs[j].setTranslation(t0)
+                t0 = np.asarray(oj.getTranslation(), dtype=np.float64)
+                oj.setTranslation(t0 + probe_eps / f * nrm); s_plus = _score(oi, oj)[0]
+                oj.setTranslation(t0 - probe_eps / f * nrm); s_minus = _score(oi, oj)[0]
+                oj.setTranslation(t0)
                 if s_minus > s_plus:
                     nrm = -nrm
                 elif s_minus == s_plus and np.dot(nrm, cj - ci) < 0.0:
@@ -263,11 +292,11 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
                 # coplanar faces that merely touch make FCL report a clip-length "depth": if a
                 # TOUCH_EPS nudge in some direction already clears every contact, the pair is touching
                 for probe in (nrm, [0, 0, 1.0], [0, 0, -1.0], [1.0, 0, 0], [-1.0, 0, 0], [0, 1.0, 0], [0, -1.0, 0]):
-                    objs[j].setTranslation(t0 + TOUCH_EPS * np.asarray(probe, dtype=np.float64))
-                    if _score(objs[i], objs[j])[0] >= 0.0:
+                    oj.setTranslation(t0 + TOUCH_EPS / f * np.asarray(probe, dtype=np.float64))
+                    if not _intersect(oi, oj):
                         signed = 0.0
                         break
-                objs[j].setTranslation(t0)
+                oj.setTranslation(t0)
                 inner = None
             if containment and signed == 0.0 and not inside:
                 # touching surfaces with nested boxes: a body flush against the inside of a solid
