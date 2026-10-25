@@ -89,6 +89,7 @@ class RepairSpec:
     margins: dict = field(default_factory=dict)     # name -> clearance kept from every body but its support
     project_iters: int = 0                          # program-only solves at s_min before the continuation
     project_step: float = 0.25                      # trust region of a projection solve (m per axis)
+    project_restarts: int = 8                       # other starts of the projection when it stops short (0: none)
     d_hat: float = 0.01
     ds_max: float = 0.05
     s_min: float = 0.05
@@ -412,23 +413,65 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
             pd_x.extend([wx, wx, yw])
         return pd_x, q_x
 
-    projected = 0
+    projected, restarts = 0, 0
     if spec.project_iters and spec.rows_fn is not None and n:
         # the program alone at the shrunken scale: no contact rows (the bodies are small enough to
         # pass each other), a wide trust region; stops when every hard row holds or a solve fails
         st.tilt = tilt_schedule(st.scale, spec.s_min)
-        for _ in range(int(spec.project_iters)):
+
+        def project() -> int:
+            done = 0
+            for _ in range(int(spec.project_iters)):
+                _pose_bodies(st, spec)
+                rows = _dsl_rows(st, spec)
+                if not rows or all(lo <= 1e-4 and hi >= -1e-4 for _, lo, hi, _ in rows):
+                    break
+                pd_x, q_x = objective()
+                status, step, _, _ = _solve_qp(n, [], rows, False, True, spec.project_step, math.pi / 4, pd_x, q_x, verbose, st.scale)
+                if status != 1:
+                    break
+                xy[:] += step[:, :2]
+                yaw[:] += step[:, 2]
+                done += 1
+            return done
+
+        def shortfall() -> float:
+            """How far the requirements are from holding at the present poses (a preference does not count)."""
             _pose_bodies(st, spec)
-            rows = _dsl_rows(st, spec)
-            if not rows or all(lo <= 1e-4 and hi >= -1e-4 for _, lo, hi, _ in rows):
-                break
-            pd_x, q_x = objective()
-            status, step, _, _ = _solve_qp(n, [], rows, False, True, spec.project_step, math.pi / 4, pd_x, q_x, verbose, st.scale)
-            if status != 1:
-                break
-            xy += step[:, :2]
-            yaw += step[:, 2]
-            projected += 1
+            return float(sum(max(0.0, lo) + max(0.0, -hi) for _, lo, hi, w in _dsl_rows(st, spec) if w is None))
+
+        start_xy, start_yaw = xy.copy(), yaw.copy()          # the bodies' start, placement targets applied
+        projected = project()
+        miss = shortfall()
+        if miss > 1e-3 and spec.project_restarts:
+            # A program with non-convex statements (min_distance, in_front_of, a cluster, a disjunction) can stop
+            # short from where the bodies start: its linearized rows push a body straight away from what it must
+            # avoid, never around it. While the bodies are small, the program alone is solved again from other
+            # starts (each body anywhere over its support, in a sequence the scene fixes), and the poses that come
+            # closest to every requirement are kept; the bodies' own start wins a tie, as the least motion.
+            rng = np.random.default_rng(spec.project_restarts)
+            boxes = []
+            for k in free:
+                sup = spec.support_of.get(scene.bodies[k].name)
+                sb = next((b for b in scene.bodies if b.name == sup), None) if sup else None
+                if sb is None or not sb.fixed or scene.bodies[k].name in spec.place:
+                    boxes.append(None)
+                else:
+                    lo, hi = sb.world_aabb()
+                    boxes.append((lo[:2] + 0.02, hi[:2] - 0.02))
+            best = (miss, xy.copy(), yaw.copy(), projected)
+            for _ in range(int(spec.project_restarts)):
+                for i, bx in enumerate(boxes):
+                    xy[i] = start_xy[i] if bx is None else rng.uniform(bx[0], np.maximum(bx[1], bx[0]))
+                yaw[:] = start_yaw
+                steps_r = project()
+                m = shortfall()
+                restarts += 1
+                if m < best[0] - 1e-6:
+                    best = (m, xy.copy(), yaw.copy(), steps_r)
+                if m <= 1e-3:
+                    break
+            miss, xy[:], yaw[:], projected = best[0], best[1], best[2], best[3]
         _pose_bodies(st, spec)
 
     def solve_step(tail: bool, ds: float, program: bool = True):
@@ -582,7 +625,8 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
     if contact_relaxed:
         notes.append(f"the contacts exceeded the trust region at {contact_relaxed} step(s); those steps served the contacts alone")
     if projected:
-        notes.append(f"the program was solved alone at scale {spec.s_min:g} in {projected} step(s) before the scale was restored")
+        notes.append(f"the program was solved alone at scale {spec.s_min:g} in {projected} step(s) before the scale was restored"
+                     + (f", after {restarts} other start(s) of the bodies over their supports" if restarts else ""))
     if verbose:
         print(f"[repair] pen {pen_before} -> {pen_after}, steps={steps}, rmsd={rmsd:.4f}")
     return RepairResult(scene, pen_before, pen_after, steps, disp, rmsd, trace, notes, relaxed, complete, last_accepted, termination)
