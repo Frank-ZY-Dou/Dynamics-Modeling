@@ -122,12 +122,20 @@ def cluster(sc, names, r):
     return (f"cluster({len(names)} bodies)", v <= r + SLACK, v)
 
 
+def line_offset(values) -> float:
+    """How far the farthest of the values lies from the best common line: half their range. "Within
+    1 cm of a common line" holds when this is at most 1 cm (the line through the middle of the range;
+    the mean would ask for more than the request says)."""
+    v = np.asarray(values, dtype=np.float64)
+    return 0.5 * float(v.max() - v.min()) if len(v) else 0.0
+
+
 def row(sc, names, axis="y", min_gap=0.0, align_tol=0.01, order=None):
-    """The bodies on one line parallel to `axis` (centres within align_tol of their mean), footprints
+    """The bodies on one line parallel to `axis` (centres within align_tol of a common line), footprints
     at least min_gap apart; with `order` ('+y' / '-y' ...) they must also come in the order given."""
     ax = 0 if axis == "x" else 1
     P = np.array([_c(sc, n) for n in names])
-    spread = float(np.abs(P[:, 1 - ax] - P[:, 1 - ax].mean()).max())
+    spread = line_offset(P[:, 1 - ax])
     out = [(f"row_aligned({len(names)} bodies)", spread <= align_tol + SLACK, spread)]
     seq = list(names)
     if order is None:
@@ -150,7 +158,8 @@ def evenly(sc, names, axis="y", tol=0.01):
 
 def rows_parallel_to(sc, names, axis="y", per_row=3, align_tol=0.01, join=0.03):
     """The bodies form lines parallel to `axis` of at most per_row bodies each: centres grouped by
-    their other coordinate (a body joins a line within `join` of it), each line aligned within align_tol."""
+    their other coordinate (a body joins a line within `join` of it), each line's centres within
+    align_tol of a common line."""
     ax = 0 if axis == "x" else 1
     other = sorted((float(_c(sc, n)[1 - ax]), n) for n in names)
     lines, cur = [], [other[0]]
@@ -160,7 +169,7 @@ def rows_parallel_to(sc, names, axis="y", per_row=3, align_tol=0.01, join=0.03):
         else:
             lines.append(cur); cur = [(v, n)]
     lines.append(cur)
-    worst_align = max(max(abs(v - np.mean([w for w, _ in ln])) for v, _ in ln) for ln in lines)
+    worst_align = max(line_offset([v for v, _ in ln]) for ln in lines)
     worst_count = max(len(ln) for ln in lines)
     return [(f"rows({len(lines)} lines)", worst_count <= per_row, worst_count),
             (f"rows_aligned({len(lines)} lines)", worst_align <= align_tol + SLACK, worst_align)]

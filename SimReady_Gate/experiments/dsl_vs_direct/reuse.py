@@ -1,7 +1,7 @@
 """One answer, many scenes: what a passing answer is worth beyond the scene it was written for.
 
-For every trial of a run whose final scene passed its rubric, the final answer is applied again,
-with no further call to the model:
+For every trial of a run whose final scene passed its rubric (as regraded, when the run has a
+regrade.json), the final answer is applied again, with no further call to the model:
   new starts   to K new starting heaps of the same task (other seeds): a program is solved again
                from each; poses are set again, and give the same layout every time;
   new assets   to the task's scene with every object replaced by another package of its category
@@ -12,6 +12,10 @@ and the spread of the layouts (mean distance between the same body's positions a
 starts; poses typed once have none). Writes reuse.json next to the trials.
 
     python experiments/dsl_vs_direct/reuse.py results/dsl_vs_direct/sonnet --starts 5
+
+A process that repairs hundreds of scenes in a row grows (about 12 MB a scene); --first and --count
+apply a slice of the passing answers and write it to reuse_parts/, so that each slice can run in a
+fresh process, and --merge writes reuse.json from the parts.
 """
 from __future__ import annotations
 
@@ -47,16 +51,27 @@ def swapped(task):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("run"); ap.add_argument("--starts", type=int, default=5); ap.add_argument("--first-seed", type=int, default=100)
+    ap.add_argument("--first", type=int, default=0, help="the first passing answer to apply, in the order of the trial files")
+    ap.add_argument("--count", type=int, help="apply this many and write them to reuse_parts/ (see --merge)")
+    ap.add_argument("--merge", action="store_true", help="write reuse.json from reuse_parts/")
     a = ap.parse_args()
+    if a.merge:
+        parts = sorted((Path(a.run) / "reuse_parts").glob("part_*.json"))
+        write_summary(Path(a.run), [r for q in parts for r in json.loads(q.read_text())])
+        return
     import tasks as T, scenes as S, pipelines as P
     from simready.cli import load_any
     run = Path(a.run)
     by_key = {t.key: t for t in T.all_tasks()}
+    regraded = json.loads((run / "regrade.json").read_text())["trials"] if (run / "regrade.json").exists() else {}
     out = []
+    chosen = []
     for p in sorted(run.glob("trials/*.json")):
         tr = json.loads(p.read_text())
-        if not tr["success"] or tr["condition"] not in ("dsl_v1", "direct"):
-            continue
+        passed_run = regraded[p.stem]["success"] if p.stem in regraded else tr["success"]
+        if passed_run and tr["condition"] in ("dsl_v1", "direct"):
+            chosen.append(tr)
+    for tr in chosen[a.first:None if a.count is None else a.first + a.count]:
         task = by_key[tr["task"]]
         answer = tr["rounds"][-1]["answer"]
         rec = {"task": tr["task"], "condition": tr["condition"], "seed": tr["seed"], "starts": [], "assets": None}
@@ -89,6 +104,14 @@ def main():
         out.append(rec)
         print(json.dumps({k: rec[k] for k in ("task", "condition")} | {"starts_ok": sum(s["rubric_ok"] for s in rec["starts"]),
                           "spread_m": round(rec["spread_m"], 3), "assets_ok": rec["assets"]["rubric_ok"]}), flush=True)
+    if a.count is not None:
+        (run / "reuse_parts").mkdir(exist_ok=True)
+        (run / "reuse_parts" / f"part_{a.first:04d}.json").write_text(json.dumps(out, indent=1))
+        return
+    write_summary(run, out)
+
+
+def write_summary(run: Path, out: list) -> None:
     summary = {}
     for cond in ("dsl_v1", "direct"):
         rs = [r for r in out if r["condition"] == cond]

@@ -1,0 +1,167 @@
+{
+ "task": "tool_layout_n7",
+ "family": "tool_layout",
+ "n": 7,
+ "condition": "dsl_v0",
+ "seed": 1,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 23.94581937789917,
+    "duration_ms": 23449,
+    "duration_api_ms": 23415,
+    "cost_usd": 0.0029857200000000003,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1467,
+     "cache_read": 3962,
+     "output": 5305,
+     "thinking": 4547
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1679,
+   "answer": {
+    "intent": "Lay the two screwdrivers, pliers, hammer and two markers in a single y-axis row at x=0.40 with yaw 0, sorted shortest (left, +y) to longest (right, -y), with at least 3 cm table gaps between neighbours, and place the tape dispenser at x\u22480.80, all resting upright on the table.",
+    "statements": [
+     {
+      "op": "no_penetration",
+      "margin": 0.005
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "place",
+      "a": "hammer",
+      "x": 0.4,
+      "y": -0.2,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "pliers",
+      "x": 0.4,
+      "y": -0.075,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "screwdriver_2",
+      "x": 0.4,
+      "y": 0.015,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "screwdriver_1",
+      "x": 0.4,
+      "y": 0.085,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "marker_2",
+      "x": 0.4,
+      "y": 0.145,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "marker_1",
+      "x": 0.4,
+      "y": 0.195,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "tape",
+      "x": 0.8,
+      "y": 0,
+      "yaw": 96
+     },
+     {
+      "op": "left_of",
+      "a": "marker_1",
+      "b": "marker_2",
+      "axis": "y",
+      "gap": 0.05
+     },
+     {
+      "op": "left_of",
+      "a": "marker_2",
+      "b": "screwdriver_1",
+      "axis": "y",
+      "gap": 0.06
+     },
+     {
+      "op": "left_of",
+      "a": "screwdriver_1",
+      "b": "screwdriver_2",
+      "axis": "y",
+      "gap": 0.07
+     },
+     {
+      "op": "left_of",
+      "a": "screwdriver_2",
+      "b": "pliers",
+      "axis": "y",
+      "gap": 0.09
+     },
+     {
+      "op": "left_of",
+      "a": "pliers",
+      "b": "hammer",
+      "axis": "y",
+      "gap": 0.125
+     },
+     {
+      "op": "in_front_of",
+      "a": "tape",
+      "b": "hammer",
+      "axis": "x",
+      "gap": 0.4
+     },
+     {
+      "op": "minimize"
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 12.91778302192688,
+   "solve_cpu_s": 12.919731617000025,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 18
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

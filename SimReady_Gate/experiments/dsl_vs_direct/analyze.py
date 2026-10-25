@@ -24,15 +24,21 @@ HELD_OUT = {"tool_layout", "desk"}          # tasks.HELD_OUT: written after the 
 
 
 def load(dirs):
+    """The trials of the runs, each with its regraded verdicts when the run has a regrade.json."""
     trials = []
     for d in dirs:
+        rg = Path(d) / "regrade.json"
+        regraded = json.loads(rg.read_text())["trials"] if rg.exists() else {}
         for p in sorted(Path(d).glob("trials/*.json")):
-            trials.append(json.loads(p.read_text()))
+            t = json.loads(p.read_text())
+            t["regrade"] = regraded.get(p.stem)
+            trials.append(t)
     return trials
 
 
 def per_trial(t):
     rounds = t["rounds"]
+    rg = t.get("regrade")
     u = defaultdict(float)
     for r in rounds:
         us = (r["llm"] or {}).get("usage") or {}
@@ -43,7 +49,8 @@ def per_trial(t):
         u["solve_s"] += float(r.get("solve_s") or 0)
         u["solve_cpu_s"] += float(r.get("solve_cpu_s") or 0)
     rows = [{"condition": t["condition"], "task": t["task"], "family": t["family"], "n": t["n"], "seed": t["seed"], "model": t["model"],
-             "success": bool(t["success"]), "first": bool(t["first_round_success"]), "rounds": len(rounds),
+             "success": bool(rg["success"] if rg else t["success"]), "first": bool(rg["first"] if rg else t["first_round_success"]),
+             "success_run": bool(t["success"]), "rounds": len(rounds),
              "self_ok": bool(t["self_ok"]), "prompt": u["input"] + u["cache_creation"] + u["cache_read"],
              "prompt_fresh": u["input"] + u["cache_creation"], "output": u["output"], "thinking": u["thinking"], "cost": u["cost"],
              "llm_s": u["llm_s"], "solve_s": u["solve_s"], "solve_cpu_s": u["solve_cpu_s"], "items": rounds[-1].get("answer_items"),
@@ -51,9 +58,10 @@ def per_trial(t):
     if t["condition"] == "direct" and rounds[-1].get("direct_repair"):
         dr = rounds[-1]["direct_repair"]
         r2 = dict(rows[0]); r2["condition"] = "direct+repair"
-        r2["success"] = bool(dr["rubric_ok"]); r2["solve_s"] = rows[0]["solve_s"] + float(dr.get("solve_s") or 0)
+        r2["success"] = bool(rg["repair_success"] if rg else dr["rubric_ok"]); r2["success_run"] = bool(dr["rubric_ok"])
+        r2["solve_s"] = rows[0]["solve_s"] + float(dr.get("solve_s") or 0)
         r2["solve_cpu_s"] = rows[0]["solve_cpu_s"] + float(dr.get("solve_cpu_s") or 0)
-        r2["first"] = bool((rounds[0].get("direct_repair") or {}).get("rubric_ok"))
+        r2["first"] = bool(rg["repair_first"] if rg else (rounds[0].get("direct_repair") or {}).get("rubric_ok"))
         rows.append(r2)
     return rows
 
@@ -77,7 +85,8 @@ def summarize(rows, key=lambda r: r["condition"]):
     for k, g in groups.items():
         n, s = len(g), sum(r["success"] for r in g)
         tot = {f: float(sum(r[f] for r in g)) for f in ("prompt", "prompt_fresh", "output", "thinking", "cost", "llm_s", "solve_s", "solve_cpu_s")}
-        out[k] = {"trials": n, "passed": s, "success_rate": s / n, "success_ci95": wilson(s, n), "first_round_rate": sum(r["first"] for r in g) / n,
+        out[k] = {"trials": n, "passed": s, "passed_as_run": sum(r["success_run"] for r in g), "success_rate": s / n, "success_ci95": wilson(s, n),
+                  "first_round_rate": sum(r["first"] for r in g) / n,
                   "self_check_rate": sum(r["self_ok"] for r in g) / n, "rounds_mean": float(np.mean([r["rounds"] for r in g])),
                   "per_trial": {f: v / n for f, v in tot.items()}, "per_success": {f: (v / s if s else None) for f, v in tot.items()},
                   "time_per_trial_s": (tot["llm_s"] + tot["solve_s"]) / n,
@@ -143,12 +152,45 @@ def main():
                     cells.append("—" if v is None else f"{v['passed']}/{v['trials']}, {v['per_trial']['output']:.0f}, {v['per_trial']['llm_s']:.0f}")
                 lines.append(f"| {f} | {n} | " + " | ".join(cells) + " |")
         md.append("\n".join(lines) + "\n")
+    md.append(after_runs(a.dirs, trials, report))
     text = "\n".join(md)
     print(text)
     if a.md:
         Path(a.md).write_text(text)
     if a.json:
         Path(a.json).write_text(json.dumps(report, indent=1))
+
+
+def after_runs(dirs, trials, report) -> str:
+    """The regrade, the settle of every final scene (finals.json) and the reuse of passing answers
+    (reuse.json) of each run, with the regraded verdicts."""
+    verdict = {(t["model"], t["task"], t["condition"], t["seed"]): bool(t["regrade"]["success"] if t.get("regrade") else t["success"]) for t in trials}
+    lines = ["### Regrade, settle and reuse", "",
+             "| model | condition | pass as run | pass regraded | settles | passes and settles | reuse: new starts pass | reuse: layout spread | reuse: new assets pass |",
+             "|---|---|---|---|---|---|---|---|---|"]
+    for d in dirs:
+        meta = json.loads((Path(d) / "run_meta.json").read_text())
+        m = meta["model"]
+        fin = json.loads((Path(d) / "finals.json").read_text())["trials"] if (Path(d) / "finals.json").exists() else []
+        reu = json.loads((Path(d) / "reuse.json").read_text())["summary"] if (Path(d) / "reuse.json").exists() else {}
+        report.setdefault("after_runs", {})[m] = {}
+        for c in ORDER[:3]:
+            v = report["overall"][m].get(c)
+            if v is None:
+                continue
+            fs = [f for f in fin if f["condition"] == c and "settle" in f]
+            settles = sum(f["settle"]["pass"] for f in fs)
+            both = sum(f["settle"]["pass"] and verdict[(m, f["task"], c, f["seed"])] for f in fs)
+            ru = reu.get(c)
+            row = {"passed_as_run": v["passed_as_run"], "passed": v["passed"], "trials": v["trials"], "settled": settles, "settle_trials": len(fs),
+                   "passed_and_settled": both, "reuse": ru}
+            report["after_runs"][m][c] = row
+            reuse_cells = (["—"] * 3 if ru is None else
+                           [f"{100 * ru['new_start_pass_rate']:.0f}% of {ru['new_start_scenes']}", f"{100 * ru['spread_m']:.1f} cm",
+                            f"{100 * ru['new_asset_pass_rate']:.0f}% of {ru['answers']}"])
+            lines.append(f"| {m} | {c} | {v['passed_as_run']}/{v['trials']} | {v['passed']}/{v['trials']} | "
+                         f"{settles}/{len(fs)} | {both}/{len(fs)} | " + " | ".join(reuse_cells) + " |")
+    return "\n".join(lines) + "\n"
 
 
 if __name__ == "__main__":

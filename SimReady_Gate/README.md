@@ -33,6 +33,7 @@
 
 ## 📢 Updates
 
+* [October 2026] **SimReady assets, a larger language, and programs against typed poses.** Layouts name NVIDIA SimReady packages, fetched from Hugging Face against their bill of materials, and each asset's mass, friction and semantic class reach the repair, the settle test and the export ([assets](#assets)). The language gains 23 statements for what robot scenes ask for (reach, gripper clearance, approach corridors, handles facing the robot, rows sorted by size, grids, keep-out zones, small edits, towers, preferences) and name patterns ([the language](#what-robot-scenes-ask-for)). In isolated `claude -p` calls on sixteen tasks, programs pass 143 / 144 against 110 / 144 for poses the model types, with 3.6-5.3 times fewer output tokens and 2.5-3.6 times less time per passing scene ([results](#a-program-or-the-poses)).
 * [September 2026] **Into the engines.** `export` writes a repaired scene as meshes, a manifest, an MJCF file and a USD stage with physics schemas; `examples/run_mujoco.py`, `run_genesis.py` and `run_isaac.py` load it and simulate it. The twenty-object layout runs in MuJoCo, Genesis and Isaac Sim with no body leaving the table ([details](#running-the-repaired-scene-in-a-simulator)).
 * [September 2026] **Twenty-object demo.** A heap of twenty RoboLab objects laid out by a language request in scale-space, two recorded rounds of the agent loop, one passing certificate; the request, the programs, every tool output and both certificates are in [`docs/examples/pile_n20/`](docs/examples/pile_n20/) ([Example 2](#example-2-twenty-objects-from-a-heap-laid-out-by-language)).
 * [September 2026] **Scale-space placement.** `place(a, x, y, yaw)` lets the model position bodies at the configured shrink scale, where overlaps may remain; the continuation restores full scale under the program. Renders from the solver's own meshes with the assets' textures (`viz/`).
@@ -350,6 +351,59 @@ row is checked against finite differences of its own residual in `tests/test_dsl
 and recipes for place settings, shelves, sorting a heap, pick-ready scenes, small fixes,
 palletizing and towers.
 
+## A program or the poses
+
+The same requests on the same SimReady scenes, answered by Claude Haiku 5.5, Sonnet 5.5 and Opus 5.5
+in isolated `claude -p` calls (no tools, memory, CLAUDE.md or MCP servers; a leak test with planted
+canaries before the run): the model either writes a SimReady program, which the gate compiles and
+repairs, or types the final pose of every object itself. Sixteen tasks, from place settings and
+shelves to sorting a heap, towers, palletizing and dense packing, two of them written only after the
+language was frozen; three seeds; up to three rounds, each told what its condition's check found.
+The method and every table are in [`docs/EVAL_DSL_vs_direct.md`](docs/EVAL_DSL_vs_direct.md), every
+trial in [`results/dsl_vs_direct/`](results/dsl_vs_direct/).
+
+<p align="center"><img src="docs/media/dsl_vs_direct.png" width="100%" alt="pass rate, output tokens per passing scene and seconds per passing scene of programs, of poses and of programs restricted to the earlier statements, for Haiku, Sonnet and Opus 5.5" /></p>
+
+| model | answer | scenes that pass | output tokens / trial | cost / trial | seconds / passing scene |
+|---|---|---|---|---|---|
+| Haiku 5.5 | program | **47 / 48** | **4,051** | **$0.0025** | **26** |
+| | poses | 35 / 48 | 15,425 | $0.0081 | 93 |
+| Sonnet 5.5 | program | **48 / 48** | **633** | **$0.014** | **13** |
+| | poses | 35 / 48 | 3,341 | $0.044 | 39 |
+| Opus 5.5 | program | **48 / 48** | **764** | **$0.030** | **15** |
+| | poses | 40 / 48 | 2,783 | $0.072 | 36 |
+
+- **Programs pass where poses need geometry the model cannot see.** No typed answer stacked the
+  three cartons without interpenetration (0 / 9 over the three models); ten drinks came out in the
+  wrong order of height in 8 / 9 (the scene summary gives heights to the centimetre, the compiler
+  sorts on the meshes); six cartons on a pallet interpenetrated in 8 / 9. Programs pass 143 / 144,
+  and every one of their scenes settles in MuJoCo; five of the poses' towers do not (three drop a box).
+- **A program does not grow with the scene.** Sorting a heap of 10, 16 and 24 objects, Haiku's poses
+  grow from 6,600 to 38,700 output tokens per trial while its programs stay between 3,500 and 5,500;
+  Sonnet's go from 2,500 to 6,400 against 350 to 980, Opus's from 1,200 to 5,300 against 820 to
+  1,020. Name patterns keep the program's length, and the solver does the per-object work.
+- **Cheaper and faster per scene.** Programs take 3.6 to 5.3 times fewer output tokens per trial,
+  cost 2.4 to 3.3 times less, and need 2.5 to 3.6 times less time per passing scene, the solver's
+  7 s per trial included. The system prompt that carries the language is longer (12-13k prompt
+  tokens per trial against 3-4k), and it is read from the prompt cache.
+- **Where poses do as well.** On the two held-out tasks, of six and seven objects, both answers pass
+  6 / 6 with every model, and poses take less time (11-17 s per passing scene against 22-34 s): when
+  the scene is small and nothing in it needs exact geometry, the model can type the answer, and the
+  solver's seconds are the program's price.
+- **A program is reusable.** Applied unchanged to five new heaps of its task it is solved again and
+  passes 93-97 % of them; with every object replaced by another asset of its category it passes
+  98-100 %, typed poses 45-66 %.
+- **The new statements and the request both matter.** Programs restricted to the statements the
+  language had before pass 104 / 144; poses repaired by S4R with only the geometric statements every
+  task shares pass 111 / 144: the repair removes interpenetration but does not know the request (it
+  pushed packed fruit out of their square).
+
+<p align="center"><img src="docs/media/dsl_vs_direct_scaling.png" width="90%" alt="output tokens and model seconds per trial of programs and poses when sorting a heap of 10, 16 and 24 objects, for Haiku, Sonnet and Opus 5.5" /></p>
+
+One rubric check was corrected after the first model's run: "within 1 cm of a common line" had been
+measured from the centres' mean, which asks for more than the request; every round it could change
+was rebuilt and graded again (programs passed 134 / 144 as first graded).
+
 ## Getting started
 
 ### Setup
@@ -527,7 +581,7 @@ examples/            run_mujoco.py, run_genesis.py, run_isaac.py: load an export
 tests/               regression tests (python -m unittest discover tests)
 skills/              the agent skill that runs the loop
 experiments/         the diagnostics behind docs/DIAGNOSTIC_2026-09-08.md (RoboLab, RoboCasa, settle)
-  dsl_vs_direct/     the program-or-poses comparison: SimReady tasks and rubrics, the isolated CLI calls, the leak test, the tables
+  dsl_vs_direct/     the program-or-poses comparison: SimReady tasks and rubrics, the isolated CLI calls, the leak test, the regrade, settle and reuse, the tables and figures
 viz/                 Blender rendering on the solver's meshes, video drivers, the agent-run page generator
 results/             tracked result tables and the persisted layouts
 docs/                diagnostic notes, design note, the language (DSL.md), the comparison (EVAL_DSL_vs_direct.md), media, the recorded example runs

@@ -1,0 +1,114 @@
+{
+ "task": "palletize_n6",
+ "family": "palletize",
+ "n": 6,
+ "condition": "dsl_v0",
+ "seed": 2,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 7.66490626335144,
+    "duration_ms": 7107,
+    "duration_api_ms": 7078,
+    "cost_usd": 0.0162502,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1315,
+     "cache_read": 3962,
+     "output": 1059,
+     "thinking": 717
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1327,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "pallet"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "pallet.top",
+      "inset": 0.02
+     },
+     {
+      "op": "no_penetration",
+      "margin": 0.01
+     },
+     {
+      "op": "place",
+      "a": "box_1",
+      "x": 0.5,
+      "y": -0.3,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "box_2",
+      "x": 0.5,
+      "y": 0,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "box_3",
+      "x": 0.5,
+      "y": 0.3,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "box_4",
+      "x": 0.88,
+      "y": -0.34,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "box_5",
+      "x": 0.88,
+      "y": 0,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "box_6",
+      "x": 0.88,
+      "y": 0.34,
+      "yaw": 0
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 2.4515323638916016,
+   "solve_cpu_s": 2.451921390000024,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 10
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

@@ -5,8 +5,10 @@ and drawn from above. Set SIMREADY_CACHE_DIR to keep the decompositions between 
 
     python experiments/dsl_vs_direct/finals.py results/dsl_vs_direct/claude-sonnet-5-5 [--draw task_key ...]
 
-Writes finals.json next to the trials: per trial whether the rubric passed and whether the scene
-stays at rest (no body leaving the support, peak speed <= 1.0 m/s, peak displacement <= 0.15 m).
+Writes finals.json next to the trials: per trial whether the rubric passed (as regraded, when the
+run has a regrade.json) and whether the scene stays at rest (no body leaving the support, peak speed
+<= 1.0 m/s, peak displacement <= 0.15 m). With --draw-only the drawings are made again and nothing
+is settled or written.
 """
 from __future__ import annotations
 
@@ -76,25 +78,32 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("run"); ap.add_argument("--draw", nargs="*", default=[]); ap.add_argument("--no-settle", action="store_true")
     ap.add_argument("--tasks", nargs="*", help="only these task keys")
+    ap.add_argument("--draw-only", action="store_true", help="make the drawings again; settle nothing, write no finals.json")
     a = ap.parse_args()
     import tasks as T
     run = Path(a.run)
     by_key = {t.key: t for t in T.all_tasks()}
+    regraded = json.loads((run / "regrade.json").read_text())["trials"] if (run / "regrade.json").exists() else {}
     out = []
     for p in sorted(run.glob("trials/*.json")):
         tr = json.loads(p.read_text())
         if a.tasks and tr["task"] not in a.tasks:
             continue
+        if a.draw_only and not (tr["task"] in a.draw and tr["seed"] == 0):
+            continue
         task = by_key[tr["task"]]
+        passed = regraded[p.stem]["success"] if p.stem in regraded else tr["success"]
         sc = final_scene(task, tr, run / "finals_layouts")
-        rec = {"task": tr["task"], "condition": tr["condition"], "seed": tr["seed"], "rubric_ok": tr["success"]}
-        if sc is not None and not a.no_settle:
+        rec = {"task": tr["task"], "condition": tr["condition"], "seed": tr["seed"], "rubric_ok": passed}
+        if sc is not None and not a.no_settle and not a.draw_only:
             rec["settle"] = settle(sc, task.support)
         if sc is not None and tr["task"] in a.draw and tr["seed"] == 0:
             (run / "figures").mkdir(exist_ok=True)
-            draw(sc, run / "figures" / f"{tr['task']}_{tr['condition']}.png", f"{tr['condition']}: {'passes' if tr['success'] else 'fails'} the rubric")
+            draw(sc, run / "figures" / f"{tr['task']}_{tr['condition']}.png", f"{tr['condition']}: {'passes' if passed else 'fails'} the rubric")
         out.append(rec)
         print(json.dumps(rec), flush=True)
+    if a.draw_only:
+        return
     summary = {}
     for cond in sorted({r["condition"] for r in out}):
         rs = [r for r in out if r["condition"] == cond and "settle" in r]

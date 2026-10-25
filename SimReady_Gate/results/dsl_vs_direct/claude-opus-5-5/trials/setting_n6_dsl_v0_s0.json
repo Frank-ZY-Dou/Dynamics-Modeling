@@ -1,0 +1,163 @@
+{
+ "task": "setting_n6",
+ "family": "setting",
+ "n": 6,
+ "condition": "dsl_v0",
+ "seed": 0,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 17.52890157699585,
+    "duration_ms": 16978,
+    "duration_api_ms": 16934,
+    "cost_usd": 0.0401092,
+    "usage": {
+     "input": 2,
+     "cache_creation": 398,
+     "cache_read": 4986,
+     "output": 1796,
+     "thinking": 1276
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1710,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "place",
+      "a": "plate",
+      "x": 0.55,
+      "y": 0
+     },
+     {
+      "op": "place",
+      "a": "fork",
+      "x": 0.55,
+      "y": 0.135,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "knife",
+      "x": 0.55,
+      "y": -0.135,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "spoon",
+      "x": 0.55,
+      "y": -0.19,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "glass",
+      "x": 0.67,
+      "y": -0.07
+     },
+     {
+      "op": "place",
+      "a": "mug",
+      "x": 0.55,
+      "y": 0.23,
+      "yaw": 0
+     },
+     {
+      "op": "left_of",
+      "a": "fork",
+      "b": "plate",
+      "gap": 0.12
+     },
+     {
+      "op": "near",
+      "a": "fork",
+      "b": "plate",
+      "r": 0.15
+     },
+     {
+      "op": "right_of",
+      "a": "knife",
+      "b": "plate",
+      "gap": 0.12
+     },
+     {
+      "op": "near",
+      "a": "knife",
+      "b": "plate",
+      "r": 0.15
+     },
+     {
+      "op": "right_of",
+      "a": "spoon",
+      "b": "knife",
+      "gap": 0.045
+     },
+     {
+      "op": "in_front_of",
+      "a": "glass",
+      "b": "plate"
+     },
+     {
+      "op": "near",
+      "a": "glass",
+      "b": "knife",
+      "r": 0.15
+     },
+     {
+      "op": "left_of",
+      "a": "mug",
+      "b": "fork",
+      "gap": 0.08
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 2.363140106201172,
+   "solve_cpu_s": 2.3633139599999997,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "facing(mug)",
+     false,
+     22.6938
+    ]
+   ],
+   "answer_items": 18
+  }
+ ],
+ "n_rounds": 1,
+ "success": false,
+ "first_round_success": false,
+ "self_ok": true
+}

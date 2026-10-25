@@ -1,0 +1,235 @@
+{
+ "task": "kitchen_prep_n12",
+ "family": "kitchen_prep",
+ "n": 12,
+ "condition": "dsl_v1",
+ "seed": 1,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 34.94961667060852,
+    "duration_ms": 34428,
+    "duration_api_ms": 34398,
+    "cost_usd": 0.00445129,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1889,
+     "cache_read": 10529,
+     "output": 7936,
+     "thinking": 7070
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2596,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "at",
+      "a": "board",
+      "y": 0,
+      "tol": 0.02
+     },
+     {
+      "op": "reach",
+      "a": "board",
+      "r": 0.5,
+      "min": 0.4
+     },
+     {
+      "op": "yaw",
+      "a": "board",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5,
+      "mod": 180
+     },
+     {
+      "op": "beside",
+      "a": "knife",
+      "b": "board",
+      "side": "right",
+      "gap": 0.02,
+      "max": 0.05
+     },
+     {
+      "op": "parallel",
+      "a": "knife",
+      "b": "board",
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "spoon",
+      "b": "knife",
+      "side": "right",
+      "gap": 0.02
+     },
+     {
+      "op": "parallel",
+      "a": "spoon",
+      "b": "knife",
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "bowl",
+      "b": "board",
+      "side": "left",
+      "gap": 0.05
+     },
+     {
+      "op": "place",
+      "a": "bowl",
+      "x": 0.6,
+      "y": 0.23
+     },
+     {
+      "op": "cluster",
+      "members": [
+       "apple_1",
+       "apple_2",
+       "orange",
+       "banana",
+       "tangerine"
+      ],
+      "r": 0.12
+     },
+     {
+      "op": "in_front_of",
+      "a": "apple_?",
+      "b": "bowl",
+      "axis": "x"
+     },
+     {
+      "op": "in_front_of",
+      "a": "orange",
+      "b": "bowl",
+      "axis": "x"
+     },
+     {
+      "op": "in_front_of",
+      "a": "banana",
+      "b": "bowl",
+      "axis": "x"
+     },
+     {
+      "op": "in_front_of",
+      "a": "tangerine",
+      "b": "bowl",
+      "axis": "x"
+     },
+     {
+      "op": "row",
+      "members": [
+       "bottle",
+       "can_*"
+      ],
+      "axis": "y",
+      "gap": 0.02,
+      "mid": -0.3
+     },
+     {
+      "op": "reach",
+      "a": "bottle",
+      "r": 0.9,
+      "min": 0.75
+     },
+     {
+      "op": "reach",
+      "a": "can_*",
+      "r": 0.9,
+      "min": 0.75
+     },
+     {
+      "op": "min_distance",
+      "a": "bowl",
+      "b": "board",
+      "r": 0.25
+     },
+     {
+      "op": "min_distance",
+      "a": "apple_?",
+      "b": "board",
+      "r": 0.25
+     },
+     {
+      "op": "min_distance",
+      "a": "orange",
+      "b": "board",
+      "r": 0.25
+     },
+     {
+      "op": "min_distance",
+      "a": "banana",
+      "b": "board",
+      "r": 0.25
+     },
+     {
+      "op": "min_distance",
+      "a": "tangerine",
+      "b": "board",
+      "r": 0.25
+     },
+     {
+      "op": "min_distance",
+      "a": "bottle",
+      "b": "board",
+      "r": 0.25
+     },
+     {
+      "op": "min_distance",
+      "a": "can_*",
+      "b": "board",
+      "r": 0.25
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 26 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts exceeded the trust region at 3 step(s); those steps served the contacts alone",
+     "the program was solved alone at scale 0.05 in 12 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 4.353642225265503,
+   "solve_cpu_s": 4.354242027999987,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 28
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

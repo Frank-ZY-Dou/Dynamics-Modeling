@@ -1,0 +1,122 @@
+{
+ "task": "drinks_row_n6",
+ "family": "drinks_row",
+ "n": 6,
+ "condition": "direct",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 8.772252321243286,
+    "duration_ms": 8182,
+    "duration_api_ms": 8153,
+    "cost_usd": 0.00091775,
+    "usage": {
+     "input": 2,
+     "cache_creation": 401,
+     "cache_read": 1835,
+     "output": 1638,
+     "thinking": 1379
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1388,
+   "answer": {
+    "poses": [
+     {
+      "name": "can_4",
+      "x": 0.75,
+      "y": -0.25,
+      "yaw": 0
+     },
+     {
+      "name": "can_5",
+      "x": 0.75,
+      "y": -0.15,
+      "yaw": 0
+     },
+     {
+      "name": "can_1",
+      "x": 0.75,
+      "y": -0.05,
+      "yaw": 0
+     },
+     {
+      "name": "can_2",
+      "x": 0.75,
+      "y": 0.05,
+      "yaw": 0
+     },
+     {
+      "name": "can_3",
+      "x": 0.75,
+      "y": 0.15,
+      "yaw": 0
+     },
+     {
+      "name": "bottle_1",
+      "x": 0.75,
+      "y": 0.25,
+      "yaw": 0
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "penetrating_pairs": [],
+    "not_resting_on_anything": [],
+    "off_the_support": [],
+    "missing_poses": []
+   },
+   "self_ok": true,
+   "solve_s": 0.5646941661834717,
+   "solve_cpu_s": 0.5645830149999997,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "ordered_by_height",
+     false,
+     [
+      0.17726458608767548,
+      0.12099999986821786,
+      0.1209462242140944,
+      0.11753090641650488,
+      0.10444383877620567,
+      0.09157940887962468
+     ]
+    ]
+   ],
+   "answer_items": 6,
+   "direct_repair": {
+    "rubric_ok": false,
+    "self_ok": true,
+    "solve_s": 1.884004831314087,
+    "solve_cpu_s": 1.8842602209999995,
+    "rubric_failed": [
+     [
+      "ordered_by_height",
+      false,
+      [
+       0.17726458608767548,
+       0.12099999986821786,
+       0.1209462242140944,
+       0.11753090641650488,
+       0.10444383877620567,
+       0.09157940887962468
+      ]
+     ]
+    ]
+   }
+  }
+ ],
+ "n_rounds": 1,
+ "success": false,
+ "first_round_success": false,
+ "self_ok": true
+}

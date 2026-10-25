@@ -1,0 +1,399 @@
+{
+ "task": "stack_n6",
+ "family": "stack",
+ "n": 6,
+ "condition": "direct",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 10.181371212005615,
+    "duration_ms": 9582,
+    "duration_api_ms": 9547,
+    "cost_usd": 0.00112343,
+    "usage": {
+     "input": 2,
+     "cache_creation": 401,
+     "cache_read": 1803,
+     "output": 2050,
+     "thinking": 1777
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1347,
+   "answer": {
+    "poses": [
+     {
+      "name": "box_large",
+      "x": 0.4,
+      "y": -0.25,
+      "yaw": 170
+     },
+     {
+      "name": "box_medium",
+      "x": 0.4,
+      "y": -0.25,
+      "yaw": 69,
+      "on": "box_large"
+     },
+     {
+      "name": "box_small",
+      "x": 0.4,
+      "y": -0.25,
+      "yaw": -161,
+      "on": "box_medium"
+     },
+     {
+      "name": "apple",
+      "x": 0.4,
+      "y": 0.3,
+      "yaw": 89
+     },
+     {
+      "name": "can",
+      "x": 0.6,
+      "y": 0.3,
+      "yaw": -119
+     },
+     {
+      "name": "cup",
+      "x": 0.5,
+      "y": 0.5,
+      "yaw": -135
+     }
+    ]
+   },
+   "report": {
+    "ok": false,
+    "penetrating_pairs": [
+     [
+      "box_large",
+      "box_medium",
+      -74.9
+     ]
+    ],
+    "not_resting_on_anything": [
+     "box_medium"
+    ],
+    "off_the_support": [],
+    "missing_poses": []
+   },
+   "self_ok": false,
+   "solve_s": 0.6674377918243408,
+   "solve_cpu_s": 0.6671422119999875,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "no_penetration",
+     false,
+     1
+    ],
+    [
+     "supported",
+     false,
+     1
+    ]
+   ],
+   "answer_items": 6,
+   "direct_repair": {
+    "rubric_ok": false,
+    "self_ok": true,
+    "solve_s": 2.2286622524261475,
+    "solve_cpu_s": 2.228428218000005,
+    "rubric_failed": [
+     [
+      "on(box_medium,box_large)",
+      false,
+      null
+     ],
+     [
+      "centred(box_medium,box_large)",
+      false,
+      0.3109
+     ],
+     [
+      "on(box_small,box_medium)",
+      false,
+      null
+     ],
+     [
+      "centred(box_small,box_medium)",
+      false,
+      0.1525
+     ],
+     [
+      "in_right_half(box_large)",
+      false,
+      0.1006
+     ]
+    ]
+   }
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 11.240121364593506,
+    "duration_ms": 10591,
+    "duration_api_ms": 10546,
+    "cost_usd": 0.00137883,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1620,
+     "cache_read": 913,
+     "output": 2091,
+     "thinking": 1818
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1964,
+   "answer": {
+    "poses": [
+     {
+      "name": "box_large",
+      "x": 0.5,
+      "y": -0.25,
+      "yaw": 170
+     },
+     {
+      "name": "box_medium",
+      "x": 0.5,
+      "y": -0.25,
+      "yaw": 69,
+      "on": "box_large"
+     },
+     {
+      "name": "box_small",
+      "x": 0.5,
+      "y": -0.25,
+      "yaw": -161,
+      "on": "box_medium"
+     },
+     {
+      "name": "apple",
+      "x": 0.45,
+      "y": 0.25,
+      "yaw": 89
+     },
+     {
+      "name": "can",
+      "x": 0.65,
+      "y": 0.25,
+      "yaw": -119
+     },
+     {
+      "name": "cup",
+      "x": 0.55,
+      "y": 0.45,
+      "yaw": -135
+     }
+    ]
+   },
+   "report": {
+    "ok": false,
+    "penetrating_pairs": [
+     [
+      "box_large",
+      "box_medium",
+      -74.9
+     ]
+    ],
+    "not_resting_on_anything": [
+     "box_medium"
+    ],
+    "off_the_support": [],
+    "missing_poses": []
+   },
+   "self_ok": false,
+   "solve_s": 0.6309814453125,
+   "solve_cpu_s": 0.6307821240000067,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "no_penetration",
+     false,
+     1
+    ],
+    [
+     "supported",
+     false,
+     1
+    ]
+   ],
+   "answer_items": 6,
+   "direct_repair": {
+    "rubric_ok": false,
+    "self_ok": true,
+    "solve_s": 2.3490524291992188,
+    "solve_cpu_s": 2.349360790999981,
+    "rubric_failed": [
+     [
+      "on(box_medium,box_large)",
+      false,
+      null
+     ],
+     [
+      "centred(box_medium,box_large)",
+      false,
+      0.3096
+     ],
+     [
+      "on(box_small,box_medium)",
+      false,
+      null
+     ],
+     [
+      "centred(box_small,box_medium)",
+      false,
+      0.1938
+     ],
+     [
+      "in_right_half(box_large)",
+      false,
+      0.0802
+     ]
+    ]
+   }
+  },
+  {
+   "round": 3,
+   "llm": {
+    "ok": true,
+    "wall_s": 9.412610054016113,
+    "duration_ms": 8792,
+    "duration_api_ms": 8754,
+    "cost_usd": 0.00123233,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1620,
+     "cache_read": 913,
+     "output": 1798,
+     "thinking": 1525
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1970,
+   "answer": {
+    "poses": [
+     {
+      "name": "box_large",
+      "x": 0.5,
+      "y": -0.25,
+      "yaw": 170
+     },
+     {
+      "name": "box_medium",
+      "x": 0.5,
+      "y": -0.25,
+      "yaw": 69,
+      "on": "box_large"
+     },
+     {
+      "name": "box_small",
+      "x": 0.5,
+      "y": -0.25,
+      "yaw": -161,
+      "on": "box_medium"
+     },
+     {
+      "name": "apple",
+      "x": 0.4,
+      "y": 0.25,
+      "yaw": 89
+     },
+     {
+      "name": "can",
+      "x": 0.6,
+      "y": 0.25,
+      "yaw": -119
+     },
+     {
+      "name": "cup",
+      "x": 0.5,
+      "y": 0.5,
+      "yaw": -135
+     }
+    ]
+   },
+   "report": {
+    "ok": false,
+    "penetrating_pairs": [
+     [
+      "box_large",
+      "box_medium",
+      -74.9
+     ]
+    ],
+    "not_resting_on_anything": [
+     "box_medium"
+    ],
+    "off_the_support": [],
+    "missing_poses": []
+   },
+   "self_ok": false,
+   "solve_s": 0.5968713760375977,
+   "solve_cpu_s": 0.5969021850000047,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "no_penetration",
+     false,
+     1
+    ],
+    [
+     "supported",
+     false,
+     1
+    ]
+   ],
+   "answer_items": 6,
+   "direct_repair": {
+    "rubric_ok": false,
+    "self_ok": true,
+    "solve_s": 2.2363855838775635,
+    "solve_cpu_s": 2.2327549009999927,
+    "rubric_failed": [
+     [
+      "on(box_medium,box_large)",
+      false,
+      null
+     ],
+     [
+      "centred(box_medium,box_large)",
+      false,
+      0.3096
+     ],
+     [
+      "on(box_small,box_medium)",
+      false,
+      null
+     ],
+     [
+      "centred(box_small,box_medium)",
+      false,
+      0.1938
+     ],
+     [
+      "in_right_half(box_large)",
+      false,
+      0.0802
+     ]
+    ]
+   }
+  }
+ ],
+ "n_rounds": 3,
+ "success": false,
+ "first_round_success": false,
+ "self_ok": false
+}

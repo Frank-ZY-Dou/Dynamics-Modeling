@@ -1,0 +1,150 @@
+{
+ "task": "pack_n14",
+ "family": "pack",
+ "n": 14,
+ "condition": "direct",
+ "seed": 2,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 86.41357946395874,
+    "duration_ms": 85838,
+    "duration_api_ms": 85811,
+    "cost_usd": 0.01050363,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1774,
+     "cache_read": 913,
+     "output": 20279,
+     "thinking": 19783
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2006,
+   "answer": {
+    "poses": [
+     {
+      "name": "fruit_1",
+      "x": 0.605,
+      "y": 0.031,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_2",
+      "x": 0.61,
+      "y": 0.115,
+      "yaw": 90
+     },
+     {
+      "name": "fruit_3",
+      "x": 0.485,
+      "y": 0.115,
+      "yaw": 90
+     },
+     {
+      "name": "fruit_4",
+      "x": 0.43,
+      "y": -0.037,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_5",
+      "x": 0.492,
+      "y": -0.037,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_6",
+      "x": 0.685,
+      "y": 0.031,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_7",
+      "x": 0.48,
+      "y": 0.031,
+      "yaw": 90
+     },
+     {
+      "name": "fruit_8",
+      "x": 0.554,
+      "y": -0.037,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_9",
+      "x": 0.683,
+      "y": -0.037,
+      "yaw": 90
+     },
+     {
+      "name": "fruit_10",
+      "x": 0.61,
+      "y": -0.115,
+      "yaw": 90
+     },
+     {
+      "name": "fruit_11",
+      "x": 0.485,
+      "y": -0.115,
+      "yaw": 90
+     },
+     {
+      "name": "fruit_12",
+      "x": 0.616,
+      "y": -0.037,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_13",
+      "x": 0.685,
+      "y": 0.115,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_14",
+      "x": 0.685,
+      "y": -0.115,
+      "yaw": 0
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "penetrating_pairs": [],
+    "not_resting_on_anything": [],
+    "off_the_support": [],
+    "missing_poses": []
+   },
+   "self_ok": true,
+   "solve_s": 0.6989531517028809,
+   "solve_cpu_s": 0.699047261000004,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 14,
+   "direct_repair": {
+    "rubric_ok": false,
+    "self_ok": true,
+    "solve_s": 3.0764896869659424,
+    "solve_cpu_s": 3.076927798000014,
+    "rubric_failed": [
+     [
+      "in_square(14 bodies)",
+      false,
+      0.0072
+     ]
+    ]
+   }
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

@@ -1,0 +1,102 @@
+{
+ "task": "tool_layout_n7",
+ "family": "tool_layout",
+ "n": 7,
+ "condition": "direct",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 13.18354868888855,
+    "duration_ms": 12611,
+    "duration_api_ms": 12584,
+    "cost_usd": 0.00166423,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1467,
+     "cache_read": 913,
+     "output": 2723,
+     "thinking": 2452
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1690,
+   "answer": {
+    "poses": [
+     {
+      "name": "marker_1",
+      "x": 0.4,
+      "y": 0.2,
+      "yaw": 0
+     },
+     {
+      "name": "marker_2",
+      "x": 0.4,
+      "y": 0.14,
+      "yaw": 0
+     },
+     {
+      "name": "screwdriver_1",
+      "x": 0.4,
+      "y": 0.07,
+      "yaw": 0
+     },
+     {
+      "name": "screwdriver_2",
+      "x": 0.4,
+      "y": -0.01,
+      "yaw": 0
+     },
+     {
+      "name": "pliers",
+      "x": 0.4,
+      "y": -0.11,
+      "yaw": 0
+     },
+     {
+      "name": "hammer",
+      "x": 0.4,
+      "y": -0.245,
+      "yaw": 0
+     },
+     {
+      "name": "tape",
+      "x": 0.8,
+      "y": -0.06,
+      "yaw": -9
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "penetrating_pairs": [],
+    "not_resting_on_anything": [],
+    "off_the_support": [],
+    "missing_poses": []
+   },
+   "self_ok": true,
+   "solve_s": 3.785768747329712,
+   "solve_cpu_s": 3.78624364800001,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 7,
+   "direct_repair": {
+    "rubric_ok": true,
+    "self_ok": true,
+    "solve_s": 12.524913311004639,
+    "solve_cpu_s": 12.52429998400001,
+    "rubric_failed": []
+   }
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

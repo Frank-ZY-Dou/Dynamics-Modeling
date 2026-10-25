@@ -1,0 +1,212 @@
+{
+ "task": "drinks_row_n10",
+ "family": "drinks_row",
+ "n": 10,
+ "condition": "dsl_v0",
+ "seed": 2,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 15.589654207229614,
+    "duration_ms": 15043,
+    "duration_api_ms": 15010,
+    "cost_usd": 0.0498964,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1632,
+     "cache_read": 3962,
+     "output": 1802,
+     "thinking": 738
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1938,
+   "answer": {
+    "intent": "Arrange all ten drinks upright on the table in one row along y at x\u22480.75, evenly spaced and centred on y=0, ordered from shortest at the left (+y) to tallest at the right (-y), with at least 2 cm of table between neighbours.",
+    "assumptions": [
+     "Left is +y, so the shortest drink is at the largest y and the tallest at the smallest y.",
+     "Drinks of equal height (0.09: can_4, glass_2; 0.10: can_5, bottle_2, glass_1; 0.12: can_1, can_2, can_3, can_6) can go in any order among themselves, so a fixed order was chosen.",
+     "The centres are spaced 0.11 m apart, from y=+0.495 to y=-0.495 on the line x=0.75. This leaves at least 2 cm between even the widest neighbours, and the row's midpoint is at y=0.",
+     "The left_of statements require at least 0.10 m between neighbouring centres, which keeps the height order and the 2 cm clearance."
+    ],
+    "statements": [
+     {
+      "op": "fixed",
+      "a": "table"
+     },
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "place",
+      "a": "can_4",
+      "x": 0.75,
+      "y": 0.495
+     },
+     {
+      "op": "place",
+      "a": "glass_2",
+      "x": 0.75,
+      "y": 0.385
+     },
+     {
+      "op": "place",
+      "a": "can_5",
+      "x": 0.75,
+      "y": 0.275
+     },
+     {
+      "op": "place",
+      "a": "bottle_2",
+      "x": 0.75,
+      "y": 0.165
+     },
+     {
+      "op": "place",
+      "a": "glass_1",
+      "x": 0.75,
+      "y": 0.055
+     },
+     {
+      "op": "place",
+      "a": "can_1",
+      "x": 0.75,
+      "y": -0.055
+     },
+     {
+      "op": "place",
+      "a": "can_2",
+      "x": 0.75,
+      "y": -0.165
+     },
+     {
+      "op": "place",
+      "a": "can_3",
+      "x": 0.75,
+      "y": -0.275
+     },
+     {
+      "op": "place",
+      "a": "can_6",
+      "x": 0.75,
+      "y": -0.385
+     },
+     {
+      "op": "place",
+      "a": "bottle_1",
+      "x": 0.75,
+      "y": -0.495
+     },
+     {
+      "op": "left_of",
+      "a": "can_4",
+      "b": "glass_2",
+      "gap": 0.1
+     },
+     {
+      "op": "left_of",
+      "a": "glass_2",
+      "b": "can_5",
+      "gap": 0.1
+     },
+     {
+      "op": "left_of",
+      "a": "can_5",
+      "b": "bottle_2",
+      "gap": 0.1
+     },
+     {
+      "op": "left_of",
+      "a": "bottle_2",
+      "b": "glass_1",
+      "gap": 0.1
+     },
+     {
+      "op": "left_of",
+      "a": "glass_1",
+      "b": "can_1",
+      "gap": 0.1
+     },
+     {
+      "op": "left_of",
+      "a": "can_1",
+      "b": "can_2",
+      "gap": 0.1
+     },
+     {
+      "op": "left_of",
+      "a": "can_2",
+      "b": "can_3",
+      "gap": 0.1
+     },
+     {
+      "op": "left_of",
+      "a": "can_3",
+      "b": "can_6",
+      "gap": 0.1
+     },
+     {
+      "op": "left_of",
+      "a": "can_6",
+      "b": "bottle_1",
+      "gap": 0.1
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 4.580962657928467,
+   "solve_cpu_s": 4.581616726,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "ordered_by_height",
+     false,
+     [
+      0.09157940887962468,
+      0.08514325322175864,
+      0.10444383877620567,
+      0.1009607969335998,
+      0.1004264010116458,
+      0.11753090641650488,
+      0.1209462242140944,
+      0.12099999986821786,
+      0.1218886886126711,
+      0.17726458608767548
+     ]
+    ]
+   ],
+   "answer_items": 24
+  }
+ ],
+ "n_rounds": 1,
+ "success": false,
+ "first_round_success": false,
+ "self_ok": true
+}

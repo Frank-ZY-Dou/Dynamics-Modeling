@@ -1,0 +1,87 @@
+{
+ "cli": "2.1.310 (Claude Code)",
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": 3,
+ "seeds": [
+  0,
+  1,
+  2
+ ],
+ "conditions": [
+  "dsl_v1",
+  "dsl_v0",
+  "direct"
+ ],
+ "flags": [
+  "--safe-mode",
+  "--no-session-persistence",
+  "--tools",
+  "",
+  "--strict-mcp-config"
+ ],
+ "env_allowlist": [
+  "HOME",
+  "PATH",
+  "USER",
+  "LOGNAME",
+  "LANG",
+  "LC_ALL",
+  "LC_CTYPE",
+  "TERM",
+  "SHELL",
+  "TMPDIR",
+  "CLAUDE_CODE_DISABLE_AUTO_MEMORY=1"
+ ],
+ "system_prompts": {
+  "dsl_v1": {
+   "chars": 7143
+  },
+  "dsl_v0": {
+   "chars": 2452
+  },
+  "direct": {
+   "chars": 998
+  }
+ },
+ "started": "2026-10-24T22:34:10",
+ "code": {
+  "commit": "70b766323243a6a99902ff22112cc11ab5744198",
+  "local_changes": false
+ },
+ "assets_revision": "524747d9b5e1f21b5b18b56041788c01d745f1a1",
+ "tasks": [
+  "setting_n6",
+  "drinks_row_n6",
+  "drinks_row_n10",
+  "fruit_cans_n10",
+  "fruit_cans_n16",
+  "fruit_cans_n24",
+  "pick_ready_n8",
+  "minimal_fix_n12",
+  "stack_n6",
+  "palletize_n4",
+  "palletize_n6",
+  "kitchen_prep_n12",
+  "pack_n10",
+  "pack_n14",
+  "tool_layout_n7",
+  "desk_n6"
+ ],
+ "held_out": [
+  "desk",
+  "tool_layout"
+ ],
+ "workers": 6,
+ "cpus": [
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15
+ ],
+ "omp_threads": "1"
+}

@@ -1,0 +1,182 @@
+{
+ "task": "desk_n6",
+ "family": "desk",
+ "n": 6,
+ "condition": "dsl_v0",
+ "seed": 1,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 25.879833698272705,
+    "duration_ms": 25372,
+    "duration_api_ms": 25341,
+    "cost_usd": 0.0032132200000000006,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1502,
+     "cache_read": 3962,
+     "output": 5746,
+     "thinking": 5007
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1876,
+   "answer": {
+    "intent": "Arrange the desk for a robot at the base: keyboard centred on the midline 40-50 cm out, mouse to its right, notebook to its left with marker beyond it, mug further out with handle toward the robot, and tape dispenser well clear of the rest.",
+    "statements": [
+     {
+      "op": "fixed",
+      "a": "table"
+     },
+     {
+      "op": "no_penetration",
+      "a": "*",
+      "margin": 0.002
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.01
+     },
+     {
+      "op": "place",
+      "a": "keyboard",
+      "x": 0.45,
+      "y": 0,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "mouse",
+      "x": 0.45,
+      "y": -0.365
+     },
+     {
+      "op": "right_of",
+      "a": "mouse",
+      "b": "keyboard",
+      "axis": "y",
+      "gap": 0.365
+     },
+     {
+      "op": "place",
+      "a": "notebook",
+      "x": 0.45,
+      "y": 0.41,
+      "yaw": 90
+     },
+     {
+      "op": "left_of",
+      "a": "notebook",
+      "b": "keyboard",
+      "axis": "y",
+      "gap": 0.41
+     },
+     {
+      "op": "place",
+      "a": "marker",
+      "x": 0.565,
+      "y": 0.41,
+      "yaw": 90
+     },
+     {
+      "op": "in_front_of",
+      "a": "marker",
+      "b": "notebook",
+      "axis": "x",
+      "gap": 0.115
+     },
+     {
+      "op": "place",
+      "a": "mug",
+      "x": 0.68,
+      "y": 0.1,
+      "yaw": 8
+     },
+     {
+      "op": "in_front_of",
+      "a": "mug",
+      "b": "keyboard",
+      "axis": "x",
+      "gap": 0.27
+     },
+     {
+      "op": "place",
+      "a": "tape",
+      "x": 0.78,
+      "y": -0.25
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "keyboard",
+      "r": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "mouse",
+      "r": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "notebook",
+      "r": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "marker",
+      "r": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "mug",
+      "r": 0.2
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 16.940932035446167,
+   "solve_cpu_s": 16.94263381800002,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "gap(keyboard->mouse,-y)",
+     false,
+     -0.0006
+    ]
+   ],
+   "answer_items": 20
+  }
+ ],
+ "n_rounds": 1,
+ "success": false,
+ "first_round_success": false,
+ "self_ok": true
+}

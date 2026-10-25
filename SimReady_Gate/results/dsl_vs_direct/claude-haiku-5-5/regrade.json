@@ -1,0 +1,2408 @@
+{
+ "rule": "a line check measures half the range of the centres (from the best common line), no longer the distance from their mean",
+ "rebuilt_rounds": 3,
+ "changed": [
+  "tool_layout_n7_dsl_v1_s0",
+  "tool_layout_n7_dsl_v1_s1",
+  "tool_layout_n7_dsl_v1_s2"
+ ],
+ "mismatches": [],
+ "trials": {
+  "desk_n6_direct_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "desk_n6_direct_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "desk_n6_direct_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "desk_n6_dsl_v0_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "desk_n6_dsl_v0_s1": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false
+    }
+   ]
+  },
+  "desk_n6_dsl_v0_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false
+    },
+    {
+     "round": 2,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "desk_n6_dsl_v1_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "desk_n6_dsl_v1_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "desk_n6_dsl_v1_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "drinks_row_n10_direct_s0": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    }
+   ],
+   "repair_success_run": false,
+   "repair_success": false,
+   "repair_first_run": false,
+   "repair_first": false
+  },
+  "drinks_row_n10_direct_s1": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    }
+   ],
+   "repair_success_run": false,
+   "repair_success": false,
+   "repair_first_run": false,
+   "repair_first": false
+  },
+  "drinks_row_n10_direct_s2": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    }
+   ],
+   "repair_success_run": false,
+   "repair_success": false,
+   "repair_first_run": false,
+   "repair_first": false
+  },
+  "drinks_row_n10_dsl_v0_s0": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false
+    }
+   ]
+  },
+  "drinks_row_n10_dsl_v0_s1": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false
+    }
+   ]
+  },
+  "drinks_row_n10_dsl_v0_s2": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false
+    }
+   ]
+  },
+  "drinks_row_n10_dsl_v1_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "drinks_row_n10_dsl_v1_s1": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false
+    }
+   ]
+  },
+  "drinks_row_n10_dsl_v1_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "drinks_row_n6_direct_s0": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    }
+   ],
+   "repair_success_run": false,
+   "repair_success": false,
+   "repair_first_run": false,
+   "repair_first": false
+  },
+  "drinks_row_n6_direct_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "drinks_row_n6_direct_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "drinks_row_n6_dsl_v0_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "drinks_row_n6_dsl_v0_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "drinks_row_n6_dsl_v0_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "drinks_row_n6_dsl_v1_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "drinks_row_n6_dsl_v1_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "drinks_row_n6_dsl_v1_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n10_direct_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "fruit_cans_n10_direct_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "fruit_cans_n10_direct_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "fruit_cans_n10_dsl_v0_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false
+    },
+    {
+     "round": 2,
+     "ok_run": false,
+     "ok": false
+    },
+    {
+     "round": 3,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n10_dsl_v0_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n10_dsl_v0_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n10_dsl_v1_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n10_dsl_v1_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n10_dsl_v1_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n16_direct_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "fruit_cans_n16_direct_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": true,
+     "repair_ok": true
+    },
+    {
+     "round": 2,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    },
+    {
+     "round": 3,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "fruit_cans_n16_direct_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "fruit_cans_n16_dsl_v0_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n16_dsl_v0_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n16_dsl_v0_s2": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false
+    }
+   ]
+  },
+  "fruit_cans_n16_dsl_v1_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n16_dsl_v1_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n16_dsl_v1_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n24_direct_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "fruit_cans_n24_direct_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "fruit_cans_n24_direct_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": true,
+     "repair_ok": true
+    },
+    {
+     "round": 2,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "fruit_cans_n24_dsl_v0_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    },
+    {
+     "round": 2,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n24_dsl_v0_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n24_dsl_v0_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n24_dsl_v1_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n24_dsl_v1_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "fruit_cans_n24_dsl_v1_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "kitchen_prep_n12_direct_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "kitchen_prep_n12_direct_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "kitchen_prep_n12_direct_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "kitchen_prep_n12_dsl_v0_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "kitchen_prep_n12_dsl_v0_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "kitchen_prep_n12_dsl_v0_s2": {
+   "success_run": false,
+   "success": false,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    },
+    {
+     "round": 2,
+     "ok_run": false,
+     "ok": false
+    }
+   ]
+  },
+  "kitchen_prep_n12_dsl_v1_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "kitchen_prep_n12_dsl_v1_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "kitchen_prep_n12_dsl_v1_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "minimal_fix_n12_direct_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "minimal_fix_n12_direct_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "minimal_fix_n12_direct_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "minimal_fix_n12_dsl_v0_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "minimal_fix_n12_dsl_v0_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "minimal_fix_n12_dsl_v0_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "minimal_fix_n12_dsl_v1_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "minimal_fix_n12_dsl_v1_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "minimal_fix_n12_dsl_v1_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "pack_n10_direct_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": false,
+     "repair_ok": false
+    }
+   ],
+   "repair_success_run": false,
+   "repair_success": false,
+   "repair_first_run": false,
+   "repair_first": false
+  },
+  "pack_n10_direct_s1": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": true,
+     "repair_ok": true
+    },
+    {
+     "round": 2,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    },
+    {
+     "round": 3,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    }
+   ],
+   "repair_success_run": false,
+   "repair_success": false,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "pack_n10_direct_s2": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    },
+    {
+     "round": 2,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    },
+    {
+     "round": 3,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    }
+   ],
+   "repair_success_run": false,
+   "repair_success": false,
+   "repair_first_run": false,
+   "repair_first": false
+  },
+  "pack_n10_dsl_v0_s0": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false
+    }
+   ]
+  },
+  "pack_n10_dsl_v0_s1": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false
+    }
+   ]
+  },
+  "pack_n10_dsl_v0_s2": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false
+    }
+   ]
+  },
+  "pack_n10_dsl_v1_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "pack_n10_dsl_v1_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "pack_n10_dsl_v1_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "pack_n14_direct_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    },
+    {
+     "round": 2,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": false,
+     "repair_ok": false
+    }
+   ],
+   "repair_success_run": false,
+   "repair_success": false,
+   "repair_first_run": false,
+   "repair_first": false
+  },
+  "pack_n14_direct_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    },
+    {
+     "round": 2,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": false,
+   "repair_first": false
+  },
+  "pack_n14_direct_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": false,
+     "repair_ok": false
+    }
+   ],
+   "repair_success_run": false,
+   "repair_success": false,
+   "repair_first_run": false,
+   "repair_first": false
+  },
+  "pack_n14_dsl_v0_s0": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false
+    }
+   ]
+  },
+  "pack_n14_dsl_v0_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "pack_n14_dsl_v0_s2": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false
+    }
+   ]
+  },
+  "pack_n14_dsl_v1_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "pack_n14_dsl_v1_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "pack_n14_dsl_v1_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "palletize_n4_direct_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "palletize_n4_direct_s1": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": true,
+     "repair_ok": true
+    },
+    {
+     "round": 2,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": true,
+     "repair_ok": true
+    },
+    {
+     "round": 3,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "palletize_n4_direct_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "palletize_n4_dsl_v0_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    },
+    {
+     "round": 2,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "palletize_n4_dsl_v0_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    },
+    {
+     "round": 2,
+     "ok_run": true,
+     "ok": true
+    },
+    {
+     "round": 3,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "palletize_n4_dsl_v0_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    },
+    {
+     "round": 2,
+     "ok_run": true,
+     "ok": true
+    },
+    {
+     "round": 3,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "palletize_n4_dsl_v1_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "palletize_n4_dsl_v1_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    },
+    {
+     "round": 2,
+     "ok_run": true,
+     "ok": true
+    },
+    {
+     "round": 3,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "palletize_n4_dsl_v1_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    },
+    {
+     "round": 2,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "palletize_n6_direct_s0": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": true,
+     "repair_ok": true
+    },
+    {
+     "round": 2,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": true,
+     "repair_ok": true
+    },
+    {
+     "round": 3,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "palletize_n6_direct_s1": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": true,
+     "repair_ok": true
+    },
+    {
+     "round": 2,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": true,
+     "repair_ok": true
+    },
+    {
+     "round": 3,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "palletize_n6_direct_s2": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": true,
+     "repair_ok": true
+    },
+    {
+     "round": 2,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    },
+    {
+     "round": 3,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "palletize_n6_dsl_v0_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "palletize_n6_dsl_v0_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "palletize_n6_dsl_v0_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "palletize_n6_dsl_v1_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "palletize_n6_dsl_v1_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "palletize_n6_dsl_v1_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    },
+    {
+     "round": 2,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "pick_ready_n8_direct_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "pick_ready_n8_direct_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "pick_ready_n8_direct_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "pick_ready_n8_dsl_v0_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "pick_ready_n8_dsl_v0_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "pick_ready_n8_dsl_v0_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "pick_ready_n8_dsl_v1_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "pick_ready_n8_dsl_v1_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    },
+    {
+     "round": 2,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "pick_ready_n8_dsl_v1_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "setting_n6_direct_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "setting_n6_direct_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "setting_n6_direct_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "setting_n6_dsl_v0_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "setting_n6_dsl_v0_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "setting_n6_dsl_v0_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "setting_n6_dsl_v1_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "setting_n6_dsl_v1_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "setting_n6_dsl_v1_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "stack_n6_direct_s0": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    },
+    {
+     "round": 2,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    },
+    {
+     "round": 3,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    }
+   ],
+   "repair_success_run": false,
+   "repair_success": false,
+   "repair_first_run": false,
+   "repair_first": false
+  },
+  "stack_n6_direct_s1": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    },
+    {
+     "round": 2,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    },
+    {
+     "round": 3,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    }
+   ],
+   "repair_success_run": false,
+   "repair_success": false,
+   "repair_first_run": false,
+   "repair_first": false
+  },
+  "stack_n6_direct_s2": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    },
+    {
+     "round": 2,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    },
+    {
+     "round": 3,
+     "ok_run": false,
+     "ok": false,
+     "repair_ok_run": false,
+     "repair_ok": false
+    }
+   ],
+   "repair_success_run": false,
+   "repair_success": false,
+   "repair_first_run": false,
+   "repair_first": false
+  },
+  "stack_n6_dsl_v0_s0": {
+   "success_run": false,
+   "success": false,
+   "first_run": false,
+   "first": false,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": false
+    }
+   ]
+  },
+  "stack_n6_dsl_v0_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "stack_n6_dsl_v0_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "stack_n6_dsl_v1_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "stack_n6_dsl_v1_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "stack_n6_dsl_v1_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "tool_layout_n7_direct_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "tool_layout_n7_direct_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "tool_layout_n7_direct_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true,
+     "repair_ok_run": true,
+     "repair_ok": true
+    }
+   ],
+   "repair_success_run": true,
+   "repair_success": true,
+   "repair_first_run": true,
+   "repair_first": true
+  },
+  "tool_layout_n7_dsl_v0_s0": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "tool_layout_n7_dsl_v0_s1": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "tool_layout_n7_dsl_v0_s2": {
+   "success_run": true,
+   "success": true,
+   "first_run": true,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": true,
+     "ok": true
+    }
+   ]
+  },
+  "tool_layout_n7_dsl_v1_s0": {
+   "success_run": false,
+   "success": true,
+   "first_run": false,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": true
+    }
+   ]
+  },
+  "tool_layout_n7_dsl_v1_s1": {
+   "success_run": false,
+   "success": true,
+   "first_run": false,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": true
+    }
+   ]
+  },
+  "tool_layout_n7_dsl_v1_s2": {
+   "success_run": false,
+   "success": true,
+   "first_run": false,
+   "first": true,
+   "rounds": [
+    {
+     "round": 1,
+     "ok_run": false,
+     "ok": true
+    }
+   ]
+  }
+ }
+}

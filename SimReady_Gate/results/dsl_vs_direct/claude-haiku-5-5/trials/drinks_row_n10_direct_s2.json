@@ -1,0 +1,154 @@
+{
+ "task": "drinks_row_n10",
+ "family": "drinks_row",
+ "n": 10,
+ "condition": "direct",
+ "seed": 2,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 9.005956888198853,
+    "duration_ms": 8406,
+    "duration_api_ms": 8376,
+    "cost_usd": 0.0010960499999999999,
+    "usage": {
+     "input": 2,
+     "cache_creation": 402,
+     "cache_read": 2145,
+     "output": 1988,
+     "thinking": 1633
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1938,
+   "answer": {
+    "poses": [
+     {
+      "name": "can_4",
+      "x": 0.75,
+      "y": 0.495,
+      "yaw": 0
+     },
+     {
+      "name": "glass_2",
+      "x": 0.75,
+      "y": 0.385,
+      "yaw": 0
+     },
+     {
+      "name": "can_5",
+      "x": 0.75,
+      "y": 0.275,
+      "yaw": 0
+     },
+     {
+      "name": "bottle_2",
+      "x": 0.75,
+      "y": 0.165,
+      "yaw": 0
+     },
+     {
+      "name": "glass_1",
+      "x": 0.75,
+      "y": 0.055,
+      "yaw": 0
+     },
+     {
+      "name": "can_1",
+      "x": 0.75,
+      "y": -0.055,
+      "yaw": 0
+     },
+     {
+      "name": "can_2",
+      "x": 0.75,
+      "y": -0.165,
+      "yaw": 0
+     },
+     {
+      "name": "can_3",
+      "x": 0.75,
+      "y": -0.275,
+      "yaw": 0
+     },
+     {
+      "name": "can_6",
+      "x": 0.75,
+      "y": -0.385,
+      "yaw": 0
+     },
+     {
+      "name": "bottle_1",
+      "x": 0.75,
+      "y": -0.495,
+      "yaw": 0
+     }
+    ]
+   },
+   "report": {
+    "ok": true,
+    "penetrating_pairs": [],
+    "not_resting_on_anything": [],
+    "off_the_support": [],
+    "missing_poses": []
+   },
+   "self_ok": true,
+   "solve_s": 1.4278433322906494,
+   "solve_cpu_s": 1.4281034129999988,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "ordered_by_height",
+     false,
+     [
+      0.09157940887962468,
+      0.08514325322175864,
+      0.10444383877620567,
+      0.1009607969335998,
+      0.1004264010116458,
+      0.11753090641650488,
+      0.1209462242140944,
+      0.12099999986821786,
+      0.1218886886126711,
+      0.17726458608767548
+     ]
+    ]
+   ],
+   "answer_items": 10,
+   "direct_repair": {
+    "rubric_ok": false,
+    "self_ok": true,
+    "solve_s": 4.239739656448364,
+    "solve_cpu_s": 4.240410935,
+    "rubric_failed": [
+     [
+      "ordered_by_height",
+      false,
+      [
+       0.09157940887962468,
+       0.08514325322175864,
+       0.10444383877620567,
+       0.1009607969335998,
+       0.1004264010116458,
+       0.11753090641650488,
+       0.1209462242140944,
+       0.12099999986821786,
+       0.1218886886126711,
+       0.17726458608767548
+      ]
+     ]
+    ]
+   }
+  }
+ ],
+ "n_rounds": 1,
+ "success": false,
+ "first_round_success": false,
+ "self_ok": true
+}
