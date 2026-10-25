@@ -453,7 +453,7 @@ class PrebuiltFCLOracle:
                                          pos_world.copy(),
                                          pos_world + n_k * depth_world))
                     continue
-                depth_u, n_raw, pos_u = _contact_witness(pair_contacts)
+                depth_u, n_raw, pos_u = _contact_witness(fcl, fcl_objs[i], fcl_objs[j], pair_contacts, (lo[i], hi[i]), (lo[j], hi[j]))
                 depth_world = depth_u * s
                 pos_world = pos_u * s
                 cp_on_a = pos_world.copy()
@@ -1885,7 +1885,9 @@ def _optimize_rotations_fcl(centers, rots, nfs, mverts, mfaces, N,
                         continue
                     # The reported normal is the exit direction of body j
                     # (second argument) through the crossed triangle.
-                    depth_u, n_raw, pos_u = _contact_witness(pair_contacts)
+                    depth_u, n_raw, pos_u = _contact_witness(fcl, fcl_objs[i], fcl_objs[j], pair_contacts,
+                                                             (np.array(aabbs[i][:3]), np.array(aabbs[i][3:])),
+                                                             (np.array(aabbs[j][:3]), np.array(aabbs[j][3:])))
                     cl_world = pos_u * scale
                     d_min_world = -depth_u * scale
                 nn = np.linalg.norm(n_raw)

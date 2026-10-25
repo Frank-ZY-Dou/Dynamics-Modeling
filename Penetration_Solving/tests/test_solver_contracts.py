@@ -425,7 +425,9 @@ class RotationHelper(unittest.TestCase):
 class ContactWitness(unittest.TestCase):
     """The witness of a crossing pair (depth, normal, position) is taken from
     every contact FCL reports, so it does not depend on the order of the
-    contacts, which follows FCL's traversal of the two BVHs."""
+    contacts, which follows FCL's traversal of the two BVHs. When the normals
+    cancel, the normal is the direction that separates the pair with the least
+    translation and the depth that translation."""
 
     @staticmethod
     def _pair():
@@ -437,17 +439,23 @@ class ContactWitness(unittest.TestCase):
         t = np.array([0.09, 0.03, -0.02])
         return fcl, a, b, R, t
 
+    @staticmethod
+    def _posed(fcl, mesh, R=np.eye(3), t=np.zeros(3)):
+        """FCL object of a body-frame BVH with its pose, and its box in that frame."""
+        w = np.asarray(mesh.vertices) @ np.asarray(R).T + t
+        return fcl.CollisionObject(_bvh(mesh.vertices, mesh.faces), fcl.Transform(R, t)), (w.min(0), w.max(0))
+
     def test_witness_does_not_depend_on_the_order_of_the_contacts(self):
         from mesh_collision import _contact_witness, _fcl_all_contacts
         fcl, a, b, R, t = self._pair()
-        oa = fcl.CollisionObject(_bvh(a.vertices, a.faces), fcl.Transform())
-        ob = fcl.CollisionObject(_bvh(b.vertices, b.faces), fcl.Transform(R, t))
+        oa, box_a = self._posed(fcl, a)
+        ob, box_b = self._posed(fcl, b, R, t)
         contacts = _fcl_all_contacts(fcl, oa, ob)
         self.assertGreater(len(contacts), 64)                # the complete second query ran
-        d0, n0, p0 = _contact_witness(contacts)
+        d0, n0, p0 = _contact_witness(fcl, oa, ob, contacts, box_a, box_b)
         rng = np.random.default_rng(0)
         for _ in range(3):
-            d, n, p = _contact_witness([contacts[k] for k in rng.permutation(len(contacts))])
+            d, n, p = _contact_witness(fcl, oa, ob, [contacts[k] for k in rng.permutation(len(contacts))], box_a, box_b)
             self.assertEqual(d, d0)
             np.testing.assert_allclose(n, n0, rtol=0, atol=1e-12)
             np.testing.assert_allclose(p, p0, rtol=0, atol=1e-12)
@@ -457,14 +465,52 @@ class ContactWitness(unittest.TestCase):
         # vertices with the pose as FCL's transform (as PrebuiltFCLOracle does)
         from mesh_collision import _contact_witness, _fcl_all_contacts
         fcl, a, b, R, t = self._pair()
-        oa = fcl.CollisionObject(_bvh(a.vertices, a.faces), fcl.Transform())
-        world = fcl.CollisionObject(_bvh(np.asarray(b.vertices) @ R.T + t, b.faces), fcl.Transform())
-        posed = fcl.CollisionObject(_bvh(b.vertices, b.faces), fcl.Transform(R, t))
-        d1, n1, p1 = _contact_witness(_fcl_all_contacts(fcl, oa, world))
-        d2, n2, p2 = _contact_witness(_fcl_all_contacts(fcl, oa, posed))
+        oa, box_a = self._posed(fcl, a)
+        world, box_b = self._posed(fcl, trimesh.Trimesh(np.asarray(b.vertices) @ R.T + t, b.faces, process=False))
+        posed, _ = self._posed(fcl, b, R, t)
+        d1, n1, p1 = _contact_witness(fcl, oa, world, _fcl_all_contacts(fcl, oa, world), box_a, box_b)
+        d2, n2, p2 = _contact_witness(fcl, oa, posed, _fcl_all_contacts(fcl, oa, posed), box_a, box_b)
         self.assertAlmostEqual(d1, d2, delta=1e-9 * max(d1, 1e-12))
         self.assertLess(float(np.degrees(np.arccos(np.clip(n1 @ n2, -1.0, 1.0)))), 1e-5)
         np.testing.assert_allclose(p1, p2, rtol=0, atol=1e-9)
+
+    def test_cancelling_normals_take_the_least_separating_direction(self):
+        # two co-centred plates, one turned 45 degrees: the contacts on opposite
+        # sides cancel; lifting one plate by its thickness parts them, while the
+        # deepest contact's normal is horizontal and needs a slide of 1.21
+        import fcl
+        from mesh_collision import _contact_witness, _fcl_all_contacts
+        from scipy.spatial.transform import Rotation
+        plate = trimesh.creation.box(extents=(1.0, 1.0, 0.2))
+        oa, box_a = self._posed(fcl, plate)
+        ob, box_b = self._posed(fcl, plate, Rotation.from_rotvec([0.0, 0.0, np.pi / 4]).as_matrix())
+        contacts = _fcl_all_contacts(fcl, oa, ob)
+        self.assertLess(np.linalg.norm(np.sum([c.normal for c in contacts], axis=0)), 1e-9 * len(contacts))
+        depth, n, _ = _contact_witness(fcl, oa, ob, contacts, box_a, box_b)
+        self.assertAlmostEqual(depth, 0.2, delta=1e-6)
+        self.assertGreater(abs(float(n[2])), 1.0 - 1e-9)
+        np.testing.assert_array_equal(ob.getTranslation(), np.zeros(3))   # the search put the body back
+        ob.setTranslation(depth * (1.0 + 1e-6) * n)
+        res = fcl.CollisionResult()
+        fcl.collide(oa, ob, fcl.CollisionRequest(), res)
+        self.assertFalse(res.is_collision)
+
+    def test_separation_does_not_end_inside_the_other_body(self):
+        # a cube across the top face of a big box, mostly below it: sinking it by
+        # 0.04 also ends the crossing of the surfaces, but inside the box, which
+        # FCL's test of the surfaces reads as apart; the search lifts it by 0.06
+        import fcl
+        from mesh_collision import _least_separating_direction
+        big, box_big = self._posed(fcl, trimesh.creation.box(extents=(1.0, 1.0, 1.0)))
+        cube, box_cube = self._posed(fcl, trimesh.creation.box(extents=(0.1, 0.1, 0.1)), t=np.array([0.0, 0.0, 0.49]))
+        cube.setTranslation(np.array([0.0, 0.0, 0.49 - 0.041]))
+        res = fcl.CollisionResult()
+        fcl.collide(big, cube, fcl.CollisionRequest(), res)
+        self.assertFalse(res.is_collision)                   # inside, yet apart to FCL
+        cube.setTranslation(np.array([0.0, 0.0, 0.49]))
+        t, u = _least_separating_direction(fcl, big, cube, box_big, box_cube)
+        self.assertAlmostEqual(t, 0.06, delta=1e-6)
+        np.testing.assert_allclose(u, (0.0, 0.0, 1.0), rtol=0, atol=1e-9)
 
 
 def _bvh(verts, faces):

@@ -427,7 +427,100 @@ def _fcl_all_contacts(fcl_mod, o_i, o_j) -> list:
     return list(res.contacts) if res.is_collision else []
 
 
-def _contact_witness(contacts: list) -> tuple[float, np.ndarray, np.ndarray]:
+SEPARATION_DIRECTIONS = 32     # points of a Fibonacci sphere whose directions, either way, are searched first
+SEPARATION_GRID = 32           # steps from the boxes' separation down to zero along a direction
+SEPARATION_BISECT = 30         # bisections of the step at which the bodies last intersect
+SEPARATION_TURN = (0.4, 1e-3)  # angles (rad) the local search on the sphere starts and stops at
+
+
+def _fibonacci_sphere(n: int) -> np.ndarray:
+    """n nearly evenly spread unit vectors, in a fixed order."""
+    k = np.arange(n, dtype=np.float64) + 0.5
+    z = 1.0 - 2.0 * k / n
+    r = np.sqrt(np.maximum(0.0, 1.0 - z * z))
+    a = np.pi * (3.0 - np.sqrt(5.0)) * k
+    return np.column_stack([r * np.cos(a), r * np.sin(a), z])
+
+
+def _least_separating_direction(fcl_mod, o_i, o_j, box_i, box_j) -> tuple[float, np.ndarray]:
+    """(t, u): the direction u along which moving body j (o_j) separates it
+    from body i with the least translation t, and that translation: the pair's
+    penetration depth and its direction, the step that the QP, minimizing the
+    motion, would take for this pair alone.
+
+    Along u, t(u) is the last translation at which the bodies still intersect,
+    not the first at which they are apart: FCL tests whether the surfaces
+    cross, so a body inside the other reads as apart, but past the last
+    crossing neither can be inside the other. Past the separation of their
+    boxes (box_i, box_j: (lo, hi) in the objects' frame) they cannot meet, so a
+    grid from there down to zero finds the last intersecting step and
+    bisection refines it. t(u) is not convex in u: the search takes the best
+    of the directions of SEPARATION_DIRECTIONS points of a Fibonacci sphere,
+    of both bodies' axes and of the line between the boxes' centres, each
+    either way, then polls four directions at an angle from the best and moves
+    to the best of them that shortens t, halving the angle when none does.
+    Every direction comes with its opposite, so neither body is favoured; a
+    tie keeps the earlier direction. o_j is put back where it was.
+    """
+    lo_i, hi_i = (np.asarray(x, dtype=np.float64) for x in box_i)
+    lo_j, hi_j = (np.asarray(x, dtype=np.float64) for x in box_j)
+    axes = list(_fibonacci_sphere(SEPARATION_DIRECTIONS))
+    for o in (o_i, o_j):
+        R = np.asarray(o.getRotation(), dtype=np.float64)
+        axes += [R[:, k] for k in range(3)]
+    d = 0.5 * (lo_j + hi_j) - 0.5 * (lo_i + hi_i)
+    if np.linalg.norm(d) > 1e-12:
+        axes.append(d)
+    t0 = np.asarray(o_j.getTranslation(), dtype=np.float64)
+    req = fcl_mod.CollisionRequest(num_max_contacts=1, enable_contact=False)
+
+    def intersect(t, u):
+        o_j.setTranslation(t0 + t * u)
+        res = fcl_mod.CollisionResult()
+        fcl_mod.collide(o_i, o_j, req, res)
+        return bool(res.is_collision)
+
+    def exit_translation(u):
+        top = float(np.maximum(u * lo_i, u * hi_i).sum() + np.maximum(-u * lo_j, -u * hi_j).sum())
+        step = top / SEPARATION_GRID
+        k = SEPARATION_GRID - 1
+        while k > 0 and not intersect(k * step, u):
+            k -= 1
+        lo_t, hi_t = k * step, (k + 1) * step       # they intersect at lo_t (at 0 they cross), not at hi_t
+        for _ in range(SEPARATION_BISECT):
+            mid = 0.5 * (lo_t + hi_t)
+            if intersect(mid, u):
+                lo_t = mid
+            else:
+                hi_t = mid
+        return hi_t
+
+    def best_of(dirs, best):
+        for u in dirs:
+            u = u / np.linalg.norm(u)
+            t = exit_translation(u)
+            if best is None or t < best[0]:
+                best = (t, u)
+        return best
+
+    try:
+        best = best_of([sign * a for a in axes for sign in (1.0, -1.0)], None)
+        angle = SEPARATION_TURN[0]
+        while angle > SEPARATION_TURN[1]:
+            u = best[1]
+            a = np.cross(u, np.eye(3)[int(np.argmin(np.abs(u)))])
+            a /= np.linalg.norm(a)
+            b = np.cross(u, a)
+            polled = best_of([np.cos(angle) * u + np.sin(angle) * v for v in (a, -a, b, -b)], best)
+            if polled is best:
+                angle *= 0.5
+            best = polled
+    finally:
+        o_j.setTranslation(t0)
+    return best
+
+
+def _contact_witness(fcl_mod, o_i, o_j, contacts: list, box_i, box_j) -> tuple[float, np.ndarray, np.ndarray]:
     """(depth, normal, position) standing for a non-empty list of FCL contacts
     of one pair, whatever order FCL lists them in: the deepest depth, the
     direction of the sum of the contacts' normals (FCL's own: the exit
@@ -435,28 +528,26 @@ def _contact_witness(contacts: list) -> tuple[float, np.ndarray, np.ndarray]:
     of their positions. The deepest contact alone is a poor witness: FCL's
     depth of a triangle pair grows with the triangles, so the deepest is often
     an outlier, and its normal is that of one triangle. When the normals cancel
-    (a symmetric overlap), the normal is that of the deepest contact, the
-    nearest to the mean position of the deepest ones (ties by position).
+    (a symmetric overlap), the sum gives no direction, and the contacts' depths
+    belong to directions that cancel: the normal is then the direction along
+    which the pair parts with the least translation, and that translation is
+    the depth (_least_separating_direction; box_i, box_j: the bodies' boxes in
+    the frame of o_i and o_j).
     """
-    depths = [float(c.penetration_depth) for c in contacts]
-    depth = max(depths)
+    depth = max(float(c.penetration_depth) for c in contacts)
     pos = np.mean([np.asarray(c.pos, dtype=np.float64) for c in contacts], axis=0)
     normal = np.sum([np.asarray(c.normal, dtype=np.float64) for c in contacts], axis=0)
     if np.linalg.norm(normal) < 1e-9 * len(contacts):
-        tied = [c for c, d in zip(contacts, depths) if d >= depth - 1e-9]
-        w = np.mean([np.asarray(c.pos, dtype=np.float64) for c in tied], axis=0)
-        best = min(tied, key=lambda c: (round(float(np.linalg.norm(np.asarray(c.pos, dtype=np.float64) - w)), 9),
-                                        tuple(np.round(np.asarray(c.pos, dtype=np.float64), 9))))
-        normal = np.asarray(best.normal, dtype=np.float64)
-    return depth, normal / max(np.linalg.norm(normal), 1e-12), pos
+        depth, normal = _least_separating_direction(fcl_mod, o_i, o_j, box_i, box_j)
+    return depth, normal / np.linalg.norm(normal), pos
 
 
-def _fcl_pair_signed_distance(fcl_mod, bvh_i, bvh_j, mesh_i=None, mesh_j=None) -> float:
+def _fcl_pair_signed_distance(fcl_mod, bvh_i, bvh_j, mesh_i, mesh_j) -> float:
     """FCL signed distance between two BVHs whose verts are already in world
-    coords: distance() when the surfaces are apart, collide() when they
-    cross (exact triangle-pair penetration depth). When the trimesh objects
-    are given, a pair whose surfaces are apart but whose AABBs nest is also
-    checked for one body lying entirely inside the other.
+    coords (those of the trimesh objects mesh_i, mesh_j): distance() when the
+    surfaces are apart, collide() when they cross (exact triangle-pair
+    penetration depth). A pair whose surfaces are apart but whose AABBs nest
+    is also checked for one body lying entirely inside the other.
     """
     ident3 = np.eye(3)
     zero3 = np.zeros(3)
@@ -467,17 +558,16 @@ def _fcl_pair_signed_distance(fcl_mod, bvh_i, bvh_j, mesh_i=None, mesh_j=None) -
     res = fcl_mod.DistanceResult()
     d = fcl_mod.distance(o_i, o_j, req, res)
     if d > 0.0:
-        if mesh_i is not None and mesh_j is not None:
-            nested = _nested_signed_distance(
-                mesh_i, mesh_j, res.nearest_points[0], res.nearest_points[1], d)
-            if nested is not None:
-                return nested
+        nested = _nested_signed_distance(
+            mesh_i, mesh_j, res.nearest_points[0], res.nearest_points[1], d)
+        if nested is not None:
+            return nested
         return float(d)
     # Overlap: use collide() to extract exact penetration depth.
     contacts = _fcl_all_contacts(fcl_mod, o_i, o_j)
     if not contacts:
         return 0.0
-    return -_contact_witness(contacts)[0]
+    return -_contact_witness(fcl_mod, o_i, o_j, contacts, mesh_i.bounds, mesh_j.bounds)[0]
 
 
 def _build_fcl_bvhs(meshes: List[trimesh.Trimesh]):
@@ -827,7 +917,9 @@ class MeshOracle:
             if not contacts:
                 # Distance=0 but not colliding: touching; treat as sd=0.
                 return 0.0, _safe_normalize(cj - ci)
-            depth, raw, _ = _contact_witness(contacts)
+            depth, raw, _ = _contact_witness(fcl, o_i, o_j, contacts,
+                                             (self._local_aabb_min[i] + ci, self._local_aabb_max[i] + ci),
+                                             (self._local_aabb_min[j] + cj, self._local_aabb_max[j] + cj))
             if np.linalg.norm(raw) < 1e-12:
                 raw = cj - ci
             return -depth, _safe_normalize(raw)

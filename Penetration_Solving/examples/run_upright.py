@@ -237,7 +237,9 @@ def fcl_contacts(
                     # The reported normal is the exit direction of body j
                     # through the crossed triangle; it is kept as is (the
                     # centroid line points the wrong way inside a cavity).
-                    depth, normal, pos = _contact_witness(pair_contacts)
+                    depth, normal, pos = _contact_witness(fcl, collision_objects[i], collision_objects[j], pair_contacts,
+                                                          (aabb_min[i] / scale, aabb_max[i] / scale),
+                                                          (aabb_min[j] / scale, aabb_max[j] / scale))
                     signed = -depth * scale
                     if np.linalg.norm(normal) < 1e-12:
                         normal = centers[j] - centers[i]
