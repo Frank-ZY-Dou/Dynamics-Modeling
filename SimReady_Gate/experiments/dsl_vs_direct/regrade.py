@@ -68,7 +68,7 @@ def main():
                         mismatches.append({"trial": p.stem, "round": r["round"], "checks": other_failures(checks)})
                     item["ok"] = ok
                 if redo_repair:
-                    fixed = P.generic_repair(final, task.support)[0]
+                    fixed = P.generic_repair(final, task.support, on=P.typed_supports(r["answer"]))[0]
                     ok2, checks2 = P.grade(task, fixed, start)
                     if other_failures(checks2):
                         mismatches.append({"trial": p.stem, "round": r["round"], "repair": True, "checks": other_failures(checks2)})

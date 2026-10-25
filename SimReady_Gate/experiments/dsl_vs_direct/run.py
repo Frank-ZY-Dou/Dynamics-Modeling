@@ -106,7 +106,7 @@ def run_trial(job):
         prev_recorded = same
         rec = {"round": r, "llm": llm_rec, "message_chars": len(msg), "answer": answer}
         if recorded is not None:
-            rec["answer_from"] = "recorded" if same else "called"
+            rec["answer_from"] = old.get("answer_from", "recorded") if same else "called"     # a replay of a replay keeps where each answer came from
         clock = {}
         if answer is None:
             report, self_ok, final, t_solve = {"ok": False, "error": "no structured answer"}, False, start, 0.0
@@ -120,7 +120,7 @@ def run_trial(job):
                     "answer_items": len(answer.get("statements", answer.get("poses", []))) if isinstance(answer, dict) else None})
         if cond == "direct" and answer is not None:
             fix_clock = {}
-            fixed, gr_ok, t_fix = P.generic_repair(final, task.support, clock=fix_clock)
+            fixed, gr_ok, t_fix = P.generic_repair(final, task.support, on=P.typed_supports(answer), clock=fix_clock)
             p2, c2 = P.grade(task, fixed, start)
             rec["direct_repair"] = {"rubric_ok": p2, "self_ok": gr_ok, "solve_s": t_fix, "solve_cpu_s": fix_clock.get("cpu_s", 0.0),
                                     "rubric_failed": [c for c in c2 if not c[1]]}
@@ -177,7 +177,8 @@ def main():
             "workers": a.workers, "cpus": sorted(os.sched_getaffinity(0)), "omp_threads": os.environ.get("OMP_NUM_THREADS")}
     if replay_meta is not None:
         meta["replay_of"] = {"run": os.path.basename(os.path.normpath(a.replay)), "started": replay_meta["started"],
-                             "code": replay_meta.get("code"), "cli": replay_meta.get("cli")}
+                             "code": replay_meta.get("code"), "cli": replay_meta.get("cli")} | (
+                                {"replay_of": replay_meta["replay_of"]} if "replay_of" in replay_meta else {})
     if (out / "run_meta.json").exists():                 # a rerun of the trials a crash left out: keep the first record
         first = json.loads((out / "run_meta.json").read_text())
         first.setdefault("resumed", []).append({k: meta[k] for k in ("started", "code", "cli", "cpus", "workers")} | {"trials": len(jobs)})

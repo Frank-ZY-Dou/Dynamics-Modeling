@@ -3,7 +3,8 @@
 dsl:     the answer is a SimReady program: validated against the scene, compiled, repaired by S4R on
          the starting scene (`simready.cli.repair_scene`, exactly what `repair` runs), verified.
 direct:  the answer is the final pose of every free body: x, y of its reference centre and its yaw;
-         the body is set upright on the surface under it (or on the body it names) and verified.
+         the body is set down upright on the surface under it (or on the body it names), as the repair
+         seats a body last, and verified.
 The report each pipeline returns is what the next round of that condition is told.
 """
 from __future__ import annotations
@@ -19,7 +20,7 @@ from simready.dsl.schema import validate_program_json, ProgramError, V0_OPS, V0_
 from simready.dsl.model import parse_program
 from simready.dsl.compile import support_height_for
 from simready.gates.verify import verify_scene
-from simready.repair.upright_s4r import rotz
+from simready.repair.upright_s4r import rotz, _lift_clear
 
 SOLVER = {"s_min": 0.05, "ds_max": 0.05, "tail": 40, "max_xy_step": 0.05}
 
@@ -96,9 +97,12 @@ def run_poses(layout_path, obj: dict, support: str = "table", clock: dict | None
             seat(on, depth + 1)
         b = sc[n]
         b.rotation = rotz(math.radians(yaw))
-        b.center = np.array([x, y, b.center[2]])
+        # set down from above: the drop meets the top of what it rests on, wherever the body started (left at its
+        # starting height, a body moved onto a taller one, a carton onto a carton, met the inside of it)
+        b.center = np.array([x, y, float(sc[on].world_aabb()[1][2]) + b.support_offset(sc.up) + 0.01])
         h = support_height_for(sc, b, sc[on])
         b.center = np.array([x, y, h + b.support_offset(sc.up)])
+        _lift_clear(sc, b, sc[on])      # as the repair's last seat: a residual of the sampled drop is raised clear
         placed.add(n)
     for n in given:
         seat(n)
@@ -113,10 +117,21 @@ def run_poses(layout_path, obj: dict, support: str = "table", clock: dict | None
     return sc, report, bool(report["ok"]), _elapsed(t0, c0, clock)
 
 
-def generic_repair(sc, support: str = "table", clock: dict | None = None):
+def typed_supports(obj) -> dict:
+    """body -> the body a pose answer rests it on (the "on" of its pose)."""
+    poses = obj.get("poses") if isinstance(obj, dict) else None
+    return {p["name"]: p["on"] for p in poses if isinstance(p, dict) and isinstance(p.get("name"), str)
+            and isinstance(p.get("on"), str)} if isinstance(poses, list) else {}
+
+
+def generic_repair(sc, support: str = "table", on: dict | None = None, clock: dict | None = None):
     """The ablation: S4R with only the geometric statements every task shares (no penetration,
-    upright on the support, over its top), on poses a model typed."""
-    prog = parse_program(f"program\n  no_penetration(*, margin=0.005)\n  on_support(*, {support})\n  upright(*)\n  within(*, {support}.top, inset=0.01)\n")
+    upright on the support, over its top), on poses a model typed; a body the answer rests on
+    another (`on`, typed_supports) stays on it."""
+    names = {b.name for b in sc.free()}
+    rest = "".join(f"  on_support({n}, {s})\n" for n, s in sorted((on or {}).items()) if n in names and s in names and s != n)
+    prog = parse_program(f"program\n  no_penetration(*, margin=0.005)\n  on_support(*, {support})\n{rest}  upright(*)\n"
+                         f"  within(*, {support}.top, inset=0.01)\n")
     sc2 = copy.deepcopy(sc)
     t0, c0 = time.time(), time.process_time()
     try:
