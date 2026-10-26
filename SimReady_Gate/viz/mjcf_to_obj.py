@@ -90,8 +90,8 @@ def export_object(xml_path, out_dir, name, c_model=None):
         fh.write(f"# visual geometry of {xml_path} (MuJoCo-compiled, root-body frame)\nmtllib {name}.mtl\n")
         for p in V:
             fh.write(f"v {p[0]:.6f} {p[1]:.6f} {p[2]:.6f}\n")
-        for t in VT:
-            fh.write(f"vt {t[0]:.6f} {t[1]:.6f}\n")
+        for t in VT:                     # MuJoCo keeps an OBJ's texture coordinates as (u, 1 - v); the file takes (u, v)
+            fh.write(f"vt {t[0]:.6f} {1.0 - t[1]:.6f}\n")
         cur = None
         for tri, tt, mk in zip(F, FT, FM):
             if mk != cur:

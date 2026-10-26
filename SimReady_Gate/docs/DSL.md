@@ -30,6 +30,7 @@ A program row is `lo <= sum(c * step) <= hi` with an elastic slack:
 | convex | `reach` (outer radius), `cluster`, `near`, `balanced_on`, `max_move` | the tangent half-plane at the current poses (a superset that tightens as the steps re-linearise); `max_move` uses a 16-gon inscribed in its disc, exact rows at most 2 % conservative |
 | non-convex | `reach` (inner radius), `min_distance`, `facing`, `offset` in a body's frame, `attach` | the first-order expansion at the current poses |
 | disjunctive | `keep_out`, `approach` | the side that needs the least motion at the current poses, chosen again at every step |
+| fitted | `ring` | rows on the centres at the angle that fits the current poses best, fitted again at every step (exact with `angle`); `face` as `facing` |
 | contact margins | `clearance` | the contact rows of that body keep the gap instead of the program's margin |
 
 A requirement's slack costs 100 per m² (per rad² for headings), so it yields only to the contacts;
@@ -84,6 +85,7 @@ matches no free body is an error, so a misspelt group is not silently empty.
 | `align(m1, ..., axis=x, edge=center, tol=0.005)` | equal x (or y) of the centres or of the footprints' `min` / `max` edge | flush backs, spines in line |
 | `evenly_spaced(m1, m2, m3, ..., axis=y, tol=0.005)` | every centre spacing within `tol` of the mean spacing | spice jars, test tubes |
 | `grid(m1, ..., cols, dx, dy, tol=0.01)` | rows of `cols` members, member k at `(row dx, col dy)` from the first; a free shared pitch without `dx`, `dy` | trays, racks, egg cartons |
+| `ring(m1, m2, m3, ..., r, x, y, angle, face, axis=+x, tol=0.01)` | the members evenly spaced counter-clockwise on a circle of radius `r` about `(x, y)` (without them, their own centre), the first at `angle` degrees from +x (without it, where they move least); `face=in` / `out` turns each one's `axis` toward or away from the centre | cups round a teapot, chairs round a table |
 | `cluster(m1, ..., r)` | every member within `r` of the group's centre | "the fruit together" |
 | `symmetric(a, b, c, axis=y, tol=0.01)` | a and b mirror images about c | fork and knife about the plate |
 | `between(a, b, c, axis=y, gap=0)` | a's centre between b's and c's | "the cup between the plate and the bottle" |
@@ -208,6 +210,14 @@ on_support(jar_*, rack.level3)   row(jar_*, start=left, order=-mass, spacing=eve
 **Fixing a stocked rack.** `on_support(*, rack)` keeps every body on the level under it.
 ```
 no_penetration(*, margin=0.002)   on_support(*, rack)   max_move(*, d=0.02)   max_turn(*, deg=10)
+```
+
+### A ring
+
+The program of the RoboCasa demo in the [README](../README.md#a-robocasa-counter): ten objects heaped at the
+counter's centre, laid out on a circle.
+```
+no_penetration(*, margin=0.003)   fixed(counter)   on_support(*, counter)   upright(*)   ring(*, r=0.2, x=0, y=0)
 ```
 
 ## Defaults

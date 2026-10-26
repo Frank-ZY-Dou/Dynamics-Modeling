@@ -33,6 +33,7 @@
 
 ## 📢 Updates
 
+* [October 2026] **Rings.** `ring` spaces bodies evenly on a circle and can turn each one in or out; the RoboCasa demo lays a heap out as a ring ([demo](#a-robocasa-counter)).
 * [October 2026] **Shelves.** A fixture's levels are supports and regions (`case.level2`), with `flush` and rows that line up an edge; three bookcase and rack examples ([Example 3](#example-3-shelves)).
 * [October 2026] **Scenario 3D Collection assets.** 37 AI-generated tabletop objects of [scenario-labs/3d-collection](https://huggingface.co/datasets/scenario-labs/3d-collection) (CC BY 4.0, credit: Scenario) can be named in layouts, with estimated mass, friction and handle side ([assets](#assets)).
 * [October 2026] **Faster S4R.** A repair in the comparison below takes 2.6-3.1 s per trial instead of 6.7-7.6 s, with the same verdicts.
@@ -109,10 +110,10 @@ supports. SimReady Gate is the layer between a scene generator and the simulator
 
 <table align="center">
 <tr>
-<td align="center"><img src="docs/media/robocasa_n10_gate.gif" alt="ten AI-generated RoboCasa objects on a 0.3 m counter region" /></td>
+<td align="center"><img src="docs/media/robocasa_ring_gate.gif" alt="ten AI-generated RoboCasa objects in a heap, laid out on a circle" /></td>
 </tr>
 <tr>
-<td><sub>Ten AI-generated RoboCasa objects on a 0.3 x 0.3 m counter region. RoboCasa's own placement test (a separating-axis test on rotated bounding boxes) places nine and gives up on the tenth; the gate places all ten with overlaps allowed, and S4R packs them to zero penetration on the objects' V-HACD collision pieces in 2.9 s, under <code>within</code>, <code>on_support</code> and <code>upright</code>.</sub></td>
+<td><sub>Ten AI-generated RoboCasa objects in a heap at the centre of a counter, with nine interpenetrating pairs. One statement, <code>ring(*, r=0.2, x=0, y=0)</code>, lays them out evenly on a 20 cm circle; S4R reaches zero penetration in 0.3 s on the objects' V-HACD collision pieces, under <code>on_support</code> and <code>upright</code>.</sub></td>
 </tr>
 </table>
 
@@ -285,6 +286,22 @@ What a program can say about them:
 Three runs on SimReady and PalatialSim assets. Every request, program, tool output and certificate
 is in [`docs/examples/`](docs/examples/); the layouts come from `experiments/shelf_layouts.py`.
 
+<table align="center">
+<tr>
+<td align="center" width="33%"><img src="docs/media/shelf_books_gate.gif" alt="books and notebooks heaped on a bookcase's shelves, then shelved by the program" /></td>
+<td align="center" width="33%"><img src="docs/media/shelf_pantry_gate.gif" alt="kitchen things heaped on a rack, then stocked by the program" /></td>
+<td align="center" width="33%"><img src="docs/media/shelf_fix_gate.gif" alt="rows on a rack 3 mm too tight, then spaced out" /></td>
+</tr>
+<tr>
+<td align="center"><sub><code>shelf_books</code></sub></td>
+<td align="center"><sub><code>shelf_pantry</code></sub></td>
+<td align="center"><sub><code>shelf_fix</code></sub></td>
+</tr>
+<tr>
+<td colspan="3"><sub>The layout as generated, interpenetrating bodies tinted; then S4R's scale continuation under the agent's program (<code>viz/make_example_video.py</code>).</sub></td>
+</tr>
+</table>
+
 | example | request | repair | settle (hull / CoACD) |
 |---|---|---|---|
 | `shelf_books` | books upright by height, spines out; the two tallest on top; notebooks stacked at the back | 18 → 0 pairs, 13 s | 0.06 / 0.16 m/s |
@@ -360,6 +377,7 @@ program
   yaw(fork, deg=0, axis=long)    parallel(spoon, knife)
   row(can_*, start=left, gap=0.02, order=height, spacing=even, mid=0)   evenly_spaced(jar_1, jar_2, jar_3, axis=x)
   grid(box_1, box_2, box_3, box_4, box_5, box_6, cols=3)   cluster(apple, orange, lime, r=0.12)
+  ring(cup_*, r=0.18, x=0.55, y=0, face=out, axis=handle)
   within(apple, table.top, side=left, frac=0.33)   stack(box_large, box_medium, box_small)   balanced_on(box_medium, box_large)
   max_move(*, d=0.03)   max_turn(*, deg=10)   left_of(cup, plate, gap=0.10, soft=0.5)
 ```
@@ -368,7 +386,7 @@ program
 |---|---|---|
 | the robot | `reach`, `clearance`, `approach`, `facing` | the tangent half-plane of the distance to the base; the contact rows' margin; the free side of a corridor toward the robot; first-order rows on the heading toward a point |
 | positions and headings | `at`, `beside`, `yaw`, `parallel`, `max_turn` | exact rows on centres, footprint projections and headings (`axis=long`: a body's long side) |
-| arrangements | `row` (from the end `start=` names, with `order=height` / `width` / `length` / `mass` sorted by the compiler, `spacing=even`, `mid` where its two ends are centred, `edge=min` to line up near edges), `align`, `evenly_spaced`, `grid`, `cluster`, `symmetric`, `between`, `centered`, `offset`, `attach` | exact rows on centres and footprints; the tangent row of each member for `cluster`; first-order rows for an offset in a body's own frame |
+| arrangements | `row` (from the end `start=` names, with `order=height` / `width` / `length` / `mass` sorted by the compiler, `spacing=even`, `mid` where its two ends are centred, `edge=min` to line up near edges), `align`, `evenly_spaced`, `grid`, `ring`, `cluster`, `symmetric`, `between`, `centered`, `offset`, `attach` | exact rows on centres and footprints; for `ring`, at the angle that fits the current poses; the tangent row of each member for `cluster`; first-order rows for an offset in a body's own frame |
 | regions | `within(a, b, side, frac, depth, x0..y1)`, `keep_out`, `flush(a, b, side, gap)`; `b.levelK` is a fixture's level | rectangle rows on the footprint; for `keep_out`, the side that needs the least motion and leaves the body room in its own regions |
 | edits and stacks | `max_move`, `stack`, `balanced_on` | a 16-gon inscribed in the allowed disc; supports that follow the body below, centring rows; the centre of mass inside the base's rectangle in its own frame |
 | preferences | `soft=w` on any of them | the same rows with a slack weight a hundred times smaller: reported, not required |
@@ -463,7 +481,7 @@ is trimesh's mesh decimator: the continuation runs on 2000-face copies of the bo
 the full meshes; without it the repair warns and runs on the full meshes, several times slower and
 with gigabytes of collision structures for assets of 50k-130k faces. Optional: `anthropic`
 for the SDK backend, which reads `ANTHROPIC_API_KEY` from the environment only (nothing in this
-repository holds a credential, and `.env` files are ignored); Blender 3.6 for the renders in
+repository holds a credential, and `.env` files are ignored); Blender 4.5 for the renders in
 `viz/` (`BLENDER=/path/to/blender`).
 
 ### Command line

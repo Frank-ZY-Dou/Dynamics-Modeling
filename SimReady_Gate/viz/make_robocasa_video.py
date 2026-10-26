@@ -9,7 +9,13 @@ within / on_support / upright, verified on the objects' collision geometry (MuJo
              -> S4R scale continuation -> repaired]
   settle  = MuJoCo trajectories on the real collision pieces: panel 0 overlapping, panel 1 repaired
 
+With --ring R the objects (at most 15 cm long) start in a heap at the counter's centre instead, and the
+program lays them out evenly on a circle of radius R (ring) on a counter large enough for it:
+
+  gate    = [the heap (tinted) -> S4R scale continuation -> the ring]
+
 Usage: python viz/make_robocasa_video.py --n 10 --region 0.15 --seed 0 --out results/videos/robocasa_n10
+       python viz/make_robocasa_video.py --n 10 --ring 0.2 --seed 0 --out results/videos/robocasa_ring
 """
 from __future__ import annotations
 
@@ -40,6 +46,9 @@ from mjcf_to_obj import export_object, export_box  # noqa: E402
 
 FPS = 30
 TOP = RL.COUNTER[2]
+RING = ("program\n  no_penetration(*, margin=0.003)\n  fixed(counter)\n  on_support(*, counter)   upright(*)\n"
+        "  ring(*, r={r:g}, x=0, y=0)\n")
+HEAP = 0.10            # with --ring, the objects start within this distance of the counter's centre
 
 
 def poses(scene):
@@ -59,27 +68,33 @@ def main():
     ap.add_argument("--n", type=int, default=10); ap.add_argument("--region", type=float, default=0.15); ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default="results/videos/robocasa_n10"); ap.add_argument("--repair-seconds", type=float, default=7.0)
     ap.add_argument("--hold-seconds", type=float, default=2.0); ap.add_argument("--settle-seconds", type=float, default=2.5)
+    ap.add_argument("--shrink-seconds", type=float, default=1.0)
+    ap.add_argument("--ring", type=float, default=None, help="radius (m): lay the objects out on a circle instead of packing the region")
     a = ap.parse_args()
-    region = (a.region, a.region)
+    region = (a.region, a.region) if a.ring is None else (a.ring + 0.15, a.ring + 0.15)
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True); assets_dir = out / "assets"
 
     seed = a.seed
-    while True:
-        objs = RC.pick(np.random.RandomState(1000 * seed + a.n), a.n)
-        placed, ok = sample_layout(np.random.RandomState(1000 * seed + a.n + 1), [o[2] for o in objs], (-region[0], region[0]), (-region[1], region[1]),
-                                   base=(0.0, 0.0, TOP), partial=True)
-        if not ok:
-            break
-        seed += 1
-    print(f"selected seed {seed}: RoboCasa's sampler placed {len(placed)}/{a.n} before giving up", flush=True)
+    if a.ring is not None:
+        objs, placed = RC.pick(np.random.RandomState(1000 * seed + a.n), a.n, max_ext=0.15), []
+    else:
+        while True:
+            objs = RC.pick(np.random.RandomState(1000 * seed + a.n), a.n)
+            placed, ok = sample_layout(np.random.RandomState(1000 * seed + a.n + 1), [o[2] for o in objs], (-region[0], region[0]),
+                                       (-region[1], region[1]), base=(0.0, 0.0, TOP), partial=True)
+            if not ok:
+                break
+            seed += 1
+        print(f"selected seed {seed}: RoboCasa's sampler placed {len(placed)}/{a.n} before giving up", flush=True)
 
     # gate: overlapping random placement (same draw), then S4R with the capacity study's program
     rng = np.random.RandomState(1000 * seed + a.n + 2)
-    bodies = [RC.counter(region), RC.region_body(region)]
+    bodies = [RC.counter(region)] + ([RC.region_body(region)] if a.ring is None else [])
+    spread = region if a.ring is None else (HEAP, HEAP)
     xmls = {}
     for k, (xml, v, spec) in enumerate(objs):
         bot = float(v[:, 2].min())
-        x = float(rng.uniform(-region[0], region[0])); y = float(rng.uniform(-region[1], region[1])); yaw = float(rng.uniform(-math.pi, math.pi))
+        x = float(rng.uniform(-spread[0], spread[0])); y = float(rng.uniform(-spread[1], spread[1])); yaw = float(rng.uniform(-math.pi, math.pi))
         bodies.append(body_from_mjcf_object(f"o{k}", xml, (x, y, TOP - bot), quat_wxyz=(math.cos(yaw / 2), 0.0, 0.0, math.sin(yaw / 2)))); xmls[f"o{k}"] = xml
     sc = Scene(bodies)
     raw_bodies = copy.deepcopy(bodies)
@@ -87,7 +102,7 @@ def main():
     v_raw = verify_scene(sc)
     oo = [(x, y) for x, y, s in v_raw.pairs if s < 0 and not sc[x].fixed and not sc[y].fixed]
     pen_bodies = sorted({n for pr in oo for n in pr})
-    prog = parse_program(RC.PROGRAM)
+    prog = parse_program(RC.PROGRAM if a.ring is None else RING.format(r=a.ring))
     spec = compile_program(prog, sc, s_min=0.05, ds_max=0.05, tail_iters=30)
     states = []
 
@@ -110,7 +125,8 @@ def main():
     settle_raw = Scene([b for b in raw_bodies if b.name != "region"]); settle_rep = Scene([b for b in sc.bodies if b.name != "region"])
     g5 = {tag: settle_and_measure(scn, seconds=a.settle_seconds, timestep=1 / 600, support_tops={"counter": TOP}, pieces=pieces, record_every=20)
           for tag, scn in (("raw", settle_raw), ("rep", settle_rep))}
-    summary = {"n": a.n, "region": 2 * a.region, "seed": seed, "selected_example": True, "sampler_placed": len(placed), "pen_raw": v_raw.pen_pairs,
+    summary = {"n": a.n, "region": 2 * region[0], "ring": a.ring, "seed": seed, "selected_example": a.ring is None, "sampler_placed": len(placed),
+               "pen_raw": v_raw.pen_pairs,
                "pen_raw_obj_obj": len(oo), "pen_rep": v_rep.pen_pairs, "rmsd_xy": res.rmsd, "steps": res.steps, "repair_s": t_rep, "fails": fails,
                "g5": {k: {"vmax": r.peak_speed, "dmax": r.peak_disp, "left": r.left_support} for k, r in g5.items()}}
     json.dump(summary, open(out / "summary.json", "w"), indent=1); print(json.dumps(summary, indent=1), flush=True)
@@ -122,11 +138,14 @@ def main():
         export_object(xml, assets_dir, nm, c_model=b.meta["c_model"])
         assets[nm] = {"obj": str((assets_dir / f"{nm}.obj").resolve()), "c_model": b.meta["c_model"].tolist(), "fixed": False}
     export_box(assets_dir, "counter", (2 * region[0] + 0.2, 2 * region[1] + 0.2, 0.05), (0, 0, 0), color=(0.88, 0.87, 0.84), roughness=0.55)
-    export_box(assets_dir, "region_marker", (2 * region[0], 2 * region[1], 0.001), (0, 0, 0), color=(0.62, 0.66, 0.74), roughness=0.9)
     assets["counter"] = {"obj": str((assets_dir / "counter.obj").resolve()), "c_model": [0, 0, 0], "fixed": True, "pose": [[0.0, 0.0, TOP - 0.025], np.eye(3).tolist()]}
-    assets["region_marker"] = {"obj": str((assets_dir / "region_marker.obj").resolve()), "c_model": [0, 0, 0], "fixed": True, "pose": [[0.0, 0.0, TOP + 0.0005], np.eye(3).tolist()]}
-    cam = {"target": [0.0, 0.0, TOP + 0.04], "dist": 1.1, "elev_deg": 40.0, "azim_deg": -35.0}
-    shots = {"assets": assets, "camera": cam, "camera_settle": dict(cam, dist=1.35, target=[0.0, 0.0, TOP - 0.05]), "floor_z": 0.0, "gate": [], "settle": []}
+    if a.ring is None:
+        export_box(assets_dir, "region_marker", (2 * region[0], 2 * region[1], 0.001), (0, 0, 0), color=(0.62, 0.66, 0.74), roughness=0.9)
+        assets["region_marker"] = {"obj": str((assets_dir / "region_marker.obj").resolve()), "c_model": [0, 0, 0], "fixed": True,
+                                   "pose": [[0.0, 0.0, TOP + 0.0005], np.eye(3).tolist()]}
+    cam = {"target": [0.0, 0.0, TOP + 0.04], "dist": 1.1 if a.ring is None else 0.35 + 2.5 * a.ring, "elev_deg": 40.0 if a.ring is None else 50.0,
+           "azim_deg": -35.0}
+    shots = {"assets": assets, "camera": cam, "camera_settle": dict(cam, dist=1.35 if a.ring is None else cam["dist"], target=[0.0, 0.0, TOP - 0.05]), "floor_z": 0.0, "gate": [], "settle": []}
 
     names = [b.name for b in sc.free()]
     sampler_pose = dict(rep_pose); shown = []
@@ -134,10 +153,13 @@ def main():
         nm = f"o{k}"; shown.append(nm); R = yaw_R(yaw)
         sampler_pose[nm] = (np.asarray([x, y, z]) + R @ sc[nm].meta["c_model"], R, 1.0)
     hidden = [nm for nm in names if nm not in shown]
-    for _ in range(int(2.5 * FPS)):
+    for _ in range(int(2.5 * FPS) if a.ring is None else 0):        # what RoboCasa's sampler managed (the packing demo)
         shots["gate"].append({"poses": ser(sampler_pose), "red": [], "hidden": hidden})
     for _ in range(int(a.hold_seconds * FPS)):
         shots["gate"].append({"poses": ser(raw_pose), "red": pen_bodies, "hidden": []})
+    shrink = int(a.shrink_seconds * FPS)
+    for f in range(shrink):                  # down to the first accepted step at the smallest scale
+        shots["gate"].append({"poses": ser(interpolate(raw_pose, states[0][1], f / shrink)), "red": [], "hidden": []})
     n_states = len(states); total = int(a.repair_seconds * FPS)
     for f in range(total):
         u = f / max(total - 1, 1) * (n_states - 1); i0 = int(np.floor(u)); i1 = min(i0 + 1, n_states - 1); t = u - i0

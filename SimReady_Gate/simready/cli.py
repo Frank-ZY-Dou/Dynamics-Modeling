@@ -286,11 +286,12 @@ def cmd_verify(a):
 
 
 def repair_scene(sc: Scene, prog, s_min: float = 0.05, ds_max: float = 0.05, tail: int = 30, proxy_faces: int = 2000,
-                 verbose: bool = False, **spec_overrides) -> dict:
+                 verbose: bool = False, on_step=None, **spec_overrides) -> dict:
     """The repair `cmd_repair` runs, on a loaded scene and a parsed program (the scene is changed in
     place): compile, S4R on decimated proxies and support slabs, re-seat, verify on the full meshes,
     polish when the proxies left a residual, check every predicate. Returns the parts of the
-    report; raises the INPUT_ERRORS a bad program or input gives."""
+    report; raises the INPUT_ERRORS a bad program or input gives. on_step(state) is passed to the
+    solver (the frames of viz/make_example_video.py)."""
     spec = compile_program(prog, sc, s_min=s_min, ds_max=ds_max, tail_iters=tail, **spec_overrides)
     before = verify_scene(sc)          # after the program has fixed its bodies: the same pairs as `after`
     t0 = time.time()
@@ -303,12 +304,12 @@ def repair_scene(sc: Scene, prog, s_min: float = 0.05, ds_max: float = 0.05, tai
         with quiet_stdout():
             proxy = MeshProxy(sc, faces=proxy_faces, slab_tops=tops)
             with proxy:                   # repair on decimated meshes + support slabs; verify on full meshes
-                res = repair_upright(sc, spec, verbose=verbose)
+                res = repair_upright(sc, spec, verbose=verbose, on_step=on_step)
             solver_notes += proxy.notes + res.notes
             reseat_on_supports(sc, spec)
             after = verify_scene(sc)
             if after.pen_pairs > 0:                       # proxy residuals: polish on the full meshes
-                res2 = polish_full_mesh(sc, spec, iters=tail, verbose=verbose)
+                res2 = polish_full_mesh(sc, spec, iters=tail, verbose=verbose, on_step=on_step)
                 reseat_on_supports(sc, spec); res.steps += res2.steps; solver_notes += res2.notes
                 after = verify_scene(sc)
         preds = check_predicates(prog, sc)

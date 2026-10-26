@@ -142,6 +142,8 @@ class Rows(unittest.TestCase):
     def test_linearisations_match_finite_differences(self):
         texts = ["facing(a, b, axis=+x)", "facing(a, axis=-y)", "offset(a, b, dx=0.1, dy=0.05, frame=local)", "attach(a, b)",
                  "flush(a, table, side=near, gap=0.02)", "flush(a, table, side=left)",
+                 "ring(a, b, c, r=0.15, x=0.55, y=0.0, angle=30)", "ring(a, b, c, r=0.15, angle=30)",
+                 "ring(a, b, c, r=0.15, x=0.55, y=0.0, angle=30, face=out)", "ring(a, b, c, r=0.15, angle=30, face=in, axis=-y)",
                  "cluster(a, b, c, r=0.05)", "reach(a, r=0.3, min=0.2)", "balanced_on(a, b)", "parallel(a, b)", "yaw(a, deg=40)"]
         rng = np.random.default_rng(0)
         for text in texts:
@@ -637,6 +639,34 @@ class Shelves(unittest.TestCase):
             validate_program_json({"statements": [{"op": "flush", "a": "book", "b": "case"}]}, sc)      # side is required
         self.assertEqual(api_schema(table_scene(box("a", (0.1, 0.1, 0.1), (0.5, 0.0, 0.05))))["properties"]["statements"]["items"]
                          ["properties"]["b"]["enum"], ["table", "a", "table.top", "a.top"])        # one level: as before
+
+
+class Rings(unittest.TestCase):
+    def test_a_heap_becomes_a_ring(self):
+        sc = table_scene(*[box(f"cup_{k}", (0.07, 0.05, 0.08), (0.52 + 0.01 * k, -0.02 + 0.008 * k, 0.04), yaw=0.3 * k) for k in range(6)])
+        res, preds, ver = repaired(sc, HEAD + "  ring(cup_*, r=0.18, x=0.55, y=0.0, face=out)\n")
+        self.assertEqual(ver.pen_pairs, 0)
+        self.assertEqual([k for k, p in preds.items() if not p[1]], [])
+        P = np.array([sc[f"cup_{k}"].center[:2] for k in range(6)]) - np.array([0.55, 0.0])
+        self.assertTrue(np.allclose(np.linalg.norm(P, axis=1), 0.18, atol=0.01 + 2e-3))
+        ang = np.degrees(np.arctan2(P[:, 1], P[:, 0]))
+        self.assertTrue(np.allclose(np.diff(np.unwrap(np.radians(ang))), np.radians(60.0), atol=0.15))   # evenly, counter-clockwise
+
+    def test_a_free_ring_moves_least(self):
+        sc = table_scene(*[box(f"b_{k}", (0.05, 0.05, 0.05), (0.55 + 0.15 * math.cos(2 * math.pi * k / 5 + 0.2),
+                                                             0.15 * math.sin(2 * math.pi * k / 5 + 0.2), 0.025)) for k in range(5)])
+        res, preds, ver = repaired(sc, HEAD + "  ring(b_*, r=0.15)\n")
+        self.assertTrue(preds["ring(b_0,b_1,b_2,b_3,b_4)"][1], preds["ring(b_0,b_1,b_2,b_3,b_4)"])
+        self.assertLess(res.rmsd, 0.01)                                  # already a ring: it stays where it is
+
+    def test_ring_needs_a_whole_centre_and_face_for_axis(self):
+        for text in ("ring(a, b, c, r=0.1, x=0.5)", "ring(a, b, c, r=0.1, axis=handle)", "ring(a, b, r=0.1)", "ring(a, b, c)"):
+            with self.assertRaises(SyntaxError, msg=text):
+                parse_program("program\n  " + text)
+        sc = table_scene(*[box(n, (0.05, 0.05, 0.05), (0.5, 0.1 * k, 0.025)) for k, n in enumerate("abc")])
+        dsl, _ = validate_program_json({"statements": [{"op": "ring", "members": ["a", "b", "c"], "r": 0.12, "angle": -90,
+                                                        "face": "out", "axis": "+x"}]}, sc)
+        self.assertIn("ring(a, b, c, r=0.12, axis=+x, angle=-90, face=out)", dsl)
 
 
 if __name__ == "__main__":

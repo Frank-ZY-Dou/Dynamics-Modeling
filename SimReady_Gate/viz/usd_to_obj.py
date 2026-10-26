@@ -63,13 +63,10 @@ def _asset_path(value, layer_dir):
 
 
 def _shader_of(material):
-    """The MDL/preview shader prim under a Material: the first Shader child (Omni assets
-    keep one shader per material); returns None for materials without a shader."""
-    from pxr import UsdShade
-    for child in material.GetPrim().GetChildren():
-        if child.GetTypeName() == "Shader":
-            return UsdShade.Shader(child)
-    return None
+    """The shader a renderer reads for the material's surface: its MDL surface (Omniverse), or without one its
+    universal surface (a UsdPreviewSurface); None for a material without a surface."""
+    sh = material.ComputeSurfaceSource("mdl")[0]
+    return sh if sh else None
 
 
 def _material_record(material, layer_dir, cache):
@@ -85,7 +82,10 @@ def _material_record(material, layer_dir, cache):
         for a in prim.GetAttributes():
             n = a.GetName()
             if n in TEX_INPUTS:
-                rec[TEX_INPUTS[n]] = _asset_path(a.Get(), layer_dir)
+                v = a.Get()
+                rec[TEX_INPUTS[n]] = _asset_path(v, layer_dir)
+                if rec[TEX_INPUTS[n]] is None and getattr(v, "path", ""):
+                    rec.setdefault("missing", []).append(v.path)       # named, not on disk (fetched without textures)
             elif n in SCALAR_INPUTS:
                 v = a.Get()
                 if v is None:
@@ -94,14 +94,72 @@ def _material_record(material, layer_dir, cache):
                     rec[SCALAR_INPUTS[n]] = [float(x) for x in v]
                 except TypeError:
                     rec[SCALAR_INPUTS[n]] = float(v) if not isinstance(v, bool) else bool(v)
+    if sh is not None and sh.GetIdAttr().Get() == "UsdPreviewSurface":
+        _fill_preview(rec, sh, layer_dir)
     if sh is not None:
         _fill_gltf(rec, material, sh.GetPrim(), layer_dir)
+        _fill_glass(rec, sh.GetPrim(), layer_dir)
     if sh is not None and not rec.get("diffuse_texture") and not rec.get("diffuse_color"):
         _fill_from_mdl(rec, sh.GetPrim(), layer_dir)
     if not rec.get("diffuse_texture") and not rec.get("diffuse_color"):
         _fill_by_name(rec, material.GetPath().pathString)
     cache[key] = rec
     return key
+
+
+def _fill_preview(rec, shader, layer_dir):
+    """A UsdPreviewSurface: its constants, or the files of the UsdUVTexture shaders its inputs read, with the
+    UsdTransform2d between a texture and its coordinates."""
+    from pxr import UsdShade
+    for name, const, tex in (("diffuseColor", "diffuse_color", "diffuse_texture"), ("roughness", "roughness", "roughness_texture"),
+                             ("metallic", "metallic", "metallic_texture"), ("normal", None, "normal_texture")):
+        inp = shader.GetInput(name)
+        if not inp:
+            continue
+        if not inp.HasConnectedSource():
+            v = inp.Get()
+            if const is not None and v is not None:
+                rec[const] = [float(x) for x in v] if name == "diffuseColor" else float(v)
+            continue
+        src = UsdShade.Shader(inp.GetConnectedSource()[0].GetPrim())
+        if src.GetIdAttr().Get() != "UsdUVTexture":
+            raise ValueError(f"{shader.GetPath()}: {name} reads {src.GetPath()}, which is not a UsdUVTexture")
+        f = src.GetInput("file").Get()
+        rec[tex] = _asset_path(f, layer_dir)
+        if rec[tex] is None:
+            rec.setdefault("missing", []).append(f.path)
+        st = src.GetInput("st")
+        if st and st.HasConnectedSource():
+            xf = UsdShade.Shader(st.GetConnectedSource()[0].GetPrim())
+            if xf.GetIdAttr().Get() == "UsdTransform2d":
+                if xf.GetInput("rotation") and xf.GetInput("rotation").Get():
+                    raise ValueError(f"{xf.GetPath()}: a rotated texture is not carried into the export")
+                for key, out in (("scale", "texture_scale"), ("translation", "texture_translate")):
+                    v = xf.GetInput(key).Get() if xf.GetInput(key) else None
+                    if v is not None:
+                        rec[out] = [float(x) for x in v]
+
+
+def _fill_glass(rec, shader_prim, layer_dir):
+    """OmniGlass: the glass colour (constant or texture), its IOR and frosting roughness, and the cutout opacity."""
+    sub = shader_prim.GetAttribute("info:mdl:sourceAsset:subIdentifier")
+    if not sub or sub.Get() != "OmniGlass":
+        return
+    rec["glass"] = True
+    for name, out in (("glass_color", "diffuse_color"), ("glass_ior", "ior"), ("frosting_roughness", "roughness"), ("cutout_opacity", "opacity")):
+        a = shader_prim.GetAttribute("inputs:" + name)
+        v = a.Get() if a else None
+        if v is not None:
+            rec[out] = [float(x) for x in v] if name == "glass_color" else float(v)
+    if "ior" not in rec or "opacity" not in rec:
+        raise ValueError(f"{shader_prim.GetPath()}: OmniGlass without an authored glass_ior and cutout_opacity")
+    for name, out in (("glass_color_texture", "diffuse_texture"), ("normal_map_texture", "normal_texture")):
+        a = shader_prim.GetAttribute("inputs:" + name)
+        v = a.Get() if a else None
+        if v is not None and getattr(v, "path", ""):
+            rec[out] = _asset_path(v, layer_dir)
+            if rec[out] is None:
+                rec.setdefault("missing", []).append(v.path)
 
 
 def _fill_gltf(rec, material, shader_prim, layer_dir):
@@ -304,6 +362,9 @@ def _write(out_dir, name, usd_path, gathered):
     V, VT, F, FT, FM, mats, n_prims = gathered
     out_dir = Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
     obj_path = out_dir / f"{name}.obj"
+    short = {mk: f"{name}_m{i}" for i, mk in enumerate(mats)}       # Blender keeps 63 bytes of a name; USD paths are longer
+    if any(len(v.encode()) > 63 for v in short.values()):
+        raise ValueError(f"the material names of {name} are longer than Blender keeps")
     with open(obj_path, "w") as f:
         f.write(f"# exported from {usd_path}\nmtllib {name}.mtl\n")
         for v in V:
@@ -316,7 +377,7 @@ def _write(out_dir, name, usd_path, gathered):
         for i in order:
             mk = FM[i]
             if mk != cur:
-                f.write(f"usemtl {mats[mk]['name'] if mk in mats else 'default'}\n"); cur = mk
+                f.write(f"usemtl {short[mk] if mk in mats else 'default'}\n"); cur = mk
             a, b, c = F[i]; ta, tb, tc = FT[i]
             if ta >= 0:
                 f.write(f"f {a+1}/{ta+1} {b+1}/{tb+1} {c+1}/{tc+1}\n")
@@ -324,15 +385,15 @@ def _write(out_dir, name, usd_path, gathered):
                 f.write(f"f {a+1} {b+1} {c+1}\n")
     with open(out_dir / f"{name}.mtl", "w") as f:
         f.write("newmtl default\nKd 0.6 0.6 0.6\n")
-        for rec in mats.values():
-            f.write(f"newmtl {rec['name']}\n")
+        for mk, rec in mats.items():
+            f.write(f"newmtl {short[mk]}\n")
             col = rec.get("diffuse_color") or [0.6, 0.6, 0.6]
             f.write(f"Kd {col[0]:.4f} {col[1]:.4f} {col[2]:.4f}\n")
             if rec.get("diffuse_texture"):
                 f.write(f"map_Kd {rec['diffuse_texture']}\n")
     info = {"usd": usd_path, "name": name, "n_prims": n_prims, "n_verts": int(len(V)), "n_tris": int(len(F)),
             "n_uv": int(len(VT)), "aabb": [V.min(0).tolist(), V.max(0).tolist()],
-            "materials": {rec["name"]: rec for rec in mats.values()}}
+            "materials": {short[mk]: dict(rec, name=short[mk]) for mk, rec in mats.items()}}
     json.dump(info, open(out_dir / f"{name}.materials.json", "w"), indent=1)
     return info
 

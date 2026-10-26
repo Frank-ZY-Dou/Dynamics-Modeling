@@ -30,7 +30,7 @@ report on stdout; `summarize`, `prompt` and `verify` print text.
 2. Produce the program: run `python -m simready.cli prompt <scene> --request "<text>"`, answer
    the printed prompt with ONE JSON object (schema included in the prompt), save it to `program.json`.
    State what must hold and let the solver find the poses: footprint gaps with `beside`, lines with
-   `row`, `align`, `evenly_spaced`, `grid`, groups with `cluster`, headings with `yaw`, `parallel`,
+   `row`, `align`, `evenly_spaced`, `grid`, circles with `ring`, groups with `cluster`, headings with `yaw`, `parallel`,
    `facing`, the robot's needs with `reach`, `clearance`, `approach`, zones with `within ... side=` and
    `keep_out`, small edits with `max_move`, `max_turn`, towers with `stack`, shelves with
    `on_support(a, <fixture>.level<K>)` and `flush` (edges against a level's front or back), spines or

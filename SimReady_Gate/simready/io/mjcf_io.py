@@ -92,13 +92,10 @@ def _geom_mesh(model, g):
         v = np.asarray(model.mesh_vert[va:va + vn], dtype=np.float64)
         f = np.asarray(model.mesh_face[fa:fa + fn], dtype=np.int32)
         tc = ftc = None
-        try:
-            ta, tn = model.mesh_texcoordadr[mid], model.mesh_texcoordnum[mid]
-            if tn > 0:
-                tc = np.asarray(model.mesh_texcoord[ta:ta + tn], dtype=np.float64)
-                ftc = np.asarray(model.mesh_facetexcoord[fa:fa + fn], dtype=np.int32)
-        except AttributeError:
-            pass
+        ta, tn = model.mesh_texcoordadr[mid], model.mesh_texcoordnum[mid]
+        if tn > 0:
+            tc = np.asarray(model.mesh_texcoord[ta:ta + tn], dtype=np.float64)
+            ftc = np.asarray(model.mesh_facetexcoord[fa:fa + fn], dtype=np.int32)
         return v, f, tc, ftc
     sz = model.geom_size[g]
     if t == mujoco.mjtGeom.mjGEOM_BOX:

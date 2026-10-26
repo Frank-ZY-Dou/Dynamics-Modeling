@@ -1,7 +1,7 @@
-"""Render shots.json frames with Blender Cycles (run inside Blender 3.x, headless).
+"""Render shots.json frames with Blender Cycles (run inside Blender 4.5, headless).
 
   blender -b --python viz/blender_render.py -- --shots out/shots.json --list gate --out out/blender_gate \
-          [--panel K] [--start 0 --end N] [--width 1920 --height 1080] [--samples 128] [--gpu 0] [--hdri studio.exr]
+          [--panel K] [--start 0 --end N] [--width 1920 --height 1080] [--samples 128] [--gpu 0] [--device OPTIX] [--hdri studio.exr]
 
 Bodies come from `shots["assets"][name]` = {"obj": path, "c_model": [3], "fixed": bool}; the OBJ is
 the solver's own mesh in the body's native frame, so a frame pose (center, R, s) places it as
@@ -24,6 +24,7 @@ ap.add_argument("--shots", required=True); ap.add_argument("--list", default="ga
 ap.add_argument("--panel", type=int, default=-1); ap.add_argument("--start", type=int, default=0); ap.add_argument("--end", type=int, default=-1)
 ap.add_argument("--width", type=int, default=1920); ap.add_argument("--height", type=int, default=1080)
 ap.add_argument("--samples", type=int, default=128); ap.add_argument("--gpu", type=int, default=-1)
+ap.add_argument("--device", choices=("OPTIX", "CUDA"), default="OPTIX")
 ap.add_argument("--hdri", default=""); ap.add_argument("--hdri-strength", type=float, default=0.9)
 ap.add_argument("--world-gray", type=float, default=0.75)
 ap.add_argument("--sun", type=float, default=3.0); ap.add_argument("--floor-z", type=float, default=None)
@@ -41,27 +42,25 @@ scene = bpy.context.scene
 scene.render.engine = "CYCLES"
 scene.cycles.samples = a.samples
 scene.cycles.use_adaptive_sampling = True; scene.cycles.adaptive_threshold = 0.02
-scene.cycles.use_denoising = True
-try:
-    scene.cycles.denoiser = "OPENIMAGEDENOISE"
-except Exception:  # noqa: BLE001
-    pass
+scene.cycles.use_denoising = True; scene.cycles.denoiser = "OPENIMAGEDENOISE"; scene.cycles.denoising_use_gpu = True
+scene.render.use_persistent_data = True          # frames differ only in poses and tints: keep meshes and images
 scene.cycles.max_bounces = 6; scene.cycles.caustics_reflective = False; scene.cycles.caustics_refractive = False
 scene.render.resolution_x, scene.render.resolution_y, scene.render.resolution_percentage = a.width, a.height, 100
 scene.render.image_settings.file_format = "PNG"; scene.render.image_settings.color_mode = "RGB"
 scene.render.film_transparent = False
-try:
-    scene.view_settings.view_transform = "Filmic"; scene.view_settings.look = "Medium Contrast"
-except TypeError:                     # this Blender build ships without the Filmic OCIO config
-    scene.view_settings.view_transform = "Standard"
+scene.view_settings.view_transform = "Filmic"; scene.view_settings.look = "Medium Contrast"
 scene.view_settings.exposure = a.exposure
 prefs = bpy.context.preferences.addons["cycles"].preferences
-prefs.compute_device_type = "CUDA"; prefs.get_devices()
+prefs.compute_device_type = a.device; prefs.get_devices()
 n_gpu = 0
-for i, d in enumerate([d for d in prefs.devices if d.type == "CUDA"]):
+for d in prefs.devices:
+    d.use = False                                # the GPUs asked for only, no CPU in the render
+for i, d in enumerate([d for d in prefs.devices if d.type == a.device]):
     d.use = (a.gpu < 0) or (i == a.gpu); n_gpu += int(d.use)
-scene.cycles.device = "GPU" if n_gpu else "CPU"
-print("[blender] cycles device", scene.cycles.device, "gpus enabled", n_gpu, flush=True)
+if not n_gpu:
+    raise RuntimeError(f"no {a.device} device {a.gpu} (--gpu -1 takes them all)")
+scene.cycles.device = "GPU"
+print("[blender] cycles", a.device, [d.name for d in prefs.devices if d.use], flush=True)
 
 # --- world: HDRI + sun -------------------------------------------------------------------------------
 world = bpy.data.worlds.new("World"); scene.world = world; world.use_nodes = True
@@ -86,12 +85,7 @@ _images = {}
 def image(path, colorspace):
     key = (path, colorspace)
     if key not in _images:
-        im = bpy.data.images.load(path)
-        for name in ((colorspace, "Linear") if colorspace == "Non-Color" else (colorspace,)):
-            try:
-                im.colorspace_settings.name = name; break
-            except TypeError:               # builds without the full OCIO config only know Linear / sRGB
-                continue
+        im = bpy.data.images.load(path); im.colorspace_settings.name = colorspace
         _images[key] = im
     return _images[key]
 
@@ -147,7 +141,10 @@ def build_material(mat, rec, red=False, box_project=False):
         nt.links.new(base_src, bsdf.inputs["Base Color"])
     rough = rec.get("roughness"); bsdf.inputs["Roughness"].default_value = float(rough) if isinstance(rough, (int, float)) else 0.5
     met = rec.get("metallic"); bsdf.inputs["Metallic"].default_value = float(met) if isinstance(met, (int, float)) else 0.0
-    if rec.get("enable_orm") and rec.get("orm_texture") and os.path.exists(rec["orm_texture"]):
+    if rec.get("glass"):                   # OmniGlass: transmission, its IOR, and the cutout opacity as alpha
+        bsdf.inputs["Transmission Weight"].default_value = 1.0
+        bsdf.inputs["IOR"].default_value = float(rec["ior"]); bsdf.inputs["Alpha"].default_value = float(rec["opacity"])
+    elif rec.get("enable_orm") and rec.get("orm_texture") and os.path.exists(rec["orm_texture"]):
         t = tex(rec["orm_texture"], "Non-Color"); sep = nt.nodes.new("ShaderNodeSeparateRGB")
         nt.links.new(t.outputs["Color"], sep.inputs["Image"])
         nt.links.new(sep.outputs["G"], bsdf.inputs["Roughness"]); nt.links.new(sep.outputs["B"], bsdf.inputs["Metallic"])
@@ -165,8 +162,7 @@ def build_material(mat, rec, red=False, box_project=False):
 def import_body(name, asset):
     """Import the OBJ (no axis conversion), one object, materials rebuilt from the JSON."""
     before = set(bpy.data.objects)
-    bpy.ops.import_scene.obj(filepath=asset["obj"], use_split_objects=False, use_split_groups=False, use_image_search=False,
-                             axis_forward="Y", axis_up="Z")
+    bpy.ops.wm.obj_import(filepath=asset["obj"], use_split_objects=False, use_split_groups=False, forward_axis="Y", up_axis="Z")
     new = [o for o in bpy.data.objects if o not in before and o.type == "MESH"]
     if not new:
         raise RuntimeError(f"nothing imported from {asset['obj']}")
@@ -186,13 +182,13 @@ def import_body(name, asset):
         if m is None:
             continue
         base = m.name.split(".")[0]
-        rec = recs.get(base, {})
+        if base not in recs and base != "default":
+            raise RuntimeError(f"{name}: material {m.name} is not in the materials.json of {asset['obj']}")
+        rec = recs[base] if base in recs else {"diffuse_color": [0.6, 0.6, 0.6]}   # 'default': faces exported without a material
         build_material(m, rec, red=False, box_project=no_uv)
         r = bpy.data.materials.new(m.name + "_red"); build_material(r, rec, red=True, box_project=no_uv)
         originals.append(m); reds.append(r)
-    obj.data.use_auto_smooth = True; obj.data.auto_smooth_angle = math.radians(35.0)
-    for p in obj.data.polygons:
-        p.use_smooth = True
+    obj.data.shade_smooth(); obj.data.set_sharp_from_angle(angle=math.radians(35.0))
     obj["c_model"] = list(asset["c_model"])
     return obj, originals, reds
 

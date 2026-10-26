@@ -31,7 +31,7 @@ AXIS = {"x": 0, "y": 1}
 REL = {"left_of": ("y", +1), "right_of": ("y", -1), "in_front_of": ("x", +1), "behind": ("x", -1)}
 BINARY = {"on_support", "within", "inside", "min_distance", "near", "parallel", "centered", "offset", "attach",
           "balanced_on", "keep_out", "facing", "beside", "flush"} | set(REL)
-V1_ROWS = {"reach", "at", "beside", "facing", "yaw", "parallel", "max_turn", "row", "align", "evenly_spaced", "grid", "cluster",
+V1_ROWS = {"reach", "at", "beside", "facing", "yaw", "parallel", "max_turn", "row", "align", "evenly_spaced", "grid", "ring", "cluster",
            "symmetric", "between", "centered", "offset", "attach", "keep_out", "flush", "approach", "max_move", "balanced_on", "stack"}
 LEVEL_OPS = {"on_support", "within", "keep_out", "flush"}     # the statements that take <fixture>.level<K>
 PLACE_TOL = 0.05     # a placed body that ended within 5 cm of its target counts as placed

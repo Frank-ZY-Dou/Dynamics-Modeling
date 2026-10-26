@@ -22,7 +22,7 @@ AXIS_WORDS = ("x", "y", "+x", "-x", "+y", "-y", "long", "short", "front", "handl
 OPS = ["no_penetration", "place", "fixed", "on_support", "upright", "within", "inside",
        "left_of", "right_of", "in_front_of", "behind", "min_distance", "near", "minimize", "prefer",
        "reach", "clearance", "approach", "facing", "yaw", "parallel", "at", "beside",
-       "row", "align", "evenly_spaced", "grid", "cluster", "symmetric", "between", "centered", "offset", "attach",
+       "row", "align", "evenly_spaced", "grid", "ring", "cluster", "symmetric", "between", "centered", "offset", "attach",
        "keep_out", "flush", "max_move", "max_turn", "stack", "balanced_on"]
 
 PROGRAM_SCHEMA = {
@@ -56,6 +56,8 @@ PROGRAM_SCHEMA = {
                     "spacing": {"type": "string", "enum": ["even"]},
                     "start": {"type": "string", "enum": ["left", "right", "near", "far"], "description": "row: the end the first member is at (left or right for a line along y, near or far along x)"},
                     "mid": {"type": "number", "description": "row: where along its axis the midpoint of the two end members' centres lies"},
+                    "angle": {"type": "number", "description": "ring: the angle of the first member about the centre, degrees from +x"},
+                    "face": {"type": "string", "enum": ["in", "out"], "description": "ring: each member's axis toward or away from the centre"},
                     "side": {"type": "string", "enum": ["left", "right", "near", "far", "center"]},
                     "frac": {"type": "number", "minimum": 0, "maximum": 1}, "depth": {"type": "number", "minimum": 0},
                     "x0": {"type": "number"}, "x1": {"type": "number"}, "y0": {"type": "number"}, "y1": {"type": "number"},
@@ -86,6 +88,7 @@ OP_DEFAULTS = {
     "align": {"axis": "x", "edge": "center", "tol": 0.005},
     "evenly_spaced": {"axis": "y", "tol": 0.005},
     "grid": {"tol": 0.01},
+    "ring": {"tol": 0.01, "axis": "+x"},
     "symmetric": {"axis": "y", "tol": 0.01},
     "between": {"axis": "y", "gap": 0.0},
     "centered": {"tol": 0.01},
@@ -118,6 +121,7 @@ FIELDS = {
     "parallel": {"a", "b", "mod", "tol", "axis", "soft"},
     "row": {"members", "axis", "start", "gap", "tol", "order", "spacing", "mid", "edge", "soft"}, "align": {"members", "axis", "edge", "tol", "soft"},
     "evenly_spaced": {"members", "axis", "tol", "soft"}, "grid": {"members", "cols", "dx", "dy", "tol", "soft"},
+    "ring": {"members", "r", "x", "y", "angle", "face", "axis", "tol", "soft"},
     "cluster": {"members", "r", "soft"}, "symmetric": {"a", "b", "c", "axis", "tol", "soft"},
     "between": {"a", "b", "c", "axis", "gap", "soft"}, "centered": {"a", "b", "tol", "soft"},
     "offset": {"a", "b", "dx", "dy", "frame", "tol", "soft"}, "attach": {"a", "b", "tol", "soft"},
@@ -127,11 +131,11 @@ FIELDS = {
     "balanced_on": {"a", "b", "margin", "soft"},
 }
 NUMERIC = ("gap", "inset", "r", "margin", "w", "x", "y", "yaw", "min", "max", "length", "width", "tol", "deg", "mod", "cols",
-           "dx", "dy", "frac", "depth", "x0", "x1", "y0", "y1", "d", "mid", "soft")
-SIGNED = ("x", "y", "yaw", "deg", "dx", "dy", "x0", "x1", "y0", "y1", "mid")
-WORD_FIELDS = ("axis", "edge", "side", "toward", "frame", "order", "spacing", "start")
+           "dx", "dy", "frac", "depth", "x0", "x1", "y0", "y1", "d", "mid", "angle", "soft")
+SIGNED = ("x", "y", "yaw", "deg", "dx", "dy", "x0", "x1", "y0", "y1", "mid", "angle")
+WORD_FIELDS = ("axis", "edge", "side", "toward", "frame", "order", "spacing", "start", "face")
 # the order keywords are written in the DSL text of a v1 statement
-KW_ORDER = ("side", "r", "min", "gap", "max", "length", "width", "toward", "axis", "start", "order", "spacing", "mid", "edge", "cols", "dx", "dy", "frame", "deg", "mod",
+KW_ORDER = ("side", "r", "min", "gap", "max", "length", "width", "toward", "axis", "start", "order", "spacing", "mid", "edge", "cols", "dx", "dy", "frame", "deg", "mod", "angle", "face",
             "tol", "inset", "frac", "depth", "x0", "x1", "y0", "y1", "x", "y", "d", "margin", "soft")
 
 
@@ -505,6 +509,11 @@ natural order (can_2 before can_10), leaving out bodies the statement names itse
   evenly_spaced(members, axis, tol)      every centre spacing along axis within tol of the mean spacing
   grid(members, cols, dx, dy)            rows of cols members: member k at (row*dx, col*dy) from the first;
                                          without dx, dy the pitch is free but shared
+  ring(members, r, x, y, angle, face, axis)  the members evenly spaced on a circle of radius r about (x, y)
+                                         (default: their own centre), counter-clockwise in the order listed
+                                         from angle (degrees from +x; default: the angle that moves them
+                                         least); face=in|out turns each one's axis (default +x; front,
+                                         handle) toward or away from the centre
   cluster(members, r)                    every member within r of the group's centre
   symmetric(a, b, c, axis)               a and b mirror images about c along axis (equal other coordinate)
   between(a, b, c, axis, gap)            a's centre between b's and c's along axis, gap from each

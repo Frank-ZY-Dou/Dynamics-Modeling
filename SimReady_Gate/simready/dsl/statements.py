@@ -467,6 +467,45 @@ def compile_statement(st, ctx: Ctx):
                     _row(out, co, -tol - cur, tol - cur, w)
             return out
         gens.append(gen)
+    elif n == "ring":
+        ks = [idx[b] for b in st.args]
+        r, tol, nk = float(kw["r"]), float(kwd(st, "tol")), len(ks)
+        centre = np.array([float(kw["x"]), float(kw["y"])]) if "x" in kw else None
+        start = math.radians(float(kw["angle"])) if "angle" in kw else None
+        face = kw.get("face")
+        sgn = 1.0 if face == "in" else -1.0
+        axes = {k: body_axis(sc0.bodies[k], kwd(st, "axis"))[0] for k in ks} if face else {}
+        turn = math.radians(float(OP_DEFAULTS["facing"]["tol"]))
+
+        def gen(state):
+            out, sc = [], state.scene
+            P = np.array([_c(sc, k) for k in ks])
+            c = centre if centre is not None else P.mean(0)
+            U = ring_directions(P, c, start)
+            for i, k in enumerate(ks):
+                for ax in (0, 1):                  # the member at c + r u_i; a free centre is the members' mean
+                    co = {(k, COL[ax]): 1.0}
+                    if centre is None:
+                        for kj in ks:
+                            _acc(co, (kj, COL[ax]), -1.0 / nk)
+                    cur = float(P[i, ax] - c[ax] - r * U[i, ax])
+                    _row(out, co, -tol - cur, tol - cur, w)
+                if face:                           # its axis toward (in) or away from (out) the centre, as facing
+                    phi = heading(sc.bodies[k].rotation, axes[k])
+                    d = sgn * (c - P[i])
+                    rho2 = float(d @ d)
+                    if phi is None or rho2 < 1e-12:
+                        continue
+                    err = wrap(math.atan2(d[1], d[0]) - phi)
+                    g = sgn * np.array([-d[1], d[0]]) / rho2
+                    co = {(k, "yaw"): 1.0}
+                    _acc(co, (k, "x"), float(g[0])); _acc(co, (k, "y"), float(g[1]))
+                    if centre is None:
+                        for kj in ks:
+                            _acc(co, (kj, "x"), -float(g[0]) / nk); _acc(co, (kj, "y"), -float(g[1]) / nk)
+                    _row(out, co, err - turn, err + turn, w)
+            return out
+        gens.append(gen)
     elif n == "cluster":
         ks = [idx[b] for b in st.args]
         r = float(kw["r"])
@@ -802,6 +841,18 @@ def flush_target(scene, st):
     return col, (lo + gap if low else hi - gap), low
 
 
+def ring_directions(P: np.ndarray, c: np.ndarray, start: float | None) -> np.ndarray:
+    """Unit directions from the centre c of n members evenly spaced counter-clockwise in their order: from the angle
+    `start`, or, without it, from the angle that fits the members' present places best (least squares)."""
+    n = len(P)
+    a = 2.0 * math.pi * np.arange(n) / n
+    if start is None:
+        d = P - c
+        e = np.column_stack([np.cos(a), np.sin(a)])
+        start = math.atan2(float(np.sum(e[:, 0] * d[:, 1] - e[:, 1] * d[:, 0])), float(np.sum(e * d)))
+    return np.column_stack([np.cos(start + a), np.sin(start + a)])
+
+
 def approach_obstacles(ctx: Ctx, k: int) -> list:
     """Bodies that can block an approach to body k: everything but k, the surfaces (fixed bodies
     tagged support or ground), k's own support and the bodies resting on k."""
@@ -1012,6 +1063,20 @@ def check_v1(st, scene, supports: dict, tol: float, angle_tol: float, bodies_fn)
             lo, hi = projection(sc[nm], 1.0, u)
             v = abs(target - (float(sc[nm].center[col]) + (lo if low else hi)))
             out.append((f"flush({nm},{st.args[1]},{kw['side']})", v <= float(kwd(st, "tol")) + tol, v))
+    elif n == "ring":
+        P = np.array([sc[x].center[:2] for x in st.args])
+        c = np.array([float(kw["x"]), float(kw["y"])]) if "x" in kw else P.mean(0)
+        U = ring_directions(P, c, math.radians(float(kw["angle"])) if "angle" in kw else None)
+        v = float(np.abs(P - c - float(kw["r"]) * U).max())
+        label = f"ring({','.join(st.args)})"
+        out.append((label, v <= float(kwd(st, "tol")) + tol, v))
+        if kw.get("face"):
+            sgn = 1.0 if kw["face"] == "in" else -1.0
+            for i, nm in enumerate(st.args):
+                phi = heading(sc[nm].rotation, body_axis(sc[nm], kwd(st, "axis"))[0])
+                d = sgn * (c - P[i])
+                e = None if phi is None or float(d @ d) < 1e-12 else abs(math.degrees(wrap(math.atan2(d[1], d[0]) - phi)))
+                out.append((f"{label}:face({nm})", e is not None and e <= float(OP_DEFAULTS["facing"]["tol"]) + angle_tol, e))
     elif n == "max_move":
         d = float(kw["d"])
         for nm in bodies_fn(st.args[0]):

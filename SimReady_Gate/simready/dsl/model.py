@@ -28,6 +28,7 @@ Text form (one statement per line, '#' comments, `*` = every free body):
       row(can_1, can_2, can_3, axis=y, gap=0.02)     align(book_1, book_2, axis=x, edge=max)
       row(can_*, start=left, order=height, spacing=even, mid=0)  # every can, sorted by the compiler, shortest at the left
       evenly_spaced(can_1, can_2, can_3, axis=y)     grid(c1, c2, c3, c4, cols=2, dx=0.12, dy=0.12)
+      ring(cup_*, r=0.18, x=0.55, y=0, face=out, axis=handle)   # evenly on a circle, every handle pointing out
       cluster(orange, lime, lemon, r=0.12)           symmetric(fork, knife, plate, axis=y)
       between(cup, plate, bottle, axis=y, gap=0.05)  centered(cup, saucer)
       offset(fork, plate, dy=0.15, frame=local)      attach(lid, pot)
@@ -71,18 +72,21 @@ KEYWORDS = {"no_penetration": {"margin"}, "within": {"inset", "soft"} | REGION_K
             "facing": {"axis", "tol", "x", "y", "soft"}, "yaw": {"deg", "tol", "mod", "axis", "soft"}, "parallel": {"mod", "tol", "axis", "soft"},
             "row": {"axis", "start", "gap", "tol", "order", "spacing", "mid", "edge", "soft"}, "align": {"axis", "edge", "tol", "soft"},
             "evenly_spaced": {"axis", "tol", "soft"}, "grid": {"cols", "dx", "dy", "tol", "soft"}, "cluster": {"r", "soft"},
+            "ring": {"r", "x", "y", "angle", "face", "axis", "tol", "soft"},
             "symmetric": {"axis", "tol", "soft"}, "between": {"axis", "gap", "soft"}, "centered": {"tol", "soft"},
             "offset": {"dx", "dy", "frame", "tol", "soft"}, "attach": {"tol", "soft"},
             "keep_out": {"gap", "soft"} | REGION_KW, "flush": {"side", "gap", "tol", "soft"}, "max_move": {"d", "soft"}, "max_turn": {"deg", "soft"},
             "stack": {"tol"}, "balanced_on": {"margin", "soft"}}
 NUMERIC_KW = {"margin", "inset", "x", "y", "yaw", "w", "gap", "r", "min", "max", "length", "width", "tol", "deg", "mod", "cols",
-              "dx", "dy", "frac", "depth", "x0", "x1", "y0", "y1", "d", "soft", "mid"}
-SIGNED_KW = {"x", "y", "yaw", "deg", "dx", "dy", "x0", "x1", "y0", "y1", "mid"}
+              "dx", "dy", "frac", "depth", "x0", "x1", "y0", "y1", "d", "soft", "mid", "angle"}
+SIGNED_KW = {"x", "y", "yaw", "deg", "dx", "dy", "x0", "x1", "y0", "y1", "mid", "angle"}
 # keywords whose value is a word, and the words each statement accepts
 WORDS = {"axis": {"left_of": {"x", "y"}, "right_of": {"x", "y"}, "in_front_of": {"x", "y"}, "behind": {"x", "y"},
                   "align": {"x", "y"}, "evenly_spaced": {"x", "y"}, "symmetric": {"x", "y"}, "between": {"x", "y"},
                   "row": {"x", "y"}, "facing": {"x", "y", "+x", "-x", "+y", "-y", "front", "handle"},
-                  "yaw": {"x", "y", "+x", "-x", "+y", "-y", "long", "short", "front", "handle"}, "parallel": {"x", "y", "long", "short"}},
+                  "yaw": {"x", "y", "+x", "-x", "+y", "-y", "long", "short", "front", "handle"}, "parallel": {"x", "y", "long", "short"},
+                  "ring": {"x", "y", "+x", "-x", "+y", "-y", "front", "handle"}},
+         "face": {"ring": {"in", "out"}},
          "edge": {"align": {"min", "center", "max"}, "row": {"min", "center", "max"}},
          "order": {"row": {"height", "-height", "width", "-width", "length", "-length", "mass", "-mass"}},
          "spacing": {"row": {"even"}},
@@ -97,7 +101,7 @@ STATEMENTS = {
     "left_of", "right_of", "in_front_of", "behind", "min_distance", "near",
     "minimize", "prefer",
     "reach", "clearance", "approach", "facing", "yaw", "parallel", "at", "beside",
-    "row", "align", "evenly_spaced", "grid", "cluster", "symmetric", "between", "centered", "offset", "attach",
+    "row", "align", "evenly_spaced", "grid", "ring", "cluster", "symmetric", "between", "centered", "offset", "attach",
     "keep_out", "flush", "max_move", "max_turn", "stack", "balanced_on",
 }
 # positional arguments each statement takes: (min, max); None = unbounded
@@ -105,18 +109,18 @@ ARITY = {"no_penetration": (1, 1), "place": (1, 1), "fixed": (1, None), "on_supp
          "within": (1, 2), "inside": (2, 2), "left_of": (2, 2), "right_of": (2, 2), "in_front_of": (2, 2),
          "behind": (2, 2), "min_distance": (2, 2), "near": (2, 2), "minimize": (2, 2), "prefer": (1, 1),
          "reach": (1, 1), "clearance": (1, 1), "at": (1, 1), "beside": (2, 2), "approach": (1, 1), "facing": (1, 2), "yaw": (1, 1), "parallel": (2, 2),
-         "row": (2, None), "align": (2, None), "evenly_spaced": (3, None), "grid": (2, None), "cluster": (2, None),
+         "row": (2, None), "align": (2, None), "evenly_spaced": (3, None), "grid": (2, None), "ring": (3, None), "cluster": (2, None),
          "symmetric": (3, 3), "between": (3, 3), "centered": (2, 2), "offset": (2, 2), "attach": (2, 2),
          "keep_out": (1, 2), "flush": (2, 2), "max_move": (1, 1), "max_turn": (1, 1), "stack": (2, None), "balanced_on": (2, 2)}
 # statements over a list of distinct bodies, in the order given; '*' and patterns among the members
 # stand for the free bodies they match that the statement does not name itself
-GROUP = {"row", "align", "evenly_spaced", "grid", "cluster", "stack"}
+GROUP = {"row", "align", "evenly_spaced", "grid", "ring", "cluster", "stack"}
 # the line a row runs along, from the end its first member is at
 START_LINE = {"left": "y", "right": "y", "near": "x", "far": "x"}
 # statements whose first argument is one named body ('*' or a pattern would put every body at one spot)
 ONE_BODY = {"place", "centered", "offset", "symmetric", "between"}
 # keywords a statement cannot do without
-REQUIRED = {"reach": {"r"}, "clearance": {"gap"}, "beside": {"side"}, "flush": {"side"}, "yaw": {"deg"}, "grid": {"cols"}, "cluster": {"r"},
+REQUIRED = {"reach": {"r"}, "clearance": {"gap"}, "beside": {"side"}, "flush": {"side"}, "yaw": {"deg"}, "grid": {"cols"}, "ring": {"r"}, "cluster": {"r"},
             "max_move": {"d"}, "max_turn": {"deg"}, "min_distance": {"r"}, "near": {"r"}}
 # gate sections, their fields and the only operator each field takes
 GATES = {"G2": {"min_gap": ">="}, "G5": {"v_max": "<=", "dx": "<="}}
@@ -210,6 +214,10 @@ def check_statement(name: str, args: list, kw: dict, where: str = "") -> None:
         raise SyntaxError(f"{at}{name}: give frac= (a part of the region) or depth= (a strip beside it), not both")
     if "start" in kw and "axis" in kw and START_LINE[kw["start"]] != kw["axis"]:
         raise SyntaxError(f"{at}{name}: a line along {kw['axis']} starts at {' or '.join(e for e, a in START_LINE.items() if a == kw['axis'])}")
+    if name == "ring" and ("x" in kw) != ("y" in kw):
+        raise SyntaxError(f"{at}ring: x= and y= give the centre together; without them the centre is the members' own")
+    if name == "ring" and "axis" in kw and "face" not in kw:
+        raise SyntaxError(f"{at}ring: axis= is the side that face= turns in or out; give face=")
     if name == "beside" and "max" in kw and kw["max"] < kw.get("gap", 0.0):
         raise SyntaxError(f"{at}beside: max= is smaller than gap=")
     if "side" in kw and len(args) < 2:
