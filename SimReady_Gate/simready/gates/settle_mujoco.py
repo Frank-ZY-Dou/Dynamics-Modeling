@@ -120,19 +120,22 @@ def _plates(scene: Scene, b, tops: list) -> list:
     return out
 
 
-def coacd_pieces_info(b, threshold: float = 0.05, max_hulls: int = 32):
+def coacd_pieces_info(b, threshold: float = 0.05, max_hulls: int = 32, preprocess_resolution: int | None = 50):
     """(convex pieces of a body's mesh in the model frame via CoACD, used_fallback), cached on
     the mesh content: in memory, and on disk under $SIMREADY_CACHE_DIR/coacd when that is set
     (a decomposition takes seconds to a minute per asset). When CoACD fails the single convex hull
-    stands in and used_fallback is True."""
+    stands in and used_fallback is True. A mesh that is not a closed manifold is remeshed first on a
+    grid of `preprocess_resolution` cells across it, which moves its surface by up to half a cell;
+    None decomposes the mesh as it is (a closed one), without remeshing."""
     import coacd, trimesh, hashlib
     digest = hashlib.sha1(np.ascontiguousarray(b.verts).tobytes() + np.ascontiguousarray(b.faces).tobytes()).hexdigest()
-    key = (digest, threshold, max_hulls)
+    key = (digest, threshold, max_hulls, preprocess_resolution)
     if key in _COACD_CACHE:
         return _COACD_CACHE[key]
     path = None
     if os.environ.get("SIMREADY_CACHE_DIR"):
-        path = os.path.join(os.environ["SIMREADY_CACHE_DIR"], "coacd", f"{digest}_{threshold:g}_{max_hulls}.npz")
+        res = "" if preprocess_resolution == 50 else "_off" if preprocess_resolution is None else f"_r{preprocess_resolution}"
+        path = os.path.join(os.environ["SIMREADY_CACHE_DIR"], "coacd", f"{digest}_{threshold:g}_{max_hulls}{res}.npz")
         if os.path.exists(path):
             with np.load(path, allow_pickle=False) as z:
                 out = ([(z[f"v{i}"], z[f"f{i}"]) for i in range(int(z["n"]))], bool(z["fallback"]))
@@ -141,7 +144,9 @@ def coacd_pieces_info(b, threshold: float = 0.05, max_hulls: int = 32):
     m = trimesh.Trimesh(b.verts, b.faces, process=False)
     try:
         parts = coacd.run_coacd(coacd.Mesh(np.asarray(m.vertices, dtype=np.float64), np.asarray(m.faces, dtype=np.int64)),
-                                threshold=threshold, max_convex_hull=max_hulls, preprocess_mode="auto")
+                                threshold=threshold, max_convex_hull=max_hulls,
+                                **({"preprocess_mode": "off"} if preprocess_resolution is None else
+                                   {"preprocess_mode": "auto", "preprocess_resolution": preprocess_resolution}))
         out = ([(np.asarray(v, dtype=np.float64), np.asarray(f, dtype=np.int32)) for v, f in parts], False)
     except Exception:  # noqa: BLE001
         h = m.convex_hull; out = ([(np.asarray(h.vertices), np.asarray(h.faces))], True)

@@ -553,7 +553,7 @@ def cmd_export(a):
         prog, dsl, notes, _ = load_program(a.program, sc)
         compile_program(prog, sc)                 # applies the program's fixed(...) statements
     with quiet_stdout():
-        m = export_scene(sc, a.out, decompose=a.decompose, max_hull_verts=a.hull_verts)
+        m = export_scene(sc, a.out, decompose=a.decompose, max_hull_verts=a.hull_verts, fixture_grid=a.fixture_grid)
     print(dump_json({"ok": True, "out": str(a.out), "bodies": len(m["bodies"]), "free": sum(1 for b in m["bodies"] if not b["fixed"]),
                      "fixed": sum(1 for b in m["bodies"] if b["fixed"]), "ground_z": m["ground_z"],
                      "files": {"manifest": "manifest.json", "mjcf": m["files"]["mjcf"], "usd": m["files"]["usd"] if m.get("usd_written") else None},
@@ -636,6 +636,8 @@ def main(argv=None):
     s.set_defaults(fn=cmd_settle)
     s = sub.add_parser("export"); s.add_argument("scene"); s.add_argument("--out", required=True); s.add_argument("--program")
     s.add_argument("--decompose", action="store_true", help="CoACD pieces for the free bodies instead of one convex hull each")
+    s.add_argument("--fixture-grid", type=int, default=100, choices=(50, 100, 200, 400),
+                   help="CoACD's remeshing grid for an open fixture mesh with levels (200: about 12 GB)")
     s.add_argument("--hull-verts", type=int, default=256); s.set_defaults(fn=cmd_export)
     s = sub.add_parser("assets", help="search, fetch and inspect SimReady packages and Scenario assets")
     s.add_argument("action", choices=("search", "fetch", "info", "list"))

@@ -16,7 +16,12 @@ File names carry the body's index, so two bodies whose names differ only by a su
 share a file; every output path is checked for uniqueness before anything is written.
 
 Fixed bodies keep their full mesh as a collider; MuJoCo replaces it by its convex hull, whose top
-face is the plate of a table, and Isaac Sim keeps the triangle mesh for static colliders. A fixed
+face is the plate of a table, and Isaac Sim keeps the triangle mesh for static colliders. A fixture
+with more than one level (a bookcase, a rack) would have its shelves filled by that hull: it is
+written as CoACD pieces, and no free body of the scene may start more than FIXTURE_PEN_TOL inside
+one. A closed mesh is decomposed as it is; CoACD remeshes an open one on a grid of `fixture_grid`
+cells first (100 takes about 4 GB, 200 about 12 GB), and a grid too coarse for the scene is an
+error. The manifest notes which. A fixed
 body whose mesh is a single plane is handled by what it is: a horizontal sheet at the ground
 height, or one tagged `ground`, is the ground and is marked `flat` (the export's ground stands in
 for it); any other sheet (a wall, a shelf board) is written with a small thickness so that every
@@ -33,10 +38,15 @@ from pathlib import Path
 
 import numpy as np
 
-from ..scene.model import Scene
+from ..scene.model import Body, Scene, support_levels
 from .paths import portable
 
 SHEET_THICKNESS = 0.01     # metres given to a planar fixed body that is not the ground
+# how far a free body may start inside a fixture's collision pieces: CoACD rounds a fixture's surface by a few millimetres
+# (2.9 mm on the rack of docs/examples), while a piece that bridges a shelf or fills a corner holds a body by centimetres
+# (116 mm for the bookcase's notebooks at a remeshing grid of 100)
+FIXTURE_PEN_TOL = 0.005
+FIXTURE_COACD_THRESHOLD = 0.02
 
 
 def _write_obj(path, verts, faces):
@@ -94,7 +104,30 @@ def thicken(verts: np.ndarray, faces: np.ndarray, normal: np.ndarray, thickness:
     return V, np.vstack(F).astype(np.int32)
 
 
-def export_scene(scene: Scene, out_dir, decompose: bool = False, max_hull_verts: int = 256,
+def fixture_pieces(scene: Scene, b, fixture_grid: int = 100) -> tuple:
+    """(CoACD pieces of a fixture with levels in its model frame, the remeshing grid used (None: the closed mesh as it
+    is), the smallest signed distance from a free body of the scene to them). A piece that bridged a shelf, or bulged
+    from a wall, would push the bodies that rest there."""
+    import trimesh
+    from ..gates.settle_mujoco import coacd_pieces_info
+    from ..gates.verify import pair_signed_distances
+    free = scene.free()
+    m = trimesh.Trimesh(b.verts, b.faces, process=True)
+    res = None if m.is_watertight and m.is_winding_consistent else fixture_grid
+    parts, hull = coacd_pieces_info(b, threshold=FIXTURE_COACD_THRESHOLD, max_hulls=-1, preprocess_resolution=res)
+    if hull:
+        raise RuntimeError(f"CoACD could not decompose the fixture {b.name}; its convex hull would fill its levels")
+    pieces = [Body.from_mesh(f"{b.name}_p{j}", v @ b.rotation.T + b.center, f, fixed=True) for j, (v, f) in enumerate(parts)]
+    pairs = pair_signed_distances(pieces + free, prefilter=0.01)
+    gaps = [s for i, j, s, *_ in pairs if (i < len(pieces)) != (j < len(pieces))]
+    gap = min(gaps) if gaps else float("inf")
+    if gap >= -FIXTURE_PEN_TOL:
+        return parts, res, gap
+    raise RuntimeError(f"a free body starts {1000 * -gap:.1f} mm inside the CoACD pieces of {b.name} "
+                       + ("(its closed mesh as it is)" if res is None else f"at a remeshing grid of {res} (--fixture-grid)"))
+
+
+def export_scene(scene: Scene, out_dir, decompose: bool = False, max_hull_verts: int = 256, fixture_grid: int = 100,
                  density: float = 500.0, friction=(1.0, 0.005, 0.0001), timestep: float = 2e-3) -> dict:
     out = Path(out_dir); (out / "meshes").mkdir(parents=True, exist_ok=True)
     names = [prim_name(b.name) for b in scene.bodies]
@@ -116,7 +149,15 @@ def export_scene(scene: Scene, out_dir, decompose: bool = False, max_hull_verts:
         mesh_rel = f"meshes/{stem}.obj"
         planned[mesh_rel] = (verts, faces)
         pieces, note = [], ""
-        if decompose and not b.fixed:
+        if b.fixed and not flat and normal is None and len(support_levels(scene, b)) > 1:
+            parts, res, gap = fixture_pieces(scene, b, fixture_grid)
+            for j, (v, f) in enumerate(parts):
+                rel = f"meshes/{stem}/p{j:04d}.obj"
+                planned[rel] = (v, f)
+                pieces.append(rel)
+            note = (f"{len(pieces)} CoACD pieces ({'the closed mesh' if res is None else f'remeshing grid {res}'}); "
+                    f"the free bodies start {1000 * gap:.1f} mm from them or farther")
+        elif decompose and not b.fixed:
             from ..gates.settle_mujoco import coacd_pieces_info
             parts, used_hull = coacd_pieces_info(b)
             for j, (v, f) in enumerate(parts):
