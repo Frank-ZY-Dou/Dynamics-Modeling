@@ -459,10 +459,9 @@ def cmd_settle(a):
     hover = 0.0
     for b in sc.free():
         bottom = float(b.world_aabb()[0][2])
-        for sup, top in tops.items():
-            plates = top if isinstance(top, list) else [top]
-            under = [t for t in plates if t <= bottom + 1e-3]
-            hover = max(hover, bottom - (max(under) if under else min(plates)))
+        under = [t for top in tops.values() for t in (top if isinstance(top, list) else [top]) if t <= bottom + 1e-3]
+        if under:
+            hover = max(hover, bottom - max(under))
     free_fall_bound = float(np.sqrt(2 * 9.81 * max(hover, 0.0)))
     modes = ("hull", "coacd") if a.proxy == "both" else (a.proxy,)
     hold = bool(getattr(a, "hold_predicates", False))
