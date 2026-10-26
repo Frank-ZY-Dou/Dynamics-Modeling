@@ -14,166 +14,409 @@
  ],
  "objects": [
   {
-   "name": "can_1",
-   "package": "food_beverage_can_b01",
-   "repo": "nvidia/simready-assets",
-   "x": 0.618,
-   "y": -0.18849,
-   "z": 0.17607,
-   "yaw": 1.501
-  },
-  {
-   "name": "can_2",
-   "package": "food_beverage_can_d01",
-   "repo": "nvidia/simready-assets",
-   "x": 0.61789,
-   "y": -0.12527,
-   "z": 0.17609,
-   "yaw": 4.767
-  },
-  {
-   "name": "can_3",
-   "package": "food_beverage_can_h01",
-   "repo": "nvidia/simready-assets",
-   "x": 0.61473,
-   "y": -0.06308,
-   "z": 0.17618,
-   "yaw": 3.308
-  },
-  {
-   "name": "can_4",
-   "package": "food_beverage_can_k01",
-   "repo": "nvidia/simready-assets",
-   "x": 0.61377,
-   "y": -0.00696,
-   "z": 0.17614,
-   "yaw": -3.298
-  },
-  {
-   "name": "can_5",
-   "package": "food_beverage_can_l01",
-   "repo": "nvidia/simready-assets",
-   "x": 0.61096,
-   "y": 0.04591,
-   "z": 0.17537,
-   "yaw": -2.398
-  },
-  {
-   "name": "can_6",
-   "package": "food_beverage_can_n01",
-   "repo": "nvidia/simready-assets",
-   "x": 0.61803,
-   "y": 0.1039,
-   "z": 0.17617,
-   "yaw": 4.483
-  },
-  {
-   "name": "soup",
-   "package": "food_canned_soup_a02",
-   "repo": "nvidia/simready-assets",
-   "x": 0.62819,
-   "y": 0.17829,
-   "z": 0.17619,
-   "yaw": -5.937
-  },
-  {
-   "name": "bowl_1",
-   "package": "kitchenware_bowl_b01",
-   "repo": "nvidia/simready-assets",
-   "x": 0.64956,
-   "y": -0.18608,
-   "z": 0.58338,
-   "yaw": 3.855
-  },
-  {
-   "name": "bowl_2",
-   "package": "kitchenware_bowl_q01",
-   "repo": "nvidia/simready-assets",
-   "x": 0.64963,
-   "y": -0.05915,
-   "z": 0.58338,
-   "yaw": 3.565
-  },
-  {
    "name": "mug_1",
    "package": "dishware_mug_coffee_a01",
    "repo": "nvidia/simready-assets",
-   "x": 0.66489,
-   "y": 0.04335,
-   "z": 0.58339,
-   "yaw": -0.385
+   "x": 0.66466,
+   "y": -0.376,
+   "z": 0.17619,
+   "yaw": 1.501
   },
   {
    "name": "mug_2",
    "package": "dishware_mug_coffee_b01",
    "repo": "nvidia/simready-assets",
-   "x": 0.6625,
-   "y": 0.12532,
-   "z": 0.58339,
-   "yaw": -2.364
+   "x": 0.66222,
+   "y": -0.29403,
+   "z": 0.17619,
+   "yaw": 4.767
   },
   {
    "name": "mug_3",
    "package": "dishware_cup_tea_a01",
    "repo": "nvidia/simready-assets",
-   "x": 0.66129,
-   "y": 0.2089,
-   "z": 0.5831,
+   "x": 0.66105,
+   "y": -0.21045,
+   "z": 0.1759,
+   "yaw": 3.308
+  },
+  {
+   "name": "mug_4",
+   "package": "dishware_mug_coffee_a01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.66464,
+   "y": -0.08784,
+   "z": 0.17619,
+   "yaw": -3.298
+  },
+  {
+   "name": "mug_5",
+   "package": "dishware_mug_coffee_b01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.66229,
+   "y": -0.00587,
+   "z": 0.17619,
+   "yaw": -2.398
+  },
+  {
+   "name": "mug_6",
+   "package": "dishware_cup_tea_a01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.66102,
+   "y": 0.07771,
+   "z": 0.1759,
+   "yaw": 4.483
+  },
+  {
+   "name": "soup_1",
+   "package": "food_canned_soup_a02",
+   "repo": "nvidia/simready-assets",
+   "x": 0.62819,
+   "y": 0.20359,
+   "z": 0.17619,
+   "yaw": -5.937
+  },
+  {
+   "name": "soup_2",
+   "package": "food_canned_soup_a02",
+   "repo": "nvidia/simready-assets",
+   "x": 0.62819,
+   "y": 0.28815,
+   "z": 0.17619,
+   "yaw": 3.855
+  },
+  {
+   "name": "soup_3",
+   "package": "food_canned_soup_a02",
+   "repo": "nvidia/simready-assets",
+   "x": 0.62819,
+   "y": 0.37272,
+   "z": 0.17619,
+   "yaw": 3.565
+  },
+  {
+   "name": "bowl_1",
+   "package": "kitchenware_bowl_b01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.82934,
+   "y": -0.21193,
+   "z": 0.17619,
+   "yaw": -0.385
+  },
+  {
+   "name": "bowl_2",
+   "package": "kitchenware_bowl_q01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.82941,
+   "y": -0.085,
+   "z": 0.17619,
+   "yaw": -2.364
+  },
+  {
+   "name": "bowl_3",
+   "package": "kitchenware_bowl_b01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.82934,
+   "y": 0.08493,
+   "z": 0.17619,
    "yaw": -2.659
+  },
+  {
+   "name": "bowl_4",
+   "package": "kitchenware_bowl_q01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.82941,
+   "y": 0.21186,
+   "z": 0.17619,
+   "yaw": -2.942
+  },
+  {
+   "name": "can_1",
+   "package": "food_beverage_can_b01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61822,
+   "y": -0.54581,
+   "z": 0.58326,
+   "yaw": -0.659
+  },
+  {
+   "name": "can_2",
+   "package": "food_beverage_can_d01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61807,
+   "y": -0.48262,
+   "z": 0.58328,
+   "yaw": 0.055
+  },
+  {
+   "name": "can_3",
+   "package": "food_beverage_can_h01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61497,
+   "y": -0.42036,
+   "z": 0.58338,
+   "yaw": 0.642
+  },
+  {
+   "name": "can_4",
+   "package": "food_beverage_can_k01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61403,
+   "y": -0.36421,
+   "z": 0.58334,
+   "yaw": 5.946
+  },
+  {
+   "name": "can_5",
+   "package": "food_beverage_can_l01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61122,
+   "y": -0.31145,
+   "z": 0.58256,
+   "yaw": 3.512
+  },
+  {
+   "name": "can_6",
+   "package": "food_beverage_can_n01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61824,
+   "y": -0.25342,
+   "z": 0.58336,
+   "yaw": 1.466
+  },
+  {
+   "name": "can_7",
+   "package": "food_beverage_can_b01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61822,
+   "y": -0.14621,
+   "z": 0.58326,
+   "yaw": 5.868
+  },
+  {
+   "name": "can_8",
+   "package": "food_beverage_can_d01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61804,
+   "y": -0.08305,
+   "z": 0.58328,
+   "yaw": -3.416
+  },
+  {
+   "name": "can_9",
+   "package": "food_beverage_can_h01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61503,
+   "y": -0.0207,
+   "z": 0.58338,
+   "yaw": -4.077
+  },
+  {
+   "name": "can_10",
+   "package": "food_beverage_can_k01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61401,
+   "y": 0.03535,
+   "z": 0.58334,
+   "yaw": 1.35
+  },
+  {
+   "name": "can_11",
+   "package": "food_beverage_can_l01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61116,
+   "y": 0.08821,
+   "z": 0.58256,
+   "yaw": -5.473
+  },
+  {
+   "name": "can_12",
+   "package": "food_beverage_can_n01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61824,
+   "y": 0.14618,
+   "z": 0.58336,
+   "yaw": -5.572
+  },
+  {
+   "name": "can_13",
+   "package": "food_beverage_can_b01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61822,
+   "y": 0.25339,
+   "z": 0.58326,
+   "yaw": 0.179
+  },
+  {
+   "name": "can_14",
+   "package": "food_beverage_can_d01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61806,
+   "y": 0.31657,
+   "z": 0.58328,
+   "yaw": -0.406
+  },
+  {
+   "name": "can_15",
+   "package": "food_beverage_can_h01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61492,
+   "y": 0.37877,
+   "z": 0.58338,
+   "yaw": 5.006
+  },
+  {
+   "name": "can_16",
+   "package": "food_beverage_can_k01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61401,
+   "y": 0.43495,
+   "z": 0.58334,
+   "yaw": 1.551
+  },
+  {
+   "name": "can_17",
+   "package": "food_beverage_can_l01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.6112,
+   "y": 0.48777,
+   "z": 0.58256,
+   "yaw": 0.169
+  },
+  {
+   "name": "can_18",
+   "package": "food_beverage_can_n01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.61824,
+   "y": 0.54578,
+   "z": 0.58336,
+   "yaw": -0.038
   },
   {
    "name": "jar_1",
    "package": "paint_container_jar_green_a01",
    "repo": "nvidia/simready-assets",
    "x": 0.6331,
-   "y": -0.18654,
+   "y": -0.35137,
    "z": 1.01577,
-   "yaw": -2.942
+   "yaw": -3.03
   },
   {
    "name": "jar_2",
    "package": "paint_container_jar_orange_a01",
    "repo": "nvidia/simready-assets",
-   "x": 0.63363,
-   "y": -0.09257,
+   "x": 0.63385,
+   "y": -0.25745,
    "z": 1.01584,
-   "yaw": -0.659
+   "yaw": -5.858
   },
   {
    "name": "jar_3",
    "package": "paint_container_jar_pink_a01",
    "repo": "nvidia/simready-assets",
    "x": 0.6331,
-   "y": 0.00134,
+   "y": -0.16349,
    "z": 1.01583,
-   "yaw": 0.055
+   "yaw": -3.691
   },
   {
    "name": "jar_4",
    "package": "paint_container_jar_violet_a01",
    "repo": "nvidia/simready-assets",
-   "x": 0.63358,
-   "y": 0.09645,
+   "x": 0.63362,
+   "y": -0.06843,
    "z": 1.01612,
-   "yaw": 0.642
+   "yaw": 2.304
+  },
+  {
+   "name": "jar_5",
+   "package": "paint_container_jar_green_a01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.6331,
+   "y": 0.06847,
+   "z": 1.01577,
+   "yaw": -3.593
+  },
+  {
+   "name": "jar_6",
+   "package": "paint_container_jar_orange_a01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.63363,
+   "y": 0.16243,
+   "z": 1.01584,
+   "yaw": -1.566
+  },
+  {
+   "name": "jar_7",
+   "package": "paint_container_jar_pink_a01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.6331,
+   "y": 0.25634,
+   "z": 1.01583,
+   "yaw": -5.955
+  },
+  {
+   "name": "jar_8",
+   "package": "paint_container_jar_violet_a01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.63361,
+   "y": 0.35134,
+   "z": 1.01612,
+   "yaw": 3.961
   },
   {
    "name": "bottle_1",
    "package": "food_beverage_bottledWater_l01",
    "repo": "nvidia/simready-assets",
-   "x": 0.61263,
-   "y": 0.16982,
+   "x": 0.79262,
+   "y": -0.13028,
    "z": 1.0162,
-   "yaw": 5.946
+   "yaw": -4.146
   },
   {
    "name": "bottle_2",
    "package": "misc_bottle_corked_a01",
    "repo": "nvidia/simready-assets",
-   "x": 0.60466,
-   "y": 0.21485,
+   "x": 0.78465,
+   "y": -0.08524,
    "z": 1.01595,
-   "yaw": 3.512
+   "yaw": -2.789
+  },
+  {
+   "name": "bottle_3",
+   "package": "food_beverage_bottledWater_l01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.79263,
+   "y": -0.0401,
+   "z": 1.0162,
+   "yaw": 4.564
+  },
+  {
+   "name": "bottle_4",
+   "package": "misc_bottle_corked_a01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.78465,
+   "y": 0.04794,
+   "z": 1.01595,
+   "yaw": 0.117
+  },
+  {
+   "name": "bottle_5",
+   "package": "food_beverage_bottledWater_l01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.79263,
+   "y": 0.09308,
+   "z": 1.0162,
+   "yaw": 4.166
+  },
+  {
+   "name": "bottle_6",
+   "package": "misc_bottle_corked_a01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.78465,
+   "y": 0.13811,
+   "z": 1.01595,
+   "yaw": 1.677
   }
  ]
 }
