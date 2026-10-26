@@ -33,6 +33,7 @@
 
 ## 📢 Updates
 
+* [October 2026] **Shelves.** A fixture's levels are supports and regions (`case.level2`), with `flush` and rows that line up an edge; three bookcase and rack examples ([Example 3](#example-3-shelves)).
 * [October 2026] **Scenario 3D Collection assets.** 37 AI-generated tabletop objects of [scenario-labs/3d-collection](https://huggingface.co/datasets/scenario-labs/3d-collection) (CC BY 4.0, credit: Scenario) can be named in layouts, with estimated mass, friction and handle side ([assets](#assets)).
 * [October 2026] **Faster S4R.** A repair in the comparison below takes 2.6-3.1 s per trial instead of 6.7-7.6 s, with the same verdicts.
 * [October 2026] **SimReady assets and a larger language.** Layouts name NVIDIA SimReady assets ([assets](#assets)), and the language gains 23 statements for robot scenes ([the language](#what-robot-scenes-ask-for)). Programs pass 143 / 144 against 127 / 144 for typed poses, with 3.2-5.2 times fewer output tokens ([results](#a-program-or-the-poses)).
@@ -50,6 +51,7 @@
 * [Example 1: a scene RoboLab ships, one request, one certificate](#example-1-a-scene-robolab-ships-one-request-one-certificate)
    * [Summarize](#1-summarize-the-scene) · [Text to program](#2-text-to-program) · [Check](#3-check) · [Repair and write back](#4-repair-and-write-back) · [Settle](#5-settle-as-certification) · [Certificate](#6-the-certificate)
 * [Example 2: twenty objects from a heap, laid out by language](#example-2-twenty-objects-from-a-heap-laid-out-by-language)
+* [Example 3: shelves](#example-3-shelves)
 * [The agent loop](#the-agent-loop)
    * [Scale-space editing](#scale-space-editing)
 * [The language](#the-language)
@@ -262,6 +264,37 @@ the settle within 1° of where it started). The default policy leaves `ready` to
 thresholds and reports this; `--hold-predicates` would make the certificate not ready until the
 request is changed for those bodies.
 
+## Example 3: shelves
+
+A fixture's levels come from its mesh. The scene summary lists each one, with the room above it:
+
+```
+case.level2 z=0.315 x[0.48, 0.83] y[-0.25, 0.25] headroom 0.261 m
+```
+
+What a program can say about them:
+
+- `on_support(book_*, case.level2)`: rest on that level.
+- `within`, `keep_out`: stay in, or out of, part of a level.
+- `flush(book_1, case.level2, side=near, gap=0.01)`: an edge 1 cm behind the level's front.
+- `row(..., edge=min)`: a row whose near edges line up (spines in line).
+- `yaw(book_*, deg=180, axis=front)`: the side a body's data names faces out.
+
+`check` refuses a body taller than the room above its level, and names the levels that have room.
+
+Three runs on SimReady and PalatialSim assets. Every request, program, tool output and certificate
+is in [`docs/examples/`](docs/examples/); the layouts come from `experiments/shelf_layouts.py`.
+
+| example | request | repair | settle (hull / CoACD) |
+|---|---|---|---|
+| `shelf_books` | books upright by height, spines out; the two tallest on top; notebooks stacked at the back | 18 → 0 pairs, 13 s | 0.06 / 0.16 m/s |
+| `shelf_pantry` | heavy things low; handles to the right; cans in a grid; jars by mass | 12 → 0 pairs, 11 s | 0.77 / 0.17 m/s |
+| `shelf_fix` | rows 3 mm too tight: fix them, moving nothing more than 2 cm | 16 → 0 pairs, 6 s | 0.10 / 0.04 m/s |
+
+- `shelf_books` took two rounds: the first lined up the books' centres, so their spines could not
+  line up too; the second uses `edge=min`.
+- The hull settle fills the bowls in, and the upper bowl slides off; CoACD keeps their shape.
+
 ## The agent loop
 
 The agent is a coding agent that follows [`skills/simready-scenegen/SKILL.md`](skills/simready-scenegen/SKILL.md),
@@ -335,8 +368,8 @@ program
 |---|---|---|
 | the robot | `reach`, `clearance`, `approach`, `facing` | the tangent half-plane of the distance to the base; the contact rows' margin; the free side of a corridor toward the robot; first-order rows on the heading toward a point |
 | positions and headings | `at`, `beside`, `yaw`, `parallel`, `max_turn` | exact rows on centres, footprint projections and headings (`axis=long`: a body's long side) |
-| arrangements | `row` (from the end `start=` names, with `order=height` / `width` / `length` / `mass` sorted by the compiler, `spacing=even`, `mid` where its two ends are centred), `align`, `evenly_spaced`, `grid`, `cluster`, `symmetric`, `between`, `centered`, `offset`, `attach` | exact rows on centres and footprints; the tangent row of each member for `cluster`; first-order rows for an offset in a body's own frame |
-| regions | `within(a, b, side, frac, depth, x0..y1)`, `keep_out` | rectangle rows on the footprint; for `keep_out`, the side that needs the least motion and leaves the body room in its own regions |
+| arrangements | `row` (from the end `start=` names, with `order=height` / `width` / `length` / `mass` sorted by the compiler, `spacing=even`, `mid` where its two ends are centred, `edge=min` to line up near edges), `align`, `evenly_spaced`, `grid`, `cluster`, `symmetric`, `between`, `centered`, `offset`, `attach` | exact rows on centres and footprints; the tangent row of each member for `cluster`; first-order rows for an offset in a body's own frame |
+| regions | `within(a, b, side, frac, depth, x0..y1)`, `keep_out`, `flush(a, b, side, gap)`; `b.levelK` is a fixture's level | rectangle rows on the footprint; for `keep_out`, the side that needs the least motion and leaves the body room in its own regions |
 | edits and stacks | `max_move`, `stack`, `balanced_on` | a 16-gon inscribed in the allowed disc; supports that follow the body below, centring rows; the centre of mass inside the base's rectangle in its own frame |
 | preferences | `soft=w` on any of them | the same rows with a slack weight a hundred times smaller: reported, not required |
 
@@ -359,7 +392,7 @@ The same requests on the same SimReady scenes, answered by Claude Haiku 5.5, Son
 in isolated `claude -p` calls (no tools, memory, CLAUDE.md or MCP servers; a leak test with planted
 canaries before the run): the model either writes a SimReady program, which the gate compiles and
 repairs, or types the final pose of every object itself. Sixteen tasks, from place settings and
-shelves to sorting a heap, towers, palletizing and dense packing, two of them written only after the
+rows of drinks to sorting a heap, towers, palletizing and dense packing, two of them written only after the
 language was frozen; three seeds; up to three rounds, each told what its condition's check found.
 The method and every table are in [`docs/EVAL_DSL_vs_direct.md`](docs/EVAL_DSL_vs_direct.md), every
 trial in [`results/dsl_vs_direct/`](results/dsl_vs_direct/).
@@ -530,6 +563,15 @@ restitution in USD) instead of the defaults, and `balanced_on` uses its centre o
 files live under `SIMREADY_ASSETS_DIR` and are written as `<SIMREADY_ASSETS_DIR>/...` in layouts,
 certificates and manifests; a repair never downloads.
 
+A layout can also:
+
+- add fixtures: `"fixtures": [{"name": "case", "package": "cabinet_file_d02", "position": [0.65, 0, 0], "yaw": 180}]`;
+- stand an object on another side: `"up": "+y"` (a book on its edge);
+- name the side that faces out: `"front": "-x"` (its spine), for `axis=front`.
+
+`--repo` fetches from the other datasets SimReady Central indexes. The shelf examples also use
+`PalatialSim/palatial-nv-asset-library` (CC BY 4.0, credit: PalatialSim).
+
 **Scenario 3D Collection.** `simready/data/scenario_assets.json` lists 37 tabletop objects chosen
 from [scenario-labs/3d-collection](https://huggingface.co/datasets/scenario-labs/3d-collection),
 1,342 AI-generated assets under CC BY 4.0 (credit: Scenario), pinned to commit `55b4c002`. For each
@@ -616,6 +658,7 @@ examples/            run_mujoco.py, run_genesis.py, run_isaac.py: load an export
 tests/               regression tests (python -m unittest discover tests)
 skills/              the agent skill that runs the loop
 experiments/         the diagnostics behind docs/DIAGNOSTIC_2026-09-08.md (RoboLab, RoboCasa, settle)
+  shelf_layouts.py   the layouts of the shelf examples (docs/examples/shelf_*)
   dsl_vs_direct/     the program-or-poses comparison: SimReady tasks and rubrics, the isolated CLI calls, the leak test, the regrade, settle and reuse, the tables and figures
 viz/                 Blender rendering on the solver's meshes, video drivers, the agent-run page generator
 results/             tracked result tables and the persisted layouts

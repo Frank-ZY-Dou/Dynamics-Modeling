@@ -1,0 +1,12 @@
+- case: FIXED fixture,support (cabinet); size 0.37x0.53x0.88 m; at (0.65, 0.00, 0.44); levels from the bottom: case.level1 z=0.058 x[0.48, 0.83] y[-0.25, 0.25] headroom 0.245 m, case.level2 z=0.315 x[0.48, 0.83] y[-0.25, 0.25] headroom 0.261 m, case.level3 z=0.588 x[0.48, 0.83] y[-0.25, 0.25] headroom 0.244 m, case.level4 z=0.877 x[0.46, 0.84] y[-0.22, 0.22] open above
+- book_1: object (book); size 0.15x0.12x0.21 m; at (0.60, 0.12, 0.16); local size 0.15x0.05x0.21 m; heading -33 deg; mass 2.00 kg; front side -x
+- book_2: object (book); size 0.20x0.06x0.26 m; at (0.60, -0.03, 0.45); local size 0.20x0.04x0.26 m; heading 7 deg; mass 1.10 kg; front side -x
+- book_3: object (magazine); size 0.21x0.05x0.29 m; at (0.61, 0.11, 0.20); local size 0.21x0.04x0.29 m; heading -2 deg; mass 1.90 kg; front side -x
+- book_4: object (book); size 0.14x0.15x0.19 m; at (0.62, 0.00, 0.41); local size 0.14x0.10x0.19 m; heading -31 deg; mass 0.40 kg; front side -x
+- book_5: object (book); size 0.19x0.08x0.25 m; at (0.67, 0.10, 0.18); local size 0.19x0.06x0.25 m; heading -6 deg; mass 1.20 kg; front side -x
+- book_6: object (book); size 0.18x0.15x0.25 m; at (0.62, 0.05, 0.44); local size 0.19x0.04x0.25 m; heading 37 deg; mass 1.20 kg; front side -x
+- book_7: object (book); size 0.14x0.07x0.21 m; at (0.61, -0.22, 0.16); local size 0.14x0.03x0.21 m; heading 16 deg; mass 0.53 kg; front side -x
+- notebook_1: object (notebook); size 0.28x0.27x0.01 m; at (0.64, -0.04, 0.06); local size 0.23x0.17x0.01 m; heading 38 deg; mass 0.17 kg
+- notebook_2: object (notebook); size 0.28x0.26x0.01 m; at (0.66, -0.01, 0.59); local size 0.23x0.17x0.01 m; heading 31 deg; mass 0.17 kg; handle/grasp side +y
+- notebook_3: object (notebook); size 0.28x0.24x0.01 m; at (0.62, 0.05, 0.06); local size 0.23x0.17x0.01 m; heading 22 deg; mass 0.17 kg; handle/grasp side +y
+- notebook_4: object (notebook); size 0.25x0.21x0.01 m; at (0.62, 0.05, 0.59); local size 0.23x0.17x0.01 m; heading -10 deg; mass 0.17 kg; handle/grasp side -y

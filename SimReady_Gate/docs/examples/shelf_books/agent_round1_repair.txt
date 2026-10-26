@@ -1,0 +1,293 @@
+{
+ "ok": false,
+ "scene": "docs/examples/shelf_books/layout.json",
+ "program": "docs/examples/shelf_books/program_round1.json",
+ "pen_before": 18,
+ "pen_after": 0,
+ "min_score_after": 0.0,
+ "contained_after": [],
+ "floating_after": [],
+ "rmsd_xy": 0.12208684504831366,
+ "steps": 49,
+ "time_s": 28.05,
+ "predicates": [
+  [
+   "upright(book_1)",
+   true,
+   0.0
+  ],
+  [
+   "upright(book_2)",
+   true,
+   0.0
+  ],
+  [
+   "upright(book_3)",
+   true,
+   0.0
+  ],
+  [
+   "upright(book_4)",
+   true,
+   0.0
+  ],
+  [
+   "upright(book_5)",
+   true,
+   0.0
+  ],
+  [
+   "upright(book_6)",
+   true,
+   0.0
+  ],
+  [
+   "upright(book_7)",
+   true,
+   0.0
+  ],
+  [
+   "upright(notebook_1)",
+   true,
+   0.0
+  ],
+  [
+   "upright(notebook_2)",
+   true,
+   0.0
+  ],
+  [
+   "upright(notebook_3)",
+   true,
+   0.0
+  ],
+  [
+   "upright(notebook_4)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(book_1,case.level2)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(book_4,case.level2)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(book_5,case.level2)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(book_6,case.level2)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(book_7,case.level2)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(book_2,case.level4)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(book_3,case.level4)",
+   true,
+   0.0
+  ],
+  [
+   "yaw(book_1,deg=180)",
+   true,
+   0.21861776065449978
+  ],
+  [
+   "yaw(book_2,deg=180)",
+   true,
+   4.999999999999995
+  ],
+  [
+   "yaw(book_3,deg=180)",
+   true,
+   1.2528975692621176
+  ],
+  [
+   "yaw(book_4,deg=180)",
+   true,
+   5.001449237556493
+  ],
+  [
+   "yaw(book_5,deg=180)",
+   true,
+   0.12260587422332835
+  ],
+  [
+   "yaw(book_6,deg=180)",
+   true,
+   1.6891928283817848
+  ],
+  [
+   "yaw(book_7,deg=180)",
+   true,
+   0.1397181902278772
+  ],
+  [
+   "row(book_1,book_4,book_5,book_6,book_7):aligned",
+   false,
+   0.012979261241924611
+  ],
+  [
+   "row(book_1,book_4,book_5,book_6,book_7):order",
+   true,
+   0.006297242134533313
+  ],
+  [
+   "row(book_1,book_4,book_5,book_6,book_7):mid",
+   true,
+   0.004890326171138493
+  ],
+  [
+   "flush(book_1,case.level2,near)",
+   true,
+   0.004333589286137418
+  ],
+  [
+   "flush(book_4,case.level2,near)",
+   true,
+   0.005865747706303381
+  ],
+  [
+   "flush(book_5,case.level2,near)",
+   true,
+   0.0049879425673238775
+  ],
+  [
+   "flush(book_6,case.level2,near)",
+   true,
+   0.005767928848260218
+  ],
+  [
+   "flush(book_7,case.level2,near)",
+   false,
+   0.00797706143298893
+  ],
+  [
+   "row(book_2,book_3):aligned",
+   true,
+   0.002731100704254752
+  ],
+  [
+   "row(book_2,book_3):order",
+   true,
+   0.16293587682104627
+  ],
+  [
+   "flush(book_3,case.level4,left)",
+   true,
+   0.0050000000000000044
+  ],
+  [
+   "flush(book_2,case.level4,near)",
+   true,
+   0.004999999999999949
+  ],
+  [
+   "flush(book_3,case.level4,near)",
+   true,
+   0.004999999999999949
+  ],
+  [
+   "on_support(notebook_1,case.level1)",
+   true,
+   0.0
+  ],
+  [
+   "stack(notebook_2,notebook_1):on",
+   true,
+   0.0
+  ],
+  [
+   "stack(notebook_3,notebook_2):on",
+   true,
+   0.0
+  ],
+  [
+   "stack(notebook_4,notebook_3):on",
+   true,
+   0.0
+  ],
+  [
+   "stack(notebook_2,notebook_1):centered",
+   true,
+   0.01
+  ],
+  [
+   "stack(notebook_3,notebook_2):centered",
+   true,
+   0.01
+  ],
+  [
+   "stack(notebook_4,notebook_3):centered",
+   true,
+   0.00999999988842195
+  ],
+  [
+   "yaw(notebook_1,deg=90)",
+   true,
+   0.13588210722409935
+  ],
+  [
+   "yaw(notebook_2,deg=90)",
+   true,
+   1.8562381193433006
+  ],
+  [
+   "yaw(notebook_3,deg=90)",
+   true,
+   2.1639297970997946
+  ],
+  [
+   "yaw(notebook_4,deg=90)",
+   true,
+   0.2188199881251852
+  ],
+  [
+   "flush(notebook_1,case.level1,far)",
+   true,
+   0.004999899292392418
+  ],
+  [
+   "at(notebook_1)",
+   true,
+   0.0021630945291350634
+  ]
+ ],
+ "failed_predicates": [
+  "row(book_1,book_4,book_5,book_6,book_7):aligned",
+  "flush(book_7,case.level2,near)"
+ ],
+ "preferences": [],
+ "failed_preferences": [],
+ "clearance": null,
+ "notes": [],
+ "solver_notes": [
+  "a program row was not met within the step at 41 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+  "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+ ],
+ "dropped_children": [],
+ "continuation": {
+  "complete": true,
+  "last_accepted_scale": 1.0,
+  "termination": "complete"
+ },
+ "synthetic_table": null,
+ "written": "docs/examples/shelf_books/round1_repaired.json",
+ "written_sha256": "4d7bf42db555fe31",
+ "certificate": "docs/examples/shelf_books/round1_repaired.certificate.json"
+}
+repair exit=1

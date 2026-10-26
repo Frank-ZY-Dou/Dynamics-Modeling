@@ -1,0 +1,137 @@
+{
+ "intent": "Books upright with their spines out: the five that fit on the middle shelf by height, the two taller ones on top; the notebooks stacked at the back of the bottom shelf.",
+ "statements": [
+  {
+   "op": "no_penetration",
+   "margin": 0.005,
+   "reason": "nothing interpenetrates"
+  },
+  {
+   "op": "upright",
+   "a": "*",
+   "reason": "books stand upright, notebooks lie flat, as they rest"
+  },
+  {
+   "op": "on_support",
+   "a": "book_*",
+   "b": "case.level2",
+   "reason": "the books that fit go on the middle shelf (headroom 0.261 m)"
+  },
+  {
+   "op": "on_support",
+   "a": "book_2",
+   "b": "case.level4",
+   "reason": "0.265 m tall: taller than every inner shelf allows (0.245, 0.261, 0.244 m less the 5 mm margin); on top"
+  },
+  {
+   "op": "on_support",
+   "a": "book_3",
+   "b": "case.level4",
+   "reason": "0.286 m tall: likewise, on top"
+  },
+  {
+   "op": "yaw",
+   "a": "book_*",
+   "deg": 180,
+   "axis": "front",
+   "reason": "spine out, toward the robot (-x)"
+  },
+  {
+   "op": "row",
+   "members": [
+    "book_1",
+    "book_4",
+    "book_5",
+    "book_6",
+    "book_7"
+   ],
+   "start": "left",
+   "order": "-height",
+   "gap": 0.005,
+   "mid": 0.0,
+   "reason": "ordered by height, tallest at the left, 5 mm apart, spines in line, centred on the shelf (its y span is -0.25 to 0.25)",
+   "edge": "min"
+  },
+  {
+   "op": "flush",
+   "a": "book_1",
+   "b": "case.level2",
+   "side": "near",
+   "gap": 0.01,
+   "reason": "the spines 1 cm behind the shelf's front edge (the row lines them up)"
+  },
+  {
+   "op": "row",
+   "members": [
+    "book_2",
+    "book_3"
+   ],
+   "start": "left",
+   "order": "-height",
+   "gap": 0.005,
+   "reason": "side by side on top, tallest first from the left, spines in line",
+   "edge": "min"
+  },
+  {
+   "op": "flush",
+   "a": "book_3",
+   "b": "case.level4",
+   "side": "left",
+   "gap": 0.02,
+   "reason": "the row starts 2 cm inside the top's left end"
+  },
+  {
+   "op": "flush",
+   "a": "book_2",
+   "b": "case.level4",
+   "side": "near",
+   "gap": 0.01,
+   "reason": "spine 1 cm behind the top's front edge"
+  },
+  {
+   "op": "flush",
+   "a": "book_3",
+   "b": "case.level4",
+   "side": "near",
+   "gap": 0.01,
+   "reason": "spine 1 cm behind the top's front edge"
+  },
+  {
+   "op": "on_support",
+   "a": "notebook_1",
+   "b": "case.level1",
+   "reason": "the notebooks on the bottom shelf"
+  },
+  {
+   "op": "stack",
+   "members": [
+    "notebook_1",
+    "notebook_2",
+    "notebook_3",
+    "notebook_4"
+   ],
+   "reason": "stacked flat"
+  },
+  {
+   "op": "yaw",
+   "a": "notebook_*",
+   "deg": 90,
+   "mod": 180,
+   "reason": "square: every notebook's long side along the shelf"
+  },
+  {
+   "op": "flush",
+   "a": "notebook_1",
+   "b": "case.level1",
+   "side": "far",
+   "gap": 0.01,
+   "reason": "pushed to 1 cm from the back"
+  },
+  {
+   "op": "at",
+   "a": "notebook_1",
+   "y": 0.0,
+   "reason": "centred left to right"
+  }
+ ]
+}

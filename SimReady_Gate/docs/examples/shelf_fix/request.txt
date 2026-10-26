@@ -1,0 +1,1 @@
+A generator stocked this rack in rows without checking contacts, and neighbours interpenetrate by a few millimetres. Make it simulation-ready without rearranging it: everything stays upright on the shelf it is on, moves at most 2 cm and turns at most 10 degrees.

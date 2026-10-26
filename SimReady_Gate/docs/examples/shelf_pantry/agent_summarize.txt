@@ -1,0 +1,19 @@
+- rack: FIXED fixture,support (furniture); size 0.55x1.63x1.44 m; at (0.80, -0.00, 0.73); levels from the bottom: rack.level1 z=0.176 x[0.54, 1.05] y[-0.80, 0.80] headroom 0.385 m, rack.level2 z=0.583 x[0.54, 1.05] y[-0.80, 0.80] headroom 0.407 m, rack.level3 z=1.016 x[0.54, 1.05] y[-0.80, 0.80] headroom 0.396 m, rack.level4 z=1.436 x[0.54, 1.05] y[-0.80, 0.80] open above
+- can_1: object (beverage can); size 0.07x0.07x0.09 m; at (0.93, 0.01, 0.22); local size 0.07x0.07x0.09 m; heading 24 deg; mass 0.03 kg
+- can_2: object (beverage can); size 0.07x0.07x0.12 m; at (0.60, -0.05, 0.24); local size 0.07x0.07x0.12 m; heading -17 deg; mass 0.09 kg
+- can_3: object (beverage can); size 0.06x0.06x0.12 m; at (0.60, -0.20, 0.64); local size 0.06x0.06x0.12 m; heading -7 deg; mass 0.08 kg
+- can_4: object (beverage can); size 0.06x0.06x0.10 m; at (0.87, -0.12, 0.23); local size 0.06x0.06x0.10 m; heading 40 deg; mass 0.06 kg
+- can_5: object (beverage can); size 0.05x0.05x0.12 m; at (1.01, 0.18, 0.64); local size 0.05x0.05x0.12 m; heading -5 deg; mass 0.07 kg
+- can_6: object (beverage can); size 0.07x0.07x0.12 m; at (0.75, -0.00, 0.23); local size 0.07x0.07x0.12 m; heading 28 deg; mass 0.09 kg
+- soup: object (canned soup); size 0.09x0.09x0.11 m; at (0.61, 0.02, 0.64); local size 0.09x0.09x0.11 m; heading 14 deg; mass 1.02 kg; handle/grasp side -x
+- bowl_1: container,object (ceramic bowl); size 0.13x0.13x0.06 m; at (0.94, -0.16, 0.21); local size 0.13x0.13x0.06 m; heading -18 deg; mass 1.14 kg
+- bowl_2: container,object (ceramic bowl); size 0.13x0.13x0.05 m; at (0.94, -0.10, 0.61); local size 0.13x0.13x0.05 m; heading 14 deg; mass 1.04 kg
+- mug_1: container,object (coffee mug); size 0.11x0.09x0.10 m; at (0.94, -0.21, 0.22); local size 0.12x0.08x0.10 m; heading 32 deg; mass 1.50 kg; handle/grasp side -x
+- mug_2: container,object (coffee mug); size 0.12x0.09x0.12 m; at (0.60, -0.00, 0.64); local size 0.12x0.09x0.12 m; heading 17 deg; mass 1.75 kg; handle/grasp side -x
+- mug_3: container,object (tea cup); size 0.12x0.08x0.10 m; at (0.68, -0.07, 0.23); local size 0.12x0.08x0.10 m; heading -5 deg; mass 1.35 kg; handle/grasp side -x
+- jar_1: container,object (acrylic paint); size 0.10x0.10x0.08 m; at (0.72, -0.14, 0.62); local size 0.10x0.10x0.08 m; heading 24 deg; mass 0.23 kg; handle/grasp side -x
+- jar_2: container,object (acrylic paint); size 0.10x0.10x0.08 m; at (0.78, 0.12, 0.21); local size 0.10x0.10x0.08 m; heading 16 deg; mass 0.12 kg
+- jar_3: container,object (acrylic paint); size 0.10x0.10x0.08 m; at (0.72, 0.12, 0.62); local size 0.10x0.10x0.08 m; heading -21 deg; mass 0.12 kg
+- jar_4: container,object (acrylic paint); size 0.10x0.10x0.08 m; at (0.80, -0.11, 0.22); local size 0.10x0.10x0.08 m; heading 1 deg; mass 0.12 kg
+- bottle_1: object (bottle); size 0.06x0.06x0.18 m; at (0.99, -0.18, 0.67); local size 0.06x0.06x0.18 m; heading -39 deg; mass 0.18 kg
+- bottle_2: object (bottle); size 0.04x0.04x0.10 m; at (0.74, 0.21, 0.23); local size 0.04x0.04x0.10 m; heading 28 deg; mass 0.30 kg; handle/grasp side -x

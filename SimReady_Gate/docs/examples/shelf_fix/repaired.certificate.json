@@ -1,0 +1,1738 @@
+{
+ "ok": true,
+ "scene": "docs/examples/shelf_fix/layout.json",
+ "program": "docs/examples/shelf_fix/program.json",
+ "pen_before": 16,
+ "pen_after": 0,
+ "min_score_after": 0.0,
+ "contained_after": [],
+ "floating_after": [],
+ "rmsd_xy": 0.015382100414621134,
+ "steps": 20,
+ "time_s": 6.0,
+ "predicates": [
+  [
+   "upright(can_1)",
+   true,
+   0.0
+  ],
+  [
+   "upright(can_2)",
+   true,
+   0.0
+  ],
+  [
+   "upright(can_3)",
+   true,
+   0.0
+  ],
+  [
+   "upright(can_4)",
+   true,
+   0.0
+  ],
+  [
+   "upright(can_5)",
+   true,
+   0.0
+  ],
+  [
+   "upright(can_6)",
+   true,
+   0.0
+  ],
+  [
+   "upright(soup)",
+   true,
+   0.0
+  ],
+  [
+   "upright(bowl_1)",
+   true,
+   0.0
+  ],
+  [
+   "upright(bowl_2)",
+   true,
+   0.0
+  ],
+  [
+   "upright(mug_1)",
+   true,
+   0.0
+  ],
+  [
+   "upright(mug_2)",
+   true,
+   0.0
+  ],
+  [
+   "upright(mug_3)",
+   true,
+   0.0
+  ],
+  [
+   "upright(jar_1)",
+   true,
+   0.0
+  ],
+  [
+   "upright(jar_2)",
+   true,
+   0.0
+  ],
+  [
+   "upright(jar_3)",
+   true,
+   0.0
+  ],
+  [
+   "upright(jar_4)",
+   true,
+   0.0
+  ],
+  [
+   "upright(bottle_1)",
+   true,
+   0.0
+  ],
+  [
+   "upright(bottle_2)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(can_1,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(can_2,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(can_3,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(can_4,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(can_5,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(can_6,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(soup,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(bowl_1,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(bowl_2,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(mug_1,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(mug_2,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(mug_3,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(jar_1,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(jar_2,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(jar_3,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(jar_4,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(bottle_1,rack)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(bottle_2,rack)",
+   true,
+   0.0
+  ],
+  [
+   "max_move(can_1,d=0.02)",
+   true,
+   0.019981496426054537
+  ],
+  [
+   "max_move(can_2,d=0.02)",
+   true,
+   0.011951322602133507
+  ],
+  [
+   "max_move(can_3,d=0.02)",
+   true,
+   0.0037222487986907677
+  ],
+  [
+   "max_move(can_4,d=0.02)",
+   true,
+   0.013083202664108238
+  ],
+  [
+   "max_move(can_5,d=0.02)",
+   true,
+   0.012925048754699502
+  ],
+  [
+   "max_move(can_6,d=0.02)",
+   true,
+   0.012768629011845632
+  ],
+  [
+   "max_move(soup,d=0.02)",
+   true,
+   0.01980443175495909
+  ],
+  [
+   "max_move(bowl_1,d=0.02)",
+   true,
+   0.016207544401869747
+  ],
+  [
+   "max_move(bowl_2,d=0.02)",
+   true,
+   0.009383932165856172
+  ],
+  [
+   "max_move(mug_1,d=0.02)",
+   true,
+   0.004356614466656823
+  ],
+  [
+   "max_move(mug_2,d=0.02)",
+   true,
+   0.008366693444612069
+  ],
+  [
+   "max_move(mug_3,d=0.02)",
+   true,
+   0.015308996899126326
+  ],
+  [
+   "max_move(jar_1,d=0.02)",
+   true,
+   0.019851442990504033
+  ],
+  [
+   "max_move(jar_2,d=0.02)",
+   true,
+   0.016178078961998268
+  ],
+  [
+   "max_move(jar_3,d=0.02)",
+   true,
+   0.018245773164259908
+  ],
+  [
+   "max_move(jar_4,d=0.02)",
+   true,
+   0.01962092058993043
+  ],
+  [
+   "max_move(bottle_1,d=0.02)",
+   true,
+   0.019355604096871138
+  ],
+  [
+   "max_move(bottle_2,d=0.02)",
+   true,
+   0.01967496872015181
+  ],
+  [
+   "max_turn(can_1,deg=10)",
+   true,
+   0.012805532729827287
+  ],
+  [
+   "max_turn(can_2,deg=10)",
+   true,
+   1.8203308678848726
+  ],
+  [
+   "max_turn(can_3,deg=10)",
+   true,
+   0.19391857403651833
+  ],
+  [
+   "max_turn(can_4,deg=10)",
+   true,
+   2.4079789602365795
+  ],
+  [
+   "max_turn(can_5,deg=10)",
+   true,
+   9.714639628464708
+  ],
+  [
+   "max_turn(can_6,deg=10)",
+   true,
+   0.6682746362914938
+  ],
+  [
+   "max_turn(soup,deg=10)",
+   true,
+   0.25779476650878164
+  ],
+  [
+   "max_turn(bowl_1,deg=10)",
+   true,
+   0.24606739446763817
+  ],
+  [
+   "max_turn(bowl_2,deg=10)",
+   true,
+   0.17502263279865551
+  ],
+  [
+   "max_turn(mug_1,deg=10)",
+   true,
+   0.028017340496667435
+  ],
+  [
+   "max_turn(mug_2,deg=10)",
+   true,
+   0.5737742762664421
+  ],
+  [
+   "max_turn(mug_3,deg=10)",
+   true,
+   0.9596305353176866
+  ],
+  [
+   "max_turn(jar_1,deg=10)",
+   true,
+   5.4990001530631805
+  ],
+  [
+   "max_turn(jar_2,deg=10)",
+   true,
+   6.345503493451448
+  ],
+  [
+   "max_turn(jar_3,deg=10)",
+   true,
+   8.508160919982547
+  ],
+  [
+   "max_turn(jar_4,deg=10)",
+   true,
+   3.983772303494162
+  ],
+  [
+   "max_turn(bottle_1,deg=10)",
+   true,
+   2.1918280472092966
+  ],
+  [
+   "max_turn(bottle_2,deg=10)",
+   true,
+   1.7545729174106728
+  ]
+ ],
+ "failed_predicates": [],
+ "preferences": [],
+ "failed_preferences": [],
+ "clearance": null,
+ "notes": [],
+ "solver_notes": [],
+ "dropped_children": [],
+ "continuation": {
+  "complete": true,
+  "last_accepted_scale": 1.0,
+  "termination": "complete"
+ },
+ "synthetic_table": null,
+ "provenance": {
+  "scene": {
+   "path": "docs/examples/shelf_fix/layout.json",
+   "sha256": "c9a67be3005da0d7"
+  },
+  "assets": {
+   "<SIMREADY_ASSETS_DIR>/PalatialSim/palatial-nv-asset-library/D00661/simready_usd/D00661.usd": "a94b46f246741c97",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_b01/simready_usd/sm_food_beverage_can_b01_01.usd": "01d030134a9506bd",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_d01/simready_usd/sm_food_beverage_can_d01_01.usd": "ee4f4f998c8b948c",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_h01/simready_usd/sm_food_beverage_can_h01_01.usd": "44e8cb90a8770fef",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_k01/simready_usd/sm_food_beverage_can_k01_01.usd": "c553a33ddcc5e6b1",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_l01/simready_usd/sm_food_beverage_can_l01_01.usd": "73230e16a654ccbd",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_n01/simready_usd/sm_food_beverage_can_n01_01.usd": "f897585eaa0ac82f",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_canned_soup_a02/simready_usd/sm_food_canned_soup_a02_01.usd": "fa7d12d367b9f4cc",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_b01/simready_usd/sm_kitchenware_bowl_b01_01.usd": "cba25e0b62420e37",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_q01/simready_usd/sm_kitchenware_bowl_q01_01.usd": "3ff722e7bbbaf2e7",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_a01/simready_usd/sm_dishware_mug_coffee_a01_01.usd": "0e39d90bb1297a9d",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_b01/simready_usd/sm_dishware_mug_coffee_b01_01.usd": "05b5e07a92525e47",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_cup_tea_a01/simready_usd/sm_dishware_cup_tea_a01_01.usd": "dac0d9bde7009adb",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_green_a01/simready_usd/sm_paint_container_jar_green_a01_01.usd": "b0c6dc86793386dd",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_orange_a01/simready_usd/sm_paint_container_jar_orange_a01_01.usd": "322678d3daff1456",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_pink_a01/simready_usd/sm_paint_container_jar_pink_a01_01.usd": "64081c4d1c964ca8",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_violet_a01/simready_usd/sm_paint_container_jar_violet_a01_01.usd": "476f6f9523c392b9",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_bottledWater_l01/simready_usd/sm_food_beverage_bottledWater_l01_01.usd": "53830d692b5014cd",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_bottle_corked_a01/simready_usd/sm_misc_bottle_corked_a01_01.usd": "260f861591c72b9d",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_b01/simready_usd/payloads/MuJoCo/disabled.usda": "0da41d88dc161ef0",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_b01/simready_usd/payloads/Newton/disabled.usda": "0da41d88dc161ef0",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_b01/simready_usd/payloads/PhysX/enabled.usda": "5646cf7e96a824f4",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_b01/simready_usd/payloads/Physics/physics.usda": "12c58dfa289094e2",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_b01/simready_usd/payloads/base.usda": "ec7b9a80a5a58ec5",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_b01/simready_usd/payloads/geometries.usd": "f777322c293e22c7",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_b01/simready_usd/payloads/instances.usda": "cb33c3b883d39a09",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_b01/simready_usd/payloads/instances_physx.usda": "63257f17143d57bc",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_b01/simready_usd/payloads/materials.usda": "310f2685a86d3999",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_d01/simready_usd/payloads/MuJoCo/disabled.usda": "f767db0bc3ccdb0b",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_d01/simready_usd/payloads/Newton/disabled.usda": "f767db0bc3ccdb0b",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_d01/simready_usd/payloads/PhysX/enabled.usda": "16e4e8b107572b88",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_d01/simready_usd/payloads/Physics/physics.usda": "4bda4dea78c8150d",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_d01/simready_usd/payloads/base.usda": "e8e4d60e8b363fd6",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_d01/simready_usd/payloads/geometries.usd": "c183db26aee33463",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_d01/simready_usd/payloads/instances.usda": "1b0d59116c52b4e5",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_d01/simready_usd/payloads/instances_physx.usda": "60c6864f95abbb3a",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_d01/simready_usd/payloads/materials.usda": "5fa1a2ee07db108c",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_h01/simready_usd/payloads/MuJoCo/disabled.usda": "9fdf2c5aceb48d0f",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_h01/simready_usd/payloads/Newton/disabled.usda": "9fdf2c5aceb48d0f",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_h01/simready_usd/payloads/PhysX/enabled.usda": "6913c8cdff5e08f5",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_h01/simready_usd/payloads/Physics/physics.usda": "b1c7d17aa6372a8a",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_h01/simready_usd/payloads/base.usda": "751f80b2f793506e",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_h01/simready_usd/payloads/geometries.usd": "2c1cefb1445fc99b",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_h01/simready_usd/payloads/instances.usda": "7564c830df5ecfc4",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_h01/simready_usd/payloads/instances_physx.usda": "7a3f41a5d6d03260",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_h01/simready_usd/payloads/materials.usda": "75206deeb141f424",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_k01/simready_usd/payloads/MuJoCo/disabled.usda": "388aab4cab2b3b2e",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_k01/simready_usd/payloads/Newton/disabled.usda": "388aab4cab2b3b2e",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_k01/simready_usd/payloads/PhysX/enabled.usda": "87d2a46d68fc47b8",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_k01/simready_usd/payloads/Physics/physics.usda": "565335a89554a5a7",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_k01/simready_usd/payloads/base.usda": "b547b2ae8aee5a29",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_k01/simready_usd/payloads/geometries.usd": "fdf021c6e315a50b",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_k01/simready_usd/payloads/instances.usda": "c061219fad490f44",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_k01/simready_usd/payloads/instances_physx.usda": "12df12ea57aba629",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_k01/simready_usd/payloads/materials.usda": "94cd34197072eea0",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_l01/simready_usd/payloads/MuJoCo/disabled.usda": "df5fc98d4ee0cf04",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_l01/simready_usd/payloads/Newton/disabled.usda": "df5fc98d4ee0cf04",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_l01/simready_usd/payloads/PhysX/enabled.usda": "18ec388497ee9590",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_l01/simready_usd/payloads/Physics/physics.usda": "31d9a6cdbe3390e6",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_l01/simready_usd/payloads/base.usda": "b921bd75983fde82",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_l01/simready_usd/payloads/geometries.usd": "d1897a137c5e034b",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_l01/simready_usd/payloads/instances.usda": "4331aead2d495f26",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_l01/simready_usd/payloads/instances_physx.usda": "bc2fb385fe0ed2a9",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_l01/simready_usd/payloads/materials.usda": "e1e27e9b010bc0f0",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_n01/simready_usd/payloads/MuJoCo/disabled.usda": "ba968e50f9f65043",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_n01/simready_usd/payloads/Newton/disabled.usda": "ba968e50f9f65043",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_n01/simready_usd/payloads/PhysX/enabled.usda": "dc1a7c7349ea860d",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_n01/simready_usd/payloads/Physics/physics.usda": "11d86e136b7a2ae8",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_n01/simready_usd/payloads/base.usda": "d1dd664e50f26360",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_n01/simready_usd/payloads/geometries.usd": "648a0841aa4f9502",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_n01/simready_usd/payloads/instances.usda": "a39e3a0c8689e9bc",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_n01/simready_usd/payloads/instances_physx.usda": "bb6a1fd3be08a5c7",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_can_n01/simready_usd/payloads/materials.usda": "36ad52223f2fcfc0",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_canned_soup_a02/simready_usd/payloads/MuJoCo/disabled.usda": "f845459710e4ee9b",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_canned_soup_a02/simready_usd/payloads/Newton/disabled.usda": "f845459710e4ee9b",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_canned_soup_a02/simready_usd/payloads/PhysX/enabled.usda": "2e6d09e95d9b94cc",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_canned_soup_a02/simready_usd/payloads/Physics/physics.usda": "5c061561d21ae36e",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_canned_soup_a02/simready_usd/payloads/base.usda": "95ebdcbeda27be2f",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_canned_soup_a02/simready_usd/payloads/geometries.usd": "646b6632dd971efb",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_canned_soup_a02/simready_usd/payloads/instances.usda": "8ad5cdd9c786c0a9",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_canned_soup_a02/simready_usd/payloads/instances_physx.usda": "9d09795ef9f9925f",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_canned_soup_a02/simready_usd/payloads/materials.usda": "62299f2bd8eb0685",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_b01/simready_usd/payloads/MuJoCo/disabled.usda": "4a55f9c16dcadaae",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_b01/simready_usd/payloads/Newton/disabled.usda": "4a55f9c16dcadaae",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_b01/simready_usd/payloads/PhysX/enabled.usda": "706c850ac2b269f5",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_b01/simready_usd/payloads/Physics/physics.usda": "a93cca40c4eeceb4",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_b01/simready_usd/payloads/base.usda": "2432308eefd40fa2",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_b01/simready_usd/payloads/geometries.usd": "0b2fabf00650365d",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_b01/simready_usd/payloads/instances.usda": "6f6e7cbc63a7da3c",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_b01/simready_usd/payloads/instances_physx.usda": "1c1e9f06ed0a976c",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_b01/simready_usd/payloads/materials.usda": "96fb0abee4e0ccee",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_q01/simready_usd/payloads/MuJoCo/disabled.usda": "b099bc3c3742de3e",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_q01/simready_usd/payloads/Newton/disabled.usda": "b099bc3c3742de3e",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_q01/simready_usd/payloads/PhysX/enabled.usda": "6bc749c070beb1a0",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_q01/simready_usd/payloads/Physics/physics.usda": "c326fbcb09aefb6f",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_q01/simready_usd/payloads/base.usda": "9e352e90f3addbce",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_q01/simready_usd/payloads/geometries.usd": "d99c84ec7af59e0a",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_q01/simready_usd/payloads/instances.usda": "51fc69a497bfcf57",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_q01/simready_usd/payloads/instances_physx.usda": "caf83db076bfc5d8",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/kitchenware_bowl_q01/simready_usd/payloads/materials.usda": "7d4bfcadbe3071b4",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_a01/simready_usd/payloads/MuJoCo/disabled.usda": "f67e4c9d14c73a99",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_a01/simready_usd/payloads/Newton/disabled.usda": "f67e4c9d14c73a99",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_a01/simready_usd/payloads/PhysX/enabled.usda": "f50049b5649904ae",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_a01/simready_usd/payloads/Physics/physics.usda": "0318dddbff5fb709",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_a01/simready_usd/payloads/base.usda": "136725c7d3df7f63",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_a01/simready_usd/payloads/geometries.usd": "b83ea735e99ec6e6",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_a01/simready_usd/payloads/instances.usda": "dc001879adfc67b0",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_a01/simready_usd/payloads/instances_physx.usda": "4e694f2fcd9e5271",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_a01/simready_usd/payloads/materials.usda": "372f9981c39ad719",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_b01/simready_usd/payloads/MuJoCo/disabled.usda": "2ff7a4ca1b4619ca",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_b01/simready_usd/payloads/Newton/disabled.usda": "2ff7a4ca1b4619ca",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_b01/simready_usd/payloads/PhysX/enabled.usda": "3e02229368a48ca3",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_b01/simready_usd/payloads/Physics/physics.usda": "3524cf237ff80d0e",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_b01/simready_usd/payloads/base.usda": "131af465f4129b58",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_b01/simready_usd/payloads/geometries.usd": "31f628dc692e57c2",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_b01/simready_usd/payloads/instances.usda": "3de7178f0de5fe93",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_b01/simready_usd/payloads/instances_physx.usda": "cf83f72de4ca0026",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_mug_coffee_b01/simready_usd/payloads/materials.usda": "33c8f184d1eb9e8a",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_cup_tea_a01/simready_usd/payloads/MuJoCo/disabled.usda": "aaba235083540d77",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_cup_tea_a01/simready_usd/payloads/Newton/disabled.usda": "aaba235083540d77",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_cup_tea_a01/simready_usd/payloads/PhysX/enabled.usda": "bc86fb1ee48e9f37",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_cup_tea_a01/simready_usd/payloads/Physics/physics.usda": "f7970cb51487844a",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_cup_tea_a01/simready_usd/payloads/base.usda": "98f0796439281d46",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_cup_tea_a01/simready_usd/payloads/geometries.usd": "349ed29af4d17c4c",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_cup_tea_a01/simready_usd/payloads/instances.usda": "7baac31c7d47ddfc",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_cup_tea_a01/simready_usd/payloads/instances_physx.usda": "33cadee58f6253c3",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/dishware_cup_tea_a01/simready_usd/payloads/materials.usda": "d041b24bd27e9260",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_green_a01/simready_usd/payloads/MuJoCo/disabled.usda": "7b10e3bd39deac43",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_green_a01/simready_usd/payloads/Newton/disabled.usda": "7b10e3bd39deac43",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_green_a01/simready_usd/payloads/PhysX/enabled.usda": "3b3544bd834ed689",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_green_a01/simready_usd/payloads/Physics/physics.usda": "b075c5d3a8cde6aa",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_green_a01/simready_usd/payloads/base.usda": "7d52f7cec88b458b",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_green_a01/simready_usd/payloads/geometries.usd": "afc05e87fd8df017",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_green_a01/simready_usd/payloads/instances.usda": "44d4f9272f12c912",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_green_a01/simready_usd/payloads/instances_physx.usda": "af7777fbb94b36ca",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_green_a01/simready_usd/payloads/materials.usda": "30cfebfbc407a5ce",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_orange_a01/simready_usd/payloads/MuJoCo/disabled.usda": "bc9d137e9b52aa55",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_orange_a01/simready_usd/payloads/Newton/disabled.usda": "bc9d137e9b52aa55",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_orange_a01/simready_usd/payloads/PhysX/enabled.usda": "ca36d39b96982c9d",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_orange_a01/simready_usd/payloads/Physics/physics.usda": "33a93059a76a8f30",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_orange_a01/simready_usd/payloads/base.usda": "a1533d348df9b665",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_orange_a01/simready_usd/payloads/geometries.usd": "d2e76a1d78900b25",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_orange_a01/simready_usd/payloads/instances.usda": "763e34990e43e5de",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_orange_a01/simready_usd/payloads/instances_physx.usda": "6729f31713548e1a",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_orange_a01/simready_usd/payloads/materials.usda": "9b795a1886ec6728",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_pink_a01/simready_usd/payloads/MuJoCo/disabled.usda": "1556249ff2854821",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_pink_a01/simready_usd/payloads/Newton/disabled.usda": "1556249ff2854821",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_pink_a01/simready_usd/payloads/PhysX/enabled.usda": "b37291563168a62c",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_pink_a01/simready_usd/payloads/Physics/physics.usda": "105be60425268cc1",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_pink_a01/simready_usd/payloads/base.usda": "0446fbbf61387b1b",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_pink_a01/simready_usd/payloads/geometries.usd": "62f9b6d5f62d3056",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_pink_a01/simready_usd/payloads/instances.usda": "37214f996d882364",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_pink_a01/simready_usd/payloads/instances_physx.usda": "a23df2fa13983150",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_pink_a01/simready_usd/payloads/materials.usda": "1ab6fe823680864d",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_violet_a01/simready_usd/payloads/MuJoCo/disabled.usda": "a0196162ba6f9b03",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_violet_a01/simready_usd/payloads/Newton/disabled.usda": "a0196162ba6f9b03",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_violet_a01/simready_usd/payloads/PhysX/enabled.usda": "05fdc41ca0bf2ace",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_violet_a01/simready_usd/payloads/Physics/physics.usda": "99e28269368f9e1b",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_violet_a01/simready_usd/payloads/base.usda": "1df0b8499f53a31a",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_violet_a01/simready_usd/payloads/geometries.usd": "95c6fa35f89fb855",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_violet_a01/simready_usd/payloads/instances.usda": "38f3fe195fd6a598",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_violet_a01/simready_usd/payloads/instances_physx.usda": "3e20b0239a3151cd",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/paint_container_jar_violet_a01/simready_usd/payloads/materials.usda": "cc2b3905d18770f0",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_bottledWater_l01/simready_usd/payloads/MuJoCo/disabled.usda": "8b994074a99dff9d",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_bottledWater_l01/simready_usd/payloads/Newton/disabled.usda": "8b994074a99dff9d",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_bottledWater_l01/simready_usd/payloads/PhysX/enabled.usda": "34ab64ed3785a334",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_bottledWater_l01/simready_usd/payloads/Physics/physics.usda": "c13bbbfd4bb4b372",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_bottledWater_l01/simready_usd/payloads/base.usda": "eaa5cc84b0274fb3",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_bottledWater_l01/simready_usd/payloads/geometries.usd": "fef99f3404247b8c",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_bottledWater_l01/simready_usd/payloads/instances.usda": "73840513e05f3586",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_bottledWater_l01/simready_usd/payloads/instances_physx.usda": "93ac043a6db57c73",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/food_beverage_bottledWater_l01/simready_usd/payloads/materials.usda": "0da172e865232d7d",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_bottle_corked_a01/simready_usd/payloads/MuJoCo/disabled.usda": "299156d1d94e2dd1",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_bottle_corked_a01/simready_usd/payloads/Newton/disabled.usda": "299156d1d94e2dd1",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_bottle_corked_a01/simready_usd/payloads/PhysX/enabled.usda": "c734b75e64a09ff4",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_bottle_corked_a01/simready_usd/payloads/Physics/physics.usda": "15ae38142aa7b710",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_bottle_corked_a01/simready_usd/payloads/base.usda": "bbf73832d808bf5c",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_bottle_corked_a01/simready_usd/payloads/geometries.usd": "bcc652946c076663",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_bottle_corked_a01/simready_usd/payloads/instances.usda": "d20365c45f18cac8",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_bottle_corked_a01/simready_usd/payloads/instances_physx.usda": "6b73eeac036cb7ba",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_bottle_corked_a01/simready_usd/payloads/materials.usda": "eff43a8c3c012c7c"
+  },
+  "program": {
+   "path": "docs/examples/shelf_fix/program.json",
+   "sha256": "9f3bbedd5d0b3a38",
+   "dsl": "program\n  no_penetration(*, margin=0.002)\n  upright(*)\n  on_support(*, rack)\n  max_move(*, d=0.02)\n  max_turn(*, deg=10)",
+   "json": {
+    "intent": "A minimal fix: every body stays on its shelf and nearly where it is; only the interpenetration goes.",
+    "statements": [
+     {
+      "op": "no_penetration",
+      "margin": 0.002,
+      "reason": "simulation-ready: nothing interpenetrates; a 2 mm clearance keeps the motion small"
+     },
+     {
+      "op": "upright",
+      "a": "*",
+      "reason": "everything stays upright"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "rack",
+      "reason": "on the shelf it is on (the level under each body)"
+     },
+     {
+      "op": "max_move",
+      "a": "*",
+      "d": 0.02,
+      "reason": "moves at most 2 cm"
+     },
+     {
+      "op": "max_turn",
+      "a": "*",
+      "deg": 10,
+      "reason": "turns at most 10 degrees"
+     }
+    ]
+   }
+  },
+  "params": {
+   "s_min": 0.05,
+   "ds_max": 0.05,
+   "tail_iters": 30,
+   "proxy_faces": 2000
+  },
+  "tolerances": {
+   "pen_eps": 1e-06,
+   "touch_eps": 5e-05,
+   "predicate_tol": 0.002,
+   "verify_gap_tol": 0.002,
+   "verify_sink_tol": 0.001,
+   "defaults": {
+    "margin": 0.005,
+    "inset": 0.02,
+    "gap": 0.05
+   },
+   "statement_defaults": {
+    "reach": {
+     "min": 0.0,
+     "x": 0.0,
+     "y": 0.0
+    },
+    "at": {
+     "tol": 0.01
+    },
+    "beside": {
+     "gap": 0.0
+    },
+    "approach": {
+     "length": 0.2,
+     "width": 0.1,
+     "toward": "robot",
+     "x": 0.0,
+     "y": 0.0
+    },
+    "facing": {
+     "axis": "+x",
+     "tol": 15.0
+    },
+    "yaw": {
+     "tol": 5.0,
+     "mod": 360.0,
+     "axis": "x"
+    },
+    "parallel": {
+     "mod": 180.0,
+     "tol": 5.0,
+     "axis": "long"
+    },
+    "row": {
+     "axis": "y",
+     "gap": 0.01,
+     "tol": 0.01,
+     "edge": "center"
+    },
+    "align": {
+     "axis": "x",
+     "edge": "center",
+     "tol": 0.005
+    },
+    "evenly_spaced": {
+     "axis": "y",
+     "tol": 0.005
+    },
+    "grid": {
+     "tol": 0.01
+    },
+    "symmetric": {
+     "axis": "y",
+     "tol": 0.01
+    },
+    "between": {
+     "axis": "y",
+     "gap": 0.0
+    },
+    "centered": {
+     "tol": 0.01
+    },
+    "offset": {
+     "dx": 0.0,
+     "dy": 0.0,
+     "frame": "world",
+     "tol": 0.01
+    },
+    "attach": {
+     "tol": 0.01,
+     "deg": 2.0
+    },
+    "keep_out": {
+     "gap": 0.0
+    },
+    "flush": {
+     "gap": 0.0,
+     "tol": 0.005
+    },
+    "region": {
+     "frac": 0.5
+    },
+    "stack": {
+     "tol": 0.01
+    },
+    "balanced_on": {
+     "margin": 0.01
+    }
+   }
+  },
+  "software": {
+   "git": "d41c226a2dab",
+   "python": "3.11.17",
+   "numpy": "2.4.6",
+   "trimesh": "5.2.0",
+   "fcl": "0.7.0.11",
+   "osqp": "1.1.3",
+   "mujoco": "3.17.0",
+   "pxr": null
+  },
+  "time": "2026-10-25T23:29:08"
+ },
+ "written": "docs/examples/shelf_fix/repaired.json",
+ "written_sha256": "3dab487f1f9c4498",
+ "g5": {
+  "scene": "docs/examples/shelf_fix/repaired.json",
+  "program": "docs/examples/shelf_fix/program.json",
+  "seconds": 2.0,
+  "supports": {
+   "rack": [
+    0.1761926052127704,
+    0.583385268538216,
+    1.016203074623572
+   ]
+  },
+  "max_hover_m": 0.00010566395886724145,
+  "free_fall_bound_m_s": 0.045531603013459536,
+  "policy": {
+   "hold_predicates_after_settle": false
+  },
+  "hull": {
+   "peak_speed": 0.103,
+   "peak_disp": 0.0033,
+   "peak_tilt_deg": 4.58,
+   "left_support": [],
+   "steps": 1000,
+   "sim_seconds": 2.0,
+   "engine_warnings": {},
+   "per_body_peak_speed": {
+    "can_1": 0.02,
+    "can_2": 0.001,
+    "can_3": 0.007,
+    "can_4": 0.0,
+    "can_5": 0.016,
+    "can_6": 0.02,
+    "soup": 0.002,
+    "bowl_1": 0.022,
+    "bowl_2": 0.02,
+    "mug_1": 0.02,
+    "mug_2": 0.002,
+    "mug_3": 0.03,
+    "jar_1": 0.066,
+    "jar_2": 0.103,
+    "jar_3": 0.023,
+    "jar_4": 0.016,
+    "bottle_1": 0.009,
+    "bottle_2": 0.039
+   },
+   "per_body_peak_tilt_deg": {
+    "can_1": 0.0,
+    "can_2": 0.01,
+    "can_3": 0.3,
+    "can_4": 0.01,
+    "can_5": 0.35,
+    "can_6": 0.02,
+    "soup": 0.03,
+    "bowl_1": 0.19,
+    "bowl_2": 0.01,
+    "mug_1": 0.01,
+    "mug_2": 0.04,
+    "mug_3": 0.68,
+    "jar_1": 0.53,
+    "jar_2": 4.58,
+    "jar_3": 0.72,
+    "jar_4": 0.72,
+    "bottle_1": 0.36,
+    "bottle_2": 0.08
+   },
+   "final_tilt_deg": {
+    "can_1": 0.0,
+    "can_2": 0.01,
+    "can_3": 0.3,
+    "can_4": 0.01,
+    "can_5": 0.29,
+    "can_6": 0.02,
+    "soup": 0.02,
+    "bowl_1": 0.13,
+    "bowl_2": 0.01,
+    "mug_1": 0.01,
+    "mug_2": 0.04,
+    "mug_3": 0.54,
+    "jar_1": 0.51,
+    "jar_2": 3.85,
+    "jar_3": 0.72,
+    "jar_4": 0.72,
+    "bottle_1": 0.36,
+    "bottle_2": 0.08
+   },
+   "final_disp": {
+    "can_1": 0.0001,
+    "can_2": 0.0001,
+    "can_3": 0.0004,
+    "can_4": 0.0,
+    "can_5": 0.0003,
+    "can_6": 0.0001,
+    "soup": 0.0,
+    "bowl_1": 0.0001,
+    "bowl_2": 0.0001,
+    "mug_1": 0.0,
+    "mug_2": 0.0001,
+    "mug_3": 0.0005,
+    "jar_1": 0.0005,
+    "jar_2": 0.003,
+    "jar_3": 0.0003,
+    "jar_4": 0.0005,
+    "bottle_1": 0.0006,
+    "bottle_2": 0.0001
+   },
+   "after_settle": {
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "predicates": [
+     [
+      "upright(can_1)",
+      true,
+      4.630409315079032e-07
+     ],
+     [
+      "upright(can_2)",
+      true,
+      0.00015420354678777483
+     ],
+     [
+      "upright(can_3)",
+      true,
+      0.00512194431540562
+     ],
+     [
+      "upright(can_4)",
+      true,
+      0.00016919428983725118
+     ],
+     [
+      "upright(can_5)",
+      true,
+      0.004654700060968717
+     ],
+     [
+      "upright(can_6)",
+      true,
+      0.000274407090337521
+     ],
+     [
+      "upright(soup)",
+      true,
+      0.0002688933984497789
+     ],
+     [
+      "upright(bowl_1)",
+      true,
+      0.0016459511743128611
+     ],
+     [
+      "upright(bowl_2)",
+      true,
+      0.0001442991006925379
+     ],
+     [
+      "upright(mug_1)",
+      true,
+      0.00011327467181251216
+     ],
+     [
+      "upright(mug_2)",
+      true,
+      0.0005278551160383973
+     ],
+     [
+      "upright(mug_3)",
+      true,
+      0.009455954744596594
+     ],
+     [
+      "upright(jar_1)",
+      true,
+      0.0072897481433692
+     ],
+     [
+      "upright(jar_2)",
+      true,
+      0.06715374995394859
+     ],
+     [
+      "upright(jar_3)",
+      true,
+      0.012234564962895003
+     ],
+     [
+      "upright(jar_4)",
+      true,
+      0.011004346697697034
+     ],
+     [
+      "upright(bottle_1)",
+      true,
+      0.006094092611326846
+     ],
+     [
+      "upright(bottle_2)",
+      true,
+      0.0012668026461297225
+     ],
+     [
+      "on_support(can_1,rack)",
+      true,
+      -6.60700416593718e-05
+     ],
+     [
+      "on_support(can_2,rack)",
+      true,
+      5.004682869030885e-05
+     ],
+     [
+      "on_support(can_3,rack)",
+      true,
+      9.224830854154265e-05
+     ],
+     [
+      "on_support(can_4,rack)",
+      true,
+      1.6778762267494196e-05
+     ],
+     [
+      "on_support(can_5,rack)",
+      true,
+      -0.000125377513052638
+     ],
+     [
+      "on_support(can_6,rack)",
+      true,
+      -6.0936285369600496e-05
+     ],
+     [
+      "on_support(soup,rack)",
+      true,
+      2.2045291483252516e-05
+     ],
+     [
+      "on_support(bowl_1,rack)",
+      true,
+      -0.00014997694195140188
+     ],
+     [
+      "on_support(bowl_2,rack)",
+      true,
+      -5.547781051717937e-05
+     ],
+     [
+      "on_support(mug_1,rack)",
+      true,
+      -2.2910424362865278e-05
+     ],
+     [
+      "on_support(mug_2,rack)",
+      true,
+      6.655595457705221e-05
+     ],
+     [
+      "on_support(mug_3,rack)",
+      true,
+      -0.00024272259485114134
+     ],
+     [
+      "on_support(jar_1,rack)",
+      true,
+      -0.0006849012424126055
+     ],
+     [
+      "on_support(jar_2,rack)",
+      true,
+      -0.003471515039920492
+     ],
+     [
+      "on_support(jar_3,rack)",
+      true,
+      -0.00028267632989020797
+     ],
+     [
+      "on_support(jar_4,rack)",
+      true,
+      -0.00027945875920187824
+     ],
+     [
+      "on_support(bottle_1,rack)",
+      true,
+      4.751642016675994e-05
+     ],
+     [
+      "on_support(bottle_2,rack)",
+      true,
+      -0.00012632530208556147
+     ],
+     [
+      "max_move(can_1,d=0.02)",
+      true,
+      5.519757163058062e-07
+     ],
+     [
+      "max_move(can_2,d=0.02)",
+      true,
+      1.0904284214958171e-05
+     ],
+     [
+      "max_move(can_3,d=0.02)",
+      true,
+      0.00030685262158102367
+     ],
+     [
+      "max_move(can_4,d=0.02)",
+      true,
+      1.0010588814413884e-05
+     ],
+     [
+      "max_move(can_5,d=0.02)",
+      true,
+      0.00028404011194968737
+     ],
+     [
+      "max_move(can_6,d=0.02)",
+      true,
+      1.8791281587730967e-05
+     ],
+     [
+      "max_move(soup,d=0.02)",
+      true,
+      1.3350317638213533e-05
+     ],
+     [
+      "max_move(bowl_1,d=0.02)",
+      true,
+      6.319361719284667e-05
+     ],
+     [
+      "max_move(bowl_2,d=0.02)",
+      true,
+      4.824646520747374e-06
+     ],
+     [
+      "max_move(mug_1,d=0.02)",
+      true,
+      6.346227892411191e-06
+     ],
+     [
+      "max_move(mug_2,d=0.02)",
+      true,
+      4.081093909778515e-05
+     ],
+     [
+      "max_move(mug_3,d=0.02)",
+      true,
+      0.0004686651588160626
+     ],
+     [
+      "max_move(jar_1,d=0.02)",
+      true,
+      0.0003136028124878394
+     ],
+     [
+      "max_move(jar_2,d=0.02)",
+      true,
+      0.002886115572205195
+     ],
+     [
+      "max_move(jar_3,d=0.02)",
+      true,
+      0.00028040084748759235
+     ],
+     [
+      "max_move(jar_4,d=0.02)",
+      true,
+      0.00041839534511343274
+     ],
+     [
+      "max_move(bottle_1,d=0.02)",
+      true,
+      0.0005543817046984922
+     ],
+     [
+      "max_move(bottle_2,d=0.02)",
+      true,
+      8.079557303196974e-05
+     ],
+     [
+      "max_turn(can_1,deg=10)",
+      true,
+      4.744886983247811e-05
+     ],
+     [
+      "max_turn(can_2,deg=10)",
+      true,
+      4.1149609306886875e-05
+     ],
+     [
+      "max_turn(can_3,deg=10)",
+      true,
+      0.00018485670040776185
+     ],
+     [
+      "max_turn(can_4,deg=10)",
+      true,
+      5.8669963946432465e-05
+     ],
+     [
+      "max_turn(can_5,deg=10)",
+      true,
+      0.0034320316457385576
+     ],
+     [
+      "max_turn(can_6,deg=10)",
+      true,
+      0.0001461756372442376
+     ],
+     [
+      "max_turn(soup,deg=10)",
+      true,
+      0.01643847734121963
+     ],
+     [
+      "max_turn(bowl_1,deg=10)",
+      true,
+      0.005807618062392601
+     ],
+     [
+      "max_turn(bowl_2,deg=10)",
+      true,
+      1.3955646177101103e-05
+     ],
+     [
+      "max_turn(mug_1,deg=10)",
+      true,
+      5.395484023003833e-05
+     ],
+     [
+      "max_turn(mug_2,deg=10)",
+      true,
+      0.00031307455969866815
+     ],
+     [
+      "max_turn(mug_3,deg=10)",
+      true,
+      0.015750957647012943
+     ],
+     [
+      "max_turn(jar_1,deg=10)",
+      true,
+      0.010459311128533095
+     ],
+     [
+      "max_turn(jar_2,deg=10)",
+      true,
+      0.007296242849262453
+     ],
+     [
+      "max_turn(jar_3,deg=10)",
+      true,
+      0.01874376181944965
+     ],
+     [
+      "max_turn(jar_4,deg=10)",
+      true,
+      0.07379119694655993
+     ],
+     [
+      "max_turn(bottle_1,deg=10)",
+      true,
+      0.014617352012073608
+     ],
+     [
+      "max_turn(bottle_2,deg=10)",
+      true,
+      0.024003959587876364
+     ]
+    ],
+    "tolerances": {
+     "tol": 0.01,
+     "upright_deg": 15.0,
+     "place_tol": 0.1,
+     "angle_tol": 10.0
+    },
+    "pen_pairs_full_mesh": 11,
+    "floating": [
+     "jar_2"
+    ]
+   },
+   "hull_fallback": [],
+   "asset_physics": [
+    "rack",
+    "can_1",
+    "can_2",
+    "can_3",
+    "can_4",
+    "can_5",
+    "can_6",
+    "soup",
+    "bowl_1",
+    "bowl_2",
+    "mug_1",
+    "mug_2",
+    "mug_3",
+    "jar_1",
+    "jar_2",
+    "jar_3",
+    "jar_4",
+    "bottle_1",
+    "bottle_2"
+   ],
+   "faster_than_free_fall": true,
+   "pass": true
+  },
+  "coacd": {
+   "peak_speed": 0.039,
+   "peak_disp": 0.0009,
+   "peak_tilt_deg": 0.24,
+   "left_support": [],
+   "steps": 1000,
+   "sim_seconds": 2.0,
+   "engine_warnings": {},
+   "per_body_peak_speed": {
+    "can_1": 0.006,
+    "can_2": 0.011,
+    "can_3": 0.009,
+    "can_4": 0.009,
+    "can_5": 0.01,
+    "can_6": 0.02,
+    "soup": 0.007,
+    "bowl_1": 0.039,
+    "bowl_2": 0.013,
+    "mug_1": 0.039,
+    "mug_2": 0.02,
+    "mug_3": 0.02,
+    "jar_1": 0.011,
+    "jar_2": 0.009,
+    "jar_3": 0.007,
+    "jar_4": 0.01,
+    "bottle_1": 0.016,
+    "bottle_2": 0.007
+   },
+   "per_body_peak_tilt_deg": {
+    "can_1": 0.01,
+    "can_2": 0.01,
+    "can_3": 0.0,
+    "can_4": 0.0,
+    "can_5": 0.02,
+    "can_6": 0.0,
+    "soup": 0.0,
+    "bowl_1": 0.0,
+    "bowl_2": 0.01,
+    "mug_1": 0.0,
+    "mug_2": 0.0,
+    "mug_3": 0.01,
+    "jar_1": 0.23,
+    "jar_2": 0.09,
+    "jar_3": 0.09,
+    "jar_4": 0.01,
+    "bottle_1": 0.19,
+    "bottle_2": 0.24
+   },
+   "final_tilt_deg": {
+    "can_1": 0.01,
+    "can_2": 0.01,
+    "can_3": 0.0,
+    "can_4": 0.0,
+    "can_5": 0.02,
+    "can_6": 0.0,
+    "soup": 0.0,
+    "bowl_1": 0.0,
+    "bowl_2": 0.01,
+    "mug_1": 0.0,
+    "mug_2": 0.0,
+    "mug_3": 0.01,
+    "jar_1": 0.19,
+    "jar_2": 0.09,
+    "jar_3": 0.09,
+    "jar_4": 0.01,
+    "bottle_1": 0.19,
+    "bottle_2": 0.24
+   },
+   "final_disp": {
+    "can_1": 0.0003,
+    "can_2": 0.0006,
+    "can_3": 0.0005,
+    "can_4": 0.0005,
+    "can_5": 0.0006,
+    "can_6": 0.0,
+    "soup": 0.0004,
+    "bowl_1": 0.0,
+    "bowl_2": 0.0007,
+    "mug_1": 0.0,
+    "mug_2": 0.0,
+    "mug_3": 0.0,
+    "jar_1": 0.0004,
+    "jar_2": 0.0005,
+    "jar_3": 0.0003,
+    "jar_4": 0.0005,
+    "bottle_1": 0.0009,
+    "bottle_2": 0.0004
+   },
+   "after_settle": {
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "predicates": [
+     [
+      "upright(can_1)",
+      true,
+      0.00011033194806225484
+     ],
+     [
+      "upright(can_2)",
+      true,
+      0.00024748979469622266
+     ],
+     [
+      "upright(can_3)",
+      true,
+      4.192068075418043e-05
+     ],
+     [
+      "upright(can_4)",
+      true,
+      7.542405025125437e-05
+     ],
+     [
+      "upright(can_5)",
+      true,
+      0.00022671470812873708
+     ],
+     [
+      "upright(can_6)",
+      true,
+      7.651617352712043e-05
+     ],
+     [
+      "upright(soup)",
+      true,
+      4.380428575697431e-05
+     ],
+     [
+      "upright(bowl_1)",
+      true,
+      1.609598035478047e-05
+     ],
+     [
+      "upright(bowl_2)",
+      true,
+      0.0002454358900583692
+     ],
+     [
+      "upright(mug_1)",
+      true,
+      5.523459907309317e-06
+     ],
+     [
+      "upright(mug_2)",
+      true,
+      1.7373088577597786e-05
+     ],
+     [
+      "upright(mug_3)",
+      true,
+      0.0001137898408333933
+     ],
+     [
+      "upright(jar_1)",
+      true,
+      0.0024634215120472864
+     ],
+     [
+      "upright(jar_2)",
+      true,
+      0.001165445543649867
+     ],
+     [
+      "upright(jar_3)",
+      true,
+      0.0014471809055321828
+     ],
+     [
+      "upright(jar_4)",
+      true,
+      9.359066223434199e-05
+     ],
+     [
+      "upright(bottle_1)",
+      true,
+      0.003232693955568397
+     ],
+     [
+      "upright(bottle_2)",
+      true,
+      0.00359729131614499
+     ],
+     [
+      "on_support(can_1,rack)",
+      true,
+      0.00031762936158102884
+     ],
+     [
+      "on_support(can_2,rack)",
+      true,
+      0.0005700893305803645
+     ],
+     [
+      "on_support(can_3,rack)",
+      true,
+      0.0005106413206396598
+     ],
+     [
+      "on_support(can_4,rack)",
+      true,
+      0.0004657148939452571
+     ],
+     [
+      "on_support(can_5,rack)",
+      true,
+      0.0005629496483197105
+     ],
+     [
+      "on_support(can_6,rack)",
+      true,
+      -3.9215028564298926e-05
+     ],
+     [
+      "on_support(soup,rack)",
+      true,
+      0.00036502201991886474
+     ],
+     [
+      "on_support(bowl_1,rack)",
+      true,
+      -4.381202849523813e-05
+     ],
+     [
+      "on_support(bowl_2,rack)",
+      true,
+      0.000669207756976431
+     ],
+     [
+      "on_support(mug_1,rack)",
+      true,
+      -4.857847766082113e-05
+     ],
+     [
+      "on_support(mug_2,rack)",
+      true,
+      -4.8051765375922706e-05
+     ],
+     [
+      "on_support(mug_3,rack)",
+      true,
+      -4.518922050034124e-05
+     ],
+     [
+      "on_support(jar_1,rack)",
+      true,
+      0.0003080120642495743
+     ],
+     [
+      "on_support(jar_2,rack)",
+      true,
+      0.00041874978827838305
+     ],
+     [
+      "on_support(jar_3,rack)",
+      true,
+      0.0003123863985248221
+     ],
+     [
+      "on_support(jar_4,rack)",
+      true,
+      0.0005064118732664991
+     ],
+     [
+      "on_support(bottle_1,rack)",
+      true,
+      0.0007994370799258022
+     ],
+     [
+      "on_support(bottle_2,rack)",
+      true,
+      0.0003252892846845601
+     ],
+     [
+      "max_move(can_1,d=0.02)",
+      true,
+      5.089046757547653e-06
+     ],
+     [
+      "max_move(can_2,d=0.02)",
+      true,
+      1.5237958071392774e-05
+     ],
+     [
+      "max_move(can_3,d=0.02)",
+      true,
+      6.526661053431342e-06
+     ],
+     [
+      "max_move(can_4,d=0.02)",
+      true,
+      1.5089426811990794e-05
+     ],
+     [
+      "max_move(can_5,d=0.02)",
+      true,
+      1.3120687292748736e-05
+     ],
+     [
+      "max_move(can_6,d=0.02)",
+      true,
+      6.708417236663814e-06
+     ],
+     [
+      "max_move(soup,d=0.02)",
+      true,
+      9.196258142872278e-06
+     ],
+     [
+      "max_move(bowl_1,d=0.02)",
+      true,
+      1.3462091653747903e-06
+     ],
+     [
+      "max_move(bowl_2,d=0.02)",
+      true,
+      7.313687966782048e-06
+     ],
+     [
+      "max_move(mug_1,d=0.02)",
+      true,
+      3.856629291096278e-07
+     ],
+     [
+      "max_move(mug_2,d=0.02)",
+      true,
+      7.995738018230542e-07
+     ],
+     [
+      "max_move(mug_3,d=0.02)",
+      true,
+      7.568554055482999e-06
+     ],
+     [
+      "max_move(jar_1,d=0.02)",
+      true,
+      0.00011322349610116435
+     ],
+     [
+      "max_move(jar_2,d=0.02)",
+      true,
+      5.948871347909784e-05
+     ],
+     [
+      "max_move(jar_3,d=0.02)",
+      true,
+      5.203643218213094e-05
+     ],
+     [
+      "max_move(jar_4,d=0.02)",
+      true,
+      1.2373601713671903e-05
+     ],
+     [
+      "max_move(bottle_1,d=0.02)",
+      true,
+      0.00028104692431696793
+     ],
+     [
+      "max_move(bottle_2,d=0.02)",
+      true,
+      0.00022066523803278612
+     ],
+     [
+      "max_turn(can_1,deg=10)",
+      true,
+      0.000830164253664794
+     ],
+     [
+      "max_turn(can_2,deg=10)",
+      true,
+      0.0033582395016152817
+     ],
+     [
+      "max_turn(can_3,deg=10)",
+      true,
+      0.0011919105309009838
+     ],
+     [
+      "max_turn(can_4,deg=10)",
+      true,
+      0.004952922276573656
+     ],
+     [
+      "max_turn(can_5,deg=10)",
+      true,
+      0.005162348471116691
+     ],
+     [
+      "max_turn(can_6,deg=10)",
+      true,
+      0.0005295574112964785
+     ],
+     [
+      "max_turn(soup,deg=10)",
+      true,
+      0.010142168660032272
+     ],
+     [
+      "max_turn(bowl_1,deg=10)",
+      true,
+      2.2768554765326535e-05
+     ],
+     [
+      "max_turn(bowl_2,deg=10)",
+      true,
+      0.0002753510201549937
+     ],
+     [
+      "max_turn(mug_1,deg=10)",
+      true,
+      3.001315542711582e-05
+     ],
+     [
+      "max_turn(mug_2,deg=10)",
+      true,
+      0.0004379765635628504
+     ],
+     [
+      "max_turn(mug_3,deg=10)",
+      true,
+      0.00011116386803574855
+     ],
+     [
+      "max_turn(jar_1,deg=10)",
+      true,
+      0.016211526232979077
+     ],
+     [
+      "max_turn(jar_2,deg=10)",
+      true,
+      1.0158251412937683e-05
+     ],
+     [
+      "max_turn(jar_3,deg=10)",
+      true,
+      0.005631473953995523
+     ],
+     [
+      "max_turn(jar_4,deg=10)",
+      true,
+      0.0028409853124143633
+     ],
+     [
+      "max_turn(bottle_1,deg=10)",
+      true,
+      0.0032949280800007655
+     ],
+     [
+      "max_turn(bottle_2,deg=10)",
+      true,
+      0.0049727126210273535
+     ]
+    ],
+    "tolerances": {
+     "tol": 0.01,
+     "upright_deg": 15.0,
+     "place_tol": 0.1,
+     "angle_tol": 10.0
+    },
+    "pen_pairs_full_mesh": 0,
+    "floating": []
+   },
+   "hull_fallback": [],
+   "asset_physics": [
+    "rack",
+    "can_1",
+    "can_2",
+    "can_3",
+    "can_4",
+    "can_5",
+    "can_6",
+    "soup",
+    "bowl_1",
+    "bowl_2",
+    "mug_1",
+    "mug_2",
+    "mug_3",
+    "jar_1",
+    "jar_2",
+    "jar_3",
+    "jar_4",
+    "bottle_1",
+    "bottle_2"
+   ],
+   "faster_than_free_fall": false,
+   "pass": true
+  },
+  "pass": true,
+  "thresholds": {
+   "v_max": 1.0,
+   "d_max": 0.15,
+   "source": "cli"
+  }
+ },
+ "ready": true,
+ "ready_policy": {
+  "hold_predicates_after_settle": false
+ }
+}

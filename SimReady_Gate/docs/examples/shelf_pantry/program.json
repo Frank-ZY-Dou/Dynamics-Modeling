@@ -1,0 +1,23 @@
+{
+ "intent": "Kitchen things on the rack by weight: bowls stacked and mugs with the soup on the bottom shelf, the cans in a grid on the second, the jars by mass and the bottles on the third; all in reach and back from the front edges.",
+ "statements": [
+  {"op": "no_penetration", "margin": 0.005, "reason": "nothing interpenetrates"},
+  {"op": "upright", "a": "*", "reason": "everything stands as it rests"},
+  {"op": "reach", "a": "*", "r": 0.85, "reason": "within 85 cm of the robot's base"},
+  {"op": "within", "a": "*", "b": "rack", "x0": 0.57, "reason": "at least 3 cm behind the shelves' front edge (x = 0.54)"},
+  {"op": "on_support", "a": "bowl_1", "b": "rack.level1", "reason": "bowls (1.14 and 1.04 kg) on the bottom shelf"},
+  {"op": "stack", "members": ["bowl_1", "bowl_2"], "reason": "the two bowls stacked"},
+  {"op": "on_support", "a": "mug_*", "b": "rack.level1", "reason": "mugs (1.35 to 1.75 kg) on the bottom shelf"},
+  {"op": "on_support", "a": "soup", "b": "rack.level1", "reason": "the soup can (1.02 kg) on the bottom shelf"},
+  {"op": "row", "members": ["mug_1", "mug_2", "mug_3", "soup"], "start": "left", "gap": 0.03, "reason": "the mugs in a row 3 cm apart, the soup can at its right end"},
+  {"op": "yaw", "a": "mug_*", "deg": -90, "axis": "handle", "reason": "every handle pointing to the right (-y)"},
+  {"op": "on_support", "a": "can_*", "b": "rack.level2", "reason": "the drink cans on the second shelf"},
+  {"op": "grid", "members": ["can_1", "can_2", "can_3", "can_4", "can_5", "can_6"], "cols": 3, "dx": 0.09, "dy": 0.09, "reason": "two rows of three; 9 cm pitch leaves about 2 cm between cans 6 to 7 cm wide"},
+  {"op": "on_support", "a": "jar_*", "b": "rack.level3", "reason": "the paint jars on the third shelf"},
+  {"op": "row", "members": ["jar_*"], "start": "left", "order": "-mass", "spacing": "even", "gap": 0.01, "reason": "in a row by mass, heaviest at the left, evenly spaced"},
+  {"op": "within", "a": "jar_*", "b": "rack.level3", "y0": 0.0, "reason": "left of the shelf's middle (y = 0)"},
+  {"op": "on_support", "a": "bottle_*", "b": "rack.level3", "reason": "the bottles on the third shelf"},
+  {"op": "row", "members": ["bottle_1", "bottle_2"], "gap": 0.01, "reason": "side by side"},
+  {"op": "within", "a": "bottle_*", "b": "rack.level3", "y1": 0.0, "reason": "right of the shelf's middle"}
+ ]
+}

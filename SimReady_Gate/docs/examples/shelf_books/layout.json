@@ -1,0 +1,130 @@
+{
+ "fixtures": [
+  {
+   "name": "case",
+   "package": "cabinet_file_d02",
+   "repo": "nvidia/simready-assets",
+   "position": [
+    0.65,
+    0.0,
+    0.0
+   ],
+   "yaw": 180.0
+  }
+ ],
+ "objects": [
+  {
+   "name": "book_1",
+   "package": "D00045",
+   "repo": "PalatialSim/palatial-nv-asset-library",
+   "x": 0.60987,
+   "y": 0.1405,
+   "z": 0.16499,
+   "yaw": -33.148,
+   "up": "+y",
+   "front": "-x"
+  },
+  {
+   "name": "book_2",
+   "package": "D00188",
+   "repo": "PalatialSim/palatial-nv-asset-library",
+   "x": 0.59689,
+   "y": -0.01053,
+   "z": 0.44705,
+   "yaw": 6.573,
+   "up": "+y",
+   "front": "-x"
+  },
+  {
+   "name": "book_3",
+   "package": "D00498",
+   "repo": "PalatialSim/palatial-nv-asset-library",
+   "x": 0.60792,
+   "y": 0.12838,
+   "z": 0.20051,
+   "yaw": -1.676,
+   "up": "+y",
+   "front": "-x"
+  },
+  {
+   "name": "book_4",
+   "package": "D00552",
+   "repo": "PalatialSim/palatial-nv-asset-library",
+   "x": 0.64168,
+   "y": 0.04894,
+   "z": 0.40995,
+   "yaw": -30.906,
+   "up": "+y",
+   "front": "-x"
+  },
+  {
+   "name": "book_5",
+   "package": "D00553",
+   "repo": "PalatialSim/palatial-nv-asset-library",
+   "x": 0.67392,
+   "y": 0.13296,
+   "z": 0.18397,
+   "yaw": -5.55,
+   "up": "+y",
+   "front": "-x"
+  },
+  {
+   "name": "book_6",
+   "package": "D00662",
+   "repo": "PalatialSim/palatial-nv-asset-library",
+   "x": 0.60632,
+   "y": 0.07065,
+   "z": 0.44173,
+   "yaw": 36.501,
+   "up": "+y",
+   "front": "-x"
+  },
+  {
+   "name": "book_7",
+   "package": "D00728",
+   "repo": "PalatialSim/palatial-nv-asset-library",
+   "x": 0.60755,
+   "y": -0.20124,
+   "z": 0.1644,
+   "yaw": 15.697,
+   "up": "+y",
+   "front": "-x"
+  },
+  {
+   "name": "notebook_1",
+   "package": "misc_notebook_a01",
+   "repo": "nvidia/simready-assets",
+   "x": 0.64557,
+   "y": -0.03967,
+   "z": 0.05793,
+   "yaw": 37.877
+  },
+  {
+   "name": "notebook_2",
+   "package": "misc_notebook_a02",
+   "repo": "nvidia/simready-assets",
+   "x": 0.66483,
+   "y": -0.00481,
+   "z": 0.5879,
+   "yaw": 31.337
+  },
+  {
+   "name": "notebook_3",
+   "package": "misc_notebook_a03",
+   "repo": "nvidia/simready-assets",
+   "x": 0.62474,
+   "y": 0.05465,
+   "z": 0.05793,
+   "yaw": 21.862
+  },
+  {
+   "name": "notebook_4",
+   "package": "misc_notebook_a04",
+   "repo": "nvidia/simready-assets",
+   "x": 0.6228,
+   "y": 0.04629,
+   "z": 0.5879,
+   "yaw": -10.06
+  }
+ ]
+}

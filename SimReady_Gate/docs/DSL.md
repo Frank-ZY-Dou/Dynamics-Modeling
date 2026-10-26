@@ -111,10 +111,15 @@ matches no free body is an error, so a misspelt group is not silently empty.
 `on_support` or in a `stack` keeps that support over one a pattern gives it (`on_support(can_*, tray)`),
 and a pattern's support wins over the one `on_support(*, ...)` gives. On a fixed support a body rests
 on the level under it (a shelf below the fixture's top); on a free one (a carton on a carton, fruit in
-a bowl) it rests on the highest surface under it, wherever it starts. `on_support(a, shelf.level2)`
-puts it on that level wherever it starts; the compiler refuses a body (or a stack) taller than the
-room above the level with the margin, and names the levels that have room. A body on a level under
-part of its fixture, or on a level it is given, keeps its footprint on that level as a contact does.
+a bowl) it rests on the highest surface under it, wherever it starts.
+
+Levels:
+
+- `on_support(a, shelf.level2)` puts a on that level, wherever it starts.
+- The compiler refuses a body, or a stack, taller than the room above its level (with the margin),
+  and names the levels that have room.
+- A body on a level it is given, or on a shelf under another part of its fixture, keeps its
+  footprint on that level, as a contact does.
 
 ## Recipes
 

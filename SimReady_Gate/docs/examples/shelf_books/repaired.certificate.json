@@ -1,0 +1,1282 @@
+{
+ "ok": true,
+ "scene": "docs/examples/shelf_books/layout.json",
+ "program": "docs/examples/shelf_books/program.json",
+ "pen_before": 18,
+ "pen_after": 0,
+ "min_score_after": 0.0,
+ "contained_after": [],
+ "floating_after": [],
+ "rmsd_xy": 0.12392717843574555,
+ "steps": 22,
+ "time_s": 12.83,
+ "predicates": [
+  [
+   "upright(book_1)",
+   true,
+   0.0
+  ],
+  [
+   "upright(book_2)",
+   true,
+   0.0
+  ],
+  [
+   "upright(book_3)",
+   true,
+   0.0
+  ],
+  [
+   "upright(book_4)",
+   true,
+   0.0
+  ],
+  [
+   "upright(book_5)",
+   true,
+   0.0
+  ],
+  [
+   "upright(book_6)",
+   true,
+   0.0
+  ],
+  [
+   "upright(book_7)",
+   true,
+   0.0
+  ],
+  [
+   "upright(notebook_1)",
+   true,
+   0.0
+  ],
+  [
+   "upright(notebook_2)",
+   true,
+   0.0
+  ],
+  [
+   "upright(notebook_3)",
+   true,
+   0.0
+  ],
+  [
+   "upright(notebook_4)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(book_1,case.level2)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(book_4,case.level2)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(book_5,case.level2)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(book_6,case.level2)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(book_7,case.level2)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(book_2,case.level4)",
+   true,
+   0.0
+  ],
+  [
+   "on_support(book_3,case.level4)",
+   true,
+   0.0
+  ],
+  [
+   "yaw(book_1,deg=180)",
+   true,
+   3.731760807577626
+  ],
+  [
+   "yaw(book_2,deg=180)",
+   true,
+   4.999999999999995
+  ],
+  [
+   "yaw(book_3,deg=180)",
+   true,
+   1.2528976342083826
+  ],
+  [
+   "yaw(book_4,deg=180)",
+   true,
+   4.292221826258404
+  ],
+  [
+   "yaw(book_5,deg=180)",
+   true,
+   1.3475992033901512
+  ],
+  [
+   "yaw(book_6,deg=180)",
+   true,
+   0.539221396454783
+  ],
+  [
+   "yaw(book_7,deg=180)",
+   true,
+   1.5605014478608012
+  ],
+  [
+   "row(book_1,book_4,book_5,book_6,book_7):aligned",
+   true,
+   9.166478752098417e-06
+  ],
+  [
+   "row(book_1,book_4,book_5,book_6,book_7):order",
+   true,
+   0.004999987911821109
+  ],
+  [
+   "row(book_1,book_4,book_5,book_6,book_7):mid",
+   true,
+   0.00557251698270958
+  ],
+  [
+   "flush(book_1,case.level2,near)",
+   true,
+   0.004999999927038035
+  ],
+  [
+   "row(book_2,book_3):aligned",
+   true,
+   1.0547118733938987e-15
+  ],
+  [
+   "row(book_2,book_3):order",
+   true,
+   0.16293587722213185
+  ],
+  [
+   "flush(book_3,case.level4,left)",
+   true,
+   0.005000000624646395
+  ],
+  [
+   "flush(book_2,case.level4,near)",
+   true,
+   0.00500000000000006
+  ],
+  [
+   "flush(book_3,case.level4,near)",
+   true,
+   0.004999999999999005
+  ],
+  [
+   "on_support(notebook_1,case.level1)",
+   true,
+   0.0
+  ],
+  [
+   "stack(notebook_2,notebook_1):on",
+   true,
+   0.0
+  ],
+  [
+   "stack(notebook_3,notebook_2):on",
+   true,
+   0.0
+  ],
+  [
+   "stack(notebook_4,notebook_3):on",
+   true,
+   0.0
+  ],
+  [
+   "stack(notebook_2,notebook_1):centered",
+   true,
+   0.010000000000000002
+  ],
+  [
+   "stack(notebook_3,notebook_2):centered",
+   true,
+   0.01
+  ],
+  [
+   "stack(notebook_4,notebook_3):centered",
+   true,
+   0.009999999888421946
+  ],
+  [
+   "yaw(notebook_1,deg=90)",
+   true,
+   0.13588210722409935
+  ],
+  [
+   "yaw(notebook_2,deg=90)",
+   true,
+   1.8562381193433006
+  ],
+  [
+   "yaw(notebook_3,deg=90)",
+   true,
+   2.163929791439578
+  ],
+  [
+   "yaw(notebook_4,deg=90)",
+   true,
+   0.21881999024078838
+  ],
+  [
+   "flush(notebook_1,case.level1,far)",
+   true,
+   0.004999899292392418
+  ],
+  [
+   "at(notebook_1)",
+   true,
+   0.0021630945291350647
+  ]
+ ],
+ "failed_predicates": [],
+ "preferences": [],
+ "failed_preferences": [],
+ "clearance": null,
+ "notes": [],
+ "solver_notes": [
+  "a program row was not met within the step at 5 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+  "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+ ],
+ "dropped_children": [],
+ "continuation": {
+  "complete": true,
+  "last_accepted_scale": 1.0,
+  "termination": "complete"
+ },
+ "synthetic_table": null,
+ "provenance": {
+  "scene": {
+   "path": "docs/examples/shelf_books/layout.json",
+   "sha256": "217bcd68fc2f70f1"
+  },
+  "assets": {
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/cabinet_file_d02/simready_usd/sm_cabinet_file_d02_01.usd": "0923e52b8d022623",
+   "<SIMREADY_ASSETS_DIR>/PalatialSim/palatial-nv-asset-library/D00045/simready_usd/D00045.usd": "865eaa08e24d0c06",
+   "<SIMREADY_ASSETS_DIR>/PalatialSim/palatial-nv-asset-library/D00188/simready_usd/D00188.usd": "97d59c2ef49931b7",
+   "<SIMREADY_ASSETS_DIR>/PalatialSim/palatial-nv-asset-library/D00498/simready_usd/D00498.usd": "dd62a23fa0f60701",
+   "<SIMREADY_ASSETS_DIR>/PalatialSim/palatial-nv-asset-library/D00552/simready_usd/D00552.usd": "a35bb8d3c82410b7",
+   "<SIMREADY_ASSETS_DIR>/PalatialSim/palatial-nv-asset-library/D00553/simready_usd/D00553.usd": "b4dff3c84bb8263d",
+   "<SIMREADY_ASSETS_DIR>/PalatialSim/palatial-nv-asset-library/D00662/simready_usd/D00662.usd": "f380dfe5f5fb3afe",
+   "<SIMREADY_ASSETS_DIR>/PalatialSim/palatial-nv-asset-library/D00728/simready_usd/D00728.usd": "ddd7b742bb5428f9",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a01/simready_usd/sm_misc_notebook_a01_01.usd": "f1e5e25d4ba62beb",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a02/simready_usd/sm_misc_notebook_a02_01.usd": "22e15cfe99593364",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a03/simready_usd/sm_misc_notebook_a03_01.usd": "38520297a5f7da70",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a04/simready_usd/sm_misc_notebook_a04_01.usd": "dd311e34a2ed0dfb",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/cabinet_file_d02/simready_usd/payloads/MuJoCo/disabled.usda": "8dcaa7fdd34c3b96",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/cabinet_file_d02/simready_usd/payloads/Newton/disabled.usda": "8dcaa7fdd34c3b96",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/cabinet_file_d02/simready_usd/payloads/PhysX/enabled.usda": "d0b59a3ef86d8036",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/cabinet_file_d02/simready_usd/payloads/Physics/physics.usda": "4d851bee7d8d9c2b",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/cabinet_file_d02/simready_usd/payloads/base.usda": "85935a54272fd0a2",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/cabinet_file_d02/simready_usd/payloads/geometries.usd": "498a6ca4240e46cf",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/cabinet_file_d02/simready_usd/payloads/instances.usda": "f26d7e67e75f4f64",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/cabinet_file_d02/simready_usd/payloads/instances_physx.usda": "b17d61d24c6e2eb4",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/cabinet_file_d02/simready_usd/payloads/materials.usda": "3133bd1a276e201f",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a01/simready_usd/payloads/MuJoCo/disabled.usda": "db74ffab9c778bfd",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a01/simready_usd/payloads/Newton/disabled.usda": "db74ffab9c778bfd",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a01/simready_usd/payloads/PhysX/enabled.usda": "16b49952b0b975da",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a01/simready_usd/payloads/Physics/physics.usda": "8f7e9cf206217a1a",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a01/simready_usd/payloads/base.usda": "3af3f13463d20fd7",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a01/simready_usd/payloads/geometries.usd": "40aef0bd822fcbd4",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a01/simready_usd/payloads/instances.usda": "6339446a531471da",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a01/simready_usd/payloads/instances_physx.usda": "7285f4209e8c5395",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a01/simready_usd/payloads/materials.usda": "fa38dda3248554b1",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a02/simready_usd/payloads/MuJoCo/disabled.usda": "49a96339a31742ae",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a02/simready_usd/payloads/Newton/disabled.usda": "49a96339a31742ae",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a02/simready_usd/payloads/PhysX/enabled.usda": "8a4d841d0461856f",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a02/simready_usd/payloads/Physics/physics.usda": "75bfdcef47d63d04",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a02/simready_usd/payloads/base.usda": "2ab29f36d1267621",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a02/simready_usd/payloads/geometries.usd": "5df05932fd75e544",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a02/simready_usd/payloads/instances.usda": "d618fb935895ac55",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a02/simready_usd/payloads/instances_physx.usda": "9a287f576ac4f4fc",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a02/simready_usd/payloads/materials.usda": "5996e895f366da7c",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a03/simready_usd/payloads/MuJoCo/disabled.usda": "ade32590cb9d43a6",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a03/simready_usd/payloads/Newton/disabled.usda": "ade32590cb9d43a6",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a03/simready_usd/payloads/PhysX/enabled.usda": "0bef63c9c95b18b2",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a03/simready_usd/payloads/Physics/physics.usda": "6c2616c9c9d5706c",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a03/simready_usd/payloads/base.usda": "df2be51741b852c8",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a03/simready_usd/payloads/geometries.usd": "4902ed2782c264a4",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a03/simready_usd/payloads/instances.usda": "830d00ee0ed269e7",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a03/simready_usd/payloads/instances_physx.usda": "ac60a26ae232b9ec",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a03/simready_usd/payloads/materials.usda": "951efa105106dfe8",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a04/simready_usd/payloads/MuJoCo/disabled.usda": "0cd659e26918f876",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a04/simready_usd/payloads/Newton/disabled.usda": "0cd659e26918f876",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a04/simready_usd/payloads/PhysX/enabled.usda": "ce78dd164936cc89",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a04/simready_usd/payloads/Physics/physics.usda": "da3c6ef75dd66016",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a04/simready_usd/payloads/base.usda": "6d745df983bea53a",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a04/simready_usd/payloads/geometries.usd": "26e875ac1553e46c",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a04/simready_usd/payloads/instances.usda": "6415ab8b6c1ede7f",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a04/simready_usd/payloads/instances_physx.usda": "e23d791c9fd99ee9",
+   "<SIMREADY_ASSETS_DIR>/nvidia/simready-assets/misc_notebook_a04/simready_usd/payloads/materials.usda": "c4ef491e3e04f298",
+   "simready/data/asset_rest_orientations.json": "29762b1d4388e836"
+  },
+  "program": {
+   "path": "docs/examples/shelf_books/program.json",
+   "sha256": "fa4021025581b538",
+   "dsl": "program\n  no_penetration(*, margin=0.005)\n  upright(*)\n  on_support(book_*, case.level2)\n  on_support(book_2, case.level4)\n  on_support(book_3, case.level4)\n  yaw(book_*, axis=front, deg=180)\n  row(book_1, book_4, book_5, book_6, book_7, gap=0.005, start=left, order=-height, mid=0, edge=min)\n  flush(book_1, case.level2, side=near, gap=0.01)\n  row(book_2, book_3, gap=0.005, start=left, order=-height, edge=min)\n  flush(book_3, case.level4, side=left, gap=0.02)\n  flush(book_2, case.level4, side=near, gap=0.01)\n  flush(book_3, case.level4, side=near, gap=0.01)\n  on_support(notebook_1, case.level1)\n  stack(notebook_1, notebook_2, notebook_3, notebook_4)\n  yaw(notebook_*, deg=90, mod=180)\n  flush(notebook_1, case.level1, side=far, gap=0.01)\n  at(notebook_1, y=0)",
+   "json": {
+    "intent": "Books upright with their spines out: the five that fit on the middle shelf by height, the two taller ones on top; the notebooks stacked at the back of the bottom shelf.",
+    "statements": [
+     {
+      "op": "no_penetration",
+      "margin": 0.005,
+      "reason": "nothing interpenetrates"
+     },
+     {
+      "op": "upright",
+      "a": "*",
+      "reason": "books stand upright, notebooks lie flat, as they rest"
+     },
+     {
+      "op": "on_support",
+      "a": "book_*",
+      "b": "case.level2",
+      "reason": "the books that fit go on the middle shelf (headroom 0.261 m)"
+     },
+     {
+      "op": "on_support",
+      "a": "book_2",
+      "b": "case.level4",
+      "reason": "0.265 m tall: taller than every inner shelf allows (0.245, 0.261, 0.244 m less the 5 mm margin); on top"
+     },
+     {
+      "op": "on_support",
+      "a": "book_3",
+      "b": "case.level4",
+      "reason": "0.286 m tall: likewise, on top"
+     },
+     {
+      "op": "yaw",
+      "a": "book_*",
+      "deg": 180,
+      "axis": "front",
+      "reason": "spine out, toward the robot (-x)"
+     },
+     {
+      "op": "row",
+      "members": [
+       "book_1",
+       "book_4",
+       "book_5",
+       "book_6",
+       "book_7"
+      ],
+      "start": "left",
+      "order": "-height",
+      "gap": 0.005,
+      "mid": 0.0,
+      "reason": "ordered by height, tallest at the left, 5 mm apart, spines in line, centred on the shelf (its y span is -0.25 to 0.25)",
+      "edge": "min"
+     },
+     {
+      "op": "flush",
+      "a": "book_1",
+      "b": "case.level2",
+      "side": "near",
+      "gap": 0.01,
+      "reason": "the spines 1 cm behind the shelf's front edge (the row lines them up)"
+     },
+     {
+      "op": "row",
+      "members": [
+       "book_2",
+       "book_3"
+      ],
+      "start": "left",
+      "order": "-height",
+      "gap": 0.005,
+      "reason": "side by side on top, tallest first from the left, spines in line",
+      "edge": "min"
+     },
+     {
+      "op": "flush",
+      "a": "book_3",
+      "b": "case.level4",
+      "side": "left",
+      "gap": 0.02,
+      "reason": "the row starts 2 cm inside the top's left end"
+     },
+     {
+      "op": "flush",
+      "a": "book_2",
+      "b": "case.level4",
+      "side": "near",
+      "gap": 0.01,
+      "reason": "spine 1 cm behind the top's front edge"
+     },
+     {
+      "op": "flush",
+      "a": "book_3",
+      "b": "case.level4",
+      "side": "near",
+      "gap": 0.01,
+      "reason": "spine 1 cm behind the top's front edge"
+     },
+     {
+      "op": "on_support",
+      "a": "notebook_1",
+      "b": "case.level1",
+      "reason": "the notebooks on the bottom shelf"
+     },
+     {
+      "op": "stack",
+      "members": [
+       "notebook_1",
+       "notebook_2",
+       "notebook_3",
+       "notebook_4"
+      ],
+      "reason": "stacked flat"
+     },
+     {
+      "op": "yaw",
+      "a": "notebook_*",
+      "deg": 90,
+      "mod": 180,
+      "reason": "square: every notebook's long side along the shelf"
+     },
+     {
+      "op": "flush",
+      "a": "notebook_1",
+      "b": "case.level1",
+      "side": "far",
+      "gap": 0.01,
+      "reason": "pushed to 1 cm from the back"
+     },
+     {
+      "op": "at",
+      "a": "notebook_1",
+      "y": 0.0,
+      "reason": "centred left to right"
+     }
+    ]
+   }
+  },
+  "params": {
+   "s_min": 0.05,
+   "ds_max": 0.05,
+   "tail_iters": 30,
+   "proxy_faces": 2000
+  },
+  "tolerances": {
+   "pen_eps": 1e-06,
+   "touch_eps": 5e-05,
+   "predicate_tol": 0.002,
+   "verify_gap_tol": 0.002,
+   "verify_sink_tol": 0.001,
+   "defaults": {
+    "margin": 0.005,
+    "inset": 0.02,
+    "gap": 0.05
+   },
+   "statement_defaults": {
+    "reach": {
+     "min": 0.0,
+     "x": 0.0,
+     "y": 0.0
+    },
+    "at": {
+     "tol": 0.01
+    },
+    "beside": {
+     "gap": 0.0
+    },
+    "approach": {
+     "length": 0.2,
+     "width": 0.1,
+     "toward": "robot",
+     "x": 0.0,
+     "y": 0.0
+    },
+    "facing": {
+     "axis": "+x",
+     "tol": 15.0
+    },
+    "yaw": {
+     "tol": 5.0,
+     "mod": 360.0,
+     "axis": "x"
+    },
+    "parallel": {
+     "mod": 180.0,
+     "tol": 5.0,
+     "axis": "long"
+    },
+    "row": {
+     "axis": "y",
+     "gap": 0.01,
+     "tol": 0.01,
+     "edge": "center"
+    },
+    "align": {
+     "axis": "x",
+     "edge": "center",
+     "tol": 0.005
+    },
+    "evenly_spaced": {
+     "axis": "y",
+     "tol": 0.005
+    },
+    "grid": {
+     "tol": 0.01
+    },
+    "symmetric": {
+     "axis": "y",
+     "tol": 0.01
+    },
+    "between": {
+     "axis": "y",
+     "gap": 0.0
+    },
+    "centered": {
+     "tol": 0.01
+    },
+    "offset": {
+     "dx": 0.0,
+     "dy": 0.0,
+     "frame": "world",
+     "tol": 0.01
+    },
+    "attach": {
+     "tol": 0.01,
+     "deg": 2.0
+    },
+    "keep_out": {
+     "gap": 0.0
+    },
+    "flush": {
+     "gap": 0.0,
+     "tol": 0.005
+    },
+    "region": {
+     "frac": 0.5
+    },
+    "stack": {
+     "tol": 0.01
+    },
+    "balanced_on": {
+     "margin": 0.01
+    }
+   }
+  },
+  "software": {
+   "git": "d41c226a2dab",
+   "python": "3.11.17",
+   "numpy": "2.4.6",
+   "trimesh": "5.2.0",
+   "fcl": "0.7.0.11",
+   "osqp": "1.1.3",
+   "mujoco": "3.17.0",
+   "pxr": null
+  },
+  "time": "2026-10-25T23:19:48"
+ },
+ "written": "docs/examples/shelf_books/repaired.json",
+ "written_sha256": "1bb2deede92f48a2",
+ "g5": {
+  "scene": "docs/examples/shelf_books/repaired.json",
+  "program": "docs/examples/shelf_books/program.json",
+  "seconds": 2.0,
+  "supports": {
+   "notebook_3": 0.08800171967595821,
+   "notebook_1": 0.06797034014016395,
+   "case": [
+    0.05795465037226677,
+    0.3150005042552948,
+    0.8768095103096568
+   ],
+   "notebook_2": 0.07798602990806108
+  },
+  "max_hover_m": 0.8088413430377841,
+  "free_fall_bound_m_s": 3.983649978399373,
+  "policy": {
+   "hold_predicates_after_settle": false
+  },
+  "hull": {
+   "peak_speed": 0.062,
+   "peak_disp": 0.0021,
+   "peak_tilt_deg": 1.17,
+   "left_support": [],
+   "steps": 1000,
+   "sim_seconds": 2.0,
+   "engine_warnings": {},
+   "per_body_peak_speed": {
+    "book_1": 0.015,
+    "book_2": 0.033,
+    "book_3": 0.041,
+    "book_4": 0.062,
+    "book_5": 0.02,
+    "book_6": 0.008,
+    "book_7": 0.018,
+    "notebook_1": 0.002,
+    "notebook_2": 0.017,
+    "notebook_3": 0.034,
+    "notebook_4": 0.036
+   },
+   "per_body_peak_tilt_deg": {
+    "book_1": 0.08,
+    "book_2": 0.62,
+    "book_3": 0.83,
+    "book_4": 1.17,
+    "book_5": 0.45,
+    "book_6": 0.11,
+    "book_7": 0.45,
+    "notebook_1": 0.01,
+    "notebook_2": 0.05,
+    "notebook_3": 0.11,
+    "notebook_4": 0.13
+   },
+   "final_tilt_deg": {
+    "book_1": 0.04,
+    "book_2": 0.51,
+    "book_3": 0.64,
+    "book_4": 1.1,
+    "book_5": 0.42,
+    "book_6": 0.11,
+    "book_7": 0.41,
+    "notebook_1": 0.01,
+    "notebook_2": 0.02,
+    "notebook_3": 0.02,
+    "notebook_4": 0.02
+   },
+   "final_disp": {
+    "book_1": 0.0,
+    "book_2": 0.0012,
+    "book_3": 0.0016,
+    "book_4": 0.0018,
+    "book_5": 0.001,
+    "book_6": 0.0002,
+    "book_7": 0.0007,
+    "notebook_1": 0.0001,
+    "notebook_2": 0.0002,
+    "notebook_3": 0.0003,
+    "notebook_4": 0.0003
+   },
+   "after_settle": {
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "predicates": [
+     [
+      "upright(book_1)",
+      true,
+      0.0005987444824122591
+     ],
+     [
+      "upright(book_2)",
+      true,
+      0.008644258879442764
+     ],
+     [
+      "upright(book_3)",
+      true,
+      0.011078066409395564
+     ],
+     [
+      "upright(book_4)",
+      true,
+      0.01863390338392996
+     ],
+     [
+      "upright(book_5)",
+      true,
+      0.0070434715728498465
+     ],
+     [
+      "upright(book_6)",
+      true,
+      0.0015040603268856427
+     ],
+     [
+      "upright(book_7)",
+      true,
+      0.00631293872874445
+     ],
+     [
+      "upright(notebook_1)",
+      true,
+      9.641118198598742e-05
+     ],
+     [
+      "upright(notebook_2)",
+      true,
+      0.00026087413192876796
+     ],
+     [
+      "upright(notebook_3)",
+      true,
+      0.00033947772520030614
+     ],
+     [
+      "upright(notebook_4)",
+      true,
+      0.0003650191096468033
+     ],
+     [
+      "on_support(book_1,case.level2)",
+      true,
+      -5.212056289710665e-05
+     ],
+     [
+      "on_support(book_4,case.level2)",
+      true,
+      -0.0005928432150973384
+     ],
+     [
+      "on_support(book_5,case.level2)",
+      true,
+      4.541786707201734e-05
+     ],
+     [
+      "on_support(book_6,case.level2)",
+      true,
+      -5.7889446052228344e-05
+     ],
+     [
+      "on_support(book_7,case.level2)",
+      true,
+      -9.428757559987178e-05
+     ],
+     [
+      "on_support(book_2,case.level4)",
+      true,
+      -4.931058872537086e-05
+     ],
+     [
+      "on_support(book_3,case.level4)",
+      true,
+      -2.2498423826400327e-05
+     ],
+     [
+      "yaw(book_1,deg=180)",
+      true,
+      3.7265958596143087
+     ],
+     [
+      "yaw(book_2,deg=180)",
+      true,
+      4.990059461586623
+     ],
+     [
+      "yaw(book_3,deg=180)",
+      true,
+      1.2606376176363894
+     ],
+     [
+      "yaw(book_4,deg=180)",
+      true,
+      4.244145112072996
+     ],
+     [
+      "yaw(book_5,deg=180)",
+      true,
+      1.3450994040703406
+     ],
+     [
+      "yaw(book_6,deg=180)",
+      true,
+      0.5402556713688685
+     ],
+     [
+      "yaw(book_7,deg=180)",
+      true,
+      1.5495903453278466
+     ],
+     [
+      "row(book_1,book_4,book_5,book_6,book_7):aligned",
+      true,
+      0.0011089045528436814
+     ],
+     [
+      "row(book_1,book_4,book_5,book_6,book_7):order",
+      true,
+      0.0034096032479559377
+     ],
+     [
+      "row(book_1,book_4,book_5,book_6,book_7):mid",
+      true,
+      0.006349435778998887
+     ],
+     [
+      "flush(book_1,case.level2,near)",
+      true,
+      0.005073929664508148
+     ],
+     [
+      "row(book_2,book_3):aligned",
+      true,
+      0.0001771645028633695
+     ],
+     [
+      "row(book_2,book_3):order",
+      true,
+      0.16068238717831915
+     ],
+     [
+      "flush(book_3,case.level4,left)",
+      true,
+      0.008150888552392571
+     ],
+     [
+      "flush(book_2,case.level4,near)",
+      true,
+      0.004949900931065954
+     ],
+     [
+      "flush(book_3,case.level4,near)",
+      true,
+      0.005127065433929323
+     ],
+     [
+      "on_support(notebook_1,case.level1)",
+      true,
+      -9.697848535492049e-05
+     ],
+     [
+      "stack(notebook_2,notebook_1):on",
+      true,
+      -0.00014565022314710907
+     ],
+     [
+      "stack(notebook_3,notebook_2):on",
+      true,
+      -9.288838435267399e-05
+     ],
+     [
+      "stack(notebook_4,notebook_3):on",
+      true,
+      -4.701103863642697e-05
+     ],
+     [
+      "stack(notebook_2,notebook_1):centered",
+      true,
+      0.010011152397002855
+     ],
+     [
+      "stack(notebook_3,notebook_2):centered",
+      true,
+      0.010011221445187733
+     ],
+     [
+      "stack(notebook_4,notebook_3):centered",
+      true,
+      0.009997133703724712
+     ],
+     [
+      "yaw(notebook_1,deg=90)",
+      true,
+      0.13589551783069406
+     ],
+     [
+      "yaw(notebook_2,deg=90)",
+      true,
+      1.8566320346654908
+     ],
+     [
+      "yaw(notebook_3,deg=90)",
+      true,
+      2.1657448543192723
+     ],
+     [
+      "yaw(notebook_4,deg=90)",
+      true,
+      0.2200740780474777
+     ],
+     [
+      "flush(notebook_1,case.level1,far)",
+      true,
+      0.004999629582262521
+     ],
+     [
+      "at(notebook_1)",
+      true,
+      0.0021600302761585794
+     ]
+    ],
+    "tolerances": {
+     "tol": 0.01,
+     "upright_deg": 15.0,
+     "place_tol": 0.1,
+     "angle_tol": 10.0
+    },
+    "pen_pairs_full_mesh": 7,
+    "floating": []
+   },
+   "hull_fallback": [],
+   "asset_physics": [
+    "case",
+    "book_1",
+    "book_2",
+    "book_3",
+    "book_4",
+    "book_5",
+    "book_6",
+    "book_7",
+    "notebook_1",
+    "notebook_2",
+    "notebook_3",
+    "notebook_4"
+   ],
+   "faster_than_free_fall": false,
+   "pass": true
+  },
+  "coacd": {
+   "peak_speed": 0.161,
+   "peak_disp": 0.0083,
+   "peak_tilt_deg": 0.16,
+   "left_support": [],
+   "steps": 1000,
+   "sim_seconds": 2.0,
+   "engine_warnings": {},
+   "per_body_peak_speed": {
+    "book_1": 0.02,
+    "book_2": 0.021,
+    "book_3": 0.024,
+    "book_4": 0.017,
+    "book_5": 0.022,
+    "book_6": 0.024,
+    "book_7": 0.017,
+    "notebook_1": 0.023,
+    "notebook_2": 0.068,
+    "notebook_3": 0.113,
+    "notebook_4": 0.161
+   },
+   "per_body_peak_tilt_deg": {
+    "book_1": 0.04,
+    "book_2": 0.14,
+    "book_3": 0.09,
+    "book_4": 0.08,
+    "book_5": 0.04,
+    "book_6": 0.13,
+    "book_7": 0.12,
+    "notebook_1": 0.06,
+    "notebook_2": 0.12,
+    "notebook_3": 0.16,
+    "notebook_4": 0.16
+   },
+   "final_tilt_deg": {
+    "book_1": 0.04,
+    "book_2": 0.14,
+    "book_3": 0.09,
+    "book_4": 0.08,
+    "book_5": 0.04,
+    "book_6": 0.13,
+    "book_7": 0.12,
+    "notebook_1": 0.03,
+    "notebook_2": 0.02,
+    "notebook_3": 0.09,
+    "notebook_4": 0.09
+   },
+   "final_disp": {
+    "book_1": 0.001,
+    "book_2": 0.0011,
+    "book_3": 0.0013,
+    "book_4": 0.0009,
+    "book_5": 0.0012,
+    "book_6": 0.0013,
+    "book_7": 0.0009,
+    "notebook_1": 0.0011,
+    "notebook_2": 0.0033,
+    "notebook_3": 0.0056,
+    "notebook_4": 0.0081
+   },
+   "after_settle": {
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "predicates": [
+     [
+      "upright(book_1)",
+      true,
+      0.0005636922671123913
+     ],
+     [
+      "upright(book_2)",
+      true,
+      0.002394456663316132
+     ],
+     [
+      "upright(book_3)",
+      true,
+      0.0015405093702353303
+     ],
+     [
+      "upright(book_4)",
+      true,
+      0.0013748525545382662
+     ],
+     [
+      "upright(book_5)",
+      true,
+      0.0006613385396467568
+     ],
+     [
+      "upright(book_6)",
+      true,
+      0.00231754057140022
+     ],
+     [
+      "upright(book_7)",
+      true,
+      0.002035436322117019
+     ],
+     [
+      "upright(notebook_1)",
+      true,
+      0.00035909552151470065
+     ],
+     [
+      "upright(notebook_2)",
+      true,
+      0.0003170328778019332
+     ],
+     [
+      "upright(notebook_3)",
+      true,
+      0.0015131907085410826
+     ],
+     [
+      "upright(notebook_4)",
+      true,
+      0.001519615632232561
+     ],
+     [
+      "on_support(book_1,case.level2)",
+      true,
+      0.0010131295282622133
+     ],
+     [
+      "on_support(book_4,case.level2)",
+      true,
+      0.0008684679615876822
+     ],
+     [
+      "on_support(book_5,case.level2)",
+      true,
+      0.0011185610594334205
+     ],
+     [
+      "on_support(book_6,case.level2)",
+      true,
+      0.0011825997931381727
+     ],
+     [
+      "on_support(book_7,case.level2)",
+      true,
+      0.0008766024386953064
+     ],
+     [
+      "on_support(book_2,case.level4)",
+      true,
+      0.0009797953789492109
+     ],
+     [
+      "on_support(book_3,case.level4)",
+      true,
+      0.001214908814731186
+     ],
+     [
+      "yaw(book_1,deg=180)",
+      true,
+      3.749721620746045
+     ],
+     [
+      "yaw(book_2,deg=180)",
+      true,
+      4.997004793805337
+     ],
+     [
+      "yaw(book_3,deg=180)",
+      true,
+      1.217858835934148
+     ],
+     [
+      "yaw(book_4,deg=180)",
+      true,
+      4.337924107489359
+     ],
+     [
+      "yaw(book_5,deg=180)",
+      true,
+      1.3262820098821355
+     ],
+     [
+      "yaw(book_6,deg=180)",
+      true,
+      0.5382593116364761
+     ],
+     [
+      "yaw(book_7,deg=180)",
+      true,
+      1.5135260791634524
+     ],
+     [
+      "row(book_1,book_4,book_5,book_6,book_7):aligned",
+      true,
+      0.00014717507622941106
+     ],
+     [
+      "row(book_1,book_4,book_5,book_6,book_7):order",
+      true,
+      0.004573867555136148
+     ],
+     [
+      "row(book_1,book_4,book_5,book_6,book_7):mid",
+      true,
+      0.005535216896593934
+     ],
+     [
+      "flush(book_1,case.level2,near)",
+      true,
+      0.004926414909631416
+     ],
+     [
+      "row(book_2,book_3):aligned",
+      true,
+      1.6672805883466424e-05
+     ],
+     [
+      "row(book_2,book_3):order",
+      true,
+      0.16186629159194463
+     ],
+     [
+      "flush(book_3,case.level4,left)",
+      true,
+      0.004876434043019184
+     ],
+     [
+      "flush(book_2,case.level4,near)",
+      true,
+      0.004980303922923701
+     ],
+     [
+      "flush(book_3,case.level4,near)",
+      true,
+      0.004996976728807168
+     ],
+     [
+      "on_support(notebook_1,case.level1)",
+      true,
+      0.0010545599610918277
+     ],
+     [
+      "stack(notebook_2,notebook_1):on",
+      true,
+      0.0021023065467097868
+     ],
+     [
+      "stack(notebook_3,notebook_2):on",
+      true,
+      0.0021851721229077525
+     ],
+     [
+      "stack(notebook_4,notebook_3):on",
+      true,
+      0.0024730043275539015
+     ],
+     [
+      "stack(notebook_2,notebook_1):centered",
+      true,
+      0.00995331248594624
+     ],
+     [
+      "stack(notebook_3,notebook_2):centered",
+      true,
+      0.009837560346097632
+     ],
+     [
+      "stack(notebook_4,notebook_3):centered",
+      true,
+      0.009924440424485096
+     ],
+     [
+      "yaw(notebook_1,deg=90)",
+      true,
+      0.11823565251407278
+     ],
+     [
+      "yaw(notebook_2,deg=90)",
+      true,
+      1.9292069132847605
+     ],
+     [
+      "yaw(notebook_3,deg=90)",
+      true,
+      2.2129136665520703
+     ],
+     [
+      "yaw(notebook_4,deg=90)",
+      true,
+      0.2879488848913387
+     ],
+     [
+      "flush(notebook_1,case.level1,far)",
+      true,
+      0.005063322542829263
+     ],
+     [
+      "at(notebook_1)",
+      true,
+      0.0021207191064296247
+     ]
+    ],
+    "tolerances": {
+     "tol": 0.01,
+     "upright_deg": 15.0,
+     "place_tol": 0.1,
+     "angle_tol": 10.0
+    },
+    "pen_pairs_full_mesh": 0,
+    "floating": [
+     "notebook_2",
+     "notebook_3",
+     "notebook_4"
+    ]
+   },
+   "hull_fallback": [],
+   "asset_physics": [
+    "case",
+    "book_1",
+    "book_2",
+    "book_3",
+    "book_4",
+    "book_5",
+    "book_6",
+    "book_7",
+    "notebook_1",
+    "notebook_2",
+    "notebook_3",
+    "notebook_4"
+   ],
+   "faster_than_free_fall": false,
+   "pass": true
+  },
+  "pass": true,
+  "thresholds": {
+   "v_max": 1.0,
+   "d_max": 0.15,
+   "source": "cli"
+  }
+ },
+ "ready": true,
+ "ready_policy": {
+  "hold_predicates_after_settle": false
+ }
+}

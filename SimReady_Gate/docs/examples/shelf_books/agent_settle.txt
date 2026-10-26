@@ -1,0 +1,685 @@
+{
+ "scene": "docs/examples/shelf_books/repaired.json",
+ "program": "docs/examples/shelf_books/program.json",
+ "seconds": 2.0,
+ "supports": {
+  "notebook_3": 0.08800171967595821,
+  "notebook_1": 0.06797034014016395,
+  "case": [
+   0.05795465037226677,
+   0.3150005042552948,
+   0.8768095103096568
+  ],
+  "notebook_2": 0.07798602990806108
+ },
+ "max_hover_m": 0.8088413430377841,
+ "free_fall_bound_m_s": 3.983649978399373,
+ "policy": {
+  "hold_predicates_after_settle": false
+ },
+ "hull": {
+  "peak_speed": 0.062,
+  "peak_disp": 0.0021,
+  "peak_tilt_deg": 1.17,
+  "left_support": [],
+  "steps": 1000,
+  "sim_seconds": 2.0,
+  "engine_warnings": {},
+  "per_body_peak_speed": {
+   "book_1": 0.015,
+   "book_2": 0.033,
+   "book_3": 0.041,
+   "book_4": 0.062,
+   "book_5": 0.02,
+   "book_6": 0.008,
+   "book_7": 0.018,
+   "notebook_1": 0.002,
+   "notebook_2": 0.017,
+   "notebook_3": 0.034,
+   "notebook_4": 0.036
+  },
+  "per_body_peak_tilt_deg": {
+   "book_1": 0.08,
+   "book_2": 0.62,
+   "book_3": 0.83,
+   "book_4": 1.17,
+   "book_5": 0.45,
+   "book_6": 0.11,
+   "book_7": 0.45,
+   "notebook_1": 0.01,
+   "notebook_2": 0.05,
+   "notebook_3": 0.11,
+   "notebook_4": 0.13
+  },
+  "final_tilt_deg": {
+   "book_1": 0.04,
+   "book_2": 0.51,
+   "book_3": 0.64,
+   "book_4": 1.1,
+   "book_5": 0.42,
+   "book_6": 0.11,
+   "book_7": 0.41,
+   "notebook_1": 0.01,
+   "notebook_2": 0.02,
+   "notebook_3": 0.02,
+   "notebook_4": 0.02
+  },
+  "final_disp": {
+   "book_1": 0.0,
+   "book_2": 0.0012,
+   "book_3": 0.0016,
+   "book_4": 0.0018,
+   "book_5": 0.001,
+   "book_6": 0.0002,
+   "book_7": 0.0007,
+   "notebook_1": 0.0001,
+   "notebook_2": 0.0002,
+   "notebook_3": 0.0003,
+   "notebook_4": 0.0003
+  },
+  "after_settle": {
+   "failed_predicates": [],
+   "failed_preferences": [],
+   "predicates": [
+    [
+     "upright(book_1)",
+     true,
+     0.0005987444824122591
+    ],
+    [
+     "upright(book_2)",
+     true,
+     0.008644258879442764
+    ],
+    [
+     "upright(book_3)",
+     true,
+     0.011078066409395564
+    ],
+    [
+     "upright(book_4)",
+     true,
+     0.01863390338392996
+    ],
+    [
+     "upright(book_5)",
+     true,
+     0.0070434715728498465
+    ],
+    [
+     "upright(book_6)",
+     true,
+     0.0015040603268856427
+    ],
+    [
+     "upright(book_7)",
+     true,
+     0.00631293872874445
+    ],
+    [
+     "upright(notebook_1)",
+     true,
+     9.641118198598742e-05
+    ],
+    [
+     "upright(notebook_2)",
+     true,
+     0.00026087413192876796
+    ],
+    [
+     "upright(notebook_3)",
+     true,
+     0.00033947772520030614
+    ],
+    [
+     "upright(notebook_4)",
+     true,
+     0.0003650191096468033
+    ],
+    [
+     "on_support(book_1,case.level2)",
+     true,
+     -5.212056289710665e-05
+    ],
+    [
+     "on_support(book_4,case.level2)",
+     true,
+     -0.0005928432150973384
+    ],
+    [
+     "on_support(book_5,case.level2)",
+     true,
+     4.541786707201734e-05
+    ],
+    [
+     "on_support(book_6,case.level2)",
+     true,
+     -5.7889446052228344e-05
+    ],
+    [
+     "on_support(book_7,case.level2)",
+     true,
+     -9.428757559987178e-05
+    ],
+    [
+     "on_support(book_2,case.level4)",
+     true,
+     -4.931058872537086e-05
+    ],
+    [
+     "on_support(book_3,case.level4)",
+     true,
+     -2.2498423826400327e-05
+    ],
+    [
+     "yaw(book_1,deg=180)",
+     true,
+     3.7265958596143087
+    ],
+    [
+     "yaw(book_2,deg=180)",
+     true,
+     4.990059461586623
+    ],
+    [
+     "yaw(book_3,deg=180)",
+     true,
+     1.2606376176363894
+    ],
+    [
+     "yaw(book_4,deg=180)",
+     true,
+     4.244145112072996
+    ],
+    [
+     "yaw(book_5,deg=180)",
+     true,
+     1.3450994040703406
+    ],
+    [
+     "yaw(book_6,deg=180)",
+     true,
+     0.5402556713688685
+    ],
+    [
+     "yaw(book_7,deg=180)",
+     true,
+     1.5495903453278466
+    ],
+    [
+     "row(book_1,book_4,book_5,book_6,book_7):aligned",
+     true,
+     0.0011089045528436814
+    ],
+    [
+     "row(book_1,book_4,book_5,book_6,book_7):order",
+     true,
+     0.0034096032479559377
+    ],
+    [
+     "row(book_1,book_4,book_5,book_6,book_7):mid",
+     true,
+     0.006349435778998887
+    ],
+    [
+     "flush(book_1,case.level2,near)",
+     true,
+     0.005073929664508148
+    ],
+    [
+     "row(book_2,book_3):aligned",
+     true,
+     0.0001771645028633695
+    ],
+    [
+     "row(book_2,book_3):order",
+     true,
+     0.16068238717831915
+    ],
+    [
+     "flush(book_3,case.level4,left)",
+     true,
+     0.008150888552392571
+    ],
+    [
+     "flush(book_2,case.level4,near)",
+     true,
+     0.004949900931065954
+    ],
+    [
+     "flush(book_3,case.level4,near)",
+     true,
+     0.005127065433929323
+    ],
+    [
+     "on_support(notebook_1,case.level1)",
+     true,
+     -9.697848535492049e-05
+    ],
+    [
+     "stack(notebook_2,notebook_1):on",
+     true,
+     -0.00014565022314710907
+    ],
+    [
+     "stack(notebook_3,notebook_2):on",
+     true,
+     -9.288838435267399e-05
+    ],
+    [
+     "stack(notebook_4,notebook_3):on",
+     true,
+     -4.701103863642697e-05
+    ],
+    [
+     "stack(notebook_2,notebook_1):centered",
+     true,
+     0.010011152397002855
+    ],
+    [
+     "stack(notebook_3,notebook_2):centered",
+     true,
+     0.010011221445187733
+    ],
+    [
+     "stack(notebook_4,notebook_3):centered",
+     true,
+     0.009997133703724712
+    ],
+    [
+     "yaw(notebook_1,deg=90)",
+     true,
+     0.13589551783069406
+    ],
+    [
+     "yaw(notebook_2,deg=90)",
+     true,
+     1.8566320346654908
+    ],
+    [
+     "yaw(notebook_3,deg=90)",
+     true,
+     2.1657448543192723
+    ],
+    [
+     "yaw(notebook_4,deg=90)",
+     true,
+     0.2200740780474777
+    ],
+    [
+     "flush(notebook_1,case.level1,far)",
+     true,
+     0.004999629582262521
+    ],
+    [
+     "at(notebook_1)",
+     true,
+     0.0021600302761585794
+    ]
+   ],
+   "tolerances": {
+    "tol": 0.01,
+    "upright_deg": 15.0,
+    "place_tol": 0.1,
+    "angle_tol": 10.0
+   },
+   "pen_pairs_full_mesh": 7,
+   "floating": []
+  },
+  "hull_fallback": [],
+  "asset_physics": [
+   "case",
+   "book_1",
+   "book_2",
+   "book_3",
+   "book_4",
+   "book_5",
+   "book_6",
+   "book_7",
+   "notebook_1",
+   "notebook_2",
+   "notebook_3",
+   "notebook_4"
+  ],
+  "faster_than_free_fall": false,
+  "pass": true
+ },
+ "coacd": {
+  "peak_speed": 0.161,
+  "peak_disp": 0.0083,
+  "peak_tilt_deg": 0.16,
+  "left_support": [],
+  "steps": 1000,
+  "sim_seconds": 2.0,
+  "engine_warnings": {},
+  "per_body_peak_speed": {
+   "book_1": 0.02,
+   "book_2": 0.021,
+   "book_3": 0.024,
+   "book_4": 0.017,
+   "book_5": 0.022,
+   "book_6": 0.024,
+   "book_7": 0.017,
+   "notebook_1": 0.023,
+   "notebook_2": 0.068,
+   "notebook_3": 0.113,
+   "notebook_4": 0.161
+  },
+  "per_body_peak_tilt_deg": {
+   "book_1": 0.04,
+   "book_2": 0.14,
+   "book_3": 0.09,
+   "book_4": 0.08,
+   "book_5": 0.04,
+   "book_6": 0.13,
+   "book_7": 0.12,
+   "notebook_1": 0.06,
+   "notebook_2": 0.12,
+   "notebook_3": 0.16,
+   "notebook_4": 0.16
+  },
+  "final_tilt_deg": {
+   "book_1": 0.04,
+   "book_2": 0.14,
+   "book_3": 0.09,
+   "book_4": 0.08,
+   "book_5": 0.04,
+   "book_6": 0.13,
+   "book_7": 0.12,
+   "notebook_1": 0.03,
+   "notebook_2": 0.02,
+   "notebook_3": 0.09,
+   "notebook_4": 0.09
+  },
+  "final_disp": {
+   "book_1": 0.001,
+   "book_2": 0.0011,
+   "book_3": 0.0013,
+   "book_4": 0.0009,
+   "book_5": 0.0012,
+   "book_6": 0.0013,
+   "book_7": 0.0009,
+   "notebook_1": 0.0011,
+   "notebook_2": 0.0033,
+   "notebook_3": 0.0056,
+   "notebook_4": 0.0081
+  },
+  "after_settle": {
+   "failed_predicates": [],
+   "failed_preferences": [],
+   "predicates": [
+    [
+     "upright(book_1)",
+     true,
+     0.0005636922671123913
+    ],
+    [
+     "upright(book_2)",
+     true,
+     0.002394456663316132
+    ],
+    [
+     "upright(book_3)",
+     true,
+     0.0015405093702353303
+    ],
+    [
+     "upright(book_4)",
+     true,
+     0.0013748525545382662
+    ],
+    [
+     "upright(book_5)",
+     true,
+     0.0006613385396467568
+    ],
+    [
+     "upright(book_6)",
+     true,
+     0.00231754057140022
+    ],
+    [
+     "upright(book_7)",
+     true,
+     0.002035436322117019
+    ],
+    [
+     "upright(notebook_1)",
+     true,
+     0.00035909552151470065
+    ],
+    [
+     "upright(notebook_2)",
+     true,
+     0.0003170328778019332
+    ],
+    [
+     "upright(notebook_3)",
+     true,
+     0.0015131907085410826
+    ],
+    [
+     "upright(notebook_4)",
+     true,
+     0.001519615632232561
+    ],
+    [
+     "on_support(book_1,case.level2)",
+     true,
+     0.0010131295282622133
+    ],
+    [
+     "on_support(book_4,case.level2)",
+     true,
+     0.0008684679615876822
+    ],
+    [
+     "on_support(book_5,case.level2)",
+     true,
+     0.0011185610594334205
+    ],
+    [
+     "on_support(book_6,case.level2)",
+     true,
+     0.0011825997931381727
+    ],
+    [
+     "on_support(book_7,case.level2)",
+     true,
+     0.0008766024386953064
+    ],
+    [
+     "on_support(book_2,case.level4)",
+     true,
+     0.0009797953789492109
+    ],
+    [
+     "on_support(book_3,case.level4)",
+     true,
+     0.001214908814731186
+    ],
+    [
+     "yaw(book_1,deg=180)",
+     true,
+     3.749721620746045
+    ],
+    [
+     "yaw(book_2,deg=180)",
+     true,
+     4.997004793805337
+    ],
+    [
+     "yaw(book_3,deg=180)",
+     true,
+     1.217858835934148
+    ],
+    [
+     "yaw(book_4,deg=180)",
+     true,
+     4.337924107489359
+    ],
+    [
+     "yaw(book_5,deg=180)",
+     true,
+     1.3262820098821355
+    ],
+    [
+     "yaw(book_6,deg=180)",
+     true,
+     0.5382593116364761
+    ],
+    [
+     "yaw(book_7,deg=180)",
+     true,
+     1.5135260791634524
+    ],
+    [
+     "row(book_1,book_4,book_5,book_6,book_7):aligned",
+     true,
+     0.00014717507622941106
+    ],
+    [
+     "row(book_1,book_4,book_5,book_6,book_7):order",
+     true,
+     0.004573867555136148
+    ],
+    [
+     "row(book_1,book_4,book_5,book_6,book_7):mid",
+     true,
+     0.005535216896593934
+    ],
+    [
+     "flush(book_1,case.level2,near)",
+     true,
+     0.004926414909631416
+    ],
+    [
+     "row(book_2,book_3):aligned",
+     true,
+     1.6672805883466424e-05
+    ],
+    [
+     "row(book_2,book_3):order",
+     true,
+     0.16186629159194463
+    ],
+    [
+     "flush(book_3,case.level4,left)",
+     true,
+     0.004876434043019184
+    ],
+    [
+     "flush(book_2,case.level4,near)",
+     true,
+     0.004980303922923701
+    ],
+    [
+     "flush(book_3,case.level4,near)",
+     true,
+     0.004996976728807168
+    ],
+    [
+     "on_support(notebook_1,case.level1)",
+     true,
+     0.0010545599610918277
+    ],
+    [
+     "stack(notebook_2,notebook_1):on",
+     true,
+     0.0021023065467097868
+    ],
+    [
+     "stack(notebook_3,notebook_2):on",
+     true,
+     0.0021851721229077525
+    ],
+    [
+     "stack(notebook_4,notebook_3):on",
+     true,
+     0.0024730043275539015
+    ],
+    [
+     "stack(notebook_2,notebook_1):centered",
+     true,
+     0.00995331248594624
+    ],
+    [
+     "stack(notebook_3,notebook_2):centered",
+     true,
+     0.009837560346097632
+    ],
+    [
+     "stack(notebook_4,notebook_3):centered",
+     true,
+     0.009924440424485096
+    ],
+    [
+     "yaw(notebook_1,deg=90)",
+     true,
+     0.11823565251407278
+    ],
+    [
+     "yaw(notebook_2,deg=90)",
+     true,
+     1.9292069132847605
+    ],
+    [
+     "yaw(notebook_3,deg=90)",
+     true,
+     2.2129136665520703
+    ],
+    [
+     "yaw(notebook_4,deg=90)",
+     true,
+     0.2879488848913387
+    ],
+    [
+     "flush(notebook_1,case.level1,far)",
+     true,
+     0.005063322542829263
+    ],
+    [
+     "at(notebook_1)",
+     true,
+     0.0021207191064296247
+    ]
+   ],
+   "tolerances": {
+    "tol": 0.01,
+    "upright_deg": 15.0,
+    "place_tol": 0.1,
+    "angle_tol": 10.0
+   },
+   "pen_pairs_full_mesh": 0,
+   "floating": [
+    "notebook_2",
+    "notebook_3",
+    "notebook_4"
+   ]
+  },
+  "hull_fallback": [],
+  "asset_physics": [
+   "case",
+   "book_1",
+   "book_2",
+   "book_3",
+   "book_4",
+   "book_5",
+   "book_6",
+   "book_7",
+   "notebook_1",
+   "notebook_2",
+   "notebook_3",
+   "notebook_4"
+  ],
+  "faster_than_free_fall": false,
+  "pass": true
+ },
+ "pass": true,
+ "thresholds": {
+  "v_max": 1.0,
+  "d_max": 0.15,
+  "source": "cli"
+ }
+}
+settle exit=0
