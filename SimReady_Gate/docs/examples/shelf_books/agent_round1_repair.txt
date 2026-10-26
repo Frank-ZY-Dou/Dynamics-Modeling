@@ -9,7 +9,7 @@
  "floating_after": [],
  "rmsd_xy": 0.12208684504831366,
  "steps": 49,
- "time_s": 28.05,
+ "time_s": 31.35,
  "predicates": [
   [
    "upright(book_1)",

@@ -8,60 +8,115 @@
    0.583385268538216,
    1.016203074623572
   ],
-  "bowl_1": 0.1942402357417161
+  "bowl_3": 0.19548790297807078,
+  "bowl_1": 0.1854944963311723
  },
- "max_hover_m": 0.8220414381622909,
- "free_fall_bound_m_s": 4.016024528902202,
+ "max_hover_m": 0.004415463575232009,
+ "free_fall_bound_m_s": 0.2943321174218879,
  "policy": {
   "hold_predicates_after_settle": false
  },
  "hull": {
-  "peak_speed": 0.768,
-  "peak_disp": 0.0421,
-  "peak_tilt_deg": 4.58,
+  "peak_speed": 0.873,
+  "peak_disp": 0.0522,
+  "peak_tilt_deg": 4.63,
   "left_support": [],
   "steps": 1000,
   "sim_seconds": 2.0,
   "engine_warnings": {},
   "per_body_peak_speed": {
-   "can_1": 0.0,
-   "can_2": 0.002,
+   "can_1": 0.001,
+   "can_2": 0.003,
    "can_3": 0.008,
-   "can_4": 0.001,
-   "can_5": 0.014,
-   "can_6": 0.02,
-   "soup": 0.002,
-   "bowl_1": 0.037,
-   "bowl_2": 0.768,
-   "mug_1": 0.02,
-   "mug_2": 0.001,
-   "mug_3": 0.027,
-   "jar_1": 0.083,
+   "can_4": 0.002,
+   "can_5": 0.007,
+   "can_6": 0.0,
+   "can_7": 0.0,
+   "can_8": 0.003,
+   "can_9": 0.008,
+   "can_10": 0.001,
+   "can_11": 0.015,
+   "can_12": 0.02,
+   "can_13": 0.02,
+   "can_14": 0.002,
+   "can_15": 0.007,
+   "can_16": 0.001,
+   "can_17": 0.015,
+   "can_18": 0.02,
+   "soup_1": 0.002,
+   "soup_2": 0.002,
+   "soup_3": 0.002,
+   "bowl_1": 0.036,
+   "bowl_2": 0.873,
+   "bowl_3": 0.037,
+   "bowl_4": 0.766,
+   "mug_1": 0.0,
+   "mug_2": 0.002,
+   "mug_3": 0.03,
+   "mug_4": 0.039,
+   "mug_5": 0.002,
+   "mug_6": 0.027,
+   "jar_1": 0.066,
    "jar_2": 0.103,
-   "jar_3": 0.024,
+   "jar_3": 0.028,
    "jar_4": 0.024,
+   "jar_5": 0.074,
+   "jar_6": 0.103,
+   "jar_7": 0.028,
+   "jar_8": 0.028,
    "bottle_1": 0.009,
-   "bottle_2": 0.039
+   "bottle_2": 0.02,
+   "bottle_3": 0.009,
+   "bottle_4": 0.02,
+   "bottle_5": 0.009,
+   "bottle_6": 0.02
   },
   "per_body_peak_tilt_deg": {
    "can_1": 0.0,
    "can_2": 0.01,
    "can_3": 0.3,
    "can_4": 0.01,
-   "can_5": 0.33,
+   "can_5": 0.3,
    "can_6": 0.02,
-   "soup": 0.03,
-   "bowl_1": 0.61,
-   "bowl_2": 0.63,
+   "can_7": 0.0,
+   "can_8": 0.01,
+   "can_9": 0.3,
+   "can_10": 0.01,
+   "can_11": 0.31,
+   "can_12": 0.02,
+   "can_13": 0.0,
+   "can_14": 0.01,
+   "can_15": 0.3,
+   "can_16": 0.01,
+   "can_17": 0.33,
+   "can_18": 0.02,
+   "soup_1": 0.03,
+   "soup_2": 0.03,
+   "soup_3": 0.03,
+   "bowl_1": 0.46,
+   "bowl_2": 0.58,
+   "bowl_3": 0.45,
+   "bowl_4": 0.45,
    "mug_1": 0.01,
    "mug_2": 0.04,
-   "mug_3": 0.64,
+   "mug_3": 0.68,
+   "mug_4": 0.01,
+   "mug_5": 0.04,
+   "mug_6": 0.65,
    "jar_1": 0.55,
-   "jar_2": 4.58,
+   "jar_2": 4.59,
    "jar_3": 0.74,
-   "jar_4": 0.74,
+   "jar_4": 0.73,
+   "jar_5": 0.57,
+   "jar_6": 4.63,
+   "jar_7": 0.77,
+   "jar_8": 0.75,
    "bottle_1": 0.36,
-   "bottle_2": 0.08
+   "bottle_2": 0.1,
+   "bottle_3": 0.36,
+   "bottle_4": 0.1,
+   "bottle_5": 0.36,
+   "bottle_6": 0.1
   },
   "final_tilt_deg": {
    "can_1": 0.0,
@@ -70,224 +125,324 @@
    "can_4": 0.01,
    "can_5": 0.29,
    "can_6": 0.02,
-   "soup": 0.02,
-   "bowl_1": 0.13,
-   "bowl_2": 0.13,
+   "can_7": 0.0,
+   "can_8": 0.01,
+   "can_9": 0.3,
+   "can_10": 0.01,
+   "can_11": 0.29,
+   "can_12": 0.02,
+   "can_13": 0.0,
+   "can_14": 0.01,
+   "can_15": 0.3,
+   "can_16": 0.01,
+   "can_17": 0.29,
+   "can_18": 0.02,
+   "soup_1": 0.02,
+   "soup_2": 0.02,
+   "soup_3": 0.02,
+   "bowl_1": 0.12,
+   "bowl_2": 0.12,
+   "bowl_3": 0.08,
+   "bowl_4": 0.08,
    "mug_1": 0.01,
    "mug_2": 0.04,
    "mug_3": 0.54,
+   "mug_4": 0.01,
+   "mug_5": 0.04,
+   "mug_6": 0.54,
    "jar_1": 0.51,
    "jar_2": 3.85,
    "jar_3": 0.72,
    "jar_4": 0.72,
+   "jar_5": 0.51,
+   "jar_6": 3.85,
+   "jar_7": 0.72,
+   "jar_8": 0.72,
    "bottle_1": 0.36,
-   "bottle_2": 0.08
+   "bottle_2": 0.08,
+   "bottle_3": 0.36,
+   "bottle_4": 0.08,
+   "bottle_5": 0.36,
+   "bottle_6": 0.08
   },
   "final_disp": {
    "can_1": 0.0,
-   "can_2": 0.0001,
+   "can_2": 0.0002,
    "can_3": 0.0004,
    "can_4": 0.0001,
    "can_5": 0.0003,
-   "can_6": 0.0001,
-   "soup": 0.0001,
+   "can_6": 0.0,
+   "can_7": 0.0,
+   "can_8": 0.0001,
+   "can_9": 0.0004,
+   "can_10": 0.0001,
+   "can_11": 0.0003,
+   "can_12": 0.0,
+   "can_13": 0.0,
+   "can_14": 0.0001,
+   "can_15": 0.0004,
+   "can_16": 0.0001,
+   "can_17": 0.0003,
+   "can_18": 0.0,
+   "soup_1": 0.0,
+   "soup_2": 0.0,
+   "soup_3": 0.0,
    "bowl_1": 0.0001,
-   "bowl_2": 0.0406,
+   "bowl_2": 0.0462,
+   "bowl_3": 0.0001,
+   "bowl_4": 0.0406,
    "mug_1": 0.0,
    "mug_2": 0.0001,
    "mug_3": 0.0005,
-   "jar_1": 0.0006,
+   "mug_4": 0.0001,
+   "mug_5": 0.0001,
+   "mug_6": 0.0005,
+   "jar_1": 0.0005,
    "jar_2": 0.0031,
-   "jar_3": 0.0004,
+   "jar_3": 0.0005,
    "jar_4": 0.0004,
+   "jar_5": 0.0006,
+   "jar_6": 0.0028,
+   "jar_7": 0.0004,
+   "jar_8": 0.0005,
    "bottle_1": 0.0006,
-   "bottle_2": 0.0002
+   "bottle_2": 0.0001,
+   "bottle_3": 0.0006,
+   "bottle_4": 0.0001,
+   "bottle_5": 0.0006,
+   "bottle_6": 0.0001
   },
   "after_settle": {
    "failed_predicates": [
-    "stack(bowl_2,bowl_1):on"
+    "stack(bowl_2,bowl_1):on",
+    "stack(bowl_4,bowl_3):on"
    ],
    "failed_preferences": [],
    "predicates": [
     [
      "upright(can_1)",
      true,
-     4.630409329636532e-07
+     4.630409317716147e-07
     ],
     [
      "upright(can_2)",
      true,
-     0.00015420354680361676
+     0.00015420354679113505
     ],
     [
      "upright(can_3)",
      true,
-     0.005121944315400753
+     0.005121944315359335
     ],
     [
      "upright(can_4)",
      true,
-     0.00016919428975305226
+     0.00016919428966088928
     ],
     [
      "upright(can_5)",
      true,
-     0.0046640755776835114
+     0.004680718160746094
     ],
     [
      "upright(can_6)",
      true,
-     0.0002744070898637459
+     0.0002744070903680599
     ],
     [
-     "upright(soup)",
+     "upright(can_7)",
      true,
-     0.0002728582295166916
+     4.630409315913309e-07
+    ],
+    [
+     "upright(can_8)",
+     true,
+     0.00015420354680481914
+    ],
+    [
+     "upright(can_9)",
+     true,
+     0.00512194431538285
+    ],
+    [
+     "upright(can_10)",
+     true,
+     0.0001691942897457973
+    ],
+    [
+     "upright(can_11)",
+     true,
+     0.00470907279678965
+    ],
+    [
+     "upright(can_12)",
+     true,
+     0.0002744070903511952
+    ],
+    [
+     "upright(can_13)",
+     true,
+     4.6304093286699544e-07
+    ],
+    [
+     "upright(can_14)",
+     true,
+     0.00015420354679197783
+    ],
+    [
+     "upright(can_15)",
+     true,
+     0.005121944315373341
+    ],
+    [
+     "upright(can_16)",
+     true,
+     0.00016919428975342842
+    ],
+    [
+     "upright(can_17)",
+     true,
+     0.004664599599199858
+    ],
+    [
+     "upright(can_18)",
+     true,
+     0.00027440708957561445
+    ],
+    [
+     "upright(soup_1)",
+     true,
+     0.00026888541392135017
+    ],
+    [
+     "upright(soup_2)",
+     true,
+     0.000277689657150835
+    ],
+    [
+     "upright(soup_3)",
+     true,
+     0.00026893609653449416
     ],
     [
      "upright(bowl_1)",
      true,
-     0.001964763857649313
+     0.0015897918651313378
     ],
     [
      "upright(bowl_2)",
      true,
-     0.002020127975697637
+     0.0016405154064693514
+    ],
+    [
+     "upright(bowl_3)",
+     true,
+     0.001179432014551852
+    ],
+    [
+     "upright(bowl_4)",
+     true,
+     0.0012602015970196426
     ],
     [
      "upright(mug_1)",
      true,
-     0.00011327467182048486
+     0.00011327467183433208
     ],
     [
      "upright(mug_2)",
      true,
-     0.0005278551160115624
+     0.0005278551160185012
     ],
     [
      "upright(mug_3)",
      true,
-     0.009450995165061003
+     0.009455954744596836
+    ],
+    [
+     "upright(mug_4)",
+     true,
+     0.00011327467182056431
+    ],
+    [
+     "upright(mug_5)",
+     true,
+     0.0005278551160331043
+    ],
+    [
+     "upright(mug_6)",
+     true,
+     0.009450995165060937
     ],
     [
      "upright(jar_1)",
      true,
-     0.007289748143432242
+     0.00728974814345429
     ],
     [
      "upright(jar_2)",
      true,
-     0.06715374995398947
+     0.06715374995397712
     ],
     [
      "upright(jar_3)",
      true,
-     0.012234564963059387
+     0.012234564963048472
     ],
     [
      "upright(jar_4)",
      true,
-     0.011004346697692239
+     0.011004346697592612
+    ],
+    [
+     "upright(jar_5)",
+     true,
+     0.007289748143407892
+    ],
+    [
+     "upright(jar_6)",
+     true,
+     0.06715374995382759
+    ],
+    [
+     "upright(jar_7)",
+     true,
+     0.012234564962925826
+    ],
+    [
+     "upright(jar_8)",
+     true,
+     0.01100434669771789
     ],
     [
      "upright(bottle_1)",
      true,
-     0.00609409261138849
+     0.006094092514116077
     ],
     [
      "upright(bottle_2)",
      true,
-     0.0012668026461227653
+     0.0012668026461042751
     ],
     [
-     "reach(can_1,r=0.85)",
+     "upright(bottle_3)",
      true,
-     0.7565425741420243
+     0.006094092611310381
     ],
     [
-     "reach(can_2,r=0.85)",
+     "upright(bottle_4)",
      true,
-     0.7383212229068483
+     0.0012668026460748692
     ],
     [
-     "reach(can_3,r=0.85)",
+     "upright(bottle_5)",
      true,
-     0.7395264289124092
+     0.006094092611354996
     ],
     [
-     "reach(can_4,r=0.85)",
+     "upright(bottle_6)",
      true,
-     0.8500086344703082
-    ],
-    [
-     "reach(can_5,r=0.85)",
-     true,
-     0.8472867472106229
-    ],
-    [
-     "reach(can_6,r=0.85)",
-     true,
-     0.8290357237660348
-    ],
-    [
-     "reach(soup,r=0.85)",
-     true,
-     0.7612045104867451
-    ],
-    [
-     "reach(bowl_1,r=0.85)",
-     true,
-     0.8500140818024245
-    ],
-    [
-     "reach(bowl_2,r=0.85)",
-     true,
-     0.8501955654728124
-    ],
-    [
-     "reach(mug_1,r=0.85)",
-     true,
-     0.7360502742840164
-    ],
-    [
-     "reach(mug_2,r=0.85)",
-     true,
-     0.7090160102578054
-    ],
-    [
-     "reach(mug_3,r=0.85)",
-     true,
-     0.7239148753754503
-    ],
-    [
-     "reach(jar_1,r=0.85)",
-     true,
-     0.8442524312628359
-    ],
-    [
-     "reach(jar_2,r=0.85)",
-     true,
-     0.7874728344335801
-    ],
-    [
-     "reach(jar_3,r=0.85)",
-     true,
-     0.7507730162261799
-    ],
-    [
-     "reach(jar_4,r=0.85)",
-     true,
-     0.7940946118477324
-    ],
-    [
-     "reach(bottle_1,r=0.85)",
-     true,
-     0.8498243884877246
-    ],
-    [
-     "reach(bottle_2,r=0.85)",
-     true,
-     0.8231634909092591
+     0.0012668026461321708
     ],
     [
      "within(can_1,rack)",
@@ -320,9 +475,79 @@
      0.0
     ],
     [
-     "within(soup,rack)",
+     "within(can_7,rack)",
      true,
      0.0
+    ],
+    [
+     "within(can_8,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_9,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_10,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_11,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_12,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_13,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_14,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_15,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_16,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_17,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_18,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(soup_1,rack)",
+     true,
+     1.999762926419013e-05
+    ],
+    [
+     "within(soup_2,rack)",
+     true,
+     1.6469492073567515e-05
+    ],
+    [
+     "within(soup_3,rack)",
+     true,
+     2.293746563919452e-05
     ],
     [
      "within(bowl_1,rack)",
@@ -331,6 +556,16 @@
     ],
     [
      "within(bowl_2,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(bowl_3,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(bowl_4,rack)",
      true,
      0.0
     ],
@@ -347,7 +582,22 @@
     [
      "within(mug_3,rack)",
      true,
+     5.4885124472936475e-05
+    ],
+    [
+     "within(mug_4,rack)",
+     true,
      0.0
+    ],
+    [
+     "within(mug_5,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(mug_6,rack)",
+     true,
+     4.420895131573843e-05
     ],
     [
      "within(jar_1,rack)",
@@ -370,6 +620,26 @@
      0.0
     ],
     [
+     "within(jar_5,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(jar_6,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(jar_7,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(jar_8,rack)",
+     true,
+     0.0
+    ],
+    [
      "within(bottle_1,rack)",
      true,
      0.0
@@ -380,134 +650,314 @@
      0.0
     ],
     [
-     "on_support(bowl_1,rack.level1)",
+     "within(bottle_3,rack)",
      true,
-     -0.00010613859874697429
+     0.0
     ],
     [
-     "stack(bowl_2,bowl_1):on",
-     false,
-     0.041829757893887376
+     "within(bottle_4,rack)",
+     true,
+     0.0
     ],
     [
-     "stack(bowl_2,bowl_1):centered",
+     "within(bottle_5,rack)",
      true,
-     0.010559067579927792
+     0.0
+    ],
+    [
+     "within(bottle_6,rack)",
+     true,
+     0.0
     ],
     [
      "on_support(mug_1,rack.level1)",
      true,
-     -1.7089396871672324e-05
+     -1.126303076748325e-06
     ],
     [
      "on_support(mug_2,rack.level1)",
      true,
-     4.960658686928299e-05
+     4.62907910208088e-05
     ],
     [
      "on_support(mug_3,rack.level1)",
      true,
-     -0.00024823952352168166
+     -0.00021040219774404179
     ],
     [
-     "on_support(soup,rack.level1)",
+     "on_support(mug_4,rack.level1)",
      true,
-     7.49752015578864e-05
+     -5.589072751974178e-05
     ],
     [
-     "row(mug_1,mug_2,mug_3,soup):aligned",
+     "on_support(mug_5,rack.level1)",
      true,
-     0.010011247224371744
+     8.421800725580408e-05
     ],
     [
-     "row(mug_1,mug_2,mug_3,soup):order",
+     "on_support(mug_6,rack.level1)",
      true,
-     0.02933661478442863
+     -0.0002476905190281764
+    ],
+    [
+     "on_support(soup_1,rack.level1)",
+     true,
+     3.795292738573153e-05
+    ],
+    [
+     "on_support(soup_2,rack.level1)",
+     true,
+     5.349104465576793e-05
+    ],
+    [
+     "on_support(soup_3,rack.level1)",
+     true,
+     2.598785262683534e-05
+    ],
+    [
+     "row(mug_1,mug_2,mug_3,mug_4,mug_5,mug_6,soup_1,soup_2,soup_3):aligned",
+     true,
+     6.580886209850423e-05
+    ],
+    [
+     "row(mug_1,mug_2,mug_3,mug_4,mug_5,mug_6,soup_1,soup_2,soup_3):order",
+     true,
+     0.01932799251427325
+    ],
+    [
+     "flush(mug_1,rack.level1,near)",
+     true,
+     0.004413304165512555
     ],
     [
      "yaw(mug_1,deg=-90)",
      true,
-     4.999966833702985
+     4.082567387257084
     ],
     [
      "yaw(mug_2,deg=-90)",
      true,
-     5.000309326053285
+     5.000308577713195
     ],
     [
      "yaw(mug_3,deg=-90)",
      true,
-     4.974497963844239
+     4.984495148972101
+    ],
+    [
+     "yaw(mug_4,deg=-90)",
+     true,
+     4.999966891754011
+    ],
+    [
+     "yaw(mug_5,deg=-90)",
+     true,
+     5.00030805967483
+    ],
+    [
+     "yaw(mug_6,deg=-90)",
+     true,
+     4.9745205885574775
+    ],
+    [
+     "on_support(bowl_1,rack.level1)",
+     true,
+     -0.00010528437226697829
+    ],
+    [
+     "on_support(bowl_3,rack.level1)",
+     true,
+     -0.0001003233286827887
+    ],
+    [
+     "stack(bowl_2,bowl_1):on",
+     false,
+     0.04893546083473804
+    ],
+    [
+     "stack(bowl_2,bowl_1):centered",
+     true,
+     0.0004811197295788716
+    ],
+    [
+     "stack(bowl_4,bowl_3):on",
+     false,
+     0.04102615677800975
+    ],
+    [
+     "stack(bowl_4,bowl_3):centered",
+     true,
+     0.006579724617098659
+    ],
+    [
+     "within(bowl_1,rack.level1)",
+     true,
+     0.0
+    ],
+    [
+     "within(bowl_2,rack.level1)",
+     true,
+     0.0
+    ],
+    [
+     "within(bowl_3,rack.level1)",
+     true,
+     0.0
+    ],
+    [
+     "within(bowl_4,rack.level1)",
+     true,
+     0.0
     ],
     [
      "on_support(can_1,rack.level2)",
      true,
-     2.4277229589086957e-05
+     4.9522808588720046e-05
     ],
     [
      "on_support(can_2,rack.level2)",
      true,
-     0.0001307582905905047
+     0.00015912063605560967
     ],
     [
      "on_support(can_3,rack.level2)",
      true,
-     0.00018070747750187355
+     0.00017481415171916037
     ],
     [
      "on_support(can_4,rack.level2)",
      true,
-     5.947083842239298e-05
+     0.00010351590295321067
     ],
     [
      "on_support(can_5,rack.level2)",
      true,
-     -0.00010666279576643234
+     -2.2895197395178535e-05
     ],
     [
      "on_support(can_6,rack.level2)",
      true,
-     -5.440268230993972e-05
+     1.7195234056632813e-06
     ],
     [
-     "grid(can_1,can_2,can_3,can_4,can_5,can_6)",
+     "on_support(can_7,rack.level2)",
      true,
-     0.010126662711739537
+     1.710434467394606e-06
+    ],
+    [
+     "on_support(can_8,rack.level2)",
+     true,
+     0.00014285946934944338
+    ],
+    [
+     "on_support(can_9,rack.level2)",
+     true,
+     0.00016514515502408234
+    ],
+    [
+     "on_support(can_10,rack.level2)",
+     true,
+     7.408268130115747e-05
+    ],
+    [
+     "on_support(can_11,rack.level2)",
+     true,
+     -5.547109728276656e-05
+    ],
+    [
+     "on_support(can_12,rack.level2)",
+     true,
+     -3.454501069932725e-05
+    ],
+    [
+     "on_support(can_13,rack.level2)",
+     true,
+     -4.18419108169088e-05
+    ],
+    [
+     "on_support(can_14,rack.level2)",
+     true,
+     8.266288934188903e-05
+    ],
+    [
+     "on_support(can_15,rack.level2)",
+     true,
+     0.00011097590820174918
+    ],
+    [
+     "on_support(can_16,rack.level2)",
+     true,
+     6.538514861476052e-05
+    ],
+    [
+     "on_support(can_17,rack.level2)",
+     true,
+     -8.391014534614438e-05
+    ],
+    [
+     "on_support(can_18,rack.level2)",
+     true,
+     -3.3419406022749953e-05
+    ],
+    [
+     "grid(can_1,can_2,can_3,can_4,can_5,can_6,can_7,can_8,can_9,can_10,can_11,can_12,can_13,can_14,can_15,can_16,can_17,can_18)",
+     true,
+     0.010304430855829327
     ],
     [
      "on_support(jar_1,rack.level3)",
      true,
-     -0.0007966269971775297
+     -0.0007274388750739824
     ],
     [
      "on_support(jar_2,rack.level3)",
      true,
-     -0.0035008303456616208
+     -0.0035328770398201925
     ],
     [
      "on_support(jar_3,rack.level3)",
      true,
-     -0.0003016657727827887
+     -0.0002785888589014185
     ],
     [
      "on_support(jar_4,rack.level3)",
      true,
-     -0.0003499566980120772
+     -0.00031698120762513327
     ],
     [
-     "row(jar_1,jar_2,jar_3,jar_4):aligned",
+     "on_support(jar_5,rack.level3)",
      true,
-     0.012580367133640191
+     -0.0007537967655331101
     ],
     [
-     "row(jar_1,jar_2,jar_3,jar_4):order",
+     "on_support(jar_6,rack.level3)",
      true,
-     0.00684764240487544
+     -0.0034730556002777746
     ],
     [
-     "row(jar_1,jar_2,jar_3,jar_4):even",
+     "on_support(jar_7,rack.level3)",
      true,
-     0.0014830680876109364
+     -0.0003121246723898352
+    ],
+    [
+     "on_support(jar_8,rack.level3)",
+     true,
+     -0.00029349120482224933
+    ],
+    [
+     "row(jar_1,jar_2,jar_3,jar_4,jar_5,jar_6,jar_7,jar_8):aligned",
+     true,
+     0.010440012772717
+    ],
+    [
+     "row(jar_1,jar_2,jar_3,jar_4,jar_5,jar_6,jar_7,jar_8):order",
+     true,
+     0.007392263078896809
+    ],
+    [
+     "row(jar_1,jar_2,jar_3,jar_4,jar_5,jar_6,jar_7,jar_8):even",
+     true,
+     0.0016397249138439957
     ],
     [
      "within(jar_1,rack.level3)",
@@ -517,37 +967,77 @@
     [
      "within(jar_2,rack.level3)",
      true,
-     0.0
+     0.004521067818592184
     ],
     [
      "within(jar_3,rack.level3)",
      true,
-     0.0
+     0.00021627284839509375
     ],
     [
      "within(jar_4,rack.level3)",
      true,
+     0.0006983029217921821
+    ],
+    [
+     "within(jar_5,rack.level3)",
+     true,
      0.0
+    ],
+    [
+     "within(jar_6,rack.level3)",
+     true,
+     0.0
+    ],
+    [
+     "within(jar_7,rack.level3)",
+     true,
+     0.00041169562061948994
+    ],
+    [
+     "within(jar_8,rack.level3)",
+     true,
+     0.0007256260060684028
     ],
     [
      "on_support(bottle_1,rack.level3)",
      true,
-     4.4863988654775255e-05
+     2.8121316248963524e-05
     ],
     [
      "on_support(bottle_2,rack.level3)",
      true,
-     -0.00015238172606601985
+     -0.00011122582976752504
     ],
     [
-     "row(bottle_1,bottle_2):aligned",
+     "on_support(bottle_3,rack.level3)",
      true,
-     0.009651058479250074
+     5.485720910614056e-05
     ],
     [
-     "row(bottle_1,bottle_2):order",
+     "on_support(bottle_4,rack.level3)",
      true,
-     0.10199362466544351
+     -0.00011645289338368947
+    ],
+    [
+     "on_support(bottle_5,rack.level3)",
+     true,
+     1.0812213339095322e-05
+    ],
+    [
+     "on_support(bottle_6,rack.level3)",
+     true,
+     -0.00010289670556162811
+    ],
+    [
+     "row(bottle_1,bottle_2,bottle_3,bottle_4,bottle_5,bottle_6):aligned",
+     true,
+     0.00993999734987494
+    ],
+    [
+     "row(bottle_1,bottle_2,bottle_3,bottle_4,bottle_5,bottle_6):order",
+     true,
+     0.01926489847086363
     ],
     [
      "within(bottle_1,rack.level3)",
@@ -558,6 +1048,26 @@
      "within(bottle_2,rack.level3)",
      true,
      0.0
+    ],
+    [
+     "within(bottle_3,rack.level3)",
+     true,
+     0.0
+    ],
+    [
+     "within(bottle_4,rack.level3)",
+     true,
+     0.0
+    ],
+    [
+     "within(bottle_5,rack.level3)",
+     true,
+     0.0003927417431880409
+    ],
+    [
+     "within(bottle_6,rack.level3)",
+     true,
+     2.71233067283827e-05
     ]
    ],
    "tolerances": {
@@ -566,9 +1076,11 @@
     "place_tol": 0.1,
     "angle_tol": 10.0
    },
-   "pen_pairs_full_mesh": 9,
+   "pen_pairs_full_mesh": 18,
    "floating": [
-    "bowl_2"
+    "bowl_2",
+    "bowl_4",
+    "jar_2"
    ]
   },
   "hull_fallback": [],
@@ -580,49 +1092,103 @@
    "can_4",
    "can_5",
    "can_6",
-   "soup",
+   "can_7",
+   "can_8",
+   "can_9",
+   "can_10",
+   "can_11",
+   "can_12",
+   "can_13",
+   "can_14",
+   "can_15",
+   "can_16",
+   "can_17",
+   "can_18",
+   "soup_1",
+   "soup_2",
+   "soup_3",
    "bowl_1",
    "bowl_2",
+   "bowl_3",
+   "bowl_4",
    "mug_1",
    "mug_2",
    "mug_3",
+   "mug_4",
+   "mug_5",
+   "mug_6",
    "jar_1",
    "jar_2",
    "jar_3",
    "jar_4",
+   "jar_5",
+   "jar_6",
+   "jar_7",
+   "jar_8",
    "bottle_1",
-   "bottle_2"
+   "bottle_2",
+   "bottle_3",
+   "bottle_4",
+   "bottle_5",
+   "bottle_6"
   ],
-  "faster_than_free_fall": false,
+  "faster_than_free_fall": true,
   "pass": true
  },
  "coacd": {
-  "peak_speed": 0.166,
-  "peak_disp": 0.0041,
-  "peak_tilt_deg": 6.86,
+  "peak_speed": 0.206,
+  "peak_disp": 0.0046,
+  "peak_tilt_deg": 8.34,
   "left_support": [],
   "steps": 1000,
   "sim_seconds": 2.0,
   "engine_warnings": {},
   "per_body_peak_speed": {
-   "can_1": 0.007,
-   "can_2": 0.012,
+   "can_1": 0.008,
+   "can_2": 0.013,
    "can_3": 0.011,
-   "can_4": 0.009,
-   "can_5": 0.011,
-   "can_6": 0.02,
-   "soup": 0.008,
-   "bowl_1": 0.029,
-   "bowl_2": 0.166,
-   "mug_1": 0.039,
+   "can_4": 0.01,
+   "can_5": 0.012,
+   "can_6": 0.0,
+   "can_7": 0.007,
+   "can_8": 0.012,
+   "can_9": 0.011,
+   "can_10": 0.01,
+   "can_11": 0.012,
+   "can_12": 0.02,
+   "can_13": 0.006,
+   "can_14": 0.011,
+   "can_15": 0.01,
+   "can_16": 0.01,
+   "can_17": 0.011,
+   "can_18": 0.02,
+   "soup_1": 0.007,
+   "soup_2": 0.007,
+   "soup_3": 0.007,
+   "bowl_1": 0.0,
+   "bowl_2": 0.046,
+   "bowl_3": 0.013,
+   "bowl_4": 0.206,
+   "mug_1": 0.02,
    "mug_2": 0.039,
-   "mug_3": 0.039,
-   "jar_1": 0.01,
-   "jar_2": 0.008,
+   "mug_3": 0.02,
+   "mug_4": 0.039,
+   "mug_5": 0.02,
+   "mug_6": 0.02,
+   "jar_1": 0.011,
+   "jar_2": 0.007,
    "jar_3": 0.008,
-   "jar_4": 0.008,
-   "bottle_1": 0.017,
-   "bottle_2": 0.007
+   "jar_4": 0.009,
+   "jar_5": 0.011,
+   "jar_6": 0.009,
+   "jar_7": 0.008,
+   "jar_8": 0.009,
+   "bottle_1": 0.016,
+   "bottle_2": 0.008,
+   "bottle_3": 0.017,
+   "bottle_4": 0.008,
+   "bottle_5": 0.016,
+   "bottle_6": 0.008
   },
   "per_body_peak_tilt_deg": {
    "can_1": 0.01,
@@ -631,18 +1197,45 @@
    "can_4": 0.0,
    "can_5": 0.02,
    "can_6": 0.0,
-   "soup": 0.0,
-   "bowl_1": 0.49,
-   "bowl_2": 6.86,
+   "can_7": 0.01,
+   "can_8": 0.01,
+   "can_9": 0.0,
+   "can_10": 0.0,
+   "can_11": 0.02,
+   "can_12": 0.0,
+   "can_13": 0.01,
+   "can_14": 0.01,
+   "can_15": 0.0,
+   "can_16": 0.0,
+   "can_17": 0.02,
+   "can_18": 0.0,
+   "soup_1": 0.0,
+   "soup_2": 0.0,
+   "soup_3": 0.0,
+   "bowl_1": 0.0,
+   "bowl_2": 1.29,
+   "bowl_3": 0.18,
+   "bowl_4": 8.34,
    "mug_1": 0.0,
-   "mug_2": 0.01,
+   "mug_2": 0.0,
    "mug_3": 0.01,
+   "mug_4": 0.0,
+   "mug_5": 0.0,
+   "mug_6": 0.01,
    "jar_1": 0.22,
    "jar_2": 0.09,
    "jar_3": 0.09,
    "jar_4": 0.01,
+   "jar_5": 0.22,
+   "jar_6": 0.09,
+   "jar_7": 0.09,
+   "jar_8": 0.01,
    "bottle_1": 0.19,
-   "bottle_2": 0.24
+   "bottle_2": 0.24,
+   "bottle_3": 0.19,
+   "bottle_4": 0.24,
+   "bottle_5": 0.19,
+   "bottle_6": 0.24
   },
   "final_tilt_deg": {
    "can_1": 0.01,
@@ -651,38 +1244,92 @@
    "can_4": 0.0,
    "can_5": 0.02,
    "can_6": 0.0,
-   "soup": 0.0,
-   "bowl_1": 0.01,
-   "bowl_2": 3.56,
+   "can_7": 0.01,
+   "can_8": 0.01,
+   "can_9": 0.0,
+   "can_10": 0.0,
+   "can_11": 0.02,
+   "can_12": 0.0,
+   "can_13": 0.01,
+   "can_14": 0.01,
+   "can_15": 0.0,
+   "can_16": 0.0,
+   "can_17": 0.02,
+   "can_18": 0.0,
+   "soup_1": 0.0,
+   "soup_2": 0.0,
+   "soup_3": 0.0,
+   "bowl_1": 0.0,
+   "bowl_2": 1.29,
+   "bowl_3": 0.0,
+   "bowl_4": 5.79,
    "mug_1": 0.0,
-   "mug_2": 0.01,
+   "mug_2": 0.0,
    "mug_3": 0.01,
+   "mug_4": 0.0,
+   "mug_5": 0.0,
+   "mug_6": 0.01,
    "jar_1": 0.19,
    "jar_2": 0.09,
    "jar_3": 0.09,
    "jar_4": 0.01,
+   "jar_5": 0.19,
+   "jar_6": 0.09,
+   "jar_7": 0.09,
+   "jar_8": 0.01,
    "bottle_1": 0.19,
-   "bottle_2": 0.24
+   "bottle_2": 0.24,
+   "bottle_3": 0.19,
+   "bottle_4": 0.24,
+   "bottle_5": 0.19,
+   "bottle_6": 0.24
   },
   "final_disp": {
    "can_1": 0.0004,
-   "can_2": 0.0006,
+   "can_2": 0.0007,
    "can_3": 0.0006,
-   "can_4": 0.0005,
-   "can_5": 0.0006,
+   "can_4": 0.0006,
+   "can_5": 0.0007,
    "can_6": 0.0,
-   "soup": 0.0004,
+   "can_7": 0.0004,
+   "can_8": 0.0007,
+   "can_9": 0.0006,
+   "can_10": 0.0005,
+   "can_11": 0.0006,
+   "can_12": 0.0,
+   "can_13": 0.0003,
+   "can_14": 0.0006,
+   "can_15": 0.0005,
+   "can_16": 0.0005,
+   "can_17": 0.0006,
+   "can_18": 0.0,
+   "soup_1": 0.0004,
+   "soup_2": 0.0004,
+   "soup_3": 0.0004,
    "bowl_1": 0.0,
-   "bowl_2": 0.0041,
+   "bowl_2": 0.0018,
+   "bowl_3": 0.0,
+   "bowl_4": 0.0035,
    "mug_1": 0.0,
    "mug_2": 0.0001,
-   "mug_3": 0.0001,
+   "mug_3": 0.0,
+   "mug_4": 0.0001,
+   "mug_5": 0.0,
+   "mug_6": 0.0001,
    "jar_1": 0.0004,
    "jar_2": 0.0004,
    "jar_3": 0.0004,
-   "jar_4": 0.0004,
+   "jar_4": 0.0005,
+   "jar_5": 0.0004,
+   "jar_6": 0.0005,
+   "jar_7": 0.0004,
+   "jar_8": 0.0005,
    "bottle_1": 0.0009,
-   "bottle_2": 0.0004
+   "bottle_2": 0.0004,
+   "bottle_3": 0.0009,
+   "bottle_4": 0.0004,
+   "bottle_5": 0.0009,
+   "bottle_6": 0.0005
   },
   "after_settle": {
    "failed_predicates": [],
@@ -691,182 +1338,227 @@
     [
      "upright(can_1)",
      true,
-     0.00011033194806174314
+     0.00011033194806024248
     ],
     [
      "upright(can_2)",
      true,
-     0.00024748979469448376
+     0.00024748979469834683
     ],
     [
      "upright(can_3)",
      true,
-     4.192068075550522e-05
+     4.192068076049736e-05
     ],
     [
      "upright(can_4)",
      true,
-     7.542405025290912e-05
+     7.542405029248485e-05
     ],
     [
      "upright(can_5)",
      true,
-     0.00022671470812649867
+     0.00022671470812805021
     ],
     [
      "upright(can_6)",
      true,
-     7.65161735284695e-05
+     7.651617353195737e-05
     ],
     [
-     "upright(soup)",
+     "upright(can_7)",
      true,
-     4.380428575670396e-05
+     0.00011033194806095124
+    ],
+    [
+     "upright(can_8)",
+     true,
+     0.0002474897946998429
+    ],
+    [
+     "upright(can_9)",
+     true,
+     4.192068075608812e-05
+    ],
+    [
+     "upright(can_10)",
+     true,
+     7.542405025164356e-05
+    ],
+    [
+     "upright(can_11)",
+     true,
+     0.00022671470812736635
+    ],
+    [
+     "upright(can_12)",
+     true,
+     7.651617354695533e-05
+    ],
+    [
+     "upright(can_13)",
+     true,
+     0.00011033194806053929
+    ],
+    [
+     "upright(can_14)",
+     true,
+     0.0002474897946921343
+    ],
+    [
+     "upright(can_15)",
+     true,
+     4.1920680756014316e-05
+    ],
+    [
+     "upright(can_16)",
+     true,
+     7.542405024933577e-05
+    ],
+    [
+     "upright(can_17)",
+     true,
+     0.00022671470812850024
+    ],
+    [
+     "upright(can_18)",
+     true,
+     7.651617353933119e-05
+    ],
+    [
+     "upright(soup_1)",
+     true,
+     4.380428575696152e-05
+    ],
+    [
+     "upright(soup_2)",
+     true,
+     4.380428575816943e-05
+    ],
+    [
+     "upright(soup_3)",
+     true,
+     4.3804285757424785e-05
     ],
     [
      "upright(bowl_1)",
      true,
-     8.999488968868979e-05
+     2.2669293695033577e-05
     ],
     [
      "upright(bowl_2)",
      true,
-     0.058686785090814375
+     0.01816852880628286
+    ],
+    [
+     "upright(bowl_3)",
+     true,
+     6.419369476950382e-05
+    ],
+    [
+     "upright(bowl_4)",
+     true,
+     0.07154862851066071
     ],
     [
      "upright(mug_1)",
      true,
-     5.5234598989654335e-06
+     5.523459897929064e-06
     ],
     [
      "upright(mug_2)",
      true,
-     0.00010740011260400348
+     3.0448842562289345e-05
     ],
     [
      "upright(mug_3)",
      true,
-     0.00011378984084921329
+     0.00011378984083490412
+    ],
+    [
+     "upright(mug_4)",
+     true,
+     5.5234598959083476e-06
+    ],
+    [
+     "upright(mug_5)",
+     true,
+     3.534663220443077e-05
+    ],
+    [
+     "upright(mug_6)",
+     true,
+     0.00011378984083578052
     ],
     [
      "upright(jar_1)",
      true,
-     0.0024634865848016103
+     0.002463421512046883
     ],
     [
      "upright(jar_2)",
      true,
-     0.0011654455438959235
+     0.0011654455438021157
     ],
     [
      "upright(jar_3)",
      true,
-     0.0014471809055317936
+     0.0014475507738286792
     ],
     [
      "upright(jar_4)",
      true,
-     0.00011705366314156699
+     0.00010052271324875667
+    ],
+    [
+     "upright(jar_5)",
+     true,
+     0.0024634865848015717
+    ],
+    [
+     "upright(jar_6)",
+     true,
+     0.0011654455438497979
+    ],
+    [
+     "upright(jar_7)",
+     true,
+     0.0014475507738288338
+    ],
+    [
+     "upright(jar_8)",
+     true,
+     9.359066223523117e-05
     ],
     [
      "upright(bottle_1)",
      true,
-     0.003232693955564606
+     0.003232693955564692
     ],
     [
      "upright(bottle_2)",
      true,
-     0.0035972913161373453
+     0.0035972913163691985
     ],
     [
-     "reach(can_1,r=0.85)",
+     "upright(bottle_3)",
      true,
-     0.7565414843579953
+     0.0032326939555654345
     ],
     [
-     "reach(can_2,r=0.85)",
+     "upright(bottle_4)",
      true,
-     0.7383134591627762
+     0.0035972913161607546
     ],
     [
-     "reach(can_3,r=0.85)",
+     "upright(bottle_5)",
      true,
-     0.7392422475713095
+     0.00323269395558473
     ],
     [
-     "reach(can_4,r=0.85)",
+     "upright(bottle_6)",
      true,
-     0.8500129597131695
-    ],
-    [
-     "reach(can_5,r=0.85)",
-     true,
-     0.8475584265687157
-    ],
-    [
-     "reach(can_6,r=0.85)",
-     true,
-     0.8290319957828212
-    ],
-    [
-     "reach(soup,r=0.85)",
-     true,
-     0.7612072022968785
-    ],
-    [
-     "reach(bowl_1,r=0.85)",
-     true,
-     0.8499914132668054
-    ],
-    [
-     "reach(bowl_2,r=0.85)",
-     true,
-     0.850511965468504
-    ],
-    [
-     "reach(mug_1,r=0.85)",
-     true,
-     0.736050597098345
-    ],
-    [
-     "reach(mug_2,r=0.85)",
-     true,
-     0.7089756251748771
-    ],
-    [
-     "reach(mug_3,r=0.85)",
-     true,
-     0.7238210263357885
-    ],
-    [
-     "reach(jar_1,r=0.85)",
-     true,
-     0.8445115103186939
-    ],
-    [
-     "reach(jar_2,r=0.85)",
-     true,
-     0.7847153274091324
-    ],
-    [
-     "reach(jar_3,r=0.85)",
-     true,
-     0.7507367844062229
-    ],
-    [
-     "reach(jar_4,r=0.85)",
-     true,
-     0.7937626585967885
-    ],
-    [
-     "reach(bottle_1,r=0.85)",
-     true,
-     0.8498636570755931
-    ],
-    [
-     "reach(bottle_2,r=0.85)",
-     true,
-     0.8229965237924718
+     0.003597291316185689
     ],
     [
      "within(can_1,rack)",
@@ -899,9 +1591,79 @@
      0.0
     ],
     [
-     "within(soup,rack)",
+     "within(can_7,rack)",
      true,
      0.0
+    ],
+    [
+     "within(can_8,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_9,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_10,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_11,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_12,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_13,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_14,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_15,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_16,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_17,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(can_18,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(soup_1,rack)",
+     true,
+     1.113150390530393e-05
+    ],
+    [
+     "within(soup_2,rack)",
+     true,
+     1.102285925491664e-05
+    ],
+    [
+     "within(soup_3,rack)",
+     true,
+     9.27864242228349e-06
     ],
     [
      "within(bowl_1,rack)",
@@ -910,6 +1672,16 @@
     ],
     [
      "within(bowl_2,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(bowl_3,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(bowl_4,rack)",
      true,
      0.0
     ],
@@ -926,7 +1698,22 @@
     [
      "within(mug_3,rack)",
      true,
+     5.834409858018752e-06
+    ],
+    [
+     "within(mug_4,rack)",
+     true,
      0.0
+    ],
+    [
+     "within(mug_5,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(mug_6,rack)",
+     true,
+     5.834095346379797e-06
     ],
     [
      "within(jar_1,rack)",
@@ -949,6 +1736,26 @@
      0.0
     ],
     [
+     "within(jar_5,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(jar_6,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(jar_7,rack)",
+     true,
+     0.0
+    ],
+    [
+     "within(jar_8,rack)",
+     true,
+     0.0
+    ],
+    [
      "within(bottle_1,rack)",
      true,
      0.0
@@ -959,134 +1766,314 @@
      0.0
     ],
     [
-     "on_support(bowl_1,rack.level1)",
+     "within(bottle_3,rack)",
      true,
-     3.314809109672412e-06
+     0.0
     ],
     [
-     "stack(bowl_2,bowl_1):on",
+     "within(bottle_4,rack)",
      true,
-     0.003072469402123107
+     0.0
     ],
     [
-     "stack(bowl_2,bowl_1):centered",
+     "within(bottle_5,rack)",
      true,
-     0.00749852807218411
+     0.0
+    ],
+    [
+     "within(bottle_6,rack)",
+     true,
+     0.0
     ],
     [
      "on_support(mug_1,rack.level1)",
      true,
-     -5.0078094883665436e-05
+     -3.1755033658043e-05
     ],
     [
      "on_support(mug_2,rack.level1)",
      true,
-     -9.15683405074974e-05
+     -5.965420756240403e-05
     ],
     [
      "on_support(mug_3,rack.level1)",
      true,
-     -6.60039451902128e-05
+     -3.3150983934859823e-05
     ],
     [
-     "on_support(soup,rack.level1)",
+     "on_support(mug_4,rack.level1)",
      true,
-     0.00041743324535506443
+     -8.637640374456468e-05
     ],
     [
-     "row(mug_1,mug_2,mug_3,soup):aligned",
+     "on_support(mug_5,rack.level1)",
      true,
-     0.010006930699074101
+     -4.48719059455982e-05
     ],
     [
-     "row(mug_1,mug_2,mug_3,soup):order",
+     "on_support(mug_6,rack.level1)",
      true,
-     0.029984142299425746
+     -5.6851575433503054e-05
+    ],
+    [
+     "on_support(soup_1,rack.level1)",
+     true,
+     0.0003809685341338853
+    ],
+    [
+     "on_support(soup_2,rack.level1)",
+     true,
+     0.0003953179038035104
+    ],
+    [
+     "on_support(soup_3,rack.level1)",
+     true,
+     0.0003689135629199036
+    ],
+    [
+     "row(mug_1,mug_2,mug_3,mug_4,mug_5,mug_6,soup_1,soup_2,soup_3):aligned",
+     true,
+     1.1636858022523455e-05
+    ],
+    [
+     "row(mug_1,mug_2,mug_3,mug_4,mug_5,mug_6,soup_1,soup_2,soup_3):order",
+     true,
+     0.019985989259838736
+    ],
+    [
+     "flush(mug_1,rack.level1,near)",
+     true,
+     0.0044134963491452295
     ],
     [
      "yaw(mug_1,deg=-90)",
      true,
-     4.999990775509717
+     4.0825913517013515
     ],
     [
      "yaw(mug_2,deg=-90)",
      true,
-     4.999457398356341
+     4.999506433054835
     ],
     [
      "yaw(mug_3,deg=-90)",
      true,
-     4.999909342121138
+     4.999909183550895
+    ],
+    [
+     "yaw(mug_4,deg=-90)",
+     true,
+     4.999990775495367
+    ],
+    [
+     "yaw(mug_5,deg=-90)",
+     true,
+     4.999502785152425
+    ],
+    [
+     "yaw(mug_6,deg=-90)",
+     true,
+     4.999909174345861
+    ],
+    [
+     "on_support(bowl_1,rack.level1)",
+     true,
+     1.1937418825547219e-05
+    ],
+    [
+     "on_support(bowl_3,rack.level1)",
+     true,
+     -2.2699941663595347e-06
+    ],
+    [
+     "stack(bowl_2,bowl_1):on",
+     true,
+     0.006058399573099754
+    ],
+    [
+     "stack(bowl_2,bowl_1):centered",
+     true,
+     0.00011485342735895188
+    ],
+    [
+     "stack(bowl_4,bowl_3):on",
+     true,
+     0.0025334053214796926
+    ],
+    [
+     "stack(bowl_4,bowl_3):centered",
+     true,
+     0.006299383656487634
+    ],
+    [
+     "within(bowl_1,rack.level1)",
+     true,
+     1.6803242571805654e-06
+    ],
+    [
+     "within(bowl_2,rack.level1)",
+     true,
+     0.0
+    ],
+    [
+     "within(bowl_3,rack.level1)",
+     true,
+     0.0
+    ],
+    [
+     "within(bowl_4,rack.level1)",
+     true,
+     0.0
     ],
     [
      "on_support(can_1,rack.level2)",
      true,
-     0.00040236724773290433
+     0.00042886442791534307
     ],
     [
      "on_support(can_2,rack.level2)",
      true,
-     0.000648609194388694
+     0.000672968488859782
     ],
     [
      "on_support(can_3,rack.level2)",
      true,
-     0.0005905873582197074
+     0.000579546459340663
     ],
     [
      "on_support(can_4,rack.level2)",
      true,
-     0.0005091353608126514
+     0.0005528337739444389
     ],
     [
      "on_support(can_5,rack.level2)",
      true,
-     0.0005825965854148185
+     0.0006559425339279779
     ],
     [
      "on_support(can_6,rack.level2)",
      true,
-     -2.8572730550235903e-05
+     2.444433391068923e-05
     ],
     [
-     "grid(can_1,can_2,can_3,can_4,can_5,can_6)",
+     "on_support(can_7,rack.level2)",
      true,
-     0.01001337952503209
+     0.0003832329061315143
+    ],
+    [
+     "on_support(can_8,rack.level2)",
+     true,
+     0.0006688331733224473
+    ],
+    [
+     "on_support(can_9,rack.level2)",
+     true,
+     0.0005908756691208605
+    ],
+    [
+     "on_support(can_10,rack.level2)",
+     true,
+     0.0005238519014421072
+    ],
+    [
+     "on_support(can_11,rack.level2)",
+     true,
+     0.0006200778363334436
+    ],
+    [
+     "on_support(can_12,rack.level2)",
+     true,
+     -1.1820283745578308e-05
+    ],
+    [
+     "on_support(can_13,rack.level2)",
+     true,
+     0.00033806027590366217
+    ],
+    [
+     "on_support(can_14,rack.level2)",
+     true,
+     0.0006039326080645724
+    ],
+    [
+     "on_support(can_15,rack.level2)",
+     true,
+     0.0005344243957845496
+    ],
+    [
+     "on_support(can_16,rack.level2)",
+     true,
+     0.000514541496209775
+    ],
+    [
+     "on_support(can_17,rack.level2)",
+     true,
+     0.0005992651623577538
+    ],
+    [
+     "on_support(can_18,rack.level2)",
+     true,
+     -1.0694648514331107e-05
+    ],
+    [
+     "grid(can_1,can_2,can_3,can_4,can_5,can_6,can_7,can_8,can_9,can_10,can_11,can_12,can_13,can_14,can_15,can_16,can_17,can_18)",
+     true,
+     0.010017058458230838
     ],
     [
      "on_support(jar_1,rack.level3)",
      true,
-     0.0002579248052962946
+     0.0002733374383789844
     ],
     [
      "on_support(jar_2,rack.level3)",
      true,
-     0.0003780495905569836
+     0.0003611039504045621
     ],
     [
      "on_support(jar_3,rack.level3)",
      true,
-     0.0003766993022720211
+     0.0003923495969007096
     ],
     [
      "on_support(jar_4,rack.level3)",
      true,
-     0.0004178054810313192
+     0.00045463976387072336
     ],
     [
-     "row(jar_1,jar_2,jar_3,jar_4):aligned",
+     "on_support(jar_5,rack.level3)",
      true,
-     0.010104239797473435
+     0.0002605032925615536
     ],
     [
-     "row(jar_1,jar_2,jar_3,jar_4):order",
+     "on_support(jar_6,rack.level3)",
      true,
-     0.0098901855676913
+     0.00041221724498541334
     ],
     [
-     "row(jar_1,jar_2,jar_3,jar_4):even",
+     "on_support(jar_7,rack.level3)",
      true,
-     0.0002522639823774181
+     0.0003775820606659597
+    ],
+    [
+     "on_support(jar_8,rack.level3)",
+     true,
+     0.0004883551553189758
+    ],
+    [
+     "row(jar_1,jar_2,jar_3,jar_4,jar_5,jar_6,jar_7,jar_8):aligned",
+     true,
+     0.009986192660021875
+    ],
+    [
+     "row(jar_1,jar_2,jar_3,jar_4,jar_5,jar_6,jar_7,jar_8):order",
+     true,
+     0.009809039499739707
+    ],
+    [
+     "row(jar_1,jar_2,jar_3,jar_4,jar_5,jar_6,jar_7,jar_8):even",
+     true,
+     0.0003157747389211235
     ],
     [
      "within(jar_1,rack.level3)",
@@ -1096,37 +2083,77 @@
     [
      "within(jar_2,rack.level3)",
      true,
-     0.0
+     0.00010474804477444977
     ],
     [
      "within(jar_3,rack.level3)",
      true,
-     0.0
+     0.0001000448214691918
     ],
     [
      "within(jar_4,rack.level3)",
      true,
+     8.92364822657754e-06
+    ],
+    [
+     "within(jar_5,rack.level3)",
+     true,
      0.0
+    ],
+    [
+     "within(jar_6,rack.level3)",
+     true,
+     0.0
+    ],
+    [
+     "within(jar_7,rack.level3)",
+     true,
+     9.706478644455618e-05
+    ],
+    [
+     "within(jar_8,rack.level3)",
+     true,
+     1.7807809581382728e-06
     ],
     [
      "on_support(bottle_1,rack.level3)",
      true,
-     0.0007967913461117693
+     0.0007796071541785743
     ],
     [
      "on_support(bottle_2,rack.level3)",
      true,
-     0.0003504505064524377
+     0.0003600850992819815
     ],
     [
-     "row(bottle_1,bottle_2):aligned",
+     "on_support(bottle_3,rack.level3)",
      true,
-     0.0099155371294809
+     0.0008057940250332241
     ],
     [
-     "row(bottle_1,bottle_2):order",
+     "on_support(bottle_4,rack.level3)",
      true,
-     0.10186179622510858
+     0.00035172288544838004
+    ],
+    [
+     "on_support(bottle_5,rack.level3)",
+     true,
+     0.0007630502641116088
+    ],
+    [
+     "on_support(bottle_6,rack.level3)",
+     true,
+     0.0003701710609025355
+    ],
+    [
+     "row(bottle_1,bottle_2,bottle_3,bottle_4,bottle_5,bottle_6):aligned",
+     true,
+     0.009968300877278513
+    ],
+    [
+     "row(bottle_1,bottle_2,bottle_3,bottle_4,bottle_5,bottle_6):order",
+     true,
+     0.019711952026810618
     ],
     [
      "within(bottle_1,rack.level3)",
@@ -1136,7 +2163,27 @@
     [
      "within(bottle_2,rack.level3)",
      true,
+     0.0001373655664632656
+    ],
+    [
+     "within(bottle_3,rack.level3)",
+     true,
      0.0
+    ],
+    [
+     "within(bottle_4,rack.level3)",
+     true,
+     0.0
+    ],
+    [
+     "within(bottle_5,rack.level3)",
+     true,
+     0.0002601809123266019
+    ],
+    [
+     "within(bottle_6,rack.level3)",
+     true,
+     0.0001346448417011148
     ]
    ],
    "tolerances": {
@@ -1146,9 +2193,7 @@
     "angle_tol": 10.0
    },
    "pen_pairs_full_mesh": 3,
-   "floating": [
-    "bowl_2"
-   ]
+   "floating": []
   },
   "hull_fallback": [],
   "asset_physics": [
@@ -1159,18 +2204,45 @@
    "can_4",
    "can_5",
    "can_6",
-   "soup",
+   "can_7",
+   "can_8",
+   "can_9",
+   "can_10",
+   "can_11",
+   "can_12",
+   "can_13",
+   "can_14",
+   "can_15",
+   "can_16",
+   "can_17",
+   "can_18",
+   "soup_1",
+   "soup_2",
+   "soup_3",
    "bowl_1",
    "bowl_2",
+   "bowl_3",
+   "bowl_4",
    "mug_1",
    "mug_2",
    "mug_3",
+   "mug_4",
+   "mug_5",
+   "mug_6",
    "jar_1",
    "jar_2",
    "jar_3",
    "jar_4",
+   "jar_5",
+   "jar_6",
+   "jar_7",
+   "jar_8",
    "bottle_1",
-   "bottle_2"
+   "bottle_2",
+   "bottle_3",
+   "bottle_4",
+   "bottle_5",
+   "bottle_6"
   ],
   "faster_than_free_fall": false,
   "pass": true

@@ -199,12 +199,16 @@ row(book_1, book_4, book_5, book_6, book_7, start=left, order=-height, gap=0.005
 on_support(notebook_1, case.level1)   stack(notebook_1, notebook_2, notebook_3, notebook_4)   flush(notebook_1, case.level1, side=far, gap=0.01)
 ```
 
-**A pantry rack, heavy things low.**
+**A pantry rack of 45 things, heavy ones low.**
 ```
-reach(*, r=0.85)   within(*, rack, x0=0.57)
-on_support(mug_*, rack.level1)   yaw(mug_*, deg=-90, axis=handle)   row(mug_1, mug_2, mug_3, soup, start=left, gap=0.03)
-on_support(can_*, rack.level2)   grid(can_1, can_2, can_3, can_4, can_5, can_6, cols=3, dx=0.09, dy=0.09)
-on_support(jar_*, rack.level3)   row(jar_*, start=left, order=-mass, spacing=even, gap=0.01)
+within(*, rack, x0=0.57)
+on_support(mug_*, rack.level1)   on_support(soup_*, rack.level1)   yaw(mug_*, deg=-90, axis=handle)
+row(mug_*, soup_*, start=left, gap=0.02, edge=min)   flush(mug_1, rack.level1, side=near, gap=0.03)
+on_support(bowl_1, rack.level1)   on_support(bowl_3, rack.level1)   stack(bowl_1, bowl_2)   stack(bowl_3, bowl_4)
+within(bowl_*, rack.level1, x0=0.7)
+on_support(can_*, rack.level2)   grid(can_*, cols=9, dx=0.09, dy=0.09)
+on_support(jar_*, rack.level3)   row(jar_*, start=left, order=-mass, spacing=even, gap=0.01)   within(jar_*, rack.level3, x1=0.69)
+on_support(bottle_*, rack.level3)   row(bottle_*, gap=0.02)   within(bottle_*, rack.level3, x0=0.72)
 ```
 
 **Fixing a stocked rack.** `on_support(*, rack)` keeps every body on the level under it.

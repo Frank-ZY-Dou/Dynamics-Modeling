@@ -306,13 +306,13 @@ certificate is in [`docs/examples/`](docs/examples/); the layouts come from `exp
 
 | example | request | repair | settle (hull / CoACD) |
 |---|---|---|---|
-| `shelf_books` | books upright by height, spines out; the two tallest on top; notebooks stacked at the back | 18 → 0 pairs, 13 s | 0.06 / 0.16 m/s |
-| `shelf_pantry` | heavy things low; handles to the right; cans in a grid; jars by mass | 12 → 0 pairs, 11 s | 0.77 / 0.17 m/s |
-| `shelf_fix` | rows 3 mm too tight: fix them, moving nothing more than 2 cm | 16 → 0 pairs, 6 s | 0.10 / 0.04 m/s |
+| `shelf_books` | books upright by height, spines out; the two tallest on top; notebooks stacked at the back | 18 → 0 pairs, 12 s | 0.06 / 0.16 m/s |
+| `shelf_pantry` | 45 things, heavy ones low; mugs and soup in a front row, handles right; cans in a 2 × 9 grid; jars by mass | 23 → 0 pairs, 28 s | 0.87 / 0.21 m/s |
+| `shelf_fix` | 45 things in rows 3 mm too tight: fix them, moving nothing more than 2 cm | 36 → 0 pairs, 19 s | 0.11 / 0.04 m/s |
 
 - `shelf_books` took two rounds: the first lined up the books' centres, so their spines could not
   line up too; the second uses `edge=min`.
-- The hull settle fills the bowls in, and the upper bowl slides off; CoACD keeps their shape.
+- The hull settle fills the bowls in, and the upper bowls slide off; CoACD keeps their shape.
 
 ## The agent loop
 
@@ -541,9 +541,10 @@ Genesis and Isaac Sim from left to right, rendered from the same assets as the o
 </tr>
 </table>
 
-Fixtures keep their full meshes; the MJCF file gives every free body one convex hull unless
-`--decompose` writes CoACD pieces, Genesis decomposes the meshes itself (`--convex` for one hull
-per body), and Isaac Sim's stage asks PhysX for a convex decomposition:
+Fixtures keep their full meshes, and a fixture with shelves is written as CoACD pieces checked
+against the bodies resting on it (`--fixture-grid` for an open mesh). The MJCF file gives every free
+body one convex hull unless `--decompose` writes CoACD pieces, Genesis decomposes the meshes itself
+(`--convex` for one hull per body), and Isaac Sim's stage asks PhysX for a convex decomposition:
 
 | engine | peak displacement of a free body | bodies below the ground |
 |---|---|---|

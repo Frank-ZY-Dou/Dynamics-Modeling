@@ -9,7 +9,7 @@
  "floating_after": [],
  "rmsd_xy": 0.12392717843574555,
  "steps": 22,
- "time_s": 12.83,
+ "time_s": 12.47,
  "predicates": [
   [
    "upright(book_1)",
@@ -538,6 +538,10 @@
     "grid": {
      "tol": 0.01
     },
+    "ring": {
+     "tol": 0.01,
+     "axis": "+x"
+    },
     "symmetric": {
      "axis": "y",
      "tol": 0.01
@@ -578,7 +582,7 @@
    }
   },
   "software": {
-   "git": "d41c226a2dab",
+   "git": "cf436021680a",
    "python": "3.11.17",
    "numpy": "2.4.6",
    "trimesh": "5.2.0",
@@ -587,7 +591,7 @@
    "mujoco": "3.17.0",
    "pxr": null
   },
-  "time": "2026-10-25T23:19:48"
+  "time": "2026-10-26T03:50:29"
  },
  "written": "docs/examples/shelf_books/repaired.json",
  "written_sha256": "1bb2deede92f48a2",
@@ -596,17 +600,17 @@
   "program": "docs/examples/shelf_books/program.json",
   "seconds": 2.0,
   "supports": {
-   "notebook_3": 0.08800171967595821,
    "notebook_1": 0.06797034014016395,
+   "notebook_2": 0.07798602990806108,
    "case": [
     0.05795465037226677,
     0.3150005042552948,
     0.8768095103096568
    ],
-   "notebook_2": 0.07798602990806108
+   "notebook_3": 0.08800171967595821
   },
-  "max_hover_m": 0.8088413430377841,
-  "free_fall_bound_m_s": 3.983649978399373,
+  "max_hover_m": 2.1728682911836827e-06,
+  "free_fall_bound_m_s": 0.006529293673363442,
   "policy": {
    "hold_predicates_after_settle": false
   },
@@ -934,7 +938,7 @@
     "notebook_3",
     "notebook_4"
    ],
-   "faster_than_free_fall": false,
+   "faster_than_free_fall": true,
    "pass": true
   },
   "coacd": {
@@ -1265,7 +1269,7 @@
     "notebook_3",
     "notebook_4"
    ],
-   "faster_than_free_fall": false,
+   "faster_than_free_fall": true,
    "pass": true
   },
   "pass": true,
