@@ -3,8 +3,10 @@
 Geometry, texture coordinates and the geom poses come from the MuJoCo-compiled model
 (simready.io.mjcf_io.object_geoms), so the render mesh sits in exactly the root-body frame the
 solver uses for the collision geometry; the body's `c_model` (AABB centre of the COLLISION mesh)
-must be supplied by the caller so both share one reference frame. Textures are read from the
-XML's <material>/<texture> elements (files relative to the XML directory).
+must be supplied by the caller so both share one reference frame. Materials come from the compiled model and are
+mapped as MuJoCo's own physically based renderer draws them (_record); texture files from the XML's <texture>
+elements (relative to the XML directory). A texture not on disk, or a material feature that mapping does not
+cover, is refused.
 
 Usage: python viz/mjcf_to_obj.py <model.xml> <out_dir> --name NAME
 """
@@ -24,60 +26,113 @@ import simready  # noqa: E402,F401
 from simready.io.mjcf_io import object_geoms  # noqa: E402
 
 
-def _materials(xml_path):
-    """geom name -> material record (diffuse texture path or rgba colour)."""
+# MuJoCo's own physically based renderer (Filament: model_renderables.cc and phong_*.mat, google-deepmind/mujoco)
+# draws a material without PBR textures in the specular-glossiness model: base colour = the geom's rgba when it is not
+# the default (0.5, 0.5, 0.5, 1), else the material's, times the material's RGB texture; specular colour (F0) =
+# SPECULAR_MULT x specular; glossiness = SHININESS_MULT x shininess, roughness = 1 - glossiness; no metalness. A geom
+# without a material takes specular and shininess 0.5. The F0 is rendered as the IOR that gives it.
+SPECULAR_MULT, SHININESS_MULT = 0.2, 0.1
+TEXTURE_ROLES = ("RGB", "RGBA", "NORMAL", "ORM", "METALLIC", "ROUGHNESS", "OCCLUSION", "OPACITY", "EMISSIVE")
+
+
+def _texture_files(xml_path):
+    """texture name -> its file (relative to the XML directory), from the XML's <texture> elements."""
     root = ET.parse(xml_path).getroot(); base = Path(xml_path).parent
-    tex = {}
+    out = {}
     for t in root.iter("texture"):
         f = t.get("file")
         if f:
-            fp = Path(f) if Path(f).is_absolute() else base / f
-            if fp.exists():
-                tex[t.get("name")] = str(fp.resolve())
-    mats = {}
-    for m in root.iter("material"):
-        rec = {"name": m.get("name")}
-        if m.get("texture") in tex:
-            rec["diffuse_texture"] = tex[m.get("texture")]
-        if m.get("rgba"):
-            rec["diffuse_color"] = [float(x) for x in m.get("rgba").split()][:3]
-        if m.get("shininess"):
-            rec["roughness"] = max(0.05, 1.0 - float(m.get("shininess")))
-        mats[m.get("name")] = rec
-    by_geom, by_mesh = {}, {}
-    for g in root.iter("geom"):
-        if g.get("material") in mats:
-            if g.get("name"):
-                by_geom[g.get("name")] = mats[g.get("material")]
-            if g.get("mesh"):
-                by_mesh[g.get("mesh")] = mats[g.get("material")]
-    return by_geom, by_mesh, mats
+            out[t.get("name")] = str((Path(f) if Path(f).is_absolute() else base / f).resolve())
+    return out
+
+
+def _record(model, g, tex_files, xml_path):
+    """The material record of visual geom g, from the compiled model, as MuJoCo's own renderer draws it; what that
+    mapping does not cover is refused."""
+    import math
+    import mujoco
+    matid, rgba = int(model.geom_matid[g]), [float(x) for x in model.geom_rgba[g]]
+    texid = -1
+    if matid >= 0:
+        name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_MATERIAL, matid) or f"material{matid}"
+        if rgba == [0.5, 0.5, 0.5, 1.0]:
+            rgba = [float(x) for x in model.mat_rgba[matid]]
+        else:
+            name = f"{name}_geom{g}"
+        spec, shin = float(model.mat_specular[matid]), float(model.mat_shininess[matid])
+        if model.mat_metallic[matid] >= 0 or model.mat_roughness[matid] >= 0:
+            raise ValueError(f"{xml_path}: material {name} sets metallic or roughness (MuJoCo's PBR path), not carried into the export")
+        if model.mat_reflectance[matid] > 0 or model.mat_emission[matid] > 0:
+            raise ValueError(f"{xml_path}: material {name} reflects ({model.mat_reflectance[matid]}) or emits ({model.mat_emission[matid]}), "
+                             "not carried into the export")
+        tex = {r: int(model.mat_texid[matid, int(getattr(mujoco.mjtTextureRole, "mjTEXROLE_" + r))]) for r in TEXTURE_ROLES}
+        other = [r for r, t in tex.items() if t >= 0 and r != "RGB"]
+        if other:
+            raise ValueError(f"{xml_path}: material {name} has {other} textures, not carried into the export")
+        texid = tex["RGB"]
+        repeat = [float(x) for x in model.mat_texrepeat[matid]]
+        if texid >= 0 and model.mat_texuniform[matid]:
+            raise ValueError(f"{xml_path}: material {name} repeats its texture per metre (texuniform), not carried into the export")
+    else:
+        name, spec, shin, repeat = f"geom{g}", 0.5, 0.5, [1.0, 1.0]
+    if rgba[3] < 1.0:
+        raise ValueError(f"{xml_path}: geom {g} is transparent (alpha {rgba[3]}), not carried into the export")
+    f0 = SPECULAR_MULT * spec
+    # the record keys of viz/blender_render.py; the texture coordinates are uv * texrepeat (model_renderables.cc)
+    rec = {"name": name, "diffuse_tint": [1.0, 1.0, 1.0], "albedo_brightness": 1.0, "albedo_add": 0.0, "albedo_desaturation": 0.0,
+           "roughness": 1.0 - SHININESS_MULT * shin, "roughness_source": "constant", "metallic": 0.0, "metallic_source": "constant",
+           "texture_combine": "replace", "ao_source": "one", "ao_to_diffuse": 0.0, "specular": 0.5,
+           "ior": (1 + math.sqrt(f0)) / (1 - math.sqrt(f0)), "texture_scale": [1.0, 1.0], "texture_translate": [0.0, 0.0],
+           "mujoco": {"rgba": rgba, "specular": spec, "shininess": shin}}
+    if texid >= 0:
+        if int(model.tex_type[texid]) != int(mujoco.mjtTexture.mjTEXTURE_2D):
+            raise ValueError(f"{xml_path}: material {name} has a texture that is not 2D, not carried into the export")
+        tname = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_TEXTURE, texid)
+        if tname not in tex_files:
+            raise ValueError(f"{xml_path}: texture {tname} of material {name} has no file in the XML")
+        space = int(model.tex_colorspace[texid])
+        if space not in (int(mujoco.mjtColorSpace.mjCOLORSPACE_SRGB), int(mujoco.mjtColorSpace.mjCOLORSPACE_LINEAR)):
+            raise ValueError(f"{xml_path}: texture {tname} leaves its colour space to MuJoCo (colorspace auto), not carried into the export")
+        if not os.path.exists(tex_files[tname]):
+            rec["missing"] = [tex_files[tname]]
+        else:
+            rec["diffuse_texture"], rec["diffuse_tint"] = tex_files[tname], rgba[:3]
+            rec["diffuse_texture_colorspace"] = "sRGB" if space == int(mujoco.mjtColorSpace.mjCOLORSPACE_SRGB) else "raw"
+        rec["texture_scale"] = repeat
+    else:
+        rec["diffuse_color"] = rgba[:3]
+    return rec
 
 
 def export_object(xml_path, out_dir, name, c_model=None):
     out_dir = Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
     geoms = object_geoms(xml_path, collision=False)
-    by_geom, by_mesh, mats = _materials(xml_path)
-    # MuJoCo's geom -> mesh names, to map unnamed geoms to their XML material
     import mujoco
     from simready.io.mjcf_io import compile_object
     model, data, root = compile_object(xml_path)
-    mesh_of_geom = {}
-    for g in range(model.ngeom):
-        if model.geom_type[g] == mujoco.mjtGeom.mjGEOM_MESH:
-            mesh_of_geom[mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, g) or f"geom{g}"] = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_MESH, model.geom_dataid[g])
+    index = {}
+    for g in range(model.ngeom):                    # object_geoms' names: the geom's own, else geom<g>
+        key = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_GEOM, g) or f"geom{g}"
+        if key in index:
+            raise ValueError(f"{xml_path}: two geoms are named {key}")
+        index[key] = g
+    tex_files = _texture_files(xml_path)
     V, VT, F, FT, FM = [], [], [], [], []
     recs = {}
     v_off = vt_off = 0
     for gname, v, f, tc, ftc in geoms:
         if gname == "reg_bbox":
             continue
-        rec = by_geom.get(gname) or by_mesh.get(mesh_of_geom.get(gname)) or {"name": "default", "diffuse_color": [0.6, 0.6, 0.6]}
-        mname = rec.get("name", "default"); recs[mname] = rec
+        rec = _record(model, index[gname], tex_files, xml_path)
+        if rec["name"] in recs and recs[rec["name"]] != rec:
+            raise ValueError(f"{xml_path}: two records named {rec['name']}")
+        mname = rec["name"]; recs[mname] = rec
         V.append(v)
         has_uv = tc is not None and ftc is not None and len(tc) > 0
         if has_uv:
             VT.append(tc)
+        if rec.get("diffuse_texture") and not has_uv:
+            raise ValueError(f"{xml_path}: geom {gname} has a textured material and no texture coordinates")
         for k in range(len(f)):
             F.append([int(x) + v_off for x in f[k]])
             FT.append([int(x) + vt_off for x in ftc[k]] if has_uv else [-1, -1, -1])
@@ -102,7 +157,7 @@ def export_object(xml_path, out_dir, name, c_model=None):
                 fh.write(f"f {tri[0]+1} {tri[1]+1} {tri[2]+1}\n")
     with open(out_dir / f"{name}.mtl", "w") as fh:
         for mname, rec in recs.items():
-            col = rec.get("diffuse_color") or [0.6, 0.6, 0.6]
+            col = rec.get("diffuse_color") or [1.0, 1.0, 1.0]
             fh.write(f"newmtl {mname}\nKd {col[0]:.4f} {col[1]:.4f} {col[2]:.4f}\n")
             if rec.get("diffuse_texture"):
                 fh.write(f"map_Kd {rec['diffuse_texture']}\n")
@@ -110,6 +165,9 @@ def export_object(xml_path, out_dir, name, c_model=None):
             "aabb": [V.min(0).tolist(), V.max(0).tolist()], "materials": recs,
             "c_model": list(map(float, c_model)) if c_model is not None else None}
     json.dump(info, open(out_dir / f"{name}.materials.json", "w"), indent=1)
+    missing = {n: r["missing"] for n, r in recs.items() if r.get("missing")}
+    if missing:
+        raise RuntimeError(f"{name} ({xml_path}): textures not on disk: {missing}")
     return info
 
 
@@ -128,7 +186,12 @@ def export_box(out_dir, name, extents, center, color=(0.85, 0.85, 0.85), roughne
     with open(out_dir / f"{name}.mtl", "w") as fh:
         fh.write(f"newmtl {name}\nKd {color[0]:.3f} {color[1]:.3f} {color[2]:.3f}\n")
     info = {"name": name, "n_verts": 8, "n_tris": 12, "n_uv": 0, "aabb": [m.bounds[0].tolist(), m.bounds[1].tolist()],
-            "materials": {name: {"name": name, "diffuse_color": list(color), "roughness": roughness}}, "c_model": [0.0, 0.0, 0.0]}
+            "materials": {name: {"name": name, "diffuse_color": list(color), "diffuse_tint": [1.0, 1.0, 1.0], "albedo_brightness": 1.0,
+                                 "albedo_add": 0.0, "albedo_desaturation": 0.0, "roughness": roughness, "roughness_source": "constant",
+                                 "metallic": 0.0, "metallic_source": "constant", "texture_combine": "replace", "ao_source": "one",
+                                 "ao_to_diffuse": 0.0, "specular": 0.5, "ior": 1.5, "texture_scale": [1.0, 1.0],
+                                 "texture_translate": [0.0, 0.0]}},
+            "c_model": [0.0, 0.0, 0.0]}
     json.dump(info, open(out_dir / f"{name}.materials.json", "w"), indent=1)
     return info
 

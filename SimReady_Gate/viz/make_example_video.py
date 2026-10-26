@@ -62,15 +62,12 @@ def main():
 
     # the render mesh is the solver mesh in the same frame
     entries = {e["name"]: e for e in layout.get("fixtures", []) + layout["objects"]}
-    for b in sc.bodies:
+    for b in sc.bodies:                  # export refuses a material it cannot render as authored (check_renderable)
         e = entries[b.name]
         info = export(read_package(package_dir(e["package"], e["repo"]))["root_usd"], assets_dir, name=b.name,
                       rotation=b.meta.get("rest_rotation"))
         if not np.allclose(np.asarray(info["aabb"][0]) - b.meta["c_model"], b.verts.min(0), atol=1e-6):
             raise RuntimeError(f"render/solver mesh mismatch for {b.name}")
-        for m in info["materials"].values():
-            if m.get("guessed") or m.get("missing"):
-                raise RuntimeError(f"{b.name}: material {m['prim']} was not read ({m.get('missing') or 'no surface inputs'})")
 
     v_raw = verify_scene(sc)
     tint = sorted({n for x, y, _ in v_raw.pairs for n in (x, y) if not sc[n].fixed})
