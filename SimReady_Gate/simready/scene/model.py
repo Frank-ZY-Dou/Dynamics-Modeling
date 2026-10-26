@@ -251,7 +251,8 @@ class Level:
     """A surface of a fixture that bodies can rest on (a shelf board, the floor of a compartment, the top), in the
     scene frame: its height, the bounding rectangle of its faces and the room above it up to the fixture's next
     surface over most of it (inf when nothing of the fixture is above most of it). A lip or a retaining rail over a
-    strip of the level does not set its headroom: the contacts keep a body out from under it."""
+    strip of the level does not set its headroom: the contacts keep a body out from under it. `free` holds the grid
+    points (x, y) where the surface is and nothing of the fixture is just above it."""
     index: int
     z: float
     x0: float
@@ -259,6 +260,7 @@ class Level:
     y0: float
     y1: float
     headroom: float
+    free: np.ndarray = field(default=None, compare=False, repr=False)
 
 
 def support_levels(scene: Scene, body: Body) -> list:
@@ -321,11 +323,11 @@ def support_levels(scene: Scene, body: Body) -> list:
         if room < LEVEL_MIN_HEADROOM:
             continue
         (x0, y0), (x1, y1) = np.maximum(pts[free].min(axis=0) - 0.5 * cell, lo2), np.minimum(pts[free].max(axis=0) + 0.5 * cell, hi2)
-        out.append((zz, float(x0), float(x1), float(y0), float(y1), room))
+        out.append((zz, float(x0), float(x1), float(y0), float(y1), room, pts[free]))
     # below the top, a level is under another part of the fixture (a shelf under a board): the bottom boards of a pallet,
     # open above between the slats of its deck, are none
     out = [v for k, v in enumerate(out) if k == len(out) - 1 or math.isfinite(v[5])]
-    levels = [Level(k + 1, *v) for k, v in enumerate(out)]
+    levels = [Level(k + 1, *v[:6], free=v[6]) for k, v in enumerate(out)]
     body.meta["_levels"] = (key, levels)
     return levels
 

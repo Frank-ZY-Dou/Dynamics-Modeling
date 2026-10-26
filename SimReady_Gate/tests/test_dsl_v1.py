@@ -641,6 +641,26 @@ class Shelves(unittest.TestCase):
                          ["properties"]["b"]["enum"], ["table", "a", "table.top", "a.top"])        # one level: as before
 
 
+class FreeSupports(unittest.TestCase):
+    def test_a_bowl_sunk_in_a_bowl_rises_to_its_seat(self):
+        from simready.repair.upright_s4r import _drop_clear, LIFT_MAX
+        from simready.gates.verify import pair_signed_distances, PEN_EPS
+        # the upper bowl's bottom edge meets the lower bowl's inner wall with its bottom at z = 0.0219; it starts 5 mm lower
+        low, up = bowl("low", (0.5, 0.0, 0.0)), bowl("up", (0.5, 0.0, 0.017))
+        sc = Scene([low, up])
+
+        def penetrates():
+            pairs = pair_signed_distances([low, up], prefilter=1e-3, skip_fixed_pairs=False, containment=False)
+            return bool(pairs) and pairs[0][2] < -PEN_EPS
+        self.assertTrue(penetrates())
+        lift = _drop_clear(sc, up, low)
+        self.assertGreater(lift, LIFT_MAX)                      # deeper than a re-seating residual on a fixed support
+        self.assertAlmostEqual(float(up.world_aabb()[0][2]), 0.0219, delta=5e-4)
+        self.assertFalse(penetrates())
+        up.center = up.center - np.array([0.0, 0.0, 1e-4])
+        self.assertTrue(penetrates())                           # the lowest height clear of it
+
+
 class Rings(unittest.TestCase):
     def test_a_heap_becomes_a_ring(self):
         sc = table_scene(*[box(f"cup_{k}", (0.07, 0.05, 0.08), (0.52 + 0.01 * k, -0.02 + 0.008 * k, 0.04), yaw=0.3 * k) for k in range(6)])

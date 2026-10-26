@@ -45,10 +45,7 @@ def pick(rng, n, max_ext=0.25):
     out = []
     while len(out) < n:
         xml = RL.ALL[rng.randint(len(RL.ALL))]
-        try:
-            v, f = load_mjcf_object(xml); spec = ObjectSpec(xml)
-        except Exception:  # noqa: BLE001
-            continue
+        v, f = load_mjcf_object(xml); spec = ObjectSpec(xml)
         if (v.max(0) - v.min(0)).max() <= max_ext:
             out.append((xml, v, spec))
     return out

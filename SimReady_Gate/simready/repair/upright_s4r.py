@@ -722,11 +722,37 @@ def _lift_clear(scene: Scene, b: Body, sup: Body) -> float:
     return hi
 
 
+def _drop_clear(scene: Scene, b: Body, sup: Body) -> float:
+    """Raise b, set down on a free support (a bowl in a bowl, a carton on a carton), to the lowest height at which it
+    no longer penetrates it: bisection between the sampled seat and the height at which b's lowest point is above
+    sup's highest point, where the two cannot meet. The vertical lines of the sampled seat can miss where slanted walls
+    meet (a bowl nested in another). Returns the lift applied."""
+    from ..gates.verify import PEN_EPS
+
+    def penetrates():
+        pairs = pair_signed_distances([sup, b], prefilter=1e-3, skip_fixed_pairs=False, containment=False)
+        return bool(pairs) and float(pairs[0][2]) < -PEN_EPS
+    if not penetrates():
+        return 0.0
+    c0 = b.center.copy()
+    lo, hi = 0.0, float(sup.world_aabb()[1][2] - b.world_aabb()[0][2]) + 1e-6
+    while hi - lo > 1e-7:
+        mid = 0.5 * (lo + hi)
+        b.center = c0 + np.array([0.0, 0.0, mid])
+        if penetrates():
+            lo = mid
+        else:
+            hi = mid
+    b.center = c0 + np.array([0.0, 0.0, hi])
+    return hi
+
+
 def reseat_on_supports(scene: Scene, spec: RepairSpec) -> None:
     """Re-seat every free body on its declared support using its current (full-resolution)
     mesh and the support height under its final position; call after repair ran on proxies.
-    Supports are seated before what rests on them, and a body left a fraction of a millimetre
-    inside its support's surface is raised clear of it (_lift_clear)."""
+    Supports are seated before what rests on them. A body left a fraction of a millimetre
+    inside a fixed support's surface is raised clear of it (_lift_clear); a body on a free
+    support rests at the lowest height clear of it (_drop_clear)."""
     from ..dsl.compile import support_height_for
 
     def depth(name, seen=()):
@@ -745,7 +771,7 @@ def reseat_on_supports(scene: Scene, spec: RepairSpec) -> None:
             b.center = np.array([b.center[0], b.center[1], max(float(b.center[2]), level + b.support_offset(scene.up))])
         h0 = support_height_for(scene, b, scene[sup], from_above=not scene[sup].fixed)
         b.center = np.array([b.center[0], b.center[1], h0 + b.support_offset(scene.up)])
-        h0 += _lift_clear(scene, b, scene[sup])
+        h0 += _lift_clear(scene, b, scene[sup]) if scene[sup].fixed else _drop_clear(scene, b, scene[sup])
         spec.supports[b.name] = h0
 
 
