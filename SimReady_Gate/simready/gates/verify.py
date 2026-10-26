@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-from ..scene.model import Scene, Body
+from ..scene.model import Scene, Body, support_levels
 from ..errors import GeometryQueryError
 
 PEN_EPS = 1e-6     # |signed| below this is floating-point touching, not penetration
@@ -156,6 +156,15 @@ def _contained_touching(inner_verts, outer_mesh):
         raise GeometryQueryError(f"point-in-mesh query failed: {type(exc).__name__}: {exc}") from exc
 
 
+def _over_a_level(body: Body, p: np.ndarray) -> bool:
+    """Whether point p lies in the room above one of a fixed body's levels (scene.model.support_levels): what is there
+    rests on a shelf or in a compartment, not inside the fixture, whatever a point-in-mesh test of an open mesh says."""
+    if not body.fixed:
+        return False
+    return any(lv.x0 <= p[0] <= lv.x1 and lv.y0 <= p[1] <= lv.y1 and lv.z - 1e-3 <= p[2] <= lv.z + lv.headroom
+               for lv in support_levels(Scene([body]), body))
+
+
 class PairScore(tuple):
     """(i, j, signed, normal, wit_i, wit_j) with a `contained` attribute: True when the score
     comes from the point-in-mesh test of a body wholly inside another."""
@@ -247,7 +256,8 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
                         inner, outer = i, j
                     elif np.all(lo[j] >= lo[i] - 1e-9) and np.all(hi[j] <= hi[i] + 1e-9):
                         inner, outer = j, i
-                    if inner is not None and _contained(verts[inner], mesh_of(outer)):
+                    if (inner is not None and not _over_a_level(bodies[outer], verts[inner][np.argmin(verts[inner][:, 2])])
+                            and _contained(verts[inner], mesh_of(outer))):
                         d = cj - ci
                         nrm = d / max(np.linalg.norm(d), 1e-12)
                         ext = bodies[inner].extent_along(nrm if inner == j else -nrm, sc_of[inner])
@@ -263,7 +273,7 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
                             for idx in pieces_of(a):
                                 cv = verts[a][idx]
                                 if (np.all(cv.min(axis=0) >= lo[b] - 1e-9) and np.all(cv.max(axis=0) <= hi[b] + 1e-9)
-                                        and _contained(cv, mesh_of(b))):
+                                        and not _over_a_level(bodies[b], cv[np.argmin(cv[:, 2])]) and _contained(cv, mesh_of(b))):
                                     cen = cv.mean(0)
                                     d = (cen - ci) if a == j else (cj - cen)
                                     nrm = d / max(np.linalg.norm(d), 1e-12)
@@ -306,7 +316,8 @@ def pair_signed_distances(bodies: list, scale: float = 1.0, prefilter: float | N
                     inner, outer = i, j
                 elif np.all(lo[j] >= lo[i] - 1e-9) and np.all(hi[j] <= hi[i] + 1e-9):
                     inner, outer = j, i
-                if inner is not None and _contained_touching(verts[inner], mesh_of(outer)):
+                if (inner is not None and not _over_a_level(bodies[outer], 0.5 * (lo[inner] + hi[inner]))
+                        and _contained_touching(verts[inner], mesh_of(outer))):
                     d = cj - ci
                     nrm = d / max(np.linalg.norm(d), 1e-12)
                     signed = -bodies[inner].extent_along(nrm if inner == j else -nrm, sc_of[inner])

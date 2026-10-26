@@ -87,6 +87,7 @@ class RepairSpec:
     place: dict = field(default_factory=dict)   # name -> (x, y, yaw_deg|None): the pose given at the shrunken scale
     yaw_weight: dict = field(default_factory=dict)  # name -> weight (default size^2)
     margins: dict = field(default_factory=dict)     # name -> clearance kept from every body but its support
+    bounds: dict = field(default_factory=dict)      # name -> (x0, x1, y0, y1) its footprint keeps inside, as a contact row
     project_iters: int = 0                          # program-only solves at s_min before the continuation
     project_step: float = 0.25                      # trust region of a projection solve (m per axis)
     project_restarts: int = 8                       # other starts of the projection when it stops short (0: none)
@@ -184,10 +185,30 @@ def _qp_infeasible(info) -> bool:
     return sv is not None and int(sv) in _status_codes()[1]
 
 
-def _is_support_pair(scene: Scene, i: int, j: int, spec: RepairSpec) -> bool:
-    """(free body, its declared support)."""
+def _rests_on(spec: RepairSpec, a: str, b: str) -> bool:
+    """Whether body a rests on b, directly or through the bodies between them in a stack."""
+    seen = {a}
+    while a in spec.support_of:
+        a = spec.support_of[a]
+        if a == b:
+            return True
+        if a in seen:
+            return False
+        seen.add(a)
+    return False
+
+
+def _on_free_support(scene: Scene, i: int, j: int, spec: RepairSpec) -> bool:
+    """(free body, the free body it rests on), either way round."""
     bi, bj = scene.bodies[i], scene.bodies[j]
-    return spec.support_of.get(bi.name) == bj.name or spec.support_of.get(bj.name) == bi.name
+    return (spec.support_of.get(bi.name) == bj.name and not bj.fixed) or (spec.support_of.get(bj.name) == bi.name and not bi.fixed)
+
+
+def _is_support_pair(scene: Scene, i: int, j: int, spec: RepairSpec) -> bool:
+    """(free body, its declared support), or a body and one under it in its stack: the members between keep them apart
+    vertically (two notebooks with a third between them are closer than the margin while the stack is shrunk)."""
+    bi, bj = scene.bodies[i].name, scene.bodies[j].name
+    return _rests_on(spec, bi, bj) or _rests_on(spec, bj, bi)
 
 
 VERTICAL_COS = 0.866   # |n . up| above cos 30 deg: the resting contact carried by the support equality
@@ -257,6 +278,33 @@ def _pose_bodies(st: State, spec: RepairSpec):
         b.center = np.array([st.xy[i, 0], st.xy[i, 1], z])
 
 
+def _bound_rows(st: State, spec: RepairSpec, var: dict, ds: float, reach: float) -> list:
+    """Hard rows [(entries, rhs)] that keep each bounded body's footprint (at the next scale) inside its rectangle, the
+    turn of its extreme points to first order: the level of a fixture the body rests on, between the walls (and short of
+    the rounded edges) that the one contact witness of the body and its fixture, the board under it, does not show. A
+    body further out than one step can bring back is asked for the step it can make (`reach`), so that the rows never
+    make a step infeasible."""
+    from ..dsl.statements import edge_of
+    out = []
+    for k in st.free:
+        b = st.scene.bodies[k]
+        box = spec.bounds.get(b.name)
+        if box is None:
+            continue
+        s = min(st.body_scale(k) + ds, 1.0)
+        c0 = var[k]
+        for ax, lo, hi in ((0, box[0], box[1]), (1, box[2], box[3])):
+            u = (1.0, 0.0) if ax == 0 else (0.0, 1.0)
+            c = float(b.center[ax])
+            e0, de0 = edge_of(b, s, u, True)
+            e1, de1 = edge_of(b, s, u, False)
+            if e1 - e0 > hi - lo:                       # turned wider than the box: its centre stays in, a turn brings it back
+                e0 = e1 = de0 = de1 = 0.0
+            out.append(([(c0 + ax, 1.0), (c0 + 2, de0)], min(lo - c - e0, reach)))      # c + d + de * dyaw >= lo
+            out.append(([(c0 + ax, -1.0), (c0 + 2, -de1)], min(c + e1 - hi, reach)))    # c + d + de * dyaw <= hi
+    return out
+
+
 def _inplane_separation(scene: Scene, i: int, j: int, nrm: np.ndarray) -> np.ndarray:
     """Horizontal direction that separates two overlapping footprints the fastest: the axis of
     least footprint overlap, pointing from body i to body j (falls back to the centre line)."""
@@ -296,10 +344,11 @@ def _scaled_pairs(st: State, spec: RepairSpec, ds: float):
     return pair_signed_distances(sc.bodies, prefilter=pre, scales=[1.0 if b.fixed else st.scale for b in sc.bodies])
 
 
-def _solve_qp(n, contact_rows, dsl_rows, elastic_contacts, bounded, cap, yaw_cap, pd_x, q_x, verbose, scale):
+def _solve_qp(n, contact_rows, dsl_rows, elastic_contacts, bounded, cap, yaw_cap, pd_x, q_x, verbose, scale, hard_rows=()):
     """One step QP over x = (dx, dy, dyaw per free body) plus one slack per elastic row.
 
-    contact_rows: [(entries, rhs)] with a.x >= rhs;  dsl_rows: [(entries, lo, hi[, weight])]; `bounded`
+    contact_rows: [(entries, rhs)] with a.x >= rhs;  hard_rows: the same, never elastic (a body's bounds);
+    dsl_rows: [(entries, lo, hi[, weight])]; `bounded`
     puts the trust region into the problem (the continuation always does). Returns (status,
     step (n, 3), max contact slack, max DSL slack); status 1 = solved, -1 = failed, -2 = primal
     infeasible (only possible while the contacts are hard)."""
@@ -318,6 +367,8 @@ def _solve_qp(n, contact_rows, dsl_rows, elastic_contacts, bounded, cap, yaw_cap
 
     for entries, rhs in contact_rows:
         add_row(entries, rhs, np.inf, RHO_CONTACT if elastic_contacts else None)
+    for entries, rhs in hard_rows:
+        add_row(entries, rhs, np.inf, None)
     n_contact_slack = len(slack)
     for row in dsl_rows:
         entries, l, h = row[:3]
@@ -506,8 +557,12 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
                 continue
             # A body resting on its declared support meets it with a near-vertical normal; that
             # relation is carried by the support equality, not a row. Any other contact with the
-            # support (a rim, a wall, an apron) keeps its row.
+            # support (a rim, a wall, an apron) keeps its row, but for a body on a free support:
+            # its seat is the drop onto that body at every step, which already keeps the two apart
+            # wherever it moves (a bowl set on another meets its rim with a slanted normal).
             if _is_support_pair(scene, i, j, spec) and abs(float(np.dot(nrm, up))) > VERTICAL_COS:
+                continue
+            if _on_free_support(scene, i, j, spec):
                 continue
             if signed < 0.0 and abs(float(np.dot(nrm, up))) > VERTICAL_COS:
                 # a penetrating pair whose FCL normal is vertical gives the in-plane QP no handle;
@@ -532,17 +587,20 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
             if not entries:
                 continue   # no in-plane handle on this pair: nothing the QP can do
             contact_rows.append((entries, rhs))
+        cap = spec.max_xy_step * (0.6 if tail else 1.0)
+        bound_rows = _bound_rows(st, spec, var, ds if not tail else spec.ds_max, 0.9 * cap)
         n_contact = len(contact_rows)
         dsl_rows = _dsl_rows(st, spec) if program else []
-        if not contact_rows and not dsl_rows and not (program and spec.prefer):
+        if not contact_rows and not bound_rows and not dsl_rows and not (program and spec.prefer):
             return 0, pen_now, 0, 0.0, 0.0
         pd_x, q_x = objective(pull=program)
-        cap = spec.max_xy_step * (0.6 if tail else 1.0)
-        status, step, c_sl, d_sl = _solve_qp(n, contact_rows, dsl_rows, False, True, cap, spec.max_yaw_step, pd_x, q_x, verbose, st.scale)
+        status, step, c_sl, d_sl = _solve_qp(n, contact_rows, dsl_rows, False, True, cap, spec.max_yaw_step, pd_x, q_x, verbose, st.scale,
+                                             hard_rows=bound_rows)
         if status == -2:
             # the contacts cannot all be met inside this step's trust region: serve them alone,
-            # elastically, as far as the region allows; the program rows return at the next step
-            status, step, c_sl, d_sl = _solve_qp(n, contact_rows, [], True, True, cap, spec.max_yaw_step, pd_x, q_x, verbose, st.scale)
+            # elastically, as far as the region allows (the bounds stay hard); the program rows return at the next step
+            status, step, c_sl, d_sl = _solve_qp(n, contact_rows, [], True, True, cap, spec.max_yaw_step, pd_x, q_x, verbose, st.scale,
+                                                 hard_rows=bound_rows)
             if status == 1:
                 contact_relaxed += 1
                 d_sl = math.inf          # every program row was set aside for this step

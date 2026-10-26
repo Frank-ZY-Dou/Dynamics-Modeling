@@ -15,14 +15,15 @@ import re
 
 import numpy as np
 
-from ..scene.model import Scene
+from ..scene.model import Scene, support_levels
 from .model import check_statement, is_wildcard, GROUP, PATTERN_RE
 
+AXIS_WORDS = ("x", "y", "+x", "-x", "+y", "-y", "long", "short", "front", "handle")   # the axis words of any statement
 OPS = ["no_penetration", "place", "fixed", "on_support", "upright", "within", "inside",
        "left_of", "right_of", "in_front_of", "behind", "min_distance", "near", "minimize", "prefer",
        "reach", "clearance", "approach", "facing", "yaw", "parallel", "at", "beside",
        "row", "align", "evenly_spaced", "grid", "cluster", "symmetric", "between", "centered", "offset", "attach",
-       "keep_out", "max_move", "max_turn", "stack", "balanced_on"]
+       "keep_out", "flush", "max_move", "max_turn", "stack", "balanced_on"]
 
 PROGRAM_SCHEMA = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -39,13 +40,13 @@ PROGRAM_SCHEMA = {
                 "properties": {
                     "op": {"type": "string", "enum": OPS},
                     "a": {"type": "string", "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"},
-                    "b": {"type": "string", "description": "reference body / support / container / region"},
+                    "b": {"type": "string", "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"},
                     "c": {"type": "string", "description": "third body (symmetric: the centre; between: the other end)"},
                     "members": {"type": "array", "items": {"type": "string"}, "description": "bodies of a group statement, in order; * or a pattern (can_*) stands for the free bodies it matches"},
                     "margin": {"type": "number", "minimum": 0}, "gap": {"type": "number", "minimum": 0},
                     "x": {"type": "number"}, "y": {"type": "number"}, "yaw": {"type": "number"},
                     "inset": {"type": "number", "minimum": 0}, "r": {"type": "number", "minimum": 0},
-                    "axis": {"type": "string", "enum": ["x", "y", "+x", "-x", "+y", "-y", "long", "short"]}, "w": {"type": "number", "minimum": 0},
+                    "axis": {"type": "string", "enum": list(AXIS_WORDS)}, "w": {"type": "number", "minimum": 0},
                     "min": {"type": "number", "minimum": 0}, "max": {"type": "number", "minimum": 0}, "length": {"type": "number", "minimum": 0},
                     "width": {"type": "number", "minimum": 0}, "toward": {"type": "string", "enum": ["robot", "near", "far", "left", "right"]},
                     "tol": {"type": "number", "minimum": 0}, "deg": {"type": "number"}, "mod": {"type": "number", "enum": [90, 180, 360]},
@@ -81,7 +82,7 @@ OP_DEFAULTS = {
     "facing": {"axis": "+x", "tol": 15.0},
     "yaw": {"tol": 5.0, "mod": 360.0, "axis": "x"},
     "parallel": {"mod": 180.0, "tol": 5.0, "axis": "long"},
-    "row": {"axis": "y", "gap": 0.01, "tol": 0.01},
+    "row": {"axis": "y", "gap": 0.01, "tol": 0.01, "edge": "center"},
     "align": {"axis": "x", "edge": "center", "tol": 0.005},
     "evenly_spaced": {"axis": "y", "tol": 0.005},
     "grid": {"tol": 0.01},
@@ -91,6 +92,7 @@ OP_DEFAULTS = {
     "offset": {"dx": 0.0, "dy": 0.0, "frame": "world", "tol": 0.01},
     "attach": {"tol": 0.01, "deg": 2.0},
     "keep_out": {"gap": 0.0},
+    "flush": {"gap": 0.0, "tol": 0.005},
     "region": {"frac": 0.5},
     "stack": {"tol": 0.01},
     "balanced_on": {"margin": 0.01},
@@ -114,12 +116,13 @@ FIELDS = {
     "approach": {"a", "length", "width", "toward", "x", "y", "soft"},
     "facing": {"a", "b", "axis", "tol", "x", "y", "soft"}, "yaw": {"a", "deg", "tol", "mod", "axis", "soft"},
     "parallel": {"a", "b", "mod", "tol", "axis", "soft"},
-    "row": {"members", "axis", "start", "gap", "tol", "order", "spacing", "mid", "soft"}, "align": {"members", "axis", "edge", "tol", "soft"},
+    "row": {"members", "axis", "start", "gap", "tol", "order", "spacing", "mid", "edge", "soft"}, "align": {"members", "axis", "edge", "tol", "soft"},
     "evenly_spaced": {"members", "axis", "tol", "soft"}, "grid": {"members", "cols", "dx", "dy", "tol", "soft"},
     "cluster": {"members", "r", "soft"}, "symmetric": {"a", "b", "c", "axis", "tol", "soft"},
     "between": {"a", "b", "c", "axis", "gap", "soft"}, "centered": {"a", "b", "tol", "soft"},
     "offset": {"a", "b", "dx", "dy", "frame", "tol", "soft"}, "attach": {"a", "b", "tol", "soft"},
     "keep_out": {"a", "b", "gap", "side", "frac", "depth", "x0", "x1", "y0", "y1", "soft"},
+    "flush": {"a", "b", "side", "gap", "tol", "soft"},
     "max_move": {"a", "d", "soft"}, "max_turn": {"a", "deg", "soft"}, "stack": {"members", "tol"},
     "balanced_on": {"a", "b", "margin", "soft"},
 }
@@ -176,7 +179,7 @@ def validate_program_json(obj: dict, scene: Scene) -> tuple[str, list[str]]:
             need(a, "a"); lines.append(f"  fixed({a})")
         elif op == "on_support":
             need(a, "a"); need(b, "support")
-            if "support" not in tags.get(b, set()) and "fixture" not in tags.get(b, set()) and b in free:
+            if "support" not in tags.get(b.split(".")[0], set()) and "fixture" not in tags.get(b.split(".")[0], set()) and b in free:
                 notes.append(f"{b} used as a support but is a free body; it will be treated as movable")
             lines.append(f"  on_support({a}, {b})")
         elif op == "upright":
@@ -255,7 +258,7 @@ def _v1_line(i, op, st, need, tags, notes):
         if "b" in st:
             need(st["b"], "b")
             args.append(st["b"])
-        elif op in ("parallel", "centered", "offset", "attach", "balanced_on", "symmetric", "between"):
+        elif op in ("parallel", "centered", "offset", "attach", "balanced_on", "symmetric", "between", "flush"):
             raise ProgramError(f"statement {i} ({op}): missing b")
         if op in ("symmetric", "between"):
             if "c" not in st:
@@ -319,8 +322,8 @@ def _check_shape(obj):
         for k in NUMERIC:
             if k in st:
                 _number(st[k], f"statement {i} ({op}): '{k}'", signed=k in SIGNED)
-        if "axis" in st and st["axis"] not in ("x", "y", "+x", "-x", "+y", "-y", "long", "short"):
-            raise ProgramError(f"statement {i}: axis must be one of x, y, +x, -x, +y, -y, long, short")
+        if "axis" in st and st["axis"] not in AXIS_WORDS:
+            raise ProgramError(f"statement {i}: axis must be one of {', '.join(AXIS_WORDS)}")
     g = obj.get("gate")
     if g is not None:
         if not isinstance(g, dict):
@@ -359,12 +362,23 @@ def api_schema(scene=None, ops=None):
         names = list(scene.names())
         stems = name_patterns(scene)
         stp["a"] = {"type": "string", "enum": names + ["*"] + stems}
-        stp["b"] = {"type": "string", "enum": names + [n + ".top" for n in names]}
+        stp["b"] = {"type": "string", "enum": names + [n + ".top" for n in names] + level_refs(scene)}
         if "c" in stp:
             stp["c"] = {"type": "string", "enum": names}
         if "members" in stp:
             stp["members"] = {"type": "array", "items": {"type": "string", "enum": names + ["*"] + stems}}
     return sch
+
+
+def level_refs(scene: Scene) -> list:
+    """`name.levelK` of every fixture with more than one level (scene.model.support_levels), for the schema's references."""
+    out = []
+    for b in scene.fixed_bodies():
+        if "support" in b.tags:
+            levels = support_levels(scene, b)
+            if len(levels) > 1:
+                out += [f"{b.name}.level{lv.index}" for lv in levels]
+    return out
 
 
 def name_patterns(scene: Scene) -> list:
@@ -398,7 +412,7 @@ def op_schema(scene=None, ops=None) -> dict:
             fields["reason"] = props["reason"]
         need = ["op"] + (["members"] if op in GROUP else ["a"] if "a" in table[op] and op not in ("no_penetration", "minimize") else [])
         if op in ("on_support", "inside", "left_of", "right_of", "in_front_of", "behind", "min_distance", "near", "parallel",
-                  "centered", "offset", "attach", "balanced_on", "beside", "symmetric", "between"):
+                  "centered", "offset", "attach", "balanced_on", "beside", "symmetric", "between", "flush"):
             need.append("b")
         if op in ("symmetric", "between"):
             need.append("c")
@@ -420,15 +434,25 @@ def scene_summary(scene: Scene) -> str:
         label = b.meta.get("label")
         line = (f"- {b.name}: {'FIXED ' if b.fixed else ''}{kind}{f' ({label})' if label else ''}; "
                 f"size {ext[0]:.2f}x{ext[1]:.2f}x{ext[2]:.2f} m; at ({b.center[0]:.2f}, {b.center[1]:.2f}, {b.center[2]:.2f})")
-        if b.fixed and "support" in b.tags:
+        levels = support_levels(scene, b) if b.fixed and "support" in b.tags else []
+        if len(levels) > 1:
+            line += "; levels from the bottom: " + ", ".join(
+                f"{b.name}.level{lv.index} z={lv.z:.3f} x[{lv.x0:.2f}, {lv.x1:.2f}] y[{lv.y0:.2f}, {lv.y1:.2f}] "
+                + ("open above" if math.isinf(lv.headroom) else f"headroom {lv.headroom:.3f} m") for lv in levels)
+        elif b.fixed and "support" in b.tags:
             line += f"; top rect x[{lo[0]:.2f}, {hi[0]:.2f}] y[{lo[1]:.2f}, {hi[1]:.2f}] at z={scene.support_height(b):.3f}"
         if not b.fixed:
             # the body's own axes: what yaw, facing and parallel are about
             loc = np.ptp(b.verts, axis=0)
             yaw = math.degrees(math.atan2(b.rotation[1, 0], b.rotation[0, 0]))
             line += f"; local size {loc[0]:.2f}x{loc[1]:.2f}x{loc[2]:.2f} m; heading {yaw:.0f} deg"
+        mass = (b.meta.get("physics") or {}).get("mass")
+        if not b.fixed and mass:
+            line += f"; mass {mass:.2f} kg"
         if b.meta.get("grasp_axis"):
             line += f"; handle/grasp side {b.meta['grasp_axis']}"
+        if b.meta.get("front_axis"):
+            line += f"; front side {b.meta['front_axis']}"
         rows.append(line)
     return "\n".join(rows)
 
@@ -438,13 +462,18 @@ LANGUAGE = """Statements (a, b, c are body names; members is a list of names, in
 natural order (can_2 before can_10), leaving out bodies the statement names itself):
   no_penetration(margin)                 nothing interpenetrates; margin is the clearance the solver keeps
   fixed(a)                               a does not move
-  on_support(a, b)   upright(a)          a rests on b; a keeps its resting orientation (no roll or pitch)
-  within(a, b, inset)                    a's footprint inside b (b.top: b's top rectangle). A part of b:
+  on_support(a, b)   upright(a)          a rests on b (b.levelK: on level K of a fixture, from 1 at the bottom,
+                                         which must leave a room above for a's height); a keeps its resting
+                                         orientation (no roll or pitch)
+  within(a, b, inset)                    a's footprint inside b (b.top: b's top rectangle; b.levelK: that level's
+                                         rectangle). A part of b:
                                          side=left|right|near|far|center with frac (default 0.5); a strip beside
                                          b: side with depth. x0, x1, y0, y1 bound the region (any subset; alone
                                          they define it)
   inside(a, b)                           a inside container b
   keep_out(a, b, gap)                    a's footprint stays outside a region (region fields as for within)
+  flush(a, b, side, gap, tol)            a's footprint edge on side (near|far|left|right) gap inside the same edge of
+                                         b's rectangle (b, b.top or b.levelK), within tol (default 0.005)
   beside(a, b, side, gap, max)           a's footprint on b's side (left|right|near|far) with between gap and
                                          max of table between the two footprints (max optional)
   left_of | right_of | in_front_of | behind (a, b, gap)    relations of the centres, gap between centres
@@ -455,20 +484,23 @@ natural order (can_2 before can_10), leaving out bodies the statement names itse
   clearance(a, gap)                      every other body at least gap from a's surface (room for a gripper)
   approach(a, length, width, toward)     nothing in the corridor of that length and width from a toward the
                                          robot (toward=robot, default) or toward near|far|left|right
-  facing(a, b, axis, tol)                a's local axis (+x, -x, +y, -y: its front, handle or label side)
-                                         points at b, or at x, y, or by default at the robot, within tol degrees
+  facing(a, b, axis, tol)                a's local axis (+x, -x, +y, -y, or front / handle: the side the scene
+                                         summary gives) points at b, or at x, y, or by default at the robot,
+                                         within tol degrees
   yaw(a, deg, tol, mod, axis)            the heading of a's local +x is deg (axis=long: of its long side, a
-                                         line, so deg and deg+180 are the same); mod 90 or 180 for shapes
-                                         that repeat when turned
+                                         line, so deg and deg+180 are the same; axis=front or handle: of that
+                                         side); mod 90 or 180 for shapes that repeat when turned
   parallel(a, b, tol)                    a's and b's long sides parallel (axis=x: their local x axes)
-  row(members, axis, start, gap, order, spacing, mid)  on one line along axis (x or y, default y), in the
+  row(members, axis, start, gap, order, spacing, mid, edge)  on one line along axis (x or y, default y), in the
                                          order listed from the end start names (left|right along y, near|far
                                          along x; default right, near), footprints at least gap apart;
                                          order=height|width|length|mass (- for descending) sorts the members
                                          first, from the bodies' sizes and masses;
                                          spacing=even makes every centre spacing equal to the mean within tol;
                                          mid puts the midpoint of the two end members' centres at that y (x for
-                                         an x row), whichever members the order puts at the ends
+                                         an x row), whichever members the order puts at the ends; edge=min|max
+                                         lines up the footprints' near (min) or far (max) edges across the row
+                                         instead of the centres (spines in line)
   align(members, axis, edge)             equal x (or y) of the centres, or of the footprints' min or max edge
   evenly_spaced(members, axis, tol)      every centre spacing along axis within tol of the mean spacing
   grid(members, cols, dx, dy)            rows of cols members: member k at (row*dx, col*dy) from the first;

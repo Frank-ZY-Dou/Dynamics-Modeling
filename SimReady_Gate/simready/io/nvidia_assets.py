@@ -278,21 +278,35 @@ def _axis_word(d: np.ndarray, ext: np.ndarray) -> str | None:
     return ("+" if d[k] > 0 else "-") + "xy"[k]
 
 
-def body_from_package(name: str, pkg, position, yaw_deg: float = 0.0, fixed: bool = False, tags=None):
+def has_word(text: str, word: str) -> bool:
+    """Whether `word` (one word, or several joined by '_') is a whole word of `text`: 'bin' is one of 'storage bin' and
+    not of 'cabinet'."""
+    return f"_{word}_" in "_" + re.sub(r"[^a-z0-9]+", "_", text.lower()) + "_"
+
+
+def body_from_package(name: str, pkg, position, yaw_deg: float = 0.0, fixed: bool = False, tags=None, up: str | None = None):
     """A Body for a fetched package at a layout pose: the root prim's origin at `position`, turned
     by `yaw_deg` about z, with the package's physics in meta['physics'], the centre of mass relative
     to the reference centre in meta['com'], the semantic class in meta['label'] and the side the
-    grasp hint points at in meta['grasp_axis']."""
+    grasp hint points at in meta['grasp_axis']. `up` ('+y', '-x', ...) is the authored axis that
+    points up when the body rests, for a pose the layout chooses (a book standing on a shelf);
+    without it a pose that cannot stand as authored is turned onto its most stable side."""
+    from .asset_rest import AXIS_WORDS, rotation_to_up
     from .usd_io import body_from_object_usd
+    if up is not None and up not in AXIS_WORDS:
+        raise ValueError(f"{name}: up must be one of {', '.join(AXIS_WORDS)}, got {up!r}")
     info = read_package(pkg)
     tags = set(tags or ())
     b = body_from_object_usd(name, info["root_usd"], position, yaw_deg=yaw_deg, fixed=fixed, tags=tags)
     c_model = np.asarray(b.meta["c_model"], dtype=np.float64)
     com = None if info["com"] is None else np.asarray(info["com"], dtype=np.float64)
-    R_rest = None if fixed else rest_rotation_for(b.verts + c_model, com)
+    if fixed or up == "+z":
+        R_rest = None
+    else:
+        R_rest = rotation_to_up(up) if up is not None else rest_rotation_for(b.verts + c_model, com)
     if R_rest is not None:
-        # an authored pose that cannot stand (a cutting board on its edge): the asset is re-expressed
-        # in its resting frame, as simready.io.asset_rest does for RoboLab's catalog
+        # an authored pose that cannot stand (a cutting board on its edge), or the pose the layout asks for: the asset
+        # is re-expressed in its resting frame, as simready.io.asset_rest does for RoboLab's catalog
         v = (b.verts + c_model) @ R_rest.T
         lo, hi = v.min(0), v.max(0)
         c_model = 0.5 * (lo + hi)
@@ -315,10 +329,10 @@ def body_from_package(name: str, pkg, position, yaw_deg: float = 0.0, fixed: boo
         word = _axis_word(np.asarray(info["grasp"]["location"]) - c_model, ext)
         if word:
             b.meta["grasp_axis"] = word
-    words = (Path(pkg).name + " " + (label or "")).lower()
-    if any(w in words for w in CONTAINER_WORDS):
+    words = Path(pkg).name + " " + (label or "")
+    if any(has_word(words, w) for w in CONTAINER_WORDS):
         b.tags.add("container")
-    if fixed and any(w in words for w in SUPPORT_WORDS):
+    if fixed and any(has_word(words, w) for w in SUPPORT_WORDS):
         b.tags.update({"support", "fixture"})
     b.meta["package"] = {"name": Path(pkg).name, "package_id": info["package_id"], "license": info["license"],
                          "revision": (_read_json(Path(pkg) / RECORD) or {}).get("revision")}

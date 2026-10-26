@@ -20,7 +20,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 from simready.scene.model import Scene, Body  # noqa: E402
-from simready.dsl.schema import validate_program_json, ProgramError, api_schema, prompt_for  # noqa: E402
+from simready.dsl.schema import validate_program_json, ProgramError, api_schema, prompt_for, scene_summary  # noqa: E402
 from simready.dsl.model import parse_program  # noqa: E402
 from simready.dsl.compile import compile_program, check_predicates, effective_supports, CompileError  # noqa: E402
 from simready.dsl import statements as V1  # noqa: E402
@@ -141,6 +141,7 @@ class Rows(unittest.TestCase):
 
     def test_linearisations_match_finite_differences(self):
         texts = ["facing(a, b, axis=+x)", "facing(a, axis=-y)", "offset(a, b, dx=0.1, dy=0.05, frame=local)", "attach(a, b)",
+                 "flush(a, table, side=near, gap=0.02)", "flush(a, table, side=left)",
                  "cluster(a, b, c, r=0.05)", "reach(a, r=0.3, min=0.2)", "balanced_on(a, b)", "parallel(a, b)", "yaw(a, deg=40)"]
         rng = np.random.default_rng(0)
         for text in texts:
@@ -477,6 +478,165 @@ class Reports(unittest.TestCase):
             self.assertTrue(report["ok"])
             self.assertEqual(report["failed_preferences"], ["left_of(b,a,gap=0.1)"])
             self.assertEqual(report["failed_predicates"], [])
+
+
+
+def bookcase(name="case", at=(0.75, 0.0, 0.0)):
+    """A fixed bookcase of boxes, open toward the robot (-x): a plinth under the bottom board, two shelves and a top
+    between two sides and a back. Its levels are at 0.07, 0.35, 0.63 and 0.90 (the top), with 0.26, 0.26 and 0.25 m
+    under the board above; the plinth's top, under the bottom board, is none."""
+    W, D, t = 0.6, 0.3, 0.02
+    parts = [((D, W - 2 * t, 0.05), (0.0, 0.0, 0.025)), ((D, W - 2 * t, t), (0.0, 0.0, 0.06)),
+             ((D, W - 2 * t, t), (0.0, 0.0, 0.34)), ((D, W - 2 * t, t), (0.0, 0.0, 0.62)), ((D, W, t), (0.0, 0.0, 0.89)),
+             ((D, t, 0.88), (0.0, 0.5 * (W - t), 0.44)), ((D, t, 0.88), (0.0, -0.5 * (W - t), 0.44)),
+             ((t, W - 2 * t, 0.83), (0.5 * (D - t), 0.0, 0.465))]
+    meshes = []
+    for ext, c in parts:
+        m = trimesh.creation.box(extents=ext)
+        m.apply_translation(np.array(c) + np.array(at))
+        meshes.append(m)
+    m = trimesh.util.concatenate(meshes)
+    return Body.from_mesh(name, m.vertices, m.faces, fixed=True, tags={"support", "fixture"})
+
+
+SHELF = "program\n  no_penetration(*, margin=0.005)\n  upright(*)\n"
+
+
+def bowl(name, at, bottom=0.07, top=0.13, height=0.06, wall=0.008):
+    """A square bowl: a hollow frustum, open at the top, its bottom at `at`."""
+    def ring(w, z):
+        h = 0.5 * w
+        return [(-h, -h, z), (h, -h, z), (h, h, z), (-h, h, z)]
+    v = ring(bottom, 0.0) + ring(top, height) + ring(top - 2 * wall, height) + ring(bottom - 2 * wall, wall)
+    f = [(0, 2, 1), (0, 3, 2), (12, 13, 14), (12, 14, 15)]                          # outer bottom, cavity floor
+    for a, b_, flip in ((0, 4, False), (4, 8, False), (8, 12, False)):              # outer wall, rim, inner wall
+        for k in range(4):
+            i, j = a + k, a + (k + 1) % 4
+            p, q = b_ + k, b_ + (k + 1) % 4
+            f += [(i, j, q), (i, q, p)]
+    m = trimesh.Trimesh(np.array(v) + np.array(at), np.array(f), process=False)
+    m.fix_normals()
+    return Body.from_mesh(name, m.vertices, m.faces)
+
+
+class Shelves(unittest.TestCase):
+    """A fixture's levels: found from its mesh, named as supports and regions, checked for room above them."""
+
+    def test_the_levels_of_a_bookcase(self):
+        from simready.scene.model import support_levels
+        sc = Scene([bookcase()])
+        levels = support_levels(sc, sc["case"])
+        self.assertEqual([round(lv.z, 3) for lv in levels], [0.07, 0.35, 0.63, 0.9])
+        for lv, room in zip(levels, (0.26, 0.26, 0.25)):
+            self.assertAlmostEqual(lv.headroom, room, places=3)
+        self.assertTrue(math.isinf(levels[-1].headroom))
+        self.assertAlmostEqual(levels[1].x0, 0.6, places=3)
+        self.assertAlmostEqual(levels[1].y1, 0.28, places=3)
+        self.assertIn("case.level2 z=0.350", scene_summary(sc))
+
+    def test_a_body_rests_on_the_level_it_is_given(self):
+        sc = Scene([bookcase(), box("book", (0.15, 0.04, 0.2), (0.70, 0.1, 0.17), yaw=0.3)])     # on the bottom board
+        res, preds, ver = repaired(sc, SHELF + "  on_support(book, case.level3)\n  within(book, case.level3, inset=0.01)\n"
+                                   "  flush(book, case.level3, side=near, gap=0.01)\n  yaw(book, deg=0, mod=180)\n")
+        self.assertEqual(ver.pen_pairs, 0)
+        self.assertTrue(preds["on_support(book,case.level3)"][1], preds["on_support(book,case.level3)"])
+        self.assertAlmostEqual(float(sc["book"].world_aabb()[0][2]), 0.63, places=3)
+        self.assertTrue(preds["flush(book,case.level3,near)"][1], preds["flush(book,case.level3,near)"])
+        self.assertAlmostEqual(float(sc["book"].world_aabb()[0][0]), 0.61, delta=0.005 + 2e-3)
+
+    def test_a_level_without_room_is_refused(self):
+        sc = Scene([bookcase(), box("vase", (0.1, 0.1, 0.3), (0.7, 0.0, 0.22))])
+        with self.assertRaises(CompileError) as e:
+            compile_program(parse_program(SHELF + "  on_support(vase, case.level2)\n"), sc)
+        self.assertIn("leaves 0.260 m", str(e.exception))
+        self.assertIn("case.level4 (open above)", str(e.exception))
+        compile_program(parse_program(SHELF + "  on_support(vase, case.level4)\n"), sc)
+        sc = Scene([bookcase(), box("plank", (0.6, 0.1, 0.02), (0.7, 0.0, 0.08))])
+        with self.assertRaises(CompileError) as e:
+            compile_program(parse_program(SHELF + "  on_support(plank, case.level1)\n"), sc)
+        self.assertIn("does not fit on case.level1", str(e.exception))
+
+    def test_level_references_are_checked(self):
+        sc = Scene([bookcase(), box("book", (0.15, 0.04, 0.2), (0.70, 0.1, 0.17))])
+        for text, words in (("on_support(book, case.level9)", "has 4 levels"), ("left_of(book, case.level2)", "is a level"),
+                            ("within(book, case.side)", "a reference is a body"), ("on_support(book, case.level0)", "a reference is a body")):
+            with self.assertRaises(CompileError, msg=text) as e:
+                compile_program(parse_program(SHELF + "  " + text + "\n"), sc)
+            self.assertIn(words, str(e.exception), text)
+
+    def test_a_shelf_is_no_slab_under_bodies_on_its_lower_levels(self):
+        from simready.scene.model import MeshProxy
+        sc = Scene([bookcase(), box("book", (0.15, 0.04, 0.2), (0.70, 0.1, 0.17))])
+        faces = len(sc["case"].faces)
+        with MeshProxy(sc, slab_tops={"case": 0.07}):
+            self.assertEqual(len(sc["case"].faces), faces)                        # the boards and walls stay
+        with MeshProxy(sc, slab_tops={"case": 0.90}):
+            self.assertEqual(len(sc["case"].faces), 12)                           # on its top: the slab, as for a table
+
+    def test_the_settle_puts_a_plate_under_each_level_used(self):
+        from simready.gates.settle_mujoco import settle_and_measure, support_plates
+        sc = Scene([bookcase(), box("book", (0.15, 0.04, 0.2), (0.70, 0.1, 0.7305)), box("box", (0.1, 0.1, 0.1), (0.70, -0.1, 0.1205))])
+        tops = support_plates(sc, {"case": [0.63, 0.07, 0.63]})
+        self.assertEqual([round(t, 3) for t in tops["case"]], [0.07, 0.63])
+        rep = settle_and_measure(sc, seconds=0.5, support_tops=tops)
+        self.assertEqual(rep.left_support, [])
+        self.assertLess(rep.peak_disp, 0.01)
+        self.assertEqual(support_plates(sc, {"case": [0.9]})["case"], 0.9)        # bodies on its top: one slab, as for a table
+
+    def test_a_row_lines_up_an_edge(self):
+        sc = Scene([bookcase(), box("deep", (0.20, 0.04, 0.2), (0.70, 0.15, 0.45)), box("shallow", (0.12, 0.04, 0.2), (0.75, -0.1, 0.45))])
+        res, preds, ver = repaired(sc, SHELF + "  on_support(*, case.level2)\n  yaw(*, deg=0, mod=180)\n"
+                                   "  row(deep, shallow, start=left, gap=0.01, edge=min)\n  flush(deep, case.level2, side=near, gap=0.01)\n")
+        self.assertEqual(ver.pen_pairs, 0)
+        self.assertTrue(preds["row(deep,shallow):aligned"][1], preds["row(deep,shallow):aligned"])
+        self.assertAlmostEqual(float(sc["deep"].world_aabb()[0][0]), float(sc["shallow"].world_aabb()[0][0]), delta=0.01 + 2e-3)
+
+    def test_a_stack_of_thin_plates_on_a_shelf(self):
+        plates = [box(f"plate_{k}", (0.2, 0.15, 0.01), (0.66 + 0.04 * k, -0.15 + 0.1 * k, 0.07 + 0.3 * (k % 2) + 0.005)) for k in range(4)]
+        sc = Scene([bookcase()] + plates)
+        res, preds, ver = repaired(sc, SHELF + "  on_support(plate_0, case.level1)\n  stack(plate_0, plate_1, plate_2, plate_3)\n"
+                                   "  flush(plate_0, case.level1, side=far, gap=0.01)\n")
+        self.assertEqual(ver.pen_pairs, 0)
+        bad = [k for k, p in preds.items() if not p[1]]
+        self.assertEqual(bad, [])
+        self.assertAlmostEqual(float(sc["plate_3"].world_aabb()[0][2]), 0.10, delta=2e-3)      # three plates under it
+
+    def test_a_bowl_set_on_a_bowl_rests_on_its_rim(self):
+        lower, upper = bowl("lower", (0.5, 0.0, 0.0)), bowl("upper", (0.5, 0.0, 0.2))
+        sc = table_scene(lower, upper)
+        res, preds, ver = repaired(sc, HEAD.replace("on_support(*, table)", "on_support(lower, table)") + "  stack(lower, upper)\n")
+        self.assertEqual(ver.pen_pairs, 0)
+        self.assertTrue(preds["stack(upper,lower):on"][1], preds["stack(upper,lower):on"])
+        self.assertTrue(preds["stack(upper,lower):centered"][1], preds["stack(upper,lower):centered"])
+
+    def test_the_summary_gives_masses(self):
+        sc = table_scene(box("a", (0.1, 0.1, 0.1), (0.5, 0.0, 0.05)))
+        sc["a"].meta["physics"] = {"mass": 1.25}
+        self.assertIn("mass 1.25 kg", scene_summary(sc))
+
+    def test_front_and_handle_sides_come_from_the_body(self):
+        sc = table_scene(box("book", (0.15, 0.04, 0.2), (0.5, 0.0, 0.1), yaw=0.5))
+        sc["book"].meta["front_axis"] = "-y"
+        res, preds, ver = repaired(sc, HEAD + "  yaw(book, deg=180, axis=front)\n")
+        self.assertTrue(preds["yaw(book,deg=180)"][1], preds["yaw(book,deg=180)"])
+        w = sc["book"].rotation @ np.array([0.0, -1.0, 0.0])
+        self.assertAlmostEqual(math.degrees(math.atan2(w[1], w[0])) % 360, 180.0, delta=0.5 + 5.0)
+        with self.assertRaises(CompileError) as e:
+            compile_program(parse_program(HEAD + "  facing(book, axis=handle)\n"), table_scene(box("book", (0.15, 0.04, 0.2), (0.5, 0.0, 0.1))))
+        self.assertIn("no handle side", str(e.exception))
+
+    def test_json_names_levels_and_flush(self):
+        sc = Scene([bookcase(), box("book", (0.15, 0.04, 0.2), (0.70, 0.1, 0.17))])
+        enum = api_schema(sc)["properties"]["statements"]["items"]["properties"]["b"]["enum"]
+        self.assertIn("case.level2", enum)
+        dsl, _ = validate_program_json({"statements": [{"op": "on_support", "a": "book", "b": "case.level3"},
+                                                       {"op": "flush", "a": "book", "b": "case.level3", "side": "near", "gap": 0.01}]}, sc)
+        self.assertIn("on_support(book, case.level3)", dsl)
+        self.assertIn("flush(book, case.level3, side=near, gap=0.01)", dsl)
+        with self.assertRaises(ProgramError):
+            validate_program_json({"statements": [{"op": "flush", "a": "book", "b": "case"}]}, sc)      # side is required
+        self.assertEqual(api_schema(table_scene(box("a", (0.1, 0.1, 0.1), (0.5, 0.0, 0.05))))["properties"]["statements"]["items"]
+                         ["properties"]["b"]["enum"], ["table", "a", "table.top", "a.top"])        # one level: as before
 
 
 if __name__ == "__main__":

@@ -202,6 +202,36 @@ class Packages(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             load_any(str(layout))                                       # a repair never downloads
 
+    def test_layout_fixtures_and_a_resting_side_it_chooses(self):
+        from simready.cli import load_any
+        write_package(self.root, "book_a01", (0.15, 0.21, 0.03), label="book", mass=0.4)     # authored lying flat, its height along y
+        write_package(self.root, "slab_table_a01", (0.7, 1.0, 0.05), label="table", mass=20.0)
+        write_package(self.root, "storage_cabinet_a01", (0.3, 0.5, 0.8), label="cabinet", mass=30.0)
+        layout = self.root / "layout.json"
+        doc = {"table": {"package": "slab_table_a01", "position": [0.55, 0.0, -0.05]},
+               "fixtures": [{"name": "cabinet", "package": "storage_cabinet_a01", "position": [1.2, 0.0, 0.0]}],
+               "objects": [{"name": "book", "package": "book_a01", "x": 0.5, "y": 0.0, "z": 0.0, "up": "+y", "front": "-x"}]}
+        layout.write_text(json.dumps(doc))
+        sc = load_any(str(layout))
+        self.assertTrue(sc["cabinet"].fixed and {"support", "fixture"} <= sc["cabinet"].tags)
+        self.assertNotIn("container", sc["cabinet"].tags)                    # 'cabinet' holds no word 'bin'
+        self.assertAlmostEqual(float(np.ptp(sc["book"].world_vertices()[:, 2])), 0.21, places=4)   # standing on its edge
+        self.assertEqual(sc["book"].meta["front_axis"], "-x")
+        doc["objects"][0]["front"] = "+y"                                    # the side that ends up on top
+        layout.write_text(json.dumps(doc))
+        with self.assertRaises(ValueError):
+            load_any(str(layout))
+
+
+class Words(unittest.TestCase):
+    def test_tags_match_whole_words(self):
+        from simready.io.nvidia_assets import has_word
+        self.assertFalse(has_word("cabinet_file_d02 cabinet", "bin"))
+        self.assertFalse(has_word("handTool_pliers_combination_a01 pliers", "bin"))
+        self.assertTrue(has_word("storage_bin_a01 bin", "bin"))
+        self.assertTrue(has_word("crate_box_open_a01", "box_open"))
+        self.assertTrue(has_word("kitchenware_bowl_q01 bowl", "bowl"))
+
 
 if __name__ == "__main__":
     unittest.main()

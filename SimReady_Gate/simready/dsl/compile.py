@@ -21,7 +21,7 @@ import re
 
 import numpy as np
 
-from ..scene.model import Scene, Body
+from ..scene.model import LEVEL_MIN_HEADROOM, Scene, Body, support_levels
 from ..repair.upright_s4r import RepairSpec, decompose_zyx
 from .model import ARITY, GROUP, Program, Statement, is_wildcard
 from .schema import DEFAULTS
@@ -30,9 +30,10 @@ from . import statements as V1
 AXIS = {"x": 0, "y": 1}
 REL = {"left_of": ("y", +1), "right_of": ("y", -1), "in_front_of": ("x", +1), "behind": ("x", -1)}
 BINARY = {"on_support", "within", "inside", "min_distance", "near", "parallel", "centered", "offset", "attach",
-          "balanced_on", "keep_out", "facing", "beside"} | set(REL)
+          "balanced_on", "keep_out", "facing", "beside", "flush"} | set(REL)
 V1_ROWS = {"reach", "at", "beside", "facing", "yaw", "parallel", "max_turn", "row", "align", "evenly_spaced", "grid", "cluster",
-           "symmetric", "between", "centered", "offset", "attach", "keep_out", "approach", "max_move", "balanced_on", "stack"}
+           "symmetric", "between", "centered", "offset", "attach", "keep_out", "flush", "approach", "max_move", "balanced_on", "stack"}
+LEVEL_OPS = {"on_support", "within", "keep_out", "flush"}     # the statements that take <fixture>.level<K>
 PLACE_TOL = 0.05     # a placed body that ended within 5 cm of its target counts as placed
 ANGLE_TOL = 0.5      # degrees of slack a heading predicate gets on top of its statement's tolerance
 
@@ -131,7 +132,7 @@ def _region(scene: Scene, st: Statement, inset: float):
     plane, for bounds alone), the part or strip that side= selects, the bounds, then the inset."""
     ref = _ref(st.args[1]) if len(st.args) > 1 else None
     try:
-        x0, x1, y0, y1 = V1.region_rect(*V1.reference_rect(scene, ref), st.kw, repr(st))
+        x0, x1, y0, y1 = V1.region_rect(*V1.reference_rect(scene, st.args[1] if ref else None), st.kw, repr(st))
     except V1.StatementError as e:
         raise CompileError(str(e)) from None
     r = (x0 + inset, x1 - inset, y0 + inset, y1 - inset)
@@ -259,13 +260,30 @@ def _support_samples(support: Body, foot: np.ndarray, below: float) -> np.ndarra
     return np.vstack(out) if out else np.zeros((0, 2))
 
 
+def _whole_footprint(b: Body, interior: int = 6):
+    """XY of the corners of the body's whole footprint (the convex hull of all its vertices) and a grid inside it: where
+    a body that is not flat underneath meets what it is set on away from its lowest points (a bowl set in a bowl meets
+    it with its wall)."""
+    from scipy.spatial import ConvexHull, Delaunay, QhullError
+    xy = b.world_vertices()[:, :2]
+    try:
+        hull = xy[ConvexHull(xy).vertices]
+    except QhullError:          # a footprint that is a line or a point: its own points
+        return xy[:: max(1, len(xy) // 64)]
+    lo, hi = hull.min(0), hull.max(0)
+    gx, gy = np.meshgrid(np.linspace(lo[0], hi[0], interior + 2)[1:-1], np.linspace(lo[1], hi[1], interior + 2)[1:-1])
+    grid = np.column_stack([gx.ravel(), gy.ravel()])
+    return np.vstack([hull, grid[Delaunay(hull).find_simplex(grid) >= 0]])
+
+
 def _drop_height(scene: Scene, body: Body, support: Body, below: float | None = None):
     """max over sample points of S - (B - z_low): see support_height_for; None when no point has
     both surfaces above and below it. S is the support's highest surface under `below` (the body's
-    centre by default)."""
+    centre by default). The points are those under the body's lowest part and over its whole
+    footprint, with the support's vertices and edges inside the footprint of its lowest part."""
     below = float(body.center[2]) if below is None else below
     foot = _low_footprint(body)
-    P = np.vstack([foot, _support_samples(support, foot, below=below)])
+    P = np.vstack([foot, _whole_footprint(body), _support_samples(support, foot, below=below)])
     S = scene.vertical_hits(support, P, below=below)
     B = scene.vertical_hits(body, P, upward=True)
     ok = np.isfinite(S) & np.isfinite(B)
@@ -276,10 +294,15 @@ def _drop_height(scene: Scene, body: Body, support: Body, below: float | None = 
 
 
 def effective_supports(program: Program, scene: Scene) -> dict:
-    """body -> the support it rests on. A body named in on_support or in a stack keeps that support
-    over one that a pattern gives it (on_support(can_*, tray)), and a pattern's over the one of
-    on_support(*, ...), whatever the statement order; between statements of the same kind the later
-    one wins."""
+    """body -> the support it rests on (see effective_support_refs)."""
+    return {nm: _ref(tok) for nm, tok in effective_support_refs(program, scene).items()}
+
+
+def effective_support_refs(program: Program, scene: Scene) -> dict:
+    """body -> the reference of the support it rests on, as written (`shelf.level2` for a level). A body named in
+    on_support or in a stack keeps that support over one that a pattern gives it (on_support(can_*, tray)), and a
+    pattern's over the one of on_support(*, ...), whatever the statement order; between statements of the same kind
+    the later one wins."""
     out, prio = {}, {}
     for st in expand_names(program, scene).statements:
         if st.name == "on_support":
@@ -287,7 +310,7 @@ def effective_supports(program: Program, scene: Scene) -> dict:
             if sup not in scene.names():
                 raise CompileError(f"unknown support '{sup}'")
             p = 1 if st.args[0] == "*" else 2 if is_wildcard(st.args[0]) else 3
-            pairs = [(nm, sup) for nm in _bodies(scene, st.args[0], exclude=(sup,))]
+            pairs = [(nm, st.args[1]) for nm in _bodies(scene, st.args[0], exclude=(sup,))]
         elif st.name == "stack":
             for nm in st.args:
                 _bodies(scene, nm)
@@ -299,6 +322,46 @@ def effective_supports(program: Program, scene: Scene) -> dict:
             if p >= prio.get(nm, 0):
                 out[nm], prio[nm] = sup, p
     return out
+
+
+def _check_reference(scene: Scene, st: Statement, tok: str) -> None:
+    """`name.top` anywhere a body is taken; `name.levelK` only as the support or region of LEVEL_OPS, and only of a fixed
+    body that has that level."""
+    try:
+        V1.check_reference(tok)
+        if V1.LEVEL_RE.match(tok.partition(".")[2]):
+            if st.name not in LEVEL_OPS or st.args.index(tok) != 1:
+                raise V1.StatementError(f"'{tok}' is a level: it is the support of on_support or the region of within, keep_out and flush")
+            if not scene[_ref(tok)].fixed:
+                raise V1.StatementError(f"'{tok}': levels are a fixed body's")
+            V1.level_of(scene, tok)
+    except V1.StatementError as e:
+        raise CompileError(f"{e} ({st!r})") from None
+
+
+def _program_margin(program: Program) -> float:
+    return next((float(st.kw.get("margin", DEFAULTS["margin"])) for st in program.statements if st.name == "no_penetration"),
+                DEFAULTS["margin"])
+
+
+def _height(scene: Scene, nm: str, upright: set) -> float:
+    """A body's height as it will rest: its own up extent when it is kept upright, else its present extent."""
+    b = scene[nm]
+    return float(np.ptp(b.verts[:, 2])) if nm in upright else b.extent_along(scene.up)
+
+
+def _level_seat(scene: Scene, program: Program, nm: str, tok: str, upright: set) -> float:
+    """Height of the level `tok` a body rests on; the body must fit under the fixture's surface above it, with the
+    program's margin."""
+    lv = V1.level_of(scene, tok)
+    h = _height(scene, nm, upright)
+    margin = _program_margin(program)
+    if h + margin > lv.headroom:
+        room = [f"{_ref(tok)}.level{o.index} ({'open above' if math.isinf(o.headroom) else f'{o.headroom:.3f} m'})"
+                for o in support_levels(scene, scene[_ref(tok)]) if h + margin <= o.headroom]
+        raise CompileError(f"{nm} is {h:.3f} m tall and {tok} leaves {lv.headroom:.3f} m under the surface above it"
+                           + (f"; levels with room for it: {', '.join(room)}" if room else "; no level of it has room"))
+    return lv.z
 
 
 def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
@@ -325,6 +388,8 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
                 _bodies(scene, nm)               # a pattern must match a free body
             elif _ref(nm) not in scene.names():
                 raise CompileError(f"unknown body '{nm}' in {st!r}")
+            elif "." in nm:
+                _check_reference(scene, st, nm)
         if st.name in REL and st.kw.get("axis", REL[st.name][0]) not in AXIS:
             raise CompileError(f"axis must be x or y: {st!r}")
     program = expand_names(program, scene)
@@ -334,13 +399,48 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
     dists = []          # (a, b, kind, r, weight)
     dyn_support = []    # (body, free support)
     v1 = []             # row generators of the v1 statements
-    supports = effective_supports(program, scene)
+    refs = effective_support_refs(program, scene)
+    supports = {nm: _ref(tok) for nm, tok in refs.items()}
+    upright = {nm for st in program.statements if st.name == "upright" for nm in _bodies(scene, st.args[0])}
     for nm, sup in supports.items():
         b = scene[nm]
-        spec.supports[nm] = support_height_for(scene, b, scene[sup], from_above=not scene[sup].fixed)
+        if V1.level_of(scene, refs[nm]) is not None:
+            spec.supports[nm] = _level_seat(scene, program, nm, refs[nm], upright)
+        else:
+            spec.supports[nm] = support_height_for(scene, b, scene[sup], from_above=not scene[sup].fixed)
         spec.support_of[nm] = sup
         if not scene[sup].fixed:
             dyn_support.append((nm, sup))
+    # A body on a level it is given (shelf.level2), or on a level under part of its fixture (a shelf of a bookcase), keeps
+    # its footprint on that level, the margin inside its rectangle, as a contact does: the repair takes one contact
+    # witness per pair, which for the body and its fixture is the board it rests on, and that one hides the walls and
+    # the rounded edge of a top. A body stacked on such a body keeps the same bounds.
+    margin = _program_margin(program)
+    for nm, sup in supports.items():
+        levels = support_levels(scene, scene[sup]) if scene[sup].fixed else []
+        lv = V1.level_of(scene, refs[nm]) if levels else None
+        if lv is None and len(levels) > 1:
+            lv = min(levels, key=lambda o: abs(o.z - spec.supports[nm]))
+            lv = lv if lv.index < len(levels) and abs(lv.z - spec.supports[nm]) <= 0.5 * LEVEL_MIN_HEADROOM else None
+        if lv is not None:
+            spec.bounds[nm] = (lv.x0 + margin, lv.x1 - margin, lv.y0 + margin, lv.y1 - margin)
+            foot = sorted(np.ptp(V1.footprint_verts(scene[nm])[:, :2], axis=0))
+            room = sorted((lv.x1 - lv.x0 - 2 * margin, lv.y1 - lv.y0 - 2 * margin))
+            if foot[0] > room[0] or foot[1] > room[1]:
+                raise CompileError(f"{nm} ({foot[1]:.3f} x {foot[0]:.3f} m) does not fit on {_ref(refs[nm])}.level{lv.index} "
+                                   f"({room[1]:.3f} x {room[0]:.3f} m inside the margin)")
+    for nm in supports:
+        base, seen, tall = nm, {nm}, _height(scene, nm, upright)
+        while supports.get(base) in supports and not scene[supports[base]].fixed and supports[base] not in seen:
+            base = supports[base]
+            seen.add(base)
+            tall += _height(scene, base, upright)
+        if base != nm and base in spec.bounds:
+            spec.bounds[nm] = spec.bounds[base]
+            lv = V1.level_of(scene, refs[base])
+            if lv is not None and tall + margin > lv.headroom:
+                raise CompileError(f"the stack from {base} up to {nm} is {tall:.3f} m tall and {refs[base]} leaves {lv.headroom:.3f} m "
+                                   f"under the surface above it")
     ctx = V1.Ctx(scene, {b.name: k for k, b in enumerate(scene.bodies)}, supports,
                  lambda tok, exclude=(): _bodies(scene, tok, exclude=exclude))
     ctx.regions = rects_static          # filled below; a disjunction reads a body's own regions when it chooses a side
@@ -476,16 +576,21 @@ def check_predicates(program: Program, scene: Scene, tol: float = 2e-3, upright_
     the program was compiled on."""
     out = []
     program = expand_names(program, scene)
-    supports = effective_supports(program, scene)
+    refs = effective_support_refs(program, scene)
+    supports = {nm: _ref(tok) for nm, tok in refs.items()}
 
     def bodies_fn(tok, exclude=()):
         return _bodies(scene, tok, exclude=exclude)
 
-    def on_support_pred(nm, sup, label):
+    def on_support_pred(nm, sup, label, level=None):
         b = scene[nm]
         h = support_height_for(scene, b, scene[sup], require_hit=True, from_above=not scene[sup].fixed)
-        if h is None:
-            return _pred(label, False, None)
+        if h is None or (level is not None and abs(h - level.z) > max(tol, 0.5 * LEVEL_MIN_HEADROOM)):
+            return _pred(label, False, None if h is None else float((b.world_vertices() @ scene.up).min()) - level.z)
+        if level is not None:                 # on the level: over its rectangle, not only touching its board
+            lo, hi = V1.body_aabb(b)
+            if max(level.x0 - lo[0], hi[0] - level.x1, level.y0 - lo[1], hi[1] - level.y1) > tol:
+                return _pred(label, False, max(level.x0 - lo[0], hi[0] - level.x1, level.y0 - lo[1], hi[1] - level.y1))
         g = float((b.world_vertices() @ scene.up).min()) - h
         from ..gates.verify import pair_signed_distances
 
@@ -514,11 +619,11 @@ def check_predicates(program: Program, scene: Scene, tol: float = 2e-3, upright_
         n = st.name
         soft = st.soft
         if n == "on_support":
-            sup = _ref(st.args[1])
+            sup, level = _ref(st.args[1]), V1.level_of(scene, st.args[1])
             for nm in _bodies(scene, st.args[0], exclude=(sup,)):
-                if is_wildcard(st.args[0]) and supports.get(nm) != sup:
-                    continue                  # a body named elsewhere rests on another support
-                out.append(on_support_pred(nm, sup, f"on_support({nm},{sup})"))
+                if is_wildcard(st.args[0]) and refs.get(nm) != st.args[1]:
+                    continue                  # a body named elsewhere rests on another support, or on another level
+                out.append(on_support_pred(nm, sup, f"on_support({nm},{st.args[1] if level else sup})", level))
         elif n == "stack":
             for lower, upper in zip(st.args, st.args[1:]):
                 out.append(on_support_pred(upper, lower, f"stack({upper},{lower}):on"))

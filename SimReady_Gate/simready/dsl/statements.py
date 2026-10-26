@@ -8,8 +8,9 @@ lo <= sum(coeffs * step) <= hi. A soft statement's rows carry its weight as a fo
 
 How each kind of statement becomes rows:
   linear in the poses (at, beside, row, align, evenly_spaced, grid, symmetric, between, centered,
-    offset in the scene frame, yaw windows, regions): exact rows, re-evaluated at each step only
-    because footprints change with the scale and the heading;
+    offset in the scene frame, yaw windows, regions; flush, with the first-order turn of its edge):
+    exact rows, re-evaluated at each step only because footprints change with the scale and the
+    heading;
   convex but not linear (reach's outer radius, cluster, balanced_on with a centre of mass off the
     reference centre): the tangent half-plane at the current poses, a superset that tightens as the
     steps re-linearise;
@@ -23,15 +24,19 @@ How each kind of statement becomes rows:
 from __future__ import annotations
 
 import math
+import re
 
 import numpy as np
 
+from ..scene.model import support_levels
 from .schema import OP_DEFAULTS
 
 INF = np.inf
 AXIS_VEC = {"x": (1.0, 0.0, 0.0), "+x": (1.0, 0.0, 0.0), "-x": (-1.0, 0.0, 0.0),
             "y": (0.0, 1.0, 0.0), "+y": (0.0, 1.0, 0.0), "-y": (0.0, -1.0, 0.0)}
 COL = ("x", "y")
+SIDE_META = {"front": "front_axis", "handle": "grasp_axis"}   # axis words a body's own data defines (scene summary)
+LEVEL_RE = re.compile(r"^level([1-9]\d*)$")
 SIDE_VEC = {"left": (0.0, 1.0), "right": (0.0, -1.0), "far": (1.0, 0.0), "near": (-1.0, 0.0)}
 CORRIDOR_MARGIN = 0.005    # a body counts as out of an approach corridor 5 mm beyond its edge
 POLYGON = 16               # sides of the polygon that stands in for max_move's disc
@@ -87,9 +92,15 @@ def body_aabb(b):
 
 
 def body_axis(b, tok: str):
-    """(local axis vector, is_line) for an axis word: 'x', '+x', '-y', ... or 'long' / 'short', the
+    """(local axis vector, is_line) for an axis word: 'x', '+x', '-y', ..., 'long' / 'short', the
     longer / shorter horizontal local axis of the body, which is a line (a turn by 180 degrees maps
-    it onto itself)."""
+    it onto itself), or 'front' / 'handle', the side the body's own data names (a book's spine, a
+    mug's handle)."""
+    if tok in SIDE_META:
+        word = b.meta.get(SIDE_META[tok])
+        if word not in AXIS_VEC:
+            raise StatementError(f"{b.name} has no {tok} side in its data (axis={tok} needs one; the scene summary lists the sides it knows)")
+        return AXIS_VEC[word], False
     if tok in ("long", "short"):
         ext = np.ptp(footprint_verts(b), axis=0)
         longer_x = ext[0] >= ext[1]
@@ -102,6 +113,15 @@ def projection(b, s: float, u) -> tuple[float, float]:
     relative to its reference centre (exact for any footprint)."""
     p = (b.rotation @ (s * footprint_verts(b)).T).T[:, :2] @ np.asarray(u, dtype=np.float64)
     return float(p.min()), float(p.max())
+
+
+def edge_of(b, s: float, u, low: bool) -> tuple[float, float]:
+    """(the footprint's min (low) or max along the horizontal unit direction u at scale s, relative to the reference
+    centre; its derivative with the body's yaw): the extreme vertex turns with the body."""
+    w = (b.rotation @ (s * footprint_verts(b)).T).T[:, :2]
+    p = w @ np.asarray(u, dtype=np.float64)
+    i = int(np.argmin(p) if low else np.argmax(p))
+    return float(p[i]), float(np.array([-w[i, 1], w[i, 0]]) @ np.asarray(u, dtype=np.float64))
 
 
 def footprint_hull(b) -> np.ndarray:
@@ -178,10 +198,34 @@ def region_rect(lo, hi, kw: dict, name: str = "") -> tuple[float, float, float, 
     return x0, x1, y0, y1
 
 
+def check_reference(tok: str) -> None:
+    """A reference is a body, `name.top` (its bounding box, as the body) or `name.levelK`."""
+    part = tok.partition(".")[2]
+    if part not in ("", "top") and not LEVEL_RE.match(part):
+        raise StatementError(f"'{tok}': a reference is a body, <body>.top or <fixture>.level<K> (K from 1 at the bottom)")
+
+
+def level_of(scene, tok: str):
+    """The scene.model.Level that `name.levelK` names, K counted from 1 at the bottom; None for another reference."""
+    name, _, part = tok.partition(".")
+    m = LEVEL_RE.match(part)
+    if not m:
+        return None
+    levels = support_levels(scene, scene[name])
+    k = int(m.group(1))
+    if k > len(levels):
+        raise StatementError(f"'{tok}': {name} has {len(levels)} level{'' if len(levels) == 1 else 's'}")
+    return levels[k - 1]
+
+
 def reference_rect(scene, tok: str | None):
-    """(lo, hi) of a region reference: the body's world bounding box in the plane, or the whole plane."""
+    """(lo, hi) of a region reference: the body's world bounding box in the plane (`name`, `name.top`), the rectangle
+    of one of a fixture's levels (`name.levelK`), or the whole plane."""
     if tok is None:
         return (-INF, -INF), (INF, INF)
+    lv = level_of(scene, tok)
+    if lv is not None:
+        return (lv.x0, lv.y0), (lv.x1, lv.y1)
     lo, hi = body_aabb(scene[tok.split(".")[0]])
     return lo[:2], hi[:2]
 
@@ -266,7 +310,7 @@ def compile_statement(st, ctx: Ctx):
         gens.append(gen)
     elif n == "facing":
         ks = [idx[b] for b in ctx.bodies(st.args[0], exclude=st.args[1:2])]
-        axis = AXIS_VEC[kwd(st, "axis")]
+        axes = {k: body_axis(sc0.bodies[k], kwd(st, "axis"))[0] for k in ks}
         tol = math.radians(float(kwd(st, "tol")))
         tb = idx[st.args[1]] if len(st.args) > 1 else None
         point = np.array([float(kw.get("x", 0.0)), float(kw.get("y", 0.0))])
@@ -274,7 +318,7 @@ def compile_statement(st, ctx: Ctx):
         def gen(state):
             out = []
             for k in ks:
-                phi = heading(state.scene.bodies[k].rotation, axis)
+                phi = heading(state.scene.bodies[k].rotation, axes[k])
                 if phi is None:
                     continue
                 t = _c(state.scene, tb) if tb is not None else point
@@ -337,12 +381,20 @@ def compile_statement(st, ctx: Ctx):
         gap, tol = float(kwd(st, "gap")), float(kwd(st, "tol"))
         even = kw.get("spacing") == "even"
         mid = float(kw["mid"]) if "mid" in kw else None
+        edge = kwd(st, "edge")
+        v = np.zeros(2); v[pa] = 1.0
 
         def gen(state):
             out, sc = [], state.scene
+
+            def q(k):                            # what lines up across the row: the centre, or a footprint edge
+                if edge == "center":
+                    return float(_c(sc, k)[pa])
+                lo, hi = projection(sc.bodies[k], state.body_scale(k), v)
+                return float(_c(sc, k)[pa]) + (lo if edge == "min" else hi)
             k0 = ks[0]
             for k in ks[1:]:
-                cur = float(_c(sc, k)[pa] - _c(sc, k0)[pa])
+                cur = q(k) - q(k0)
                 _row(out, {(k, COL[pa]): 1.0, (k0, COL[pa]): -1.0}, -tol - cur, tol - cur, w)
             if mid is not None:                  # the midpoint of the end members, along the row
                 cur = 0.5 * float(_c(sc, ks[0])[ax] + _c(sc, ks[-1])[ax])
@@ -509,11 +561,12 @@ def compile_statement(st, ctx: Ctx):
         gap = float(kwd(st, "gap"))
         dyn = ref is not None and not sc0[ref].fixed
         kr = idx[ref] if ref is not None else None
-        static = None if dyn else region_rect(*reference_rect(sc0, ref), kw, repr(st))
+        tok = st.args[1] if len(st.args) > 1 else None
+        static = None if dyn else region_rect(*reference_rect(sc0, tok), kw, repr(st))
 
         def gen(state):
             out, sc = [], state.scene
-            x0, x1, y0, y1 = region_rect(*reference_rect(sc, ref), kw, repr(st)) if dyn else static
+            x0, x1, y0, y1 = region_rect(*reference_rect(sc, tok), kw, repr(st)) if dyn else static
             x0, x1, y0, y1 = x0 - gap, x1 + gap, y0 - gap, y1 + gap
             for k in ks:
                 s = state.body_scale(k)
@@ -537,6 +590,23 @@ def compile_statement(st, ctx: Ctx):
                     _row(out, co, -INF, -need, w)
                 else:
                     _row(out, co, need, INF, w)
+            return out
+        gens.append(gen)
+    elif n == "flush":
+        ref = st.args[1].split(".")[0]
+        if not sc0[ref].fixed:
+            raise StatementError(f"{st!r}: flush is against a fixed body, its top or one of its levels")
+        ks = [idx[x] for x in ctx.bodies(st.args[0], exclude=(ref,))]
+        tol = float(kwd(st, "tol"))
+        col, target, low = flush_target(sc0, st)
+        u = (1.0, 0.0) if col == 0 else (0.0, 1.0)
+
+        def gen(state):
+            out, sc = [], state.scene
+            for k in ks:
+                e, de = edge_of(sc.bodies[k], state.body_scale(k), u, low)
+                err = target - (float(_c(sc, k)[col]) + e)
+                _row(out, {(k, COL[col]): 1.0, (k, "yaw"): de}, err - tol, err + tol, w)
             return out
         gens.append(gen)
     elif n == "approach":
@@ -719,6 +789,19 @@ def _room(option, rect, region, foot) -> bool:
     return hi - lo >= py1 - py0
 
 
+FLUSH_EDGE = {"near": (0, True), "far": (0, False), "right": (1, True), "left": (1, False)}   # (axis, the low edge)
+
+
+def flush_target(scene, st):
+    """(axis, the coordinate the footprint's edge goes to, whether that is its low edge) of flush(a, b, side, gap):
+    the edge on `side` sits `gap` inside the same edge of b's rectangle (its bounding box, or the level it names)."""
+    x0, x1, y0, y1 = region_rect(*reference_rect(scene, st.args[1]), {}, repr(st))
+    col, low = FLUSH_EDGE[st.kw["side"]]
+    gap = float(kwd(st, "gap"))
+    lo, hi = ((x0, x1), (y0, y1))[col]
+    return col, (lo + gap if low else hi - gap), low
+
+
 def approach_obstacles(ctx: Ctx, k: int) -> list:
     """Bodies that can block an approach to body k: everything but k, the surfaces (fixed bodies
     tagged support or ground), k's own support and the bodies resting on k."""
@@ -790,11 +873,10 @@ def check_v1(st, scene, supports: dict, tol: float, angle_tol: float, bodies_fn)
             worst = max(worst, 0.0) if worst > -INF else 0.0
             out.append((f"approach({nm})", worst <= tol, worst))
     elif n == "facing":
-        axis = AXIS_VEC[kwd(st, "axis")]
         tol_s = float(kwd(st, "tol"))
         point = sc[st.args[1]].center[:2] if len(st.args) > 1 else np.array([float(kw.get("x", 0.0)), float(kw.get("y", 0.0))])
         for nm in bodies_fn(st.args[0], exclude=st.args[1:2]):
-            phi = heading(sc[nm].rotation, axis)
+            phi = heading(sc[nm].rotation, body_axis(sc[nm], kwd(st, "axis"))[0])
             d = point - sc[nm].center[:2]
             if phi is None or float(d @ d) < 1e-12:
                 out.append((f"facing({nm})", False, None)); continue
@@ -832,7 +914,11 @@ def check_v1(st, scene, supports: dict, tol: float, angle_tol: float, bodies_fn)
             ax = 0 if tok.endswith("x") else 1
             sgn = -1.0 if tok.startswith("-") else 1.0
             u = np.zeros(2); u[ax] = sgn
-            spread = float(np.abs(P[1:, 1 - ax] - P[0, 1 - ax]).max())
+            v = np.zeros(2); v[1 - ax] = 1.0
+            edge = kwd(st, "edge")
+            q = [float(P[i, 1 - ax]) + (0.0 if edge == "center" else projection(sc[x], 1.0, v)[0 if edge == "min" else 1])
+                 for i, x in enumerate(members)]
+            spread = max(abs(qi - q[0]) for qi in q[1:])
             gaps = [sgn * float(P[i + 1, ax] - P[i, ax]) + projection(sc[members[i + 1]], 1.0, u)[0] - projection(sc[members[i]], 1.0, u)[1]
                     for i in range(len(members) - 1)]
             out.append((label + ":aligned", spread <= float(kwd(st, "tol")) + tol, spread))
@@ -913,12 +999,19 @@ def check_v1(st, scene, supports: dict, tol: float, angle_tol: float, bodies_fn)
     elif n == "keep_out":
         ref = st.args[1].split(".")[0] if len(st.args) > 1 else None
         gap = float(kwd(st, "gap"))
-        x0, x1, y0, y1 = region_rect(*reference_rect(sc, ref), kw, repr(st))
+        x0, x1, y0, y1 = region_rect(*reference_rect(sc, st.args[1] if ref else None), kw, repr(st))
         big = 1e3                                                     # an open side of the region, far beyond the scene
         R = rect_polygon(max(x0, -big) - gap, min(x1, big) + gap, max(y0, -big) - gap, min(y1, big) + gap)
         for nm in bodies_fn(st.args[0], exclude=(ref,) if ref else ()):
             v = max(polygon_overlap(R, footprint_hull(sc[nm])), 0.0)
             out.append((f"keep_out({nm},{st.args[1] if ref else 'region'})", v <= tol, v))
+    elif n == "flush":
+        col, target, low = flush_target(sc, st)
+        u = (1.0, 0.0) if col == 0 else (0.0, 1.0)
+        for nm in bodies_fn(st.args[0], exclude=(st.args[1].split(".")[0],)):
+            lo, hi = projection(sc[nm], 1.0, u)
+            v = abs(target - (float(sc[nm].center[col]) + (lo if low else hi)))
+            out.append((f"flush({nm},{st.args[1]},{kw['side']})", v <= float(kwd(st, "tol")) + tol, v))
     elif n == "max_move":
         d = float(kw["d"])
         for nm in bodies_fn(st.args[0]):

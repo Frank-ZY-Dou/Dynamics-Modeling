@@ -23,7 +23,8 @@ report on stdout; `summarize`, `prompt` and `verify` print text.
    The repair, the settle test and the export then use each asset's own friction and mass.
 1. Load or build the scene:
    `python -m simready.cli summarize <scene.usda|layout.json>` prints the body list with tags and sizes
-   (for free bodies also their local size and heading, and the side a SimReady asset's grasp hint is on).
+   (for free bodies also their local size, heading, mass and the sides their data names, and for a
+   fixture with shelves each level's height, rectangle and headroom).
    If loading warns about unresolved assets, or `repair` reports a nonempty `dropped_children`, assets did not resolve;
    stop and report that — a certificate cannot cover a missing container.
 2. Produce the program: run `python -m simready.cli prompt <scene> --request "<text>"`, answer
@@ -31,7 +32,9 @@ report on stdout; `summarize`, `prompt` and `verify` print text.
    State what must hold and let the solver find the poses: footprint gaps with `beside`, lines with
    `row`, `align`, `evenly_spaced`, `grid`, groups with `cluster`, headings with `yaw`, `parallel`,
    `facing`, the robot's needs with `reach`, `clearance`, `approach`, zones with `within ... side=` and
-   `keep_out`, small edits with `max_move`, `max_turn`, towers with `stack`. Name a group of similar
+   `keep_out`, small edits with `max_move`, `max_turn`, towers with `stack`, shelves with
+   `on_support(a, <fixture>.level<K>)` and `flush` (edges against a level's front or back), spines or
+   handles with `axis=front` / `axis=handle`. Name a group of similar
    bodies by a pattern (`members: ["can_*", "bottle_1"]`, `a: "fruit_*"`) instead of listing them, so
    none is left out. `docs/DSL.md` lists every statement with what it compiles to; `soft=` marks a
    preference.
@@ -52,6 +55,8 @@ report on stdout; `summarize`, `prompt` and `verify` print text.
      in the JSON and rerun step 4.
    - a failed `within`/`inside`: the region is too small for the objects; enlarge the region or
      drop an object. Positions are not statements — do not try to "move" a body by editing.
+   - `check` refusing a level ("leaves ... m under the surface above it"): the body does not fit
+     there; put it on one of the levels the message names.
    - a failed `keep_out` or `approach` next to a `grid` or a `row`: the side was chosen locally; add
      `within(..., side=)` for the structure, or a `place` target, so that it starts on the free side.
    - a failed preference (`failed_preferences`) does not fail the repair; report it.

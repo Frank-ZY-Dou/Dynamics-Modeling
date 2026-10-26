@@ -7,6 +7,8 @@ Text form (one statement per line, '#' comments, `*` = every free body):
       fixed(table)
       on_support(mug, table)      upright(mug)
       within(mug, table.top, inset=0.02)
+      on_support(book_*, shelf.level2)        # a fixture's level, from 1 at the bottom (the scene summary lists them)
+      flush(book_*, shelf.level2, side=near, gap=0.01)   # the footprints' near edges 1 cm inside the level's front edge
       place(mug, x=0.45, y=0.10, yaw=30)      # a target pose in the shrunken scale-space (soft)
       inside(mug, tray)
       left_of(mug, bowl, axis=y, gap=0.05)
@@ -20,6 +22,7 @@ Text form (one statement per line, '#' comments, `*` = every free body):
       clearance(mug, gap=0.03)                # every other body at least 3 cm from the mug's mesh
       approach(mug, length=0.20, width=0.10)  # a free corridor from the mug toward the robot
       facing(mug, axis=-x, tol=20)            # the mug's local -x (its handle) points at the robot (or at b / x=, y=)
+      yaw(book_*, deg=180, axis=front)        # each book's own front side (its spine, from its data) points along -x
       yaw(box, deg=0, mod=90, tol=3)          yaw(board, deg=90, axis=long)       parallel(fork, knife)   # long sides
       # v1: arrangements (members in the order given)
       row(can_1, can_2, can_3, axis=y, gap=0.02)     align(book_1, book_2, axis=x, edge=max)
@@ -66,11 +69,11 @@ KEYWORDS = {"no_penetration": {"margin"}, "within": {"inset", "soft"} | REGION_K
             "beside": {"side", "gap", "max", "soft"},
             "approach": {"length", "width", "toward", "x", "y", "soft"},
             "facing": {"axis", "tol", "x", "y", "soft"}, "yaw": {"deg", "tol", "mod", "axis", "soft"}, "parallel": {"mod", "tol", "axis", "soft"},
-            "row": {"axis", "start", "gap", "tol", "order", "spacing", "mid", "soft"}, "align": {"axis", "edge", "tol", "soft"},
+            "row": {"axis", "start", "gap", "tol", "order", "spacing", "mid", "edge", "soft"}, "align": {"axis", "edge", "tol", "soft"},
             "evenly_spaced": {"axis", "tol", "soft"}, "grid": {"cols", "dx", "dy", "tol", "soft"}, "cluster": {"r", "soft"},
             "symmetric": {"axis", "tol", "soft"}, "between": {"axis", "gap", "soft"}, "centered": {"tol", "soft"},
             "offset": {"dx", "dy", "frame", "tol", "soft"}, "attach": {"tol", "soft"},
-            "keep_out": {"gap", "soft"} | REGION_KW, "max_move": {"d", "soft"}, "max_turn": {"deg", "soft"},
+            "keep_out": {"gap", "soft"} | REGION_KW, "flush": {"side", "gap", "tol", "soft"}, "max_move": {"d", "soft"}, "max_turn": {"deg", "soft"},
             "stack": {"tol"}, "balanced_on": {"margin", "soft"}}
 NUMERIC_KW = {"margin", "inset", "x", "y", "yaw", "w", "gap", "r", "min", "max", "length", "width", "tol", "deg", "mod", "cols",
               "dx", "dy", "frac", "depth", "x0", "x1", "y0", "y1", "d", "soft", "mid"}
@@ -78,14 +81,14 @@ SIGNED_KW = {"x", "y", "yaw", "deg", "dx", "dy", "x0", "x1", "y0", "y1", "mid"}
 # keywords whose value is a word, and the words each statement accepts
 WORDS = {"axis": {"left_of": {"x", "y"}, "right_of": {"x", "y"}, "in_front_of": {"x", "y"}, "behind": {"x", "y"},
                   "align": {"x", "y"}, "evenly_spaced": {"x", "y"}, "symmetric": {"x", "y"}, "between": {"x", "y"},
-                  "row": {"x", "y"}, "facing": {"x", "y", "+x", "-x", "+y", "-y"},
-                  "yaw": {"x", "y", "+x", "-x", "+y", "-y", "long", "short"}, "parallel": {"x", "y", "long", "short"}},
-         "edge": {"align": {"min", "center", "max"}},
+                  "row": {"x", "y"}, "facing": {"x", "y", "+x", "-x", "+y", "-y", "front", "handle"},
+                  "yaw": {"x", "y", "+x", "-x", "+y", "-y", "long", "short", "front", "handle"}, "parallel": {"x", "y", "long", "short"}},
+         "edge": {"align": {"min", "center", "max"}, "row": {"min", "center", "max"}},
          "order": {"row": {"height", "-height", "width", "-width", "length", "-length", "mass", "-mass"}},
          "spacing": {"row": {"even"}},
          "start": {"row": {"left", "right", "near", "far"}},
          "side": {**{op: {"left", "right", "near", "far", "center"} for op in ("within", "keep_out")},
-                  "beside": {"left", "right", "near", "far"}},
+                  "beside": {"left", "right", "near", "far"}, "flush": {"left", "right", "near", "far"}},
          "toward": {"approach": {"robot", "near", "far", "left", "right"}},
          "frame": {"offset": {"world", "local"}},
          "pose": {"prefer": {"intent"}}}
@@ -95,7 +98,7 @@ STATEMENTS = {
     "minimize", "prefer",
     "reach", "clearance", "approach", "facing", "yaw", "parallel", "at", "beside",
     "row", "align", "evenly_spaced", "grid", "cluster", "symmetric", "between", "centered", "offset", "attach",
-    "keep_out", "max_move", "max_turn", "stack", "balanced_on",
+    "keep_out", "flush", "max_move", "max_turn", "stack", "balanced_on",
 }
 # positional arguments each statement takes: (min, max); None = unbounded
 ARITY = {"no_penetration": (1, 1), "place": (1, 1), "fixed": (1, None), "on_support": (2, 2), "upright": (1, 1),
@@ -104,7 +107,7 @@ ARITY = {"no_penetration": (1, 1), "place": (1, 1), "fixed": (1, None), "on_supp
          "reach": (1, 1), "clearance": (1, 1), "at": (1, 1), "beside": (2, 2), "approach": (1, 1), "facing": (1, 2), "yaw": (1, 1), "parallel": (2, 2),
          "row": (2, None), "align": (2, None), "evenly_spaced": (3, None), "grid": (2, None), "cluster": (2, None),
          "symmetric": (3, 3), "between": (3, 3), "centered": (2, 2), "offset": (2, 2), "attach": (2, 2),
-         "keep_out": (1, 2), "max_move": (1, 1), "max_turn": (1, 1), "stack": (2, None), "balanced_on": (2, 2)}
+         "keep_out": (1, 2), "flush": (2, 2), "max_move": (1, 1), "max_turn": (1, 1), "stack": (2, None), "balanced_on": (2, 2)}
 # statements over a list of distinct bodies, in the order given; '*' and patterns among the members
 # stand for the free bodies they match that the statement does not name itself
 GROUP = {"row", "align", "evenly_spaced", "grid", "cluster", "stack"}
@@ -113,7 +116,7 @@ START_LINE = {"left": "y", "right": "y", "near": "x", "far": "x"}
 # statements whose first argument is one named body ('*' or a pattern would put every body at one spot)
 ONE_BODY = {"place", "centered", "offset", "symmetric", "between"}
 # keywords a statement cannot do without
-REQUIRED = {"reach": {"r"}, "clearance": {"gap"}, "beside": {"side"}, "yaw": {"deg"}, "grid": {"cols"}, "cluster": {"r"},
+REQUIRED = {"reach": {"r"}, "clearance": {"gap"}, "beside": {"side"}, "flush": {"side"}, "yaw": {"deg"}, "grid": {"cols"}, "cluster": {"r"},
             "max_move": {"d"}, "max_turn": {"deg"}, "min_distance": {"r"}, "near": {"r"}}
 # gate sections, their fields and the only operator each field takes
 GATES = {"G2": {"min_gap": ">="}, "G5": {"v_max": "<=", "dx": "<="}}

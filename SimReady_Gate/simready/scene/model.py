@@ -6,6 +6,7 @@ Fixed bodies (fixtures, containers declared fixed) act as obstacles only.
 """
 from __future__ import annotations
 
+import math
 from collections import OrderedDict
 from dataclasses import dataclass, field
 
@@ -116,31 +117,37 @@ class Scene:
         z = self.vertical_hits(support, xy)
         return z[np.isfinite(z)]
 
-    def vertical_hits(self, body: Body, xy: np.ndarray, upward: bool = False, below: float | None = None) -> np.ndarray:
-        """Per point of `xy`, the z where a vertical line through it meets the body's surface: the highest crossing
-        (only those under `below` when given), or with `upward` the lowest; NaN where the line misses the body.
+    def crossings(self, body: Body, xy: np.ndarray, facing: bool = False):
+        """(index of the point, world z) of every crossing of the vertical lines through `xy` with the body's surface,
+        and with `facing` whether the face crossed there faces up.
 
         No rays are cast: the triangles are binned on a grid of the plane (_VerticalIndex) and each point is tested
         against the triangles of its cell. A body turned about z alone, as every body that a repair moves is, is
         indexed once in its own frame and the points are brought into it, so a new pose costs nothing; a body tilted
         otherwise is indexed in the world frame, again for each pose."""
         xy = np.asarray(xy, dtype=np.float64).reshape(-1, 2)
-        out = np.full(len(xy), np.nan)
-        if not len(xy):
-            return out
         R = body.rotation
         if abs(float(R[2, 2]) - 1.0) < 1e-9:
             index = vertical_index(body.verts, body.faces)
-            pi, z = index.crossings((xy - body.center[:2]) @ R[:2, :2])
-            z = z + float(body.center[2])
-        else:
-            key = (tuple(np.round(body.center, 9)), tuple(np.round(R.ravel(), 9)), id(body.verts), body.verts.shape,
-                   id(body.faces), body.faces.shape)
-            cache = body.meta.setdefault("_vertical_cache", {})
-            if key not in cache:
-                cache.clear()
-                cache[key] = (_VerticalIndex(body.world_vertices(), body.faces), body.verts, body.faces)
-            pi, z = cache[key][0].crossings(xy)
+            out = index.crossings((xy - body.center[:2]) @ R[:2, :2], facing=facing)
+            return (out[0], out[1] + float(body.center[2])) + out[2:]
+        key = (tuple(np.round(body.center, 9)), tuple(np.round(R.ravel(), 9)), id(body.verts), body.verts.shape,
+               id(body.faces), body.faces.shape)
+        cache = body.meta.setdefault("_vertical_cache", {})
+        if key not in cache:
+            cache.clear()
+            cache[key] = (_VerticalIndex(body.world_vertices(), body.faces), body.verts, body.faces)
+        return cache[key][0].crossings(xy, facing=facing)
+
+    def vertical_hits(self, body: Body, xy: np.ndarray, upward: bool = False, below: float | None = None) -> np.ndarray:
+        """Per point of `xy`, the z where a vertical line through it meets the body's surface: the highest crossing
+        (only those under `below` when given), or with `upward` the lowest; NaN where the line misses the body
+        (see crossings)."""
+        xy = np.asarray(xy, dtype=np.float64).reshape(-1, 2)
+        out = np.full(len(xy), np.nan)
+        if not len(xy):
+            return out
+        pi, z = self.crossings(body, xy)
         if not upward and below is not None:
             keep = z < below
             pi, z = pi[keep], z[keep]
@@ -185,9 +192,10 @@ class _VerticalIndex:
         self.tri = tri[order]
         self.ptr = np.searchsorted(cell[order], np.arange(self.shape[0] * self.shape[1] + 1))
 
-    def crossings(self, xy: np.ndarray):
-        """(index of the point, z) of every crossing of the vertical lines through `xy` (model frame) with the mesh."""
-        empty = (np.zeros(0, dtype=np.int64), np.zeros(0))
+    def crossings(self, xy: np.ndarray, facing: bool = False):
+        """(index of the point, z) of every crossing of the vertical lines through `xy` (model frame) with the mesh, and
+        with `facing` whether the triangle crossed there faces up (counter-clockwise seen from above)."""
+        empty = (np.zeros(0, dtype=np.int64), np.zeros(0)) + ((np.zeros(0, dtype=bool),) if facing else ())
         if not self.n or not len(xy):
             return empty
         g = np.floor((xy - self.origin) / self.size).astype(np.int64)
@@ -204,7 +212,8 @@ class _VerticalIndex:
         wb = ((c[:, 0] - p[:, 0]) * (a[:, 1] - p[:, 1]) - (a[:, 0] - p[:, 0]) * (c[:, 1] - p[:, 1])) / d
         wc = 1.0 - wa - wb
         hit = (wa >= -1e-9) & (wb >= -1e-9) & (wc >= -1e-9)
-        return pi[hit], (wa * a[:, 2] + wb * b[:, 2] + wc * c[:, 2])[hit]
+        out = (pi[hit], (wa * a[:, 2] + wb * b[:, 2] + wc * c[:, 2])[hit])
+        return out + ((d[hit] > 0),) if facing else out
 
 
 _VINDEX: OrderedDict = OrderedDict()   # (identity of the vertex and face arrays) -> (index, verts, faces)
@@ -230,6 +239,97 @@ def vertical_index(verts: np.ndarray, faces: np.ndarray) -> _VerticalIndex:
     return index
 
 
+LEVEL_NORMAL = 0.99         # a face whose unit normal has at least this upward component can carry a body
+LEVEL_MERGE = 0.004         # such faces within this height of each other are one level
+LEVEL_MIN_AREA = 0.10       # a level covers at least this fraction of the fixture's footprint box
+LEVEL_MIN_HEADROOM = 0.02   # and leaves at least this much room under the fixture's surface above it
+LEVEL_GRID = 64             # a level is measured on a LEVEL_GRID x LEVEL_GRID grid over the box of its faces
+
+
+@dataclass(frozen=True)
+class Level:
+    """A surface of a fixture that bodies can rest on (a shelf board, the floor of a compartment, the top), in the
+    scene frame: its height, the bounding rectangle of its faces and the room above it up to the fixture's next
+    surface over most of it (inf when nothing of the fixture is above most of it). A lip or a retaining rail over a
+    strip of the level does not set its headroom: the contacts keep a body out from under it."""
+    index: int
+    z: float
+    x0: float
+    x1: float
+    y0: float
+    y1: float
+    headroom: float
+
+
+def support_levels(scene: Scene, body: Body) -> list:
+    """The levels of a fixture, numbered from 1 at the bottom: its upward faces (LEVEL_NORMAL) grouped by height
+    (LEVEL_MERGE), each group covering at least LEVEL_MIN_AREA of the fixture's footprint box. On a grid over the
+    group's box (LEVEL_GRID), the level is where its surface is and the fixture does not cover the point just above it.
+    It covers it when the first face above faces up (a plinth's top under a cabinet's bottom board: the board's top is
+    the first face, as the board's bottom coincides with the plinth's top, and this holds for an open shell too), or
+    when the faces crossed above, counted +1 facing up and -1 facing down, sum to one or more (a wall standing on the
+    board, among parts that overlap each other). A group most of which is so covered is no level; a level's rectangle
+    is the box of its free points, half a cell out, and its headroom their median room above, at least
+    LEVEL_MIN_HEADROOM. Every level but the highest is under another part of the fixture over most of it. A table has
+    its top (and the shelf under it, if it has one), a bookcase one level per shelf and its top. Wire decks, whose
+    upward faces are the tops of wires, are not found. Kept on the body for its pose."""
+    key = (tuple(np.round(body.center, 9)), tuple(np.round(body.rotation.ravel(), 9)), id(body.verts), id(body.faces))
+    hit = body.meta.get("_levels")
+    if hit is not None and hit[0] == key:
+        return hit[1]
+    V = body.world_vertices()
+    T = V[np.asarray(body.faces, dtype=np.int64)]
+    n = np.cross(T[:, 1] - T[:, 0], T[:, 2] - T[:, 0])
+    area = 0.5 * np.linalg.norm(n, axis=1)
+    up = (area > 0) & (n[:, 2] >= LEVEL_NORMAL * 2.0 * np.maximum(area, 1e-300))
+    T, area = T[up], area[up]
+    z = T[:, :, 2].mean(axis=1)
+    lo, hi = V.min(axis=0), V.max(axis=0)
+    foot = float((hi[0] - lo[0]) * (hi[1] - lo[1]))
+    out = []
+    order = np.argsort(z, kind="stable")
+    breaks = np.nonzero(np.diff(z[order]) > LEVEL_MERGE)[0] + 1
+    for g in np.split(order, breaks) if len(order) else []:
+        a = float(area[g].sum())
+        if a < LEVEL_MIN_AREA * foot:
+            continue
+        zz = float(np.average(z[g], weights=area[g]))
+        P = T[g][:, :, :2].reshape(-1, 2)
+        lo2, hi2 = P.min(axis=0), P.max(axis=0)
+        cell = (hi2 - lo2) / LEVEL_GRID
+        gx, gy = np.meshgrid(lo2[0] + (np.arange(LEVEL_GRID) + 0.5) * cell[0], lo2[1] + (np.arange(LEVEL_GRID) + 0.5) * cell[1])
+        pts = np.column_stack([gx.ravel(), gy.ravel()])
+        pi, zc, up_face = scene.crossings(body, pts, facing=True)
+        on = np.zeros(len(pts), dtype=bool)
+        on[pi[up_face & (np.abs(zc - zz) <= LEVEL_MERGE)]] = True       # the level's surface is at the point
+        above = zc > zz + 1e-4
+        pi, zc, up_face = pi[above], zc[above], up_face[above]
+        # a line through an edge two triangles share meets both: one crossing of the surface
+        _, keep = np.unique(np.column_stack([pi, np.round(zc * 1e7), up_face]), axis=0, return_index=True)
+        pi, zc, up_face = pi[keep], zc[keep], up_face[keep]
+        first = np.full(len(pts), math.inf)
+        np.minimum.at(first, pi, zc)
+        winding = np.zeros(len(pts))
+        np.add.at(winding, pi, np.where(up_face, 1.0, -1.0))     # the solids of the fixture the point is in
+        covered = winding > 0.5
+        k = np.nonzero(zc == first[pi])[0]                       # the first crossing above each point
+        covered[pi[k[up_face[k]]]] = True
+        free = on & ~covered
+        if not free.any() or covered[on].sum() * 2 > on.sum():
+            continue
+        room = float(np.median(first[free])) - zz
+        if room < LEVEL_MIN_HEADROOM:
+            continue
+        (x0, y0), (x1, y1) = np.maximum(pts[free].min(axis=0) - 0.5 * cell, lo2), np.minimum(pts[free].max(axis=0) + 0.5 * cell, hi2)
+        out.append((zz, float(x0), float(x1), float(y0), float(y1), room))
+    # below the top, a level is under another part of the fixture (a shelf under a board): the bottom boards of a pallet,
+    # open above between the slats of its deck, are none
+    out = [v for k, v in enumerate(out) if k == len(out) - 1 or math.isfinite(v[5])]
+    levels = [Level(k + 1, *v) for k, v in enumerate(out)]
+    body.meta["_levels"] = (key, levels)
+    return levels
+
+
 def slab_proxy(body: Body, thickness: float = 0.05, up=None, top: float | None = None) -> Body:
     """A box spanning a support body's top face, for cheap repair-time contact.
 
@@ -248,13 +348,15 @@ def slab_proxy(body: Body, thickness: float = 0.05, up=None, top: float | None =
                           meta=dict(body.meta, proxy_of=body.name))
 
 
+SLAB_LEVEL_TOL = 0.005      # bodies seated this close to a support's top level rest on its top, and a slab stands in for it
 PROXY_BOX_TOL_M = 0.01      # a decimated copy keeps every side of the body's box within this,
 PROXY_BOX_TOL_FRAC = 0.05   # or within this fraction of the box's diagonal, whichever is larger
 
 
 class MeshProxy:
-    """Context manager: swap free bodies' meshes for decimated copies (and supports for
-    slabs) during repair, then restore the full meshes for verification. A decimated body keeps
+    """Context manager: swap free bodies' meshes for decimated copies (and supports whose bodies
+    rest on their top level for slabs) during repair, then restore the full meshes for
+    verification. A decimated body keeps
     its own vertices in meta['full_verts'] meanwhile: the contacts run on the copy, footprints are
     measured on the mesh the predicates will see (decimation moves a silhouette by millimetres).
 
@@ -276,7 +378,12 @@ class MeshProxy:
             self.saved[b.name] = (b.verts, b.faces, b.center.copy(), b.rotation.copy())
             if b.fixed:
                 if self.slab_supports and "support" in b.tags:
-                    px = slab_proxy(b, top=self.slab_tops.get(b.name)); b.verts, b.faces, b.center, b.rotation = px.verts, px.faces, px.center, px.rotation
+                    top = self.slab_tops.get(b.name)
+                    levels = support_levels(self.scene, b)
+                    # a slab stands in for the top level only: a body resting on a lower one (a shelf of a bookcase)
+                    # needs the boards and walls around it, so that fixture keeps its mesh
+                    if top is None or not levels or top >= levels[-1].z - SLAB_LEVEL_TOL:
+                        px = slab_proxy(b, top=top); b.verts, b.faces, b.center, b.rotation = px.verts, px.faces, px.center, px.rotation
                 continue
             if len(b.faces) <= self.faces:
                 continue

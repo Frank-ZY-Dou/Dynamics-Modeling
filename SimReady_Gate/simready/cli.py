@@ -76,11 +76,16 @@ def load_any(path: str) -> Scene:
             meta["base_scene"] = L["base_scene"]
             meta["dropped"] = list(base.meta.get("dropped", []))      # unresolved children of the base scene
             meta["layers"] = list(base.meta.get("layers", []))
-        else:                                   # the layout declares no support: a synthetic slab, recorded as such
+        elif not L.get("fixtures"):             # the layout declares no support: a synthetic slab, recorded as such
             import trimesh
             slab = trimesh.creation.box(extents=(0.8, 1.0, 0.04))
             bodies.append(Body.from_mesh("table", slab.vertices, slab.faces, center=np.array([0.274, 0.0, -0.02]), fixed=True, tags={"support", "fixture"}))
             meta["synthetic_table"] = "0.8 x 1.0 x 0.04 m slab at (0.274, 0, -0.02): the layout declares no support"
+        for fx in L.get("fixtures", []):        # more fixed bodies (a bookcase, a rack), SimReady packages
+            if "package" not in fx or "name" not in fx:
+                raise ValueError(f"a layout fixture names itself and a SimReady package (name, package, repo): {fx}")
+            bodies.append(body_from_layout_package(fx["name"], fx, fx.get("position", (0, 0, 0)), fx.get("yaw", 0.0), fixed=True,
+                                                   tags={"support", "fixture"}))
         for o in L["objects"]:
             if "package" in o:
                 bodies.append(body_from_layout_package(o["name"], o, (o["x"], o["y"], o["z"]), o.get("yaw", 0.0), tags={"object"}))
@@ -89,6 +94,14 @@ def load_any(path: str) -> Scene:
                 bodies.append(body_from_scenario(o["name"], o["scenario"], (o["x"], o["y"], o["z"]), yaw_deg=o.get("yaw", 0.0), tags={"object"}))
             else:
                 bodies.append(body_from_object_usd(o["name"], o["usd_path"], (o["x"], o["y"], o["z"]), yaw_deg=o.get("yaw", 0.0), tags={"object"}))
+            if "front" in o:                    # the side meant to face out (a book's spine), in the asset's own axes
+                from .io.asset_rest import AXIS_WORDS, rest_axis_word
+                if o["front"] not in AXIS_WORDS:
+                    raise ValueError(f"{o['name']}: front must be one of {', '.join(AXIS_WORDS)}, got {o['front']!r}")
+                word = rest_axis_word(o["front"], bodies[-1].meta.get("rest_rotation"))
+                if word.endswith("z"):
+                    raise ValueError(f"{o['name']}: front {o['front']} points {word} once the asset rests; a front side is horizontal")
+                bodies[-1].meta["front_axis"] = word
         return Scene(bodies, meta=meta)
     raise ValueError(f"unsupported scene file {path} (expected .usda/.usd/.usdc or a layout .json)")
 
@@ -100,7 +113,7 @@ def body_from_layout_package(name, entry: dict, position, yaw_deg, fixed=False, 
     pkg = package_dir(entry["package"], entry.get("repo", DEFAULT_REPO))
     if not (pkg / RECORD).exists():
         raise FileNotFoundError(f"SimReady package {entry['package']} is not in {pkg.parent}; run: python -m simready.cli assets fetch {entry['package']}")
-    return body_from_package(name, pkg, position, yaw_deg=yaw_deg, fixed=fixed, tags=tags)
+    return body_from_package(name, pkg, position, yaw_deg=yaw_deg, fixed=fixed, tags=tags, up=entry.get("up"))
 
 
 def load_program(path: str, scene: Scene):
@@ -408,7 +421,7 @@ def cmd_repair(a):
 def cmd_settle(a):
     """G5: settle the scene in MuJoCo with engine-like proxies and measure; exit 1 when it is not
     simulation-ready. Thresholds come from the program's gate section when given, else the CLI."""
-    from .gates.settle_mujoco import settle_and_measure
+    from .gates.settle_mujoco import settle_and_measure, support_plates
     sc = load_any(a.scene)
     v_max, d_max, min_gap = a.v_max, a.d_max, None
     prog = None
@@ -418,7 +431,8 @@ def cmd_settle(a):
             spec = compile_program(prog, sc)
         except INPUT_ERRORS as e:
             fail_input(e)
-        tops = {sup: min(h for b, h in spec.supports.items() if spec.support_of.get(b) == sup) for sup in set(spec.support_of.values())}
+        tops = support_plates(sc, {sup: [h for b, h in spec.supports.items() if spec.support_of.get(b) == sup]
+                                   for sup in set(spec.support_of.values())})
         g5 = prog.gate.get("G5", {})
         if "v_max" in g5:
             v_max = g5["v_max"][1]
@@ -427,17 +441,27 @@ def cmd_settle(a):
         g2 = prog.gate.get("G2", {})
         if "min_gap" in g2:
             min_gap = g2["min_gap"][1]
-    else:   # no program: every fixed body tagged support is a slab at the plate height under the free bodies
-        tops = {}
+    else:   # no program: every fixed body tagged support is a slab at the plate height under the free bodies (a fixture
+            # with levels: a plate under each level a body rests on, the one under its centre)
+        from .dsl.compile import support_height_for
+        from .scene.model import support_levels
+        seats = {}
         for sup in sc.bodies:
             if sup.fixed and "support" in sup.tags:
-                hs = [sc.support_height(sup, at=b.center[:2], radius=0.1) for b in sc.free()]
-                tops[sup.name] = min(hs) if hs else sc.support_height(sup)
-    # the largest hover above a support bounds the speed a plain drop can reach
+                if len(support_levels(sc, sup)) > 1:
+                    hs = [h for h in (support_height_for(sc, b, sup, require_hit=True) for b in sc.free()) if h is not None]
+                else:
+                    hs = [sc.support_height(sup, at=b.center[:2], radius=0.1) for b in sc.free()]
+                seats[sup.name] = hs or [sc.support_height(sup)]
+        tops = support_plates(sc, seats)
+    # the largest hover above a support bounds the speed a plain drop can reach (over the highest plate under the body)
     hover = 0.0
     for b in sc.free():
+        bottom = float(b.world_aabb()[0][2])
         for sup, top in tops.items():
-            hover = max(hover, float(b.world_aabb()[0][2] - top))
+            plates = top if isinstance(top, list) else [top]
+            under = [t for t in plates if t <= bottom + 1e-3]
+            hover = max(hover, bottom - (max(under) if under else min(plates)))
     free_fall_bound = float(np.sqrt(2 * 9.81 * max(hover, 0.0)))
     modes = ("hull", "coacd") if a.proxy == "both" else (a.proxy,)
     hold = bool(getattr(a, "hold_predicates", False))

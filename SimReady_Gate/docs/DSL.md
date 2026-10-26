@@ -26,7 +26,7 @@ A program row is `lo <= sum(c * step) <= hi` with an elastic slack:
 
 | kind | statements | rows |
 |---|---|---|
-| linear in the poses | `at`, `beside`, `within`, `inside`, `keep_out` (one side), `left_of` ..., `row`, `align`, `evenly_spaced`, `grid`, `symmetric`, `between`, `centered`, `offset` (scene frame), `yaw`, `parallel`, `max_turn`, `stack` | exact; re-evaluated every step only because footprints change with the scale and the heading |
+| linear in the poses | `at`, `beside`, `within`, `inside`, `keep_out` (one side), `flush`, `left_of` ..., `row`, `align`, `evenly_spaced`, `grid`, `symmetric`, `between`, `centered`, `offset` (scene frame), `yaw`, `parallel`, `max_turn`, `stack` | exact; re-evaluated every step only because footprints change with the scale and the heading |
 | convex | `reach` (outer radius), `cluster`, `near`, `balanced_on`, `max_move` | the tangent half-plane at the current poses (a superset that tightens as the steps re-linearise); `max_move` uses a 16-gon inscribed in its disc, exact rows at most 2 % conservative |
 | non-convex | `reach` (inner radius), `min_distance`, `facing`, `offset` in a body's frame, `attach` | the first-order expansion at the current poses |
 | disjunctive | `keep_out`, `approach` | the side that needs the least motion at the current poses, chosen again at every step |
@@ -54,7 +54,8 @@ and 10 degrees.
 
 ## Statements
 
-`a`, `b`, `c` are body names (`b.top` is b's top rectangle); group statements take a list of bodies
+`a`, `b`, `c` are body names (`b.top` is b's top rectangle; `b.levelK` is level K of a fixture, from 1 at
+the bottom, whose height, rectangle and headroom the scene summary lists); group statements take a list of bodies
 in order. In the first argument and among a group's members, `*` is every free body and a pattern
 (`can_*`, `fruit_?`) every free body whose name matches, in natural order (`can_2` before `can_10`).
 A pattern leaves out the bodies its statement names itself: `row(can_3, can_*)` puts can_3 first and
@@ -69,9 +70,9 @@ matches no free body is an error, so a misspelt group is not silently empty.
 | `reach(a, r, min=0, x=0, y=0)` | a's centre within `r` of the robot base (and at least `min` from it) | the arm's workspace annulus |
 | `clearance(a, gap)` | every other body is at least `gap` from a's surface (its support and what rests on it excepted) | room for gripper fingers |
 | `approach(a, length=0.20, width=0.10, toward=robot)` | no other body's footprint in the corridor of that size from a toward the robot (or `near`, `far`, `left`, `right`) | a clear line of approach |
-| `facing(a, b, axis=+x, tol=15)` | a's local axis points at b (or at `x=, y=`, by default the robot) | handles, labels, fronts |
+| `facing(a, b, axis=+x, tol=15)` | a's local axis (`front` / `handle`: the side the body's data names) points at b (or at `x=, y=`, by default the robot) | handles, labels, fronts |
 | `at(a, x, y, tol=0.01)` | a's centre at `x` and/or `y` | a hard position (`place` is a soft pull) |
-| `yaw(a, deg, tol=5, mod=360, axis=x)` | the heading of a's local `+x` (`axis=long`: of its long side, a line) is `deg`; `mod` 90 or 180 for shapes that repeat | square to the table, a board along x |
+| `yaw(a, deg, tol=5, mod=360, axis=x)` | the heading of a's local `+x` (`axis=long`: of its long side, a line; `axis=front`: of its front side) is `deg`; `mod` 90 or 180 for shapes that repeat | square to the table, a board along x, spines out |
 | `parallel(a, b, tol=5, axis=long)` | a's and b's long sides parallel (`axis=x`: their local x axes) | cutlery, tools, books |
 
 ### Arrangements
@@ -79,7 +80,7 @@ matches no free body is an error, so a misspelt group is not silently empty.
 | statement | holds when | use |
 |---|---|---|
 | `beside(a, b, side, gap=0, max)` | a's footprint on b's `side` with between `gap` and `max` of table between the two footprints | "the fork 2 to 5 cm left of the plate" |
-| `row(m1, m2, ..., axis=y, start, gap=0.01, tol=0.01, order, spacing, mid)` | the members on one line along `axis` (`x` or `y`), in the order listed from the end `start` names (`left` or `right` for a line along y, `near` or `far` along x; without it the list runs toward +y or +x), footprints at least `gap` apart; `order=height` / `width` / `length` / `mass` (`-` descending) sorts them first; `spacing=even` keeps every centre spacing within `tol` of the mean; `mid` puts the midpoint of the two end members' centres at that coordinate along `axis`, whichever members the order puts at the ends | drinks on a shelf, cans in a line |
+| `row(m1, m2, ..., axis=y, start, gap=0.01, tol=0.01, order, spacing, mid)` | the members on one line along `axis` (`x` or `y`), in the order listed from the end `start` names (`left` or `right` for a line along y, `near` or `far` along x; without it the list runs toward +y or +x), footprints at least `gap` apart; `order=height` / `width` / `length` / `mass` (`-` descending) sorts them first; `spacing=even` keeps every centre spacing within `tol` of the mean; `mid` puts the midpoint of the two end members' centres at that coordinate along `axis`, whichever members the order puts at the ends; `edge=min` / `max` lines up the footprints' near or far edges across the row instead of the centres | drinks on a shelf, cans in a line, spines in line |
 | `align(m1, ..., axis=x, edge=center, tol=0.005)` | equal x (or y) of the centres or of the footprints' `min` / `max` edge | flush backs, spines in line |
 | `evenly_spaced(m1, m2, m3, ..., axis=y, tol=0.005)` | every centre spacing within `tol` of the mean spacing | spice jars, test tubes |
 | `grid(m1, ..., cols, dx, dy, tol=0.01)` | rows of `cols` members, member k at `(row dx, col dy)` from the first; a free shared pitch without `dx`, `dy` | trays, racks, egg cartons |
@@ -96,6 +97,7 @@ matches no free body is an error, so a misspelt group is not silently empty.
 |---|---|---|
 | `within(a, b, inset=0.02, side, frac=0.5, depth, x0, x1, y0, y1)` | a's footprint inside the region: b's rectangle, the part of it `side` and `frac` select, or the strip beside it of that `depth`, bounded by `x0 .. y1` (bounds alone define a region) | "the fruit on the left third" |
 | `keep_out(a, b, gap=0, region fields as within)` | a's footprint outside the region | drop zones, the swing of a door (`side=near, depth=0.3`) |
+| `flush(a, b, side, gap=0, tol=0.005)` | a's footprint edge on `side` `gap` inside the same edge of b's rectangle (`b`, `b.top` or `b.levelK`) | books 1 cm behind a shelf's front, boxes against the back |
 | `max_move(a, d)`, `max_turn(a, deg)` | a moves at most `d` / turns at most `deg` from where it started | repairing a shipped or human-made scene |
 | `stack(m1, m2, ...)` | each member rests on the one before it, centred within `tol` | towers, pallet layers |
 | `balanced_on(a, b, margin=0.01)` | a's centre of mass (from the asset's physics when it has it) over b's top, `margin` in from its edge, in b's own frame | stability of a stack |
@@ -109,7 +111,10 @@ matches no free body is an error, so a misspelt group is not silently empty.
 `on_support` or in a `stack` keeps that support over one a pattern gives it (`on_support(can_*, tray)`),
 and a pattern's support wins over the one `on_support(*, ...)` gives. On a fixed support a body rests
 on the level under it (a shelf below the fixture's top); on a free one (a carton on a carton, fruit in
-a bowl) it rests on the highest surface under it, wherever it starts.
+a bowl) it rests on the highest surface under it, wherever it starts. `on_support(a, shelf.level2)`
+puts it on that level wherever it starts; the compiler refuses a body (or a stack) taller than the
+room above the level with the margin, and names the levels that have room. A body on a level under
+part of its fixture, or on a level it is given, keeps its footprint on that level as a contact does.
 
 ## Recipes
 
@@ -176,6 +181,30 @@ stack(box_large, box_medium, box_small, tol=0.005)   within(box_large, table.top
 within(apple, table.top, side=left, frac=0.5)  ...
 ```
 
+### Shelves
+
+The programs of the examples in [`examples/`](examples/) (`shelf_books`, `shelf_pantry`, `shelf_fix`).
+
+**Books upright, spines out, by height; the ones too tall for the shelves on top; notebooks stacked at the back.**
+```
+on_support(book_*, case.level2)   on_support(book_2, case.level4)   on_support(book_3, case.level4)   yaw(book_*, deg=180, axis=front)
+row(book_1, book_4, book_5, book_6, book_7, start=left, order=-height, gap=0.005, mid=0, edge=min)   flush(book_1, case.level2, side=near, gap=0.01)
+on_support(notebook_1, case.level1)   stack(notebook_1, notebook_2, notebook_3, notebook_4)   flush(notebook_1, case.level1, side=far, gap=0.01)
+```
+
+**A pantry rack, heavy things low.**
+```
+reach(*, r=0.85)   within(*, rack, x0=0.57)
+on_support(mug_*, rack.level1)   yaw(mug_*, deg=-90, axis=handle)   row(mug_1, mug_2, mug_3, soup, start=left, gap=0.03)
+on_support(can_*, rack.level2)   grid(can_1, can_2, can_3, can_4, can_5, can_6, cols=3, dx=0.09, dy=0.09)
+on_support(jar_*, rack.level3)   row(jar_*, start=left, order=-mass, spacing=even, gap=0.01)
+```
+
+**Fixing a stocked rack.** `on_support(*, rack)` keeps every body on the level under it.
+```
+no_penetration(*, margin=0.002)   on_support(*, rack)   max_move(*, d=0.02)   max_turn(*, deg=10)
+```
+
 ## Defaults
 
 Omitted keywords take recorded defaults (`simready/dsl/schema.py`: `DEFAULTS`, `OP_DEFAULTS`), which
@@ -191,5 +220,9 @@ the certificate lists under `provenance.tolerances.statement_defaults`.
 - Footprints are the projections of a body's mesh on the plane: corridors, regions and gaps do not
   know heights (a flat sheet in a corridor blocks it).
 - `balanced_on` takes b's top as its footprint rectangle in b's own frame.
+- A level is a horizontal surface of a fixture: a wire deck (the tops of wires) is not found, and a
+  level's rectangle is a box in the scene frame, exact for a fixture turned by a quarter turn. It is
+  one rectangle: a divider standing on a board inside it is not kept apart from the bodies on that
+  board (their contact with the fixture is the board they rest on).
 - `max_move`, `max_turn` and `attach` are measured from the poses the program was compiled on; after
   a settle they are measured from the poses the settle started from.

@@ -91,6 +91,35 @@ def body_physics(b, parts) -> tuple[float, float]:
 _COACD_CACHE: dict = {}
 
 
+LEVEL_PLATE = 0.01      # the plate that stands in for one level of a fixture in the settle (thinner than a shelf board)
+
+
+def support_plates(scene: Scene, seats: dict) -> dict:
+    """support name -> what the settle puts in its place, from the seat heights of the bodies on it: the lowest
+    height (one slab, as for a table), or, for a fixture with bodies under its top level (the shelves of a bookcase),
+    the heights of the levels they rest on (a plate under each)."""
+    from ..scene.model import SLAB_LEVEL_TOL, support_levels
+    out = {}
+    for sup, hs in seats.items():
+        b = scene[sup]
+        levels = support_levels(scene, b) if b.fixed else []
+        if len(levels) > 1 and min(hs) < levels[-1].z - SLAB_LEVEL_TOL:
+            out[sup] = sorted({min(levels, key=lambda lv: abs(lv.z - h)).z for h in hs})
+        else:
+            out[sup] = min(hs)
+    return out
+
+
+def _plates(scene: Scene, b, tops: list) -> list:
+    """(world rectangle lo, hi, top) of the plate under each level of fixture b at the heights `tops`."""
+    from ..scene.model import support_levels
+    out = []
+    for h in tops:
+        lv = min(support_levels(scene, b), key=lambda o: abs(o.z - h))
+        out.append((np.array([lv.x0, lv.y0]), np.array([lv.x1, lv.y1]), float(h)))
+    return out
+
+
 def coacd_pieces_info(b, threshold: float = 0.05, max_hulls: int = 32):
     """(convex pieces of a body's mesh in the model frame via CoACD, used_fallback), cached on
     the mesh content: in memory, and on disk under $SIMREADY_CACHE_DIR/coacd when that is set
@@ -145,7 +174,8 @@ def settle_and_measure(scene: Scene, seconds: float = 2.0, timestep: float = 2e-
                        decompose_free: bool = False, max_hull_verts: int = 256, verbose: bool = False,
                        record_every: int = 0) -> SettleReport:
     """support_tops: support name -> plate height; such fixed bodies become a 5 cm slab
-    whose top is that height (the convex hull of a table with legs and a rim is not its plate).
+    whose top is that height (the convex hull of a table with legs and a rim is not its plate);
+    a list of heights (support_plates) puts a LEVEL_PLATE plate under each of those levels instead.
     decompose_free: CoACD convex pieces for free bodies instead of one convex hull.
     Mass properties come from the collision proxy itself (uniform density, hull inertia): an explicit
     inertial at the AABB-centred body origin sits above the centroid of round objects (a stem, a handle)
@@ -173,7 +203,13 @@ def settle_and_measure(scene: Scene, seconds: float = 2.0, timestep: float = 2e-
         for k, b in enumerate(scene.bodies):
             geoms = []
             parts = pieces.get(b.name) if pieces else None
-            if parts is None and b.fixed and support_tops and b.name in support_tops:
+            if parts is None and b.fixed and support_tops and b.name in support_tops and isinstance(support_tops[b.name], list):
+                parts = []
+                for lo, hi, top in _plates(scene, b, support_tops[b.name]):
+                    m = trimesh.creation.box(extents=(hi[0] - lo[0], hi[1] - lo[1], LEVEL_PLATE))
+                    wv = np.asarray(m.vertices) + np.array([0.5 * (lo[0] + hi[0]), 0.5 * (lo[1] + hi[1]), top - 0.5 * LEVEL_PLATE])
+                    parts.append(((b.rotation.T @ (wv - b.center).T).T, np.asarray(m.faces)))
+            elif parts is None and b.fixed and support_tops and b.name in support_tops:
                 px = slab_proxy(b, top=support_tops[b.name])
                 # express the slab in the body's frame: verts_local = R^T (world - center)
                 wv = px.world_vertices()
@@ -267,14 +303,16 @@ def settle_and_measure(scene: Scene, seconds: float = 2.0, timestep: float = 2e-
     final = {n: float(np.linalg.norm(data.xpos[bid[n]] - p0[n])) for n in free}
     left = []
     if support_tops:
-        rects = {}
+        rects = []
         for b in fixed:
-            if b.name in support_tops:
-                lo, hi = b.world_aabb(); rects[b.name] = (lo[:2], hi[:2], support_tops[b.name])
+            if b.name in support_tops and isinstance(support_tops[b.name], list):
+                rects += _plates(scene, b, support_tops[b.name])
+            elif b.name in support_tops:
+                lo, hi = b.world_aabb(); rects.append((lo[:2], hi[:2], support_tops[b.name]))
         for n in free:
             x = data.xpos[bid[n]]
             on_any = any((lo[0] - 1e-3 <= x[0] <= hi[0] + 1e-3) and (lo[1] - 1e-3 <= x[1] <= hi[1] + 1e-3) and x[2] > top - 0.02
-                         for lo, hi, top in rects.values())
+                         for lo, hi, top in rects)
             if not on_any:
                 left.append(n)
     else:

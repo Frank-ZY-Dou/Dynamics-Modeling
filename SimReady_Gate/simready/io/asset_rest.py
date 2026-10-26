@@ -29,6 +29,7 @@ _TABLE: dict | None = None
 _AXES = {"+x": np.array([1.0, 0.0, 0.0]), "-x": np.array([-1.0, 0.0, 0.0]),
          "+y": np.array([0.0, 1.0, 0.0]), "-y": np.array([0.0, -1.0, 0.0]),
          "+z": np.array([0.0, 0.0, 1.0]), "-z": np.array([0.0, 0.0, -1.0])}
+AXIS_WORDS = tuple(_AXES)
 
 
 def rotation_to_up(axis: str) -> np.ndarray:
@@ -45,6 +46,13 @@ def rotation_to_up(axis: str) -> np.ndarray:
     K = np.array([[0.0, -v[2], v[1]], [v[2], 0.0, -v[0]], [-v[1], v[0], 0.0]])
     R = np.eye(3) + K + K @ K * ((1.0 - c) / (s * s))
     return R
+
+
+def rest_axis_word(axis: str, R: np.ndarray | None) -> str:
+    """The axis word ('+x', '-z', ...) that the authored axis `axis` becomes in the resting frame of rotation R."""
+    v = _AXES[axis] if R is None else np.asarray(R, dtype=np.float64) @ _AXES[axis]
+    k = int(np.argmax(np.abs(v)))
+    return ("+" if v[k] > 0 else "-") + "xyz"[k]
 
 
 def table() -> dict:
