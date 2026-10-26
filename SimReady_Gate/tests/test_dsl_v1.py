@@ -854,6 +854,19 @@ class Rewrites(unittest.TestCase):
         _, _, _, rws = self.rewritten("", sc)
         self.assertEqual([(r["text"], r["weaken"]) for r in rws], [("on_support(*, table)", None)])
 
+    def test_a_smaller_margin_is_tried_from_the_same_start(self):
+        from simready.cli import repair_scene, schedule_rewrites
+
+        def scene():
+            return table_scene(*[box(f"b_{k}", (0.1, 0.1, 0.06), (0.55 + 0.005 * k, 0.01 * k, 0.03)) for k in range(3)])
+        text = HEAD + "  within(*, x0=0.45, x1=0.65, y0=-0.165, y1=0.165)\nschedule\n  margin = 0.02\n"
+        out = repair_scene(scene(), parse_program(text))
+        self.assertFalse(out["ok"])                     # three 10 cm boxes in 33 cm, 2 cm apart: no room
+        tries = schedule_rewrites(lambda m: repair_scene(scene(), parse_program(text), schedule={**out["schedule"], "margin": m}), out)
+        self.assertEqual([(t["margin"], t["ok"]) for t in tries], [([0.02, 0.01], True)])
+        again = repair_scene(scene(), parse_program(text.replace("margin = 0.02", "margin = 0.01")))
+        self.assertTrue(again["ok"])                    # the program with that schedule ends as the report said
+
     def test_the_report_names_the_json_statement(self):
         from simready.cli import rewrite_report
         rest = [{"op": "on_support", "a": "*", "b": "table"}, {"op": "upright", "a": "*"}]

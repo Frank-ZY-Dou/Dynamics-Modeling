@@ -15,7 +15,7 @@ import time
 
 import numpy as np
 
-from simready.cli import load_any, repair_scene, rewrite_report, INPUT_ERRORS
+from simready.cli import load_any, repair_scene, rewrite_report, schedule_rewrites, INPUT_ERRORS
 from simready.dsl.schema import validate_program_json, ProgramError, V0_OPS, V0_FIELDS
 from simready.dsl.model import parse_program, schedule_of
 from simready.dsl.compile import support_height_for
@@ -28,8 +28,9 @@ MAX_XY_STEP = 0.05
 REWRITES_NOTE = ("rewrites: for each statement whose requirement failed (its index in your statements), relax gives "
                  "{keyword: [your value, the nearest value at which it holds on the layout the repair returned]} and weaken "
                  "says whether it may become a preference (soft) or be removed (drop); accepted_if_relaxed and "
-                 "accepted_if_weakened say whether those edits make that layout pass. Your next program is repaired again "
-                 "from the same starting scene.")
+                 "accepted_if_weakened say whether those edits make that layout pass. schedule_rewrites: the repair run again "
+                 "from the same starting scene with a smaller schedule margin ([yours, tried]), and what it ended with; the "
+                 "schedule never changes what is accepted. Your next program is repaired again from the same starting scene.")
 
 
 def _elapsed(t0, c0, clock):
@@ -39,6 +40,14 @@ def _elapsed(t0, c0, clock):
     if clock is not None:
         clock["cpu_s"] = time.process_time() - c0
     return time.time() - t0
+
+
+def report_of(ok, pen_after: int, hard: list, prefs: list, solver_notes: list) -> dict:
+    """What a round of a program condition is told: the repair's verdict, the pairs that penetrate, the requirements and
+    preferences that failed (with their values) and the first solver notes."""
+    return {"ok": bool(ok), "pen_after": pen_after,
+            "failed_predicates": [(n, None if v is None else round(float(v), 4)) for n, ok_, v in hard if not ok_],
+            "failed_preferences": [n for n, ok_, _ in prefs if not ok_], "solver_notes": solver_notes[:4]}
 
 
 def run_program(layout_path, obj: dict, v0_only: bool = False, rewrites: bool = False, clock: dict | None = None):
@@ -64,12 +73,13 @@ def run_program(layout_path, obj: dict, v0_only: bool = False, rewrites: bool = 
         out = repair_scene(sc, prog, schedule={**schedule_of(prog), **SCHEDULE_FIXED}, max_xy_step=MAX_XY_STEP)
     except INPUT_ERRORS as e:
         return sc, {"ok": False, "error": f"{type(e).__name__}: {e}"}, False, _elapsed(t0, c0, clock)
-    report = {"ok": bool(out["ok"]), "pen_after": out["after"].pen_pairs,
-              "failed_predicates": [(n, None if v is None else round(float(v), 4)) for n, ok, v in out["hard"] if not ok],
-              "failed_preferences": [n for n, ok, _ in out["prefs"] if not ok], "solver_notes": out["solver_notes"][:4]}
+    report = report_of(out["ok"], out["after"].pen_pairs, out["hard"], out["prefs"], out["solver_notes"])
     if rewrites and report["failed_predicates"]:
         contacts_ok = out["after"].pen_pairs == 0 and (out["clearance"] is None or out["clearance"]["pass"])
         report.update(rewrite_report(prog, sc, out["hard"], obj, contacts_ok), rewrites_note=REWRITES_NOTE)
+        report["schedule_rewrites"] = schedule_rewrites(
+            lambda m: repair_scene(load_any(str(layout_path)), parse_program(dsl),
+                                   schedule={**schedule_of(prog), **SCHEDULE_FIXED, "margin": m}, max_xy_step=MAX_XY_STEP), out)
     return sc, report, bool(out["ok"]), _elapsed(t0, c0, clock)
 
 

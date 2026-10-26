@@ -148,6 +148,11 @@ on the layout returned (`rewrites`; `rewrites` in `simready/dsl/compile.py`):
   (`place`, `clearance`), nothing for what rests where and what is fixed (`no_penetration`, `fixed`,
   `on_support`, `upright`, `stack`).
 
+`schedule_rewrites` are the repair run again from the same start with half and then a quarter of
+the schedule's margin (not below 1 mm), until one ends ok, with what each ends with. A schedule never
+changes what is accepted, so these keep the request, and a program given that margin ends exactly as
+reported.
+
 | statements | bounds that relax |
 |---|---|
 | `left_of`, `right_of`, `farther`, `nearer`, `between`, `keep_out`, `clearance` | `gap` down |

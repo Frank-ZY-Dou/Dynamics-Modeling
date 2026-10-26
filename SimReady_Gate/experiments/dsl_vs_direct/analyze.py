@@ -6,7 +6,9 @@ cache), output tokens (thinking included), the CLI's cost at list price, the tim
 and in the solver. "Per success" divides a condition's total by its number of passing trials: what
 one passing scene costs. direct+repair is direct's last answer repaired by S4R with the shared
 geometric statements only; its cost is direct's plus the repair time. Solver time is wall-clock, with
-the worker's CPU seconds beside it; the held-out tasks are also tabulated apart.
+the worker's CPU seconds beside it; the held-out tasks are also tabulated apart. dsl_v1 and
+dsl_v1_rewrites, which share their first answer, are also compared pair by pair after a first answer
+that failed the gate (a model's, or a faulted reference of run.py --faults), with the exact McNemar test.
 
     python experiments/dsl_vs_direct/analyze.py results/dsl_vs_direct/sonnet [more run dirs] --md summary.md --json summary.json
 """
@@ -14,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from collections import defaultdict
 from pathlib import Path
 
@@ -79,6 +82,51 @@ def wilson(k: int, n: int, z: float = 1.96):
     return (max(0.0, c - h), min(1.0, c + h))
 
 
+def mcnemar(b: int, c: int) -> float:
+    """Exact two-sided McNemar p-value: b pairs where only the first condition passes, c where only the second does."""
+    n = b + c
+    return 1.0 if n == 0 else min(1.0, 2.0 * sum(math.comb(n, i) for i in range(min(b, c) + 1)) / 2 ** n)
+
+
+def paired(trials) -> tuple[str, dict]:
+    """dsl_v1 against dsl_v1_rewrites from the same first answer when that answer failed the gate: per model, and per
+    kind of fault for faulted first answers ("model" for a model's own). Per condition: the pairs whose final scene
+    passes the rubric, whose second round passes the gate, that pass the gate but not the rubric (the request
+    weakened), the rounds and the output tokens after the first; the discordant pairs and their McNemar p-value."""
+    by = {}
+    for t in trials:
+        if t["condition"] in ("dsl_v1", "dsl_v1_rewrites"):
+            by.setdefault((t["model"], t["task"], t["seed"], (t.get("fault") or {}).get("name")), {})[t["condition"]] = t
+    groups = {}
+    for (m, task, seed, fault), pair in by.items():
+        if len(pair) < 2 or pair["dsl_v1"]["rounds"][0]["self_ok"]:
+            continue                        # a first answer that passed leaves nothing to compare
+        kind = pair["dsl_v1"]["fault"]["kind"] if fault else "model"
+        for g in ((m, kind), (m, "all")):
+            groups.setdefault(g, []).append(pair)
+    report, lines = {}, ["### After a failed first answer: dsl_v1 against dsl_v1_rewrites", "",
+                         "| model | first answer | pairs | pass, plain / rewrites | gate after round 2 | request weakened | rounds | output tokens after round 1 | plain only / rewrites only | p |",
+                         "|---|---|---|---|---|---|---|---|---|---|"]
+
+    def stats(ts):
+        out_tok = [sum(float(((r["llm"] or {}).get("usage") or {}).get("output") or 0) for r in t["rounds"][1:]) for t in ts]
+        return {"passed": sum(t["success"] for t in ts), "gate_round2": sum(len(t["rounds"]) > 1 and t["rounds"][1]["self_ok"] for t in ts),
+                "weakened": sum(t["self_ok"] and not t["success"] for t in ts), "rounds_mean": float(np.mean([t["n_rounds"] for t in ts])),
+                "output_after_first": float(np.mean(out_tok))}
+    for (m, kind) in sorted(groups, key=lambda g: (g[0], g[1] == "all", g[1])):
+        ps = groups[(m, kind)]
+        a, b = stats([p_["dsl_v1"] for p_ in ps]), stats([p_["dsl_v1_rewrites"] for p_ in ps])
+        only_a = sum(p_["dsl_v1"]["success"] and not p_["dsl_v1_rewrites"]["success"] for p_ in ps)
+        only_b = sum(p_["dsl_v1_rewrites"]["success"] and not p_["dsl_v1"]["success"] for p_ in ps)
+        pv = mcnemar(only_a, only_b)
+        report.setdefault(m, {})[kind] = {"pairs": len(ps), "dsl_v1": a, "dsl_v1_rewrites": b, "plain_only": only_a, "rewrites_only": only_b, "p": pv}
+        n = len(ps)
+        lines.append(f"| {m} | {kind} | {n} | {a['passed']}/{n} / {b['passed']}/{n} | {a['gate_round2']} / {b['gate_round2']} | "
+                     f"{a['weakened']} / {b['weakened']} | {a['rounds_mean']:.2f} / {b['rounds_mean']:.2f} | "
+                     f"{a['output_after_first']:.0f} / {b['output_after_first']:.0f} | {only_a} / {only_b} | {pv:.3g} |")
+    return "\n".join(lines) + "\n", report
+
+
 def summarize(rows, key=lambda r: r["condition"]):
     groups = defaultdict(list)
     for r in rows:
@@ -117,6 +165,8 @@ def main():
     ap.add_argument("dirs", nargs="+"); ap.add_argument("--md"); ap.add_argument("--json")
     a = ap.parse_args()
     trials = load(a.dirs)
+    md_pairs, report_pairs = paired(trials)
+    trials = [t for t in trials if "fault" not in t]          # the faulted first answers are compared apart, above
     rows = [r for t in trials for r in per_trial(t)]
     models = sorted({r["model"] for r in rows})
     report = {"models": models, "overall": {}, "by_family": {}, "by_size": {}}
@@ -155,7 +205,11 @@ def main():
                     cells.append("—" if v is None else f"{v['passed']}/{v['trials']}, {v['per_trial']['output']:.0f}, {v['per_trial']['llm_s']:.0f}")
                 lines.append(f"| {f} | {n} | " + " | ".join(cells) + " |")
         md.append("\n".join(lines) + "\n")
-    md.append(after_runs(a.dirs, trials, report))
+    md.append(after_runs([d for d in a.dirs if not (Path(d) / "run_meta.json").exists()
+                          or "faults" not in json.loads((Path(d) / "run_meta.json").read_text())], trials, report))
+    if report_pairs:
+        report["paired"] = report_pairs
+        md.append(md_pairs)
     text = "\n".join(md)
     print(text)
     if a.md:

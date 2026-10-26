@@ -56,9 +56,10 @@ report on stdout; `summarize`, `prompt` and `verify` print text.
      edits make that layout pass. Apply a rewrite only when the request allows it (a number the
      request states is not yours to relax); otherwise change what the statement asks for, or
      another statement, and rerun step 4 (the repair starts again from the same scene).
-   - a tight packing whose `solver_notes` say the contacts set the program rows aside: lower the
-     clearance the repair keeps, `"schedule": {"margin": 0.002}` (default 0.005 m); it changes how
-     the repair gets there, never what is accepted.
+   - `schedule_rewrites` say what the repair ends with from the same scene with a smaller margin (the
+     clearance the repair keeps, `"schedule": {"margin": ...}`, default 0.005 m). A schedule never
+     changes what is accepted, so such an edit is always yours to make, and the program given that
+     margin ends exactly as reported.
    - `pen_after > 0` (tight packing, nested containers): shrink the intent — fewer objects,
      a larger region, or different objects — and go back to step 2.
    - a failed `within`/`inside`: the region is too small for the objects; enlarge the region or

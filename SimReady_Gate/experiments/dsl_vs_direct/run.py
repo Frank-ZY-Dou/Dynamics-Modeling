@@ -4,7 +4,9 @@ isolated CLI calls (llm.py), in three conditions.
   dsl_v1   the model writes a SimReady program (every statement); the gate compiles and repairs it
   dsl_v0   the same with the statements the language had before v1 (no rows, grids, headings, regions)
   dsl_v1_rewrites  dsl_v1 whose report, when a requirement fails, also carries the rewrites of the statements
-           that failed (simready.cli.rewrite_report); its first round is dsl_v1's (not run by default)
+           that failed and the repair with a smaller margin (simready.cli.rewrite_report, schedule_rewrites); its
+           first round is dsl_v1's answer of the same task and seed (the two differ only after a failure; run
+           after dsl_v1, not by default)
   direct   the model writes the final pose of every free body; no program, no solver
   (direct+repair, computed from direct's answers without another call: its poses repaired by S4R with
    only the geometric statements every task shares)
@@ -14,7 +16,15 @@ whose message repeats the request with the previous answer and what that conditi
 (the gate's report on the program, or the verifier's report on the poses). A trial stops when that
 check passes. The hidden rubric (tasks.py) grades every round's scene; no model sees it.
 
+With --faults, a trial's first answer is not a call but a task's reference program with one of its
+faults (tasks.Fault), and the trial compares the reports given after that failure: dsl_v1 and
+dsl_v1_rewrites from the same first answer. --check-faults first runs every reference and every
+faulted program without a call and writes which faults fail where the reference passes; --faults
+runs those.
+
     python experiments/dsl_vs_direct/run.py --model claude-sonnet-5-5 --seeds 0 1 2 --workers 4 --out results/dsl_vs_direct/sonnet
+    python experiments/dsl_vs_direct/run.py --check-faults --seeds 0 1 2 --workers 4 --out runs/faults
+    python experiments/dsl_vs_direct/run.py --faults runs/faults/faults_check.json --model claude-sonnet-5-5 --workers 4 --out runs/faults/sonnet
 """
 from __future__ import annotations
 
@@ -76,6 +86,12 @@ def sanitize(obj, home=str(Path.home())):
     return json.loads(text)
 
 
+def round_message(base: str, answer, report) -> str:
+    """The message of a later round: the first message, the previous answer and what checking it found."""
+    return (base + "\nYour previous answer:\n" + json.dumps(answer) + "\n\nWhat checking it found:\n" + json.dumps(report)
+            + "\n\nGive a corrected, complete answer.\n")
+
+
 def run_trial(job):
     import tasks as T, scenes as S, pipelines as P, llm
     from simready.cli import load_any
@@ -92,24 +108,34 @@ def run_trial(job):
     # (task and scene alone), and a later one when the answer before it was the recorded one and checking it found
     # word for word what it found then; any other round calls the model, as a run does
     recorded = json.loads(Path(job["replay_of"]).read_text())["rounds"] if job.get("replay_of") else None
+    # the first answer when it is not called: a faulted reference (--faults), or dsl_v1's for dsl_v1_rewrites
+    if job.get("fault"):
+        first = (task.faulted(job["fault"]), None, "fault")
+    elif job.get("first_from"):
+        r1 = json.loads(Path(job["first_from"]).read_text())["rounds"][0]
+        first = (r1["answer"], r1["llm"], "dsl_v1")
+    else:
+        first = None
     rounds, prev, prev_recorded = [], None, True
     canon = lambda x: json.dumps(x, sort_keys=True)
     for r in range(1, job["rounds"] + 1):
-        msg = base if prev is None else (base + "\nYour previous answer:\n" + json.dumps(prev["answer"]) +
-                                         "\n\nWhat checking it found:\n" + json.dumps(prev["report"]) + "\n\nGive a corrected, complete answer.\n")
+        msg = base if prev is None else round_message(base, prev["answer"], prev["report"])
         old = recorded[r - 1] if recorded is not None and r <= len(recorded) else None
         same = (old is not None and prev_recorded and len(msg) == old["message_chars"]
                 and (r == 1 or canon(sanitize(prev["report"])) == canon(recorded[r - 2]["report"])))
-        if same:
-            answer, llm_rec = old["answer"], old["llm"]
+        if r == 1 and first is not None:
+            answer, llm_rec, source = first
+        elif same:
+            answer, llm_rec, source = old["answer"], old["llm"], old.get("answer_from", "recorded")   # a replay of a replay keeps where each answer came from
         else:
             call = llm.call(system, msg, job["model"], job["effort"], schema=schema, work_root=job["work_root"])
             answer = call.get("structured")
             llm_rec = {k: call.get(k) for k in ("ok", "wall_s", "duration_ms", "duration_api_ms", "cost_usd", "usage", "num_turns", "stop_reason", "error")}
+            source = "called"
         prev_recorded = same
         rec = {"round": r, "llm": llm_rec, "message_chars": len(msg), "answer": answer}
-        if recorded is not None:
-            rec["answer_from"] = old.get("answer_from", "recorded") if same else "called"     # a replay of a replay keeps where each answer came from
+        if recorded is not None or first is not None:
+            rec["answer_from"] = source
         clock = {}
         if answer is None:
             report, self_ok, final, t_solve = {"ok": False, "error": "no structured answer"}, False, start, 0.0
@@ -135,7 +161,9 @@ def run_trial(job):
     out = {"task": task.key, "family": task.name, "n": task.n, "condition": cond, "seed": seed, "model": job["model"], "effort": job["effort"],
            "rounds": rounds, "n_rounds": len(rounds), "success": rounds[-1]["rubric_ok"], "first_round_success": rounds[0]["rubric_ok"],
            "self_ok": rounds[-1]["self_ok"]}
-    path = Path(job["out"]) / "trials" / f"{task.key}_{cond}_s{seed}.json"
+    if job.get("fault"):
+        out["fault"] = {"name": job["fault"], "kind": next(f.kind for f in task.faults if f.name == job["fault"])}
+    path = Path(job["out"]) / "trials" / trial_name(task.key, cond, seed, job.get("fault"))
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(sanitize(out), indent=1, default=str))
     return {k: out[k] for k in ("task", "condition", "seed", "n_rounds", "success", "first_round_success")}
@@ -152,53 +180,41 @@ def code_version() -> dict:
         return {"commit": None, "local_changes": None}
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default="claude-sonnet-5-5"); ap.add_argument("--effort", default="medium")
-    ap.add_argument("--seeds", type=int, nargs="+", default=[0]); ap.add_argument("--rounds", type=int, default=3)
-    ap.add_argument("--conditions", nargs="+", default=["dsl_v1", "dsl_v0", "direct"]); ap.add_argument("--tasks", nargs="*")
-    ap.add_argument("--workers", type=int, default=4); ap.add_argument("--out", required=True)
-    ap.add_argument("--work-root", default=None, help="where the empty per-call working directories go")
-    ap.add_argument("--replay", help="a recorded run: its trials again with the present pipelines, keeping each recorded "
-                                     "answer whose message is unchanged (model, effort, rounds and seeds come from its record)")
-    a = ap.parse_args()
-    replay_meta = None
-    if a.replay:
-        replay_meta = json.loads((Path(a.replay) / "run_meta.json").read_text())
-        a.model, a.effort, a.rounds = replay_meta["model"], replay_meta["effort"], replay_meta["rounds"]
-        a.seeds, a.conditions = replay_meta["seeds"], replay_meta["conditions"]
-        for c in a.conditions:           # a recorded answer answers the system prompt and the format it was given
-            if ((Path(a.replay) / f"system_{c}.txt").read_text() != conditions()[c]
-                    or json.loads((Path(a.replay) / f"schema_{c}.json").read_text()) != schemas()[c]):
-                sys.exit(f"--replay: the system prompt or the answer format of {c} is not the recorded run's, so its recorded "
-                         "answers answer another prompt; run without --replay")
-    import tasks as T, llm
-    out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
-    keys = [t.key for t in T.all_tasks() if not a.tasks or t.key in a.tasks or t.name in a.tasks]
-    jobs = [{"task": k, "condition": c, "seed": s, "model": a.model, "effort": a.effort, "rounds": a.rounds, "out": str(out),
-             "work_root": a.work_root} | ({"replay_of": str(Path(a.replay) / "trials" / f"{k}_{c}_s{s}.json")} if a.replay else {})
-            for k in keys for s in a.seeds for c in a.conditions
-            if not (out / "trials" / f"{k}_{c}_s{s}.json").exists()]
-    meta = {"cli": llm.cli_version(), "model": a.model, "effort": a.effort, "rounds": a.rounds, "seeds": a.seeds, "conditions": a.conditions,
-            "flags": llm.FLAGS, "env_allowlist": list(llm.ENV_KEEP) + ["CLAUDE_CODE_DISABLE_AUTO_MEMORY=1"],
-            "system_prompts": {k: {"chars": len(v)} for k, v in conditions().items()}, "started": time.strftime("%Y-%m-%dT%H:%M:%S"),
-            "code": code_version(), "assets_revision": T.ASSETS["revision"], "tasks": keys, "held_out": sorted(T.HELD_OUT),
-            "workers": a.workers, "cpus": sorted(os.sched_getaffinity(0)), "omp_threads": os.environ.get("OMP_NUM_THREADS")}
-    if replay_meta is not None:
-        meta["replay_of"] = {"run": os.path.basename(os.path.normpath(a.replay)), "started": replay_meta["started"],
-                             "code": replay_meta.get("code"), "cli": replay_meta.get("cli")} | (
-                                {"replay_of": replay_meta["replay_of"]} if "replay_of" in replay_meta else {})
-    if (out / "run_meta.json").exists():                 # a rerun of the trials a crash left out: keep the first record
-        first = json.loads((out / "run_meta.json").read_text())
-        first.setdefault("resumed", []).append({k: meta[k] for k in ("started", "code", "cli", "cpus", "workers")} | {"trials": len(jobs)})
-        meta = first
-    (out / "run_meta.json").write_text(json.dumps(meta, indent=1))
-    for k, v in conditions().items():
-        (out / f"system_{k}.txt").write_text(v)
-        (out / f"schema_{k}.json").write_text(json.dumps(schemas()[k], indent=1))
-    print(f"{len(jobs)} trials", flush=True)
+def trial_name(key: str, cond: str, seed: int, fault: str | None = None) -> str:
+    return f"{key}_{fault}_{cond}_s{seed}.json" if fault else f"{key}_{cond}_s{seed}.json"
+
+
+def check_unit(unit):
+    """A task's reference and each of its faulted programs on one seed, without a call: whether each passes the
+    gate's own check and the rubric, and the report (with the rewrites) the gate gives it."""
+    import tasks as T, scenes as S, pipelines as P
+    from simready.cli import load_any
+    os.environ.setdefault("OMP_NUM_THREADS", "2")
+    task = {t.key: t for t in T.all_tasks()}[unit["task"]]
+    layout = S.build(task, unit["seed"], Path(unit["out"]) / "layouts")
+    start = load_any(str(layout))
+
+    def run(prog):
+        final, report, self_ok, t_solve = P.run_program(layout, prog, rewrites=True)
+        passed, checks = P.grade(task, final, start)
+        return {"self_ok": self_ok, "rubric_ok": passed, "rubric_failed": [c for c in checks if not c[1]], "report": report, "solve_s": t_solve}
+    out = [{"task": task.key, "seed": unit["seed"], "fault": None, "kind": None, **run(task.reference)}]
+    out += [{"task": task.key, "seed": unit["seed"], "fault": f.name, "kind": f.kind, **run(task.faulted(f.name))} for f in task.faults]
+    return sanitize(out)
+
+
+def valid_faults(check: dict) -> list:
+    """(task, fault, seed) of the check where the reference passes the gate and the rubric and the faulted program
+    does not pass the gate."""
+    ref = {(e["task"], e["seed"]): e["self_ok"] and e["rubric_ok"] for e in check["results"] if e["fault"] is None}
+    return [(e["task"], e["fault"], e["seed"]) for e in check["results"] if e["fault"] is not None and ref[(e["task"], e["seed"])]
+            and not e["self_ok"]]
+
+
+def run_jobs(jobs, workers: int) -> int:
+    """Run the trials in a pool; the number that crashed (a dead worker stops the run)."""
     crashed = 0
-    with ProcessPoolExecutor(max_workers=a.workers) as ex:
+    with ProcessPoolExecutor(max_workers=workers) as ex:
         futs = {ex.submit(run_trial, j): j for j in jobs}
         for f in as_completed(futs):
             j = futs[f]
@@ -212,6 +228,98 @@ def main():
             except Exception:  # noqa: BLE001  a crashed trial is reported and left to a rerun
                 crashed += 1
                 print(json.dumps({"task": j["task"], "condition": j["condition"], "seed": j["seed"], "crash": traceback.format_exc()[-1500:]}), flush=True)
+    return crashed
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", default="claude-sonnet-5-5"); ap.add_argument("--effort", default="medium")
+    ap.add_argument("--seeds", type=int, nargs="+", default=[0]); ap.add_argument("--rounds", type=int, default=3)
+    ap.add_argument("--conditions", nargs="+", default=["dsl_v1", "dsl_v0", "direct"]); ap.add_argument("--tasks", nargs="*")
+    ap.add_argument("--workers", type=int, default=4); ap.add_argument("--out", required=True)
+    ap.add_argument("--work-root", default=None, help="where the empty per-call working directories go")
+    ap.add_argument("--replay", help="a recorded run: its trials again with the present pipelines, keeping each recorded "
+                                     "answer whose message is unchanged (model, effort, rounds and seeds come from its record)")
+    ap.add_argument("--check-faults", action="store_true", help="run every reference and faulted program without a call; "
+                                                                 "writes faults_check.json")
+    ap.add_argument("--faults", help="a faults_check.json: its faults that fail where the reference passes, as first answers of "
+                                     "dsl_v1 and dsl_v1_rewrites (seeds and tasks come from it)")
+    a = ap.parse_args()
+    import tasks as T, llm
+    out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
+    keys = [t.key for t in T.all_tasks() if not a.tasks or t.key in a.tasks or t.name in a.tasks]
+    if a.check_faults:
+        t0 = time.time()
+        units = [{"task": k, "seed": s, "out": str(out)} for k in keys for s in a.seeds]
+        results = []
+        with ProcessPoolExecutor(max_workers=a.workers) as ex:
+            for f in as_completed([ex.submit(check_unit, u) for u in units]):
+                for e in f.result():
+                    results.append(e)
+                    print(json.dumps({k: e[k] for k in ("task", "fault", "seed", "self_ok", "rubric_ok")}), flush=True)
+        results.sort(key=lambda e: (e["task"], e["seed"], e["fault"] or ""))
+        check = {"code": code_version(), "started": time.strftime("%Y-%m-%dT%H:%M:%S"), "wall_s": time.time() - t0, "seeds": a.seeds,
+                 "tasks": keys, "results": results}
+        check["valid"] = [list(v) for v in valid_faults(check)]
+        (out / "faults_check.json").write_text(json.dumps(check, indent=1, default=str))
+        print(f"{len(check['valid'])} of {sum(e['fault'] is not None for e in results)} faulted programs fail where the reference passes", flush=True)
+        return
+    replay_meta = None
+    if a.replay:
+        replay_meta = json.loads((Path(a.replay) / "run_meta.json").read_text())
+        a.model, a.effort, a.rounds = replay_meta["model"], replay_meta["effort"], replay_meta["rounds"]
+        a.seeds, a.conditions = replay_meta["seeds"], replay_meta["conditions"]
+        for c in a.conditions:           # a recorded answer answers the system prompt and the format it was given
+            if ((Path(a.replay) / f"system_{c}.txt").read_text() != conditions()[c]
+                    or json.loads((Path(a.replay) / f"schema_{c}.json").read_text()) != schemas()[c]):
+                sys.exit(f"--replay: the system prompt or the answer format of {c} is not the recorded run's, so its recorded "
+                         "answers answer another prompt; run without --replay")
+    common = {"model": a.model, "effort": a.effort, "rounds": a.rounds, "out": str(out), "work_root": a.work_root}
+    if a.faults:
+        check = json.loads(Path(a.faults).read_text())
+        if check["code"] != code_version():
+            sys.exit(f"--faults: {a.faults} was checked with the code {check['code']}, not {code_version()}: check again")
+        a.conditions, a.seeds, keys = ["dsl_v1", "dsl_v1_rewrites"], check["seeds"], [k for k in check["tasks"] if k in keys]
+        phases = [[{"task": k, "condition": c, "seed": s, "fault": f} | common for k, f, s in check["valid"] if k in keys for c in a.conditions
+                   if not (out / "trials" / trial_name(k, c, s, f)).exists()]]
+    else:
+        def job(k, c, s):
+            j = {"task": k, "condition": c, "seed": s} | common
+            if a.replay:
+                j["replay_of"] = str(Path(a.replay) / "trials" / trial_name(k, c, s))
+            if c == "dsl_v1_rewrites":
+                j["first_from"] = str(out / "trials" / trial_name(k, "dsl_v1", s))
+            return j
+        if "dsl_v1_rewrites" in a.conditions and "dsl_v1" not in a.conditions:
+            sys.exit("dsl_v1_rewrites answers first as dsl_v1 did: run it with dsl_v1")
+        todo = [(k, c, s) for k in keys for s in a.seeds for c in a.conditions if not (out / "trials" / trial_name(k, c, s)).exists()]
+        # dsl_v1_rewrites after dsl_v1, whose first answers it takes
+        phases = [[job(*t) for t in todo if t[1] != "dsl_v1_rewrites"], [job(*t) for t in todo if t[1] == "dsl_v1_rewrites"]]
+    meta = {"cli": llm.cli_version(), "model": a.model, "effort": a.effort, "rounds": a.rounds, "seeds": a.seeds, "conditions": a.conditions,
+            "flags": llm.FLAGS, "env_allowlist": list(llm.ENV_KEEP) + ["CLAUDE_CODE_DISABLE_AUTO_MEMORY=1"],
+            "system_prompts": {k: {"chars": len(v)} for k, v in conditions().items()}, "started": time.strftime("%Y-%m-%dT%H:%M:%S"),
+            "code": code_version(), "assets_revision": T.ASSETS["revision"], "tasks": keys, "held_out": sorted(T.HELD_OUT),
+            "workers": a.workers, "cpus": sorted(os.sched_getaffinity(0)), "omp_threads": os.environ.get("OMP_NUM_THREADS")}
+    if a.faults:
+        meta["faults"] = {"check": os.path.basename(a.faults), "started": check["started"], "trials": sum(len(p) for p in phases)}
+    if replay_meta is not None:
+        meta["replay_of"] = {"run": os.path.basename(os.path.normpath(a.replay)), "started": replay_meta["started"],
+                             "code": replay_meta.get("code"), "cli": replay_meta.get("cli")} | (
+                                {"replay_of": replay_meta["replay_of"]} if "replay_of" in replay_meta else {})
+    if (out / "run_meta.json").exists():                 # a rerun of the trials a crash left out: keep the first record
+        first = json.loads((out / "run_meta.json").read_text())
+        first.setdefault("resumed", []).append({k: meta[k] for k in ("started", "code", "cli", "cpus", "workers")} | {"trials": sum(len(p) for p in phases)})
+        meta = first
+    (out / "run_meta.json").write_text(json.dumps(meta, indent=1))
+    for k, v in conditions().items():
+        (out / f"system_{k}.txt").write_text(v)
+        (out / f"schema_{k}.json").write_text(json.dumps(schemas()[k], indent=1))
+    print(f"{sum(len(p) for p in phases)} trials", flush=True)
+    crashed = 0
+    for jobs in phases:
+        crashed += run_jobs(jobs, a.workers)
+        if crashed:
+            break                           # a later phase needs every trial of this one
     if crashed:
         sys.exit(3)                         # the trials without a file run again when run.py is started again
 

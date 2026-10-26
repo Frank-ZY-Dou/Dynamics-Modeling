@@ -6,10 +6,13 @@ the stainless prep table, turned so that its 0.70 x 1.80 m top spans x in [0.20,
 y in [-0.90, 0.90] in front of the robot base at the origin, top at z = 0 (or, for palletizing, on
 a 0.80 x 1.20 m pallet). A request states every number its rubric checks, in the frame both
 conditions are told: +x away from the robot, +y to its left. `reference` is a program written for
-the task to show that the rubric can be met; no model sees it.
+the task to show that the rubric can be met; no model sees it. A task's `faults` are edits of its
+reference that make the gate fail in a known way: the first answer of a trial that compares the
+reports given after a failure (run.py --faults).
 """
 from __future__ import annotations
 
+import copy
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -23,6 +26,18 @@ ASSETS = json.loads((HERE / "assets.json").read_text())
 
 
 @dataclass
+class Fault:
+    """One edit of a task's reference program that makes the gate fail. kind, with the recovery the request asks for:
+    "tight", a bound the program chose, tightened past what the scene allows (relax it within what the request
+    allows); "target", a place target the request contradicts (drop it); "margin", a schedule margin that leaves the
+    contacts no room (lower it); "conflict", a statement the program chose that contradicts a number the request
+    states (change that statement: relaxing the stated number breaks the request)."""
+    name: str
+    kind: str
+    edit: object                        # callable(reference program) -> the faulted program
+
+
+@dataclass
 class Task:
     name: str
     n: int
@@ -30,13 +45,17 @@ class Task:
     start: dict                         # how the scene starts: a heap, a scatter, a nearly valid scatter
     request: str
     checks: object                      # callable(final scene, start scene) -> [(name, ok, value)]
-    reference: object                   # a program (JSON) that meets the rubric, or callable(scene) -> program
+    reference: dict                     # a program (JSON) that meets the rubric
     support: str = "table"
     tags: dict = field(default_factory=dict)
+    faults: list = field(default_factory=list)
 
     @property
     def key(self):
         return f"{self.name}_n{self.n}"
+
+    def faulted(self, name: str) -> dict:
+        return next(f for f in self.faults if f.name == name).edit(self.reference)
 
 
 def pkg(cat: str, i: int = 0) -> str:
@@ -61,6 +80,37 @@ def _st(op, **kw):
 
 BASE = [_st("no_penetration"), _st("on_support", a="*", b="table"), _st("upright", a="*"),
         _st("within", a="*", b="table.top", inset=0.02)]
+
+
+def _set(op, match: dict, **new):
+    """The fault edit that sets `new` on every statement of `op` whose fields include `match` (one at least)."""
+    def edit(prog):
+        out = copy.deepcopy(prog)
+        hits = [st for st in out["statements"] if st["op"] == op and all(st.get(k) == v for k, v in match.items())]
+        if not hits:
+            raise ValueError(f"no {op} statement with {match}")
+        for st in hits:
+            st.update(new)
+        return out
+    return edit
+
+
+def _add(*statements):
+    """The fault edit that appends statements."""
+    def edit(prog):
+        out = copy.deepcopy(prog)
+        out["statements"] += [dict(st) for st in statements]
+        return out
+    return edit
+
+
+def _margin(m: float):
+    """The fault edit that sets the schedule's margin."""
+    def edit(prog):
+        out = copy.deepcopy(prog)
+        out["schedule"] = {**out.get("schedule", {}), "margin": m}
+        return out
+    return edit
 
 
 # ----------------------------------------------------------------------------------------------
@@ -92,7 +142,10 @@ def setting():
         _st("beside", a="spoon", b="knife", side="right", gap=0.025), _st("beside", a="mug", b="fork", side="left", gap=0.035),
         _st("facing", a="mug", axis="-x", tol=10),
         _st("farther", a="glass", b="plate", gap=0.12), _st("close_to", a="glass", b="knife", r=0.14)]}
-    return Task("setting", len(objs), objs, {"kind": "heap", "center": (0.55, 0.0), "radius": 0.10}, request, checks, ref)
+    faults = [Fault("glass_radius", "tight", _set("close_to", {"a": "glass"}, r=0.04)),        # the glass is at least 12 cm beyond the plate
+              Fault("knife_at", "conflict", _add(_st("at", a="knife", y=-0.30, tol=0.005))),   # the knife 2 to 5 cm from the plate
+              Fault("mug_right", "target", _add(_st("place", a="mug", x=0.55, y=-0.35)))]      # the mug is on the fork's side
+    return Task("setting", len(objs), objs, {"kind": "heap", "center": (0.55, 0.0), "radius": 0.10}, request, checks, ref, faults=faults)
 
 
 def drinks_row(n=6):
@@ -120,7 +173,12 @@ def drinks_row(n=6):
         return out + R.generic(sc)
     ref = {"statements": BASE + [_st("row", members=names, start="left", gap=0.025, order="height", spacing="even", mid=0.0, tol=0.004),
                                  _st("at", a="*", x=0.75, tol=0.004)]}
-    return Task("drinks_row", len(objs), objs, {"kind": "heap", "center": (0.55, 0.15), "radius": 0.12}, request, checks, ref)
+    faults = [Fault("row_gap", "tight", _set("row", {}, gap=0.40 if n <= 6 else 0.22)),     # longer than the table
+              Fault("bottle_left", "target", _add(_st("place", a="bottle_1", x=0.75, y=0.45)))]  # the tallest drink ends the row at the right
+    if n <= 6:
+        faults.append(Fault("can_at", "conflict", _add(_st("at", a="can_1", y=0.0, tol=0.005))))  # can_1 is not the row's middle
+    return Task("drinks_row", len(objs), objs, {"kind": "heap", "center": (0.55, 0.15), "radius": 0.12}, request, checks, ref,
+                faults=faults)
 
 
 def fruit_cans(n=10):
@@ -161,7 +219,12 @@ def fruit_cans(n=10):
         [_st("close_to", a="mug", b="bowl", r=0.18), _st("within", a="mug", y0=-0.18, y1=0.18)] if n >= 16 else []) + (
         [_st("place", a="bowl", x=0.64, y=0.05), _st("place", a="mug", x=0.70, y=-0.10)] if n >= 24 else []) + (
         [_st("clearance", a=j, gap=0.035) for j in jn])}
-    return Task("fruit_cans", n, objs, {"kind": "heap", "center": (0.55, 0.0), "radius": {10: 0.15, 16: 0.18, 24: 0.22}[n]}, request, checks, ref)
+    faults = [Fault("cluster", "tight", _set("cluster", {}, r=0.03)),                           # tighter than the fruit
+              Fault("can_left", "target", _add(_st("place", a="can_1", x=0.45, y=0.35)))]       # the cans are on the right
+    if n >= 16:
+        faults.append(Fault("margin", "margin", _margin(0.03)))
+    return Task("fruit_cans", n, objs, {"kind": "heap", "center": (0.55, 0.0), "radius": {10: 0.15, 16: 0.18, 24: 0.22}[n]}, request, checks, ref,
+                faults=faults)
 
 
 def pick_ready():
@@ -183,7 +246,10 @@ def pick_ready():
     ref = {"statements": BASE + [_st("reach", a="mug", r=0.58, min=0.47), _st("facing", a="mug", axis="-x", tol=10),
                                  _st("approach", a="mug", length=0.6, width=0.17), _st("min_distance", a="*", b="mug", r=0.19),
                                  _st("keep_out", a="*", x0=0.24, x1=0.41, y0=0.19, y1=0.41), _st("reach", a="*", r=0.78)]}
-    return Task("pick_ready", len(objs), objs, {"kind": "heap", "center": (0.5, -0.05), "radius": 0.12}, request, checks, ref)
+    faults = [Fault("reach_all", "tight", _set("reach", {"a": "*"}, r=0.40)),                 # the mug itself is 45 to 60 cm out
+              Fault("apple_drop_zone", "target", _add(_st("place", a="apple", x=0.32, y=0.30))),  # inside the drop zone
+              Fault("mug_at", "conflict", _add(_st("at", a="mug", x=0.30, y=0.0, tol=0.005)))]   # the mug 45 to 60 cm from the base
+    return Task("pick_ready", len(objs), objs, {"kind": "heap", "center": (0.5, -0.05), "radius": 0.12}, request, checks, ref, faults=faults)
 
 
 def minimal_fix():
@@ -197,8 +263,9 @@ def minimal_fix():
     def checks(sc, st):
         return [R.moved(sc, st, names, 0.03), R.turned(sc, st, names, 10.0)] + R.generic(sc)
     ref = {"statements": BASE + [_st("max_move", a="*", d=0.028), _st("max_turn", a="*", deg=8)]}
+    faults = [Fault("max_move", "tight", _set("max_move", {}, d=0.003))]                       # overlaps 12 mm deep
     return Task("minimal_fix", len(objs), objs, {"kind": "nearly", "region": (0.25, 0.85, -0.60, 0.60), "overlaps": 4, "depth": 0.012},
-                request, checks, ref)
+                request, checks, ref, faults=faults)
 
 
 def stack():
@@ -218,7 +285,10 @@ def stack():
                                  _st("within", a="box_large", b="table.top", side="right", frac=0.5, inset=0.02),
                                  _st("reach", a="box_large", r=0.68)] + [
         _st("within", a=o, b="table.top", side="left", frac=0.5, inset=0.02) for o in ("apple", "can", "cup")]}
-    return Task("stack", len(objs), objs, {"kind": "heap", "center": (0.55, 0.10), "radius": 0.15}, request, checks, ref)
+    faults = [Fault("reach_tower", "tight", _set("reach", {"a": "box_large"}, r=0.30)),        # the table starts 20 cm out
+              Fault("apple_right", "target", _add(_st("place", a="apple", x=0.55, y=-0.30))),   # every other object on the left
+              Fault("tower_at", "conflict", _add(_st("at", a="box_large", y=0.30, tol=0.005)))]  # the tower on the right half
+    return Task("stack", len(objs), objs, {"kind": "heap", "center": (0.55, 0.10), "radius": 0.15}, request, checks, ref, faults=faults)
 
 
 def palletize(n=4):
@@ -240,7 +310,11 @@ def palletize(n=4):
                           _st("within", a="*", b="pallet.top", inset=0.03), _st("yaw", a="*", deg=0, mod=90, tol=2),
                           _st("clearance", a="*", gap=0.015)] + [_st("row", members=r_, start="right", gap=0.02, tol=0.005) for r_ in rows] + (
         [_st("farther", a=rows[1][0], b=rows[0][0], gap=0.30)] if len(rows) > 1 else [])}
-    return Task("palletize", n, objs, {"kind": "heap", "center": (0.70, 0.0), "radius": 0.15}, request, checks, ref, support="pallet")
+    faults = [Fault("clearance", "tight", _set("clearance", {}, gap=0.15))]                    # more than the pallet has room for
+    if n == 6:
+        faults.append(Fault("margin", "margin", _margin(0.05)))
+    return Task("palletize", n, objs, {"kind": "heap", "center": (0.70, 0.0), "radius": 0.15}, request, checks, ref, support="pallet",
+                faults=faults)
 
 
 def kitchen_prep():
@@ -277,7 +351,9 @@ def kitchen_prep():
         _st("row", members=dn, start="right", gap=0.03, tol=0.005), _st("reach", a="bottle", r=0.88, min=0.79),
         _st("reach", a="can_1", r=0.88, min=0.79), _st("reach", a="can_2", r=0.88, min=0.79)] + [
         _st("min_distance", a=o[0], b="board", r=0.27) for o in objs if o[0] not in ("board", "knife", "spoon")]}
-    return Task("kitchen_prep", len(objs), objs, {"kind": "heap", "center": (0.55, 0.0), "radius": 0.13}, request, checks, ref)
+    faults = [Fault("fruit_cluster", "tight", _set("cluster", {}, r=0.03)),                    # tighter than the fruit
+              Fault("bowl_at", "conflict", _add(_st("at", a="bowl", y=0.18, tol=0.005)))]       # 5 cm of table between bowl and board
+    return Task("kitchen_prep", len(objs), objs, {"kind": "heap", "center": (0.55, 0.0), "radius": 0.13}, request, checks, ref, faults=faults)
 
 
 def pack(n=10):
@@ -293,7 +369,8 @@ def pack(n=10):
     ref = {"statements": [_st("no_penetration"), _st("on_support", a="*", b="table"), _st("upright", a="*"),
                           _st("within", a="*", x0=x0 + 0.002, x1=x1 - 0.002, y0=y0 + 0.002, y1=y1 - 0.002)],
            "schedule": {"margin": 0.002}}
-    return Task("pack", n, fruit, {"kind": "heap", "center": (0.56, 0.0), "radius": 0.12}, request, checks, ref)
+    faults = [Fault("margin", "margin", _margin(0.02))]
+    return Task("pack", n, fruit, {"kind": "heap", "center": (0.56, 0.0), "radius": 0.12}, request, checks, ref, faults=faults)
 
 
 # ----------------------------------------------------------------------------------------------
@@ -324,8 +401,10 @@ def tool_layout():
     ref = {"statements": BASE + [_st("row", members=tn, start="left", order="length", gap=0.035, tol=0.005)] + [
         _st("yaw", a=t, deg=0, axis="long", tol=3) for t in tn] + [_st("within", a=t, x1=0.58) for t in tn] + [
         _st("within", a="tape", x0=0.72)]}
+    faults = [Fault("row_gap", "tight", _set("row", {}, gap=0.33)),                            # longer than the table
+              Fault("hammer_far", "target", _add(_st("place", a="hammer", x=0.80, y=0.0)))]     # every tool at x < 0.60
     return Task("tool_layout", len(objs), objs, {"kind": "heap", "center": (0.55, 0.0), "radius": 0.12}, request, checks, ref,
-                tags={"split": "held_out"})
+                tags={"split": "held_out"}, faults=faults)
 
 
 def desk():
@@ -359,8 +438,10 @@ def desk():
         _st("beside", a="marker", b="notebook", side="far", gap=0.015, max=0.035), _st("parallel", a="marker", b="notebook", tol=3),
         _st("beside", a="mug", b="keyboard", side="far", gap=0.06), _st("facing", a="mug", axis="-x", tol=10),
         _st("min_distance", a="*", b="tape", r=0.21)]}
+    faults = [Fault("tape_far", "tight", _set("min_distance", {"b": "tape"}, r=0.75)),          # more than the table allows
+              Fault("mug_at", "conflict", _add(_st("at", a="mug", x=0.45, y=0.0, tol=0.005)))]   # the mug beyond the keyboard
     return Task("desk", len(objs), objs, {"kind": "heap", "center": (0.55, 0.0), "radius": 0.12}, request, checks, ref,
-                tags={"split": "held_out"})
+                tags={"split": "held_out"}, faults=faults)
 
 
 def all_tasks():

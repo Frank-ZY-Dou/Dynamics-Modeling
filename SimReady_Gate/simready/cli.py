@@ -35,6 +35,7 @@ from .io.paths import portable, expand
 from .repair.upright_s4r import repair_upright, reseat_on_supports, polish_full_mesh
 
 SCENE_EXT = (".usda", ".usd", ".usdc")
+MIN_MARGIN = 1e-3         # m: the least margin a schedule rewrite tries (schedule_rewrites)
 INPUT_ERRORS = (ProgramError, CompileError, SyntaxError, KeyError, ValueError, OSError, GeometryQueryError, RuntimeError)
 
 
@@ -341,6 +342,25 @@ def rewrite_report(prog, sc: Scene, hard: list, raw, contacts_ok: bool) -> dict:
             "accepted_if_weakened": contacts_ok and all(r["relax"] or r["weaken"] for r in out)}
 
 
+def schedule_rewrites(rerun, out: dict) -> list:
+    """When a requirement failed or a pair still penetrates: the repair run again from the same start with a smaller
+    margin, half and then a quarter of the schedule's (not below MIN_MARGIN), until one ends ok, and what each ends with.
+    `rerun(margin)` is the caller's repair of the start with that margin and nothing else changed. The schedule never
+    changes what is accepted: these edits keep the request."""
+    if out["after"].pen_pairs == 0 and all(p[1] for p in out["hard"]):
+        return []
+    margin, tries = out["schedule"]["margin"], []
+    for k in (2, 4):
+        if margin / k < MIN_MARGIN - 1e-12:
+            break
+        o = rerun(margin / k)
+        tries.append({"margin": [margin, margin / k], "ok": bool(o["ok"]), "pen_after": o["after"].pen_pairs,
+                      "failed_predicates": [p[0] for p in o["hard"] if not p[1]]})
+        if o["ok"]:
+            break
+    return tries
+
+
 def cmd_repair(a):
     sc = load_any(a.scene)
     try:
@@ -367,6 +387,8 @@ def cmd_repair(a):
               "provenance": provenance(a.scene, a.program, dsl, raw, out["schedule"], asset_hashes(sc))}
     if report["failed_predicates"]:
         report.update(rewrite_report(prog, sc, hard, raw, after.pen_pairs == 0 and (clearance is None or clearance["pass"])))
+        report["schedule_rewrites"] = schedule_rewrites(
+            lambda m: repair_scene(load_any(a.scene), parse_program(dsl), schedule={**out["schedule"], "margin": m}), out)
     if a.out:
         out_is_usd = a.out.endswith(SCENE_EXT)
         if out_is_usd != a.scene.endswith(SCENE_EXT):

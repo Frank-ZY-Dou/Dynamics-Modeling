@@ -328,8 +328,9 @@ or the SDK backend in `simready/dsl/text2dsl.py` (Claude with schema-constrained
 
 1. reads `summarize`, writes the program from the request, and validates it with `check`;
 2. runs `repair --out` and reads the JSON: `pen_after`, `failed_predicates`, `rmsd_xy`;
-3. acts on the outcome, for at most three rounds: `pen_after > 0` means the intent is too tight (fewer
-   objects, a larger region); a failed relation means a gap to relax; a body in `left_support` after
+3. acts on the outcome, for at most three rounds, with the report's rewrites: each failed requirement
+   comes with the nearest values of its bounds at which it holds and whether it may be weakened, and
+   the report says what the repair ends with at a smaller margin; a body in `left_support` after
    `settle` gets a `within(..., inset=)` statement;
 4. reports the certificate path; a scene is ready when that certificate says `ready: true`, and
    nothing else counts.
