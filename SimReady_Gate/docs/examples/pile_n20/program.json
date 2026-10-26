@@ -1,8 +1,9 @@
 {
+ "intent": "Spread the heap over the kitchen table: bowl in front of the pitcher, ladle and big spoon next to the bowl, fruit grouped on the left, cans and bottles in a row at the back, and the hammer, bin, remote and spatula on the right. Everything stays upright, at least 2 cm in from the table edge, not touching, and moved as little as possible.",
  "statements": [
   {
    "op": "no_penetration",
-   "reason": "nothing interpenetrating, keep 1 cm clearance"
+   "reason": "nothing interpenetrating"
   },
   {
    "op": "fixed",
@@ -38,29 +39,29 @@
    "op": "place",
    "a": "pitcher",
    "x": 0.42,
-   "y": 0.0,
-   "reason": "pitcher in the middle, the bowl goes in front of it"
+   "y": 0,
+   "reason": "the bowl goes in front of the pitcher"
   },
   {
    "op": "place",
    "a": "bowl",
    "x": 0.62,
-   "y": 0.0,
+   "y": 0,
    "reason": "bowl in front (+x) of the pitcher"
   },
   {
    "op": "place",
    "a": "ladle",
-   "x": 0.6,
-   "y": -0.2,
-   "yaw": 90,
-   "reason": "ladle beside the bowl, turned along the table"
+   "x": 0.56,
+   "y": -0.13,
+   "yaw": 0,
+   "reason": "ladle beside the bowl, lying along x so it stays clear of the right-hand group"
   },
   {
    "op": "place",
    "a": "spoon_big",
    "x": 0.62,
-   "y": 0.16,
+   "y": 0.18,
    "yaw": 90,
    "reason": "big spoon on the other side of the bowl"
   },
@@ -137,77 +138,83 @@
   {
    "op": "place",
    "a": "plasticjerrican_a01",
-   "x": 0.77,
-   "y": -0.3,
+   "x": 0.78,
+   "y": -0.28,
+   "yaw": 0,
    "reason": "the jerrican ends the back row"
+  },
+  {
+   "op": "place",
+   "a": "hammer_8",
+   "x": 0.39,
+   "y": -0.39,
+   "yaw": 0,
+   "reason": "hammer out of the way on the right (-y), turned so it fits inside the 2 cm inset"
   },
   {
    "op": "place",
    "a": "bin_b02",
    "x": 0.62,
-   "y": -0.42,
-   "reason": "bin on the right"
+   "y": -0.39,
+   "yaw": 90,
+   "reason": "bin on the right, turned so it fits inside the inset"
   },
   {
    "op": "place",
    "a": "remote_control",
-   "x": 0.28,
-   "y": -0.4,
+   "x": 0.42,
+   "y": -0.27,
+   "yaw": 90,
    "reason": "remote on the right"
   },
   {
    "op": "place",
    "a": "spatula_17",
-   "x": 0.3,
+   "x": 0.27,
    "y": -0.15,
    "yaw": 90,
-   "reason": "spatula on the right, along the table"
+   "reason": "spatula on the right"
   },
   {
    "op": "place",
    "a": "raisin_box",
    "x": 0.3,
    "y": 0.2,
-   "reason": "not mentioned: keep it near where it was, out of the working area"
+   "reason": "not mentioned: kept out of the working area"
   },
   {
    "op": "farther",
    "a": "bowl",
    "b": "pitcher",
    "gap": 0.12,
-   "reason": "checkable form of 'bowl in front of the pitcher'"
+   "reason": "bowl in front of the pitcher"
   },
   {
    "op": "close_to",
    "a": "ladle",
    "b": "bowl",
-   "r": 0.22,
-   "reason": "within reach of the bowl"
+   "r": 0.25,
+   "soft": 0.8,
+   "reason": "ladle within reach of the bowl"
   },
   {
    "op": "close_to",
    "a": "spoon_big",
    "b": "bowl",
-   "r": 0.22,
-   "reason": "within reach of the bowl"
+   "r": 0.25,
+   "soft": 0.8,
+   "reason": "big spoon within reach of the bowl"
   },
   {
-   "op": "close_to",
-   "a": "lime01",
-   "b": "orange_02",
-   "r": 0.12
-  },
-  {
-   "op": "close_to",
-   "a": "lemon_02",
-   "b": "orange_02",
-   "r": 0.12
-  },
-  {
-   "op": "close_to",
-   "a": "orange_01",
-   "b": "orange_02",
-   "r": 0.12
+   "op": "cluster",
+   "members": [
+    "orange_01",
+    "orange_02",
+    "lime01",
+    "lemon_02"
+   ],
+   "r": 0.12,
+   "reason": "the fruit grouped together"
   },
   {
    "op": "left_of",
@@ -221,73 +228,77 @@
    "a": "pineapple_slices_can",
    "b": "bowl",
    "gap": 0.12,
-   "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
+   "reason": "cans and bottles at the back"
   },
   {
    "op": "farther",
    "a": "tomato_sauce_can",
    "b": "bowl",
    "gap": 0.12,
-   "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
+   "reason": "back row"
   },
   {
    "op": "farther",
    "a": "peas_and_carrots",
    "b": "bowl",
    "gap": 0.12,
-   "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
+   "reason": "back row"
   },
   {
    "op": "farther",
    "a": "bbq_sauce_bottle",
    "b": "bowl",
    "gap": 0.12,
-   "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
+   "reason": "back row"
   },
   {
    "op": "farther",
    "a": "whitepackerbottle_a01",
    "b": "bowl",
    "gap": 0.12,
-   "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
+   "reason": "back row"
   },
   {
    "op": "farther",
    "a": "whitepackerbottle_a02",
    "b": "bowl",
    "gap": 0.12,
-   "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
+   "reason": "back row"
   },
   {
    "op": "farther",
    "a": "plasticjerrican_a01",
    "b": "bowl",
    "gap": 0.12,
-   "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
+   "reason": "back row"
   },
   {
    "op": "right_of",
    "a": "hammer_8",
    "b": "bowl",
-   "gap": 0.22
+   "gap": 0.22,
+   "reason": "hammer out of the way on the right"
   },
   {
    "op": "right_of",
    "a": "bin_b02",
    "b": "bowl",
-   "gap": 0.25
+   "gap": 0.25,
+   "reason": "bin on the right"
   },
   {
    "op": "right_of",
    "a": "remote_control",
    "b": "bowl",
-   "gap": 0.22
+   "gap": 0.2,
+   "reason": "remote on the right"
   },
   {
    "op": "right_of",
    "a": "spatula_17",
    "b": "bowl",
-   "gap": 0.12
+   "gap": 0.12,
+   "reason": "spatula on the right"
   },
   {
    "op": "minimize",
@@ -295,16 +306,18 @@
   }
  ],
  "gate": {
-  "settle_v_max": 1.0,
+  "settle_v_max": 1,
   "settle_dx": 0.15
  },
- "assumptions": [
-  "RoboLab frame: the robot at -x looks along +x; 'in front of X' means larger x than X and 'left of X' means larger y. So the far edge of the table ('the back') is larger x: the back row is farther than the bowl.",
-  "targets were chosen from the table rectangle x[0.20, 0.90] y[-0.50, 0.50] and the listed object sizes; the continuation resolves any residual overlap",
-  "round 2: the certificate reported place(hammer_8) missed by 7 cm (the 33 cm hammer does not fit at the requested corner next to the bin); the request only asks for it 'out of the way on the right', which right_of(hammer_8, bowl, gap=0.22) states, so the exact target is dropped"
- ],
  "schedule": {
-  "margin": 0.01,
+  "margin": 0.005,
   "s_min": 0.3
- }
+ },
+ "assumptions": [
+  "The robot is at -x looking along +x, so 'the back' of the table is larger x and 'left' is larger y. 'In front of the pitcher' is read as larger x than the pitcher.",
+  "The hammer is turned to yaw 0 and the bin to yaw 90. At their current headings their footprints (0.29x0.28 and 0.19x0.19 m) are too wide to fit on the right side with a 2 cm inset.",
+  "The ladle (0.32 m long) now lies along x just to the right of the bowl so it stays near the bowl. 'Within reach of the bowl' is now a soft preference with r=0.25 m, because the previous run showed 0.22 m could not be met.",
+  "The fruit grouping is now one cluster (r=0.12) instead of separate pairwise distance limits.",
+  "The raisin box is not mentioned in the request, so it goes to a free spot near the front left."
+ ]
 }

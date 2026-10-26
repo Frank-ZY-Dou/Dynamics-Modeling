@@ -7,9 +7,9 @@
  "min_score_after": 0.0,
  "contained_after": [],
  "floating_after": [],
- "rmsd_xy": 0.32562497483339836,
- "steps": 44,
- "time_s": 6.51,
+ "rmsd_xy": 0.3248567398244682,
+ "steps": 15,
+ "time_s": 3.84,
  "predicates": [
   [
    "on_support(pineapple_slices_can,table)",
@@ -254,7 +254,7 @@
   [
    "within(remote_control,table.top)",
    true,
-   0.0001577626199195381
+   0.0
   ],
   [
    "within(pitcher,table.top)",
@@ -304,7 +304,7 @@
   [
    "within(bin_b02,table.top)",
    true,
-   0.00036641748423082987
+   0.0
   ],
   [
    "within(orange_01,table.top)",
@@ -314,22 +314,22 @@
   [
    "place(pitcher)",
    true,
-   6.964746253365383e-14
+   0.0
   ],
   [
    "place(bowl)",
    true,
-   0.0065626151216901804
+   0.0
   ],
   [
    "place(ladle)",
    true,
-   0.003295846342340298
+   0.0
   ],
   [
    "place(spoon_big)",
    true,
-   1.8947026114226815e-10
+   0.0
   ],
   [
    "place(orange_02)",
@@ -384,22 +384,27 @@
   [
    "place(plasticjerrican_a01)",
    true,
-   0.0008710670312262567
+   0.0
+  ],
+  [
+   "place(hammer_8)",
+   true,
+   0.00012135057663032004
   ],
   [
    "place(bin_b02)",
    true,
-   0.036661084003875535
+   0.00012135057663032004
   ],
   [
    "place(remote_control)",
    true,
-   0.02020729901755116
+   0.0
   ],
   [
    "place(spatula_17)",
    true,
-   0.0004555563856644511
+   0.0
   ],
   [
    "place(raisin_box)",
@@ -409,107 +414,98 @@
   [
    "farther(bowl,pitcher,gap=0.12)",
    true,
-   0.0797536715704692
+   0.08000000000000002
   ],
   [
-   "close_to(ladle,bowl,r=0.22)",
+   "cluster(orange_01,orange_02,lime01,lemon_02)",
    true,
-   0.21038616077940328
-  ],
-  [
-   "close_to(spoon_big,bowl,r=0.22)",
-   true,
-   0.1534422072613442
-  ],
-  [
-   "close_to(lime01,orange_02,r=0.12)",
-   true,
-   0.09999999999999996
-  ],
-  [
-   "close_to(lemon_02,orange_02,r=0.12)",
-   true,
-   0.09999999999999998
-  ],
-  [
-   "close_to(orange_01,orange_02,r=0.12)",
-   true,
-   0.10198039027185567
+   0.09823441352194248
   ],
   [
    "left_of(orange_02,bowl,gap=0.18)",
    true,
-   0.15344200948916437
+   0.16000000000000003
   ],
   [
    "farther(pineapple_slices_can,bowl,gap=0.12)",
    true,
-   0.06024632842959399
+   0.06000000000000005
   ],
   [
    "farther(tomato_sauce_can,bowl,gap=0.12)",
    true,
-   0.06024632842959399
+   0.06000000000000005
   ],
   [
    "farther(peas_and_carrots,bowl,gap=0.12)",
    true,
-   0.06024632842959399
+   0.06000000000000005
   ],
   [
    "farther(bbq_sauce_bottle,bowl,gap=0.12)",
    true,
-   0.06024632842959399
+   0.06000000000000005
   ],
   [
    "farther(whitepackerbottle_a01,bowl,gap=0.12)",
    true,
-   0.06024632842959399
+   0.06000000000000005
   ],
   [
    "farther(whitepackerbottle_a02,bowl,gap=0.12)",
    true,
-   0.06024632842959399
+   0.06000000000000005
   ],
   [
    "farther(plasticjerrican_a01,bowl,gap=0.12)",
    true,
-   0.0310579949795049
+   0.040000000000000036
   ],
   [
    "right_of(hammer_8,bowl,gap=0.22)",
    true,
-   -4.979931021781292e-05
+   0.16999999998500528
   ],
   [
    "right_of(bin_b02,bowl,gap=0.25)",
    true,
-   0.13990584660783617
+   0.14000000001499474
   ],
   [
-   "right_of(remote_control,bowl,gap=0.22)",
+   "right_of(remote_control,bowl,gap=0.2)",
    true,
-   0.1896121137673921
+   0.07
   ],
   [
    "right_of(spatula_17,bowl,gap=0.12)",
    true,
-   0.03662239830143027
+   0.03
   ]
  ],
  "failed_predicates": [],
- "preferences": [],
+ "preferences": [
+  [
+   "close_to(ladle,bowl,r=0.25)",
+   true,
+   0.1431782106327635
+  ],
+  [
+   "close_to(spoon_big,bowl,r=0.25)",
+   true,
+   0.18
+  ]
+ ],
  "failed_preferences": [],
  "clearance": null,
  "notes": [
-  "RoboLab frame: the robot at -x looks along +x; 'in front of X' means larger x than X and 'left of X' means larger y. So the far edge of the table ('the back') is larger x: the back row is farther than the bowl.",
-  "targets were chosen from the table rectangle x[0.20, 0.90] y[-0.50, 0.50] and the listed object sizes; the continuation resolves any residual overlap",
-  "round 2: the certificate reported place(hammer_8) missed by 7 cm (the 33 cm hammer does not fit at the requested corner next to the bin); the request only asks for it 'out of the way on the right', which right_of(hammer_8, bowl, gap=0.22) states, so the exact target is dropped"
+  "The robot is at -x looking along +x, so 'the back' of the table is larger x and 'left' is larger y. 'In front of the pitcher' is read as larger x than the pitcher.",
+  "The hammer is turned to yaw 0 and the bin to yaw 90. At their current headings their footprints (0.29x0.28 and 0.19x0.19 m) are too wide to fit on the right side with a 2 cm inset.",
+  "The ladle (0.32 m long) now lies along x just to the right of the bowl so it stays near the bowl. 'Within reach of the bowl' is now a soft preference with r=0.25 m, because the previous run showed 0.22 m could not be met.",
+  "The fruit grouping is now one cluster (r=0.12) instead of separate pairwise distance limits.",
+  "The raisin box is not mentioned in the request, so it goes to a free spot near the front left."
  ],
  "solver_notes": [
-  "spoon_big: a copy of 2000 faces lost part of the body; the repair ran on one of 8000",
-  "a program row was not met within the step at 16 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
-  "the contacts exceeded the trust region at 3 step(s); those steps served the contacts alone"
+  "spoon_big: a copy of 2000 faces lost part of the body; the repair ran on one of 8000"
  ],
  "dropped_children": [],
  "continuation": {
@@ -519,7 +515,7 @@
  },
  "synthetic_table": null,
  "written": "results/videos/pile_n20/agent_repaired.json",
- "written_sha256": "a4fd6fd1779d3a4d",
+ "written_sha256": "7912878c50001082",
  "certificate": "results/videos/pile_n20/agent_repaired.certificate.json"
 }
 repair exit=0

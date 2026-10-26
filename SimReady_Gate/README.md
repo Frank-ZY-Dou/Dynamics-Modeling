@@ -20,13 +20,13 @@
 <td align="center"><img src="docs/media/pile_n20_gate.gif" alt="twenty RoboLab objects heaped on the table, shrunk, laid out by the model in scale-space, restored to full size" /></td>
 </tr>
 <tr>
-<td><sub><b>Twenty objects from a heap, laid out by language.</b> Twenty RoboLab catalog objects are dropped into a 13 cm radius on RoboLab's own table (82 object-object interpenetrating pairs). The request asks for a cooking layout: the bowl in front of the pitcher, the ladle and the spoon within reach, the fruit grouped on the left, the cans and bottles in a row at the back, the hammer, bin, remote and spatula out of the way on the right. S4R shrinks every body about its reference center; the model places the shrunken bodies; the scale is restored under the program, and the result is penetration-free with every predicate satisfied, in 30 s.</sub></td>
+<td><sub><b>Twenty objects from a heap, laid out by language.</b> Twenty RoboLab catalog objects are dropped into a 13 cm radius on RoboLab's own table (82 object-object interpenetrating pairs). The request asks for a cooking layout: the bowl in front of the pitcher, the ladle and the spoon within reach, the fruit grouped on the left, the cans and bottles in a row at the back, the hammer, bin, remote and spatula out of the way on the right. S4R shrinks every body about its reference center; the model places the shrunken bodies; the scale is restored under the program, and the result is penetration-free with every predicate satisfied, in 5 s.</sub></td>
 </tr>
 <tr>
 <td align="center"><img src="docs/media/pile_n20_settle.gif" alt="MuJoCo settle of the heap (left) and of the repaired layout (right)" /></td>
 </tr>
 <tr>
-<td><sub><b>Settle as certification.</b> The heap and the repaired layout simulated in MuJoCo with CoACD proxies: the heap reaches 3.8 m/s and throws a body off the table; the repaired scene peaks at 0.29 m/s with nothing leaving the table. Every clip in this repository is rendered from the solver's own meshes with the assets' textures, without overlays.</sub></td>
+<td><sub><b>Settle as certification.</b> The heap and the repaired layout simulated in MuJoCo with CoACD proxies: the heap reaches 3.8 m/s and throws a body off the table; the repaired scene peaks at 0.33 m/s with nothing leaving the table. Every clip in this repository is rendered from the solver's own meshes with the assets' textures, without overlays.</sub></td>
 </tr>
 </table>
 </div>
@@ -248,7 +248,7 @@ Twenty catalog objects are dropped into a 13 cm radius on RoboLab's `table_oak` 
 > upright on the table, at least 2 cm from the edge, nothing interpenetrating, and do not move
 > anything further than necessary.*
 
-The model's first program has 46 statements (the certified second one has 45, without the hammer's exact target): the usual guards, one `place` target per object chosen
+The model's first program has 46 statements (the certified second one has 44): the usual guards, one `place` target per object chosen
 from the table rectangle and the object sizes (the placement step in scale-space), and the
 relations that make the request checkable:
 
@@ -264,25 +264,27 @@ relations that make the request checkable:
 "gate": {"settle_v_max": 1.0, "settle_dx": 0.15}
 ```
 
-Two rounds of the loop, both from the tools' own outputs (`viz/run_agent_rounds.sh`; the request,
-the programs, every tool output and both certificates are in
-[`docs/examples/pile_n20/`](docs/examples/pile_n20/)):
+Two rounds of the loop, both from the tools' own outputs (`viz/run_agent_rounds.sh`); round 2's
+program is Claude Opus 5.5's answer to round 1's report (`viz/agent_revise.py`). The request, the
+programs, the call, every tool output and both certificates are in
+[`docs/examples/pile_n20/`](docs/examples/pile_n20/):
 
 | round | repair | outcome | settle (hull / CoACD) |
 |---|---|---|---|
-| 1 | 82 → 0 pairs, planar RMSD 0.335 m, 10 s | `place(hammer_8)` missed by 5.3 cm: the 33 cm hammer does not fit at the requested corner next to the bin, the hammer and the bin end at the table's edge, the ladle 2.6 cm beyond its 22 cm | 0.38 / 0.33 m/s, pass |
-| 2 | 82 → 0 pairs, planar RMSD 0.326 m, 7 s | the exact hammer target dropped (the request only asks for it out of the way on the right, which `right_of` states); every predicate holds, `ready: true` | 0.38 / 0.28 m/s, pass |
+| 1 | 82 → 0 pairs, planar RMSD 0.335 m, 9 s | `place(hammer_8)` missed by 5.3 cm: the 33 cm hammer does not fit at the requested corner next to the bin, the hammer and the bin end at the table's edge, the ladle 2.6 cm beyond its 22 cm | 0.38 / 0.33 m/s, pass |
+| 2 | 82 → 0 pairs, planar RMSD 0.325 m, 4 s | the hammer and the bin turned to fit inside the inset, the smaller margin, the ladle's and the spoon's reach a 25 cm preference; every predicate holds, `ready: true` | 0.38 / 0.33 m/s, pass |
 
 Round 1's report lists the rewrites of its failed statements: drop the hammer's target, relax the
-ladle's radius to 24.7 cm, or make the 2 cm edge inset a preference, which the request rules out.
+ladle's radius to 24.7 cm, or make the 2 cm edge inset a preference, which the request rules out. A
+smaller margin alone still misses the hammer's target.
 
-The heap itself, settled as is, reaches 4.8 m/s with eleven bodies off the table (hull proxies)
+The heap itself, settled as is, reaches 5.2 m/s with eleven bodies off the table (hull proxies)
 and 3.8 m/s with one (CoACD). The program's schedule starts the continuation at s = 0.3, large
 enough to see the bodies while they are placed; the certificate records it.
 
 The settle report also re-evaluates the program on the settled poses (`after_settle`). It shows
 what the peak-speed and displacement thresholds do not: the round fruit rolls out of `upright`
-(the lime and both oranges under hull proxies, one orange under CoACD) while every other statement
+(the lime and one orange, under either proxy) while every other statement
 holds, the remote control among them (it lies flat, as it rests in RoboLab's own scenes, and ends
 the settle within 1° of where it started). The default policy leaves `ready` to the G5
 thresholds and reports this; `--hold-predicates` would make the certificate not ready until the
@@ -542,7 +544,7 @@ python examples/run_isaac.py pile_export --seconds 2                  # Isaac Si
 Each runner takes `--record poses.json` to write the world pose of every free body at 30 frames
 per second; `viz/make_engine_video.py` turns the three recordings into the side-by-side clip.
 
-The certified twenty-object layout of Example 2, exported and simulated for 2 s in each engine
+The twenty-object layout certified in September 2026, exported and simulated for 2 s in each engine
 on this machine; the three panels below are the recorded trajectories (`--record`), MuJoCo,
 Genesis and Isaac Sim from left to right, rendered from the same assets as the other clips:
 

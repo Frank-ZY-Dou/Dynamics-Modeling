@@ -9,7 +9,7 @@
  "floating_after": [],
  "rmsd_xy": 0.33514514632715914,
  "steps": 41,
- "time_s": 9.91,
+ "time_s": 9.28,
  "predicates": [
   [
    "on_support(pineapple_slices_can,table)",
@@ -555,6 +555,31 @@
  ],
  "accepted_if_relaxed": false,
  "accepted_if_weakened": true,
+ "schedule_rewrites": [
+  {
+   "margin": [
+    0.01,
+    0.005
+   ],
+   "ok": false,
+   "pen_after": 0,
+   "failed_predicates": [
+    "place(hammer_8)"
+   ]
+  },
+  {
+   "margin": [
+    0.01,
+    0.0025
+   ],
+   "ok": false,
+   "pen_after": 0,
+   "failed_predicates": [
+    "within(hammer_8,table.top)",
+    "place(hammer_8)"
+   ]
+  }
+ ],
  "written": "results/videos/pile_n20/agent_round1_repaired.json",
  "written_sha256": "3baef5012d3c8aea",
  "certificate": "results/videos/pile_n20/agent_round1_repaired.certificate.json"
