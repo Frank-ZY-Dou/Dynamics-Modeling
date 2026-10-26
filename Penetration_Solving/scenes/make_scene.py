@@ -52,12 +52,6 @@ def make_scene(dataset: str, N: int, seed: int, spawn_xz_mul: float = 1.0):
             n_objects=N, target_size=0.1, spawn_range_xz=sxz,
             spawn_range_y=sy, seed=seed,
         ), sxz, sy
-    if dataset == "thingi":
-        from generate_thingi10k_scene import generate_thingi10k_scene
-        return generate_thingi10k_scene(
-            n_objects=N, target_size=0.1, spawn_range_xz=sxz,
-            spawn_range_y=sy, seed=seed,
-        ), sxz, sy
     raise ValueError(f"unknown dataset: {dataset}")
 
 

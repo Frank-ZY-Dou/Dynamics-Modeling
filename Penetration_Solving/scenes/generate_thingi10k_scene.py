@@ -211,6 +211,6 @@ def generate_thingi10k_scene(
         ))
     if len(objects) < n_objects:
         raise RuntimeError(
-            f"only built {len(objects)}/{n_objects} objects after 30% over-sample; "
+            f"only built {len(objects)}/{n_objects} objects after a 5% over-sample; "
             f"bad-mesh rate in Thingi10K exceeded our slack — raise the oversample factor")
     return objects

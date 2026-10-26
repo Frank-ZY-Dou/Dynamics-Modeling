@@ -34,14 +34,9 @@ def scan_eligible_hy3d(
     """Return the list of HY3D entries that pass our face-count window and,
     by default, the strict ``is_watertight AND is_volume`` filter.  The
     watertight check uses ``trimesh.load(process=False)`` on each
-    ``collision_geometry.obj`` and is cached on disk at
-    ``<hy3d_dir>/_good_pool.json`` so subsequent runs are O(1).
+    ``collision_geometry.obj``.
     """
     hy3d_dir = Path(hy3d_dir)
-    cache_path = hy3d_dir / "_good_pool.json"
-    good_set = None
-    if require_watertight and cache_path.exists():
-        good_set = set(_load_json_relaxed(cache_path)["good_meshes"])
     out: List[Path] = []
     for d in sorted(hy3d_dir.iterdir()):
         if not d.is_dir():
@@ -54,15 +49,10 @@ def scan_eligible_hy3d(
         if nf < min_faces or nf > max_faces:
             continue
         if require_watertight:
-            if good_set is not None:
-                if d.name not in good_set:
-                    continue
-            else:
-                # No cache: do the actual trimesh check (slow).
-                m = trimesh.load(str(cg), process=False)
-                if not (isinstance(m, trimesh.Trimesh)
-                        and m.is_watertight and m.is_volume):
-                    continue
+            m = trimesh.load(str(cg), process=False)
+            if not (isinstance(m, trimesh.Trimesh)
+                    and m.is_watertight and m.is_volume):
+                continue
         out.append(d)
     return out
 
