@@ -48,7 +48,7 @@
 * [📢 Updates](#-updates)
 * [Overview](#overview)
 * [Demos](#demos)
-   * [A scene RoboLab ships](#a-scene-robolab-ships) · [A layout RoboLab's solver rejects](#a-layout-robolabs-solver-rejects) · [A RoboCasa counter](#a-robocasa-counter)
+   * [Shelves](#shelves) · [A scene RoboLab ships](#a-scene-robolab-ships) · [A layout RoboLab's solver rejects](#a-layout-robolabs-solver-rejects) · [A RoboCasa counter](#a-robocasa-counter)
 * [Example 1: a scene RoboLab ships, one request, one certificate](#example-1-a-scene-robolab-ships-one-request-one-certificate)
    * [Summarize](#1-summarize-the-scene) · [Text to program](#2-text-to-program) · [Check](#3-check) · [Repair and write back](#4-repair-and-write-back) · [Settle](#5-settle-as-certification) · [Certificate](#6-the-certificate)
 * [Example 2: twenty objects from a heap, laid out by language](#example-2-twenty-objects-from-a-heap-laid-out-by-language)
@@ -81,6 +81,24 @@ supports. SimReady Gate is the layer between a scene generator and the simulator
 - **Runs as an agent loop.** An agent following the skill in `skills/` (or the Anthropic SDK backend) writes and edits the program and acts on exit codes; it never overrides a number.
 
 ## Demos
+
+### Shelves
+
+<table align="center">
+<tr>
+<td align="center" width="33%"><img src="docs/media/shelf_books_gate.gif" alt="books and notebooks heaped on a bookcase's shelves, then shelved by the program" /></td>
+<td align="center" width="33%"><img src="docs/media/shelf_pantry_gate.gif" alt="kitchen things heaped on a rack, then stocked by the program" /></td>
+<td align="center" width="33%"><img src="docs/media/shelf_fix_gate.gif" alt="rows on a rack 3 mm too tight, then spaced out" /></td>
+</tr>
+<tr>
+<td align="center"><sub><code>shelf_books</code></sub></td>
+<td align="center"><sub><code>shelf_pantry</code></sub></td>
+<td align="center"><sub><code>shelf_fix</code></sub></td>
+</tr>
+<tr>
+<td colspan="3"><sub>SimReady and PalatialSim assets on a bookcase and a rack, interpenetrating bodies tinted, then S4R's scale continuation under the agent's program: books by height with their spines in line; heavy things low and cans in a grid; rows 3 mm too tight, spaced out. Walked through in <a href="#example-3-shelves">Example 3</a>.</sub></td>
+</tr>
+</table>
 
 ### A scene RoboLab ships
 
@@ -283,24 +301,8 @@ What a program can say about them:
 
 `check` refuses a body taller than the room above its level, and names the levels that have room.
 
-Three runs on SimReady and PalatialSim assets. Every request, program, tool output and certificate
-is in [`docs/examples/`](docs/examples/); the layouts come from `experiments/shelf_layouts.py`.
-
-<table align="center">
-<tr>
-<td align="center" width="33%"><img src="docs/media/shelf_books_gate.gif" alt="books and notebooks heaped on a bookcase's shelves, then shelved by the program" /></td>
-<td align="center" width="33%"><img src="docs/media/shelf_pantry_gate.gif" alt="kitchen things heaped on a rack, then stocked by the program" /></td>
-<td align="center" width="33%"><img src="docs/media/shelf_fix_gate.gif" alt="rows on a rack 3 mm too tight, then spaced out" /></td>
-</tr>
-<tr>
-<td align="center"><sub><code>shelf_books</code></sub></td>
-<td align="center"><sub><code>shelf_pantry</code></sub></td>
-<td align="center"><sub><code>shelf_fix</code></sub></td>
-</tr>
-<tr>
-<td colspan="3"><sub>The layout as generated, interpenetrating bodies tinted; then S4R's scale continuation under the agent's program (<code>viz/make_example_video.py</code>).</sub></td>
-</tr>
-</table>
+Three runs on SimReady and PalatialSim assets ([clips](#shelves)). Every request, program, tool output and
+certificate is in [`docs/examples/`](docs/examples/); the layouts come from `experiments/shelf_layouts.py`.
 
 | example | request | repair | settle (hull / CoACD) |
 |---|---|---|---|
