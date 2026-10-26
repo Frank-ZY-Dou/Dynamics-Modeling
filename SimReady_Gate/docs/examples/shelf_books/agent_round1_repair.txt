@@ -9,7 +9,7 @@
  "floating_after": [],
  "rmsd_xy": 0.12208684504831366,
  "steps": 49,
- "time_s": 31.35,
+ "time_s": 29.71,
  "predicates": [
   [
    "upright(book_1)",
@@ -286,6 +286,32 @@
   "termination": "complete"
  },
  "synthetic_table": null,
+ "rewrites": [
+  {
+   "statement": 6,
+   "text": "row(book_1, book_4, book_5, book_6, book_7, gap=0.005, start=left, order=-height, mid=0.0)",
+   "relax": {
+    "tol": [
+     0.01,
+     0.013
+    ]
+   },
+   "weaken": "soft"
+  },
+  {
+   "statement": 11,
+   "text": "flush(book_7, case.level2, side=near, gap=0.01)",
+   "relax": {
+    "tol": [
+     0.005,
+     0.008
+    ]
+   },
+   "weaken": "soft"
+  }
+ ],
+ "accepted_if_relaxed": true,
+ "accepted_if_weakened": true,
  "written": "docs/examples/shelf_books/round1_repaired.json",
  "written_sha256": "4d7bf42db555fe31",
  "certificate": "docs/examples/shelf_books/round1_repaired.certificate.json"

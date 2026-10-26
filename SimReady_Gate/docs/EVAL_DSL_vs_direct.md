@@ -288,7 +288,8 @@ other's centre (4), and left unsupported the fruit that two answers set on other
 ## Reproducing
 
 The calls need the `claude` CLI signed in (2.1.310 in the recorded runs); a trial makes one to three
-calls. The packages come from `assets.json`, fetched at its pinned commit (`regrade.py` grades a run
+calls. The recorded runs were made at the commits their `run_meta.json` names; a replay stops when a
+condition's system prompt or answer format is no longer the recorded one. The packages come from `assets.json`, fetched at its pinned commit (`regrade.py` grades a run
 made before the line check's correction again, as it graded the first run):
 
 ```

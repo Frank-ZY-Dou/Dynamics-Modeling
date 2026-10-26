@@ -7,9 +7,9 @@
  "min_score_after": 0.0,
  "contained_after": [],
  "floating_after": [],
- "rmsd_xy": 0.33111047915780073,
- "steps": 44,
- "time_s": 29.84,
+ "rmsd_xy": 0.33514514632715914,
+ "steps": 41,
+ "time_s": 9.91,
  "predicates": [
   [
    "on_support(pineapple_slices_can,table)",
@@ -254,7 +254,7 @@
   [
    "within(remote_control,table.top)",
    true,
-   0.0001988254767646691
+   0.00029677022656668384
   ],
   [
    "within(pitcher,table.top)",
@@ -288,8 +288,8 @@
   ],
   [
    "within(hammer_8,table.top)",
-   true,
-   0.0008070994818444865
+   false,
+   0.019599803672470495
   ],
   [
    "within(peas_and_carrots,table.top)",
@@ -303,8 +303,8 @@
   ],
   [
    "within(bin_b02,table.top)",
-   true,
-   0.0006570811519190922
+   false,
+   0.029142542985671205
   ],
   [
    "within(orange_01,table.top)",
@@ -319,17 +319,17 @@
   [
    "place(bowl)",
    true,
-   0.003270551822655708
+   0.04627068022302146
   ],
   [
    "place(ladle)",
    true,
-   0.0032647063406788983
+   0.04283930194028152
   ],
   [
    "place(spoon_big)",
    true,
-   8.596390514063514e-07
+   0.025455844136301625
   ],
   [
    "place(orange_02)",
@@ -384,27 +384,27 @@
   [
    "place(plasticjerrican_a01)",
    true,
-   0.008203058186888806
+   0.012018822560404886
   ],
   [
    "place(hammer_8)",
    false,
-   0.07300434600845762
+   0.05308814487357454
   ],
   [
    "place(bin_b02)",
    true,
-   0.03702599809337291
+   0.023623788517272107
   ],
   [
    "place(remote_control)",
    true,
-   0.019882547676464468
+   0.019784602926662453
   ],
   [
    "place(spatula_17)",
    true,
-   0.002070385048215141
+   0.0021729406295958797
   ],
   [
    "place(raisin_box)",
@@ -412,107 +412,114 @@
    0.0
   ],
   [
-   "in_front_of(bowl,pitcher,gap=0.12)",
+   "farther(bowl,pitcher,gap=0.12)",
    true,
-   0.0788147193703857
+   0.053761717482815385
   ],
   [
-   "near(ladle,bowl,r=0.22)",
-   true,
-   0.20684770979099926
+   "close_to(ladle,bowl,r=0.22)",
+   false,
+   0.24606706731738356
   ],
   [
-   "near(spoon_big,bowl,r=0.22)",
+   "close_to(spoon_big,bowl,r=0.22)",
    true,
-   0.1569570780011595
+   0.14671627078979935
   ],
   [
-   "near(lime01,orange_02,r=0.12)",
+   "close_to(lime01,orange_02,r=0.12)",
    true,
    0.09999999999999996
   ],
   [
-   "near(lemon_02,orange_02,r=0.12)",
+   "close_to(lemon_02,orange_02,r=0.12)",
    true,
    0.09999999999999998
   ],
   [
-   "near(orange_01,orange_02,r=0.12)",
+   "close_to(orange_01,orange_02,r=0.12)",
    true,
    0.10198039027185567
   ],
   [
    "left_of(orange_02,bowl,gap=0.18)",
    true,
-   0.15695178428359519
+   0.1218879496897699
   ],
   [
-   "in_front_of(pineapple_slices_can,bowl,gap=0.12)",
+   "farther(pineapple_slices_can,bowl,gap=0.12)",
    true,
-   0.06118528062961437
+   0.08623828251718468
   ],
   [
-   "in_front_of(tomato_sauce_can,bowl,gap=0.12)",
+   "farther(tomato_sauce_can,bowl,gap=0.12)",
    true,
-   0.06118528062961437
+   0.08623828251718468
   ],
   [
-   "in_front_of(peas_and_carrots,bowl,gap=0.12)",
+   "farther(peas_and_carrots,bowl,gap=0.12)",
    true,
-   0.06118528062961437
+   0.08623828251718468
   ],
   [
-   "in_front_of(bbq_sauce_bottle,bowl,gap=0.12)",
+   "farther(bbq_sauce_bottle,bowl,gap=0.12)",
    true,
-   0.06118528062961437
+   0.08623828251718468
   ],
   [
-   "in_front_of(whitepackerbottle_a01,bowl,gap=0.12)",
+   "farther(whitepackerbottle_a01,bowl,gap=0.12)",
    true,
-   0.06118528062961437
+   0.08623828251718468
   ],
   [
-   "in_front_of(whitepackerbottle_a02,bowl,gap=0.12)",
+   "farther(whitepackerbottle_a02,bowl,gap=0.12)",
    true,
-   0.06118528062961437
+   0.08623828251718468
   ],
   [
-   "in_front_of(plasticjerrican_a01,bowl,gap=0.12)",
+   "farther(plasticjerrican_a01,bowl,gap=0.12)",
    true,
-   0.037472047449996104
+   0.06557131446261588
   ],
   [
    "right_of(hammer_8,bowl,gap=0.22)",
    true,
-   0.11007169929921448
+   0.16506610114366752
   ],
   [
    "right_of(bin_b02,bowl,gap=0.25)",
    true,
-   0.13655943257104175
+   0.2000112721609465
   ],
   [
    "right_of(remote_control,bowl,gap=0.22)",
    true,
-   0.18304821571640487
+   0.21811205031023015
   ],
   [
    "right_of(spatula_17,bowl,gap=0.12)",
    true,
-   0.03257507130373319
+   0.06761883078034633
   ]
  ],
  "failed_predicates": [
-  "place(hammer_8)"
+  "within(hammer_8,table.top)",
+  "within(bin_b02,table.top)",
+  "place(hammer_8)",
+  "close_to(ladle,bowl,r=0.22)"
  ],
+ "preferences": [],
+ "failed_preferences": [],
  "clearance": null,
  "notes": [
-  "RoboLab frame: the robot at -x looks along +x; 'in front of X' means larger x than X and 'left of X' means larger y. So the far edge of the table ('the back') is larger x: the back row is in_front_of the bowl.",
+  "RoboLab frame: the robot at -x looks along +x; 'in front of X' means larger x than X and 'left of X' means larger y. So the far edge of the table ('the back') is larger x: the back row is farther than the bowl.",
   "targets were chosen from the table rectangle x[0.20, 0.90] y[-0.50, 0.50] and the listed object sizes; the continuation resolves any residual overlap"
  ],
  "solver_notes": [
-  "a program row was not met within the step at 17 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
-  "the contacts exceeded the trust region at 4 step(s); those steps served the contacts alone"
+  "spoon_big: a copy of 2000 faces lost part of the body; the repair ran on one of 8000",
+  "pairs still penetrated in the closing steps of the tail; 3 step(s) served the contacts alone, the program rows set aside",
+  "a program row was not met within the step at 19 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+  "the contacts exceeded the trust region at 9 step(s); those steps served the contacts alone"
  ],
  "dropped_children": [],
  "continuation": {
@@ -521,8 +528,35 @@
   "termination": "complete"
  },
  "synthetic_table": null,
+ "rewrites": [
+  {
+   "statement": 6,
+   "text": "within(*, table.top, inset=0.02)",
+   "relax": null,
+   "weaken": "soft"
+  },
+  {
+   "statement": 22,
+   "text": "place(hammer_8, x=0.4, y=-0.4)",
+   "relax": null,
+   "weaken": "drop"
+  },
+  {
+   "statement": 28,
+   "text": "close_to(ladle, bowl, r=0.22)",
+   "relax": {
+    "r": [
+     0.22,
+     0.247
+    ]
+   },
+   "weaken": "soft"
+  }
+ ],
+ "accepted_if_relaxed": false,
+ "accepted_if_weakened": true,
  "written": "results/videos/pile_n20/agent_round1_repaired.json",
- "written_sha256": "0e6f6f890509e10d",
+ "written_sha256": "3baef5012d3c8aea",
  "certificate": "results/videos/pile_n20/agent_round1_repaired.certificate.json"
 }
 repair exit=1

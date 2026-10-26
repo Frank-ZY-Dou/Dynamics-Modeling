@@ -9,7 +9,7 @@
  "floating_after": [],
  "rmsd_xy": 0.4279256700949665,
  "steps": 49,
- "time_s": 27.86,
+ "time_s": 28.42,
  "predicates": [
   [
    "upright(can_1)",

@@ -9,7 +9,7 @@
  "floating_after": [],
  "rmsd_xy": 0.4279256700949665,
  "steps": 49,
- "time_s": 27.86,
+ "time_s": 28.42,
  "predicates": [
   [
    "upright(can_1)",
@@ -1069,14 +1069,13 @@
   },
   "program": {
    "path": "docs/examples/shelf_pantry/program.json",
-   "sha256": "87a1cc6d0d084ab7",
-   "dsl": "program\n  no_penetration(*, margin=0.003)\n  upright(*)\n  within(*, rack, x0=0.57)\n  on_support(mug_*, rack.level1)\n  on_support(soup_*, rack.level1)\n  row(mug_*, soup_*, gap=0.02, start=left, edge=min)\n  flush(mug_1, rack.level1, side=near, gap=0.03)\n  yaw(mug_*, axis=handle, deg=-90)\n  on_support(bowl_1, rack.level1)\n  on_support(bowl_3, rack.level1)\n  stack(bowl_1, bowl_2)\n  stack(bowl_3, bowl_4)\n  within(bowl_*, rack.level1, x0=0.7)\n  on_support(can_*, rack.level2)\n  grid(can_*, cols=9, dx=0.09, dy=0.09)\n  on_support(jar_*, rack.level3)\n  row(jar_*, gap=0.01, start=left, order=-mass, spacing=even)\n  within(jar_*, rack.level3, x1=0.69)\n  on_support(bottle_*, rack.level3)\n  row(bottle_*, gap=0.02)\n  within(bottle_*, rack.level3, x0=0.72)",
+   "sha256": "65034747bd16a576",
+   "dsl": "schedule\n  margin = 0.003\nprogram\n  no_penetration(*)\n  upright(*)\n  within(*, rack, x0=0.57)\n  on_support(mug_*, rack.level1)\n  on_support(soup_*, rack.level1)\n  row(mug_*, soup_*, gap=0.02, start=left, edge=min)\n  flush(mug_1, rack.level1, side=near, gap=0.03)\n  yaw(mug_*, axis=handle, deg=-90)\n  on_support(bowl_1, rack.level1)\n  on_support(bowl_3, rack.level1)\n  stack(bowl_1, bowl_2)\n  stack(bowl_3, bowl_4)\n  within(bowl_*, rack.level1, x0=0.7)\n  on_support(can_*, rack.level2)\n  grid(can_*, cols=9, dx=0.09, dy=0.09)\n  on_support(jar_*, rack.level3)\n  row(jar_*, gap=0.01, start=left, order=-mass, spacing=even)\n  within(jar_*, rack.level3, x1=0.69)\n  on_support(bottle_*, rack.level3)\n  row(bottle_*, gap=0.02)\n  within(bottle_*, rack.level3, x0=0.72)",
    "json": {
     "intent": "A stocked rack by weight: the mugs and soup cans in a front row and two stacks of bowls behind them on the bottom shelf, the cans in a 2 x 9 grid on the second, the jars by mass and the bottles behind them on the third.",
     "statements": [
      {
       "op": "no_penetration",
-      "margin": 0.003,
       "reason": "nothing interpenetrates"
      },
      {
@@ -1225,10 +1224,14 @@
       "x0": 0.72,
       "reason": "behind the jars"
      }
-    ]
+    ],
+    "schedule": {
+     "margin": 0.003
+    }
    }
   },
-  "params": {
+  "schedule": {
+   "margin": 0.003,
    "s_min": 0.05,
    "ds_max": 0.05,
    "tail_iters": 30,
@@ -1241,7 +1244,6 @@
    "verify_gap_tol": 0.002,
    "verify_sink_tol": 0.001,
    "defaults": {
-    "margin": 0.005,
     "inset": 0.02,
     "gap": 0.05
    },
@@ -1340,7 +1342,7 @@
    }
   },
   "software": {
-   "git": "cf436021680a",
+   "git": "4eb4e2f19652",
    "python": "3.11.17",
    "numpy": "2.4.6",
    "trimesh": "5.2.0",
@@ -1349,7 +1351,7 @@
    "mujoco": "3.17.0",
    "pxr": null
   },
-  "time": "2026-10-26T03:51:59"
+  "time": "2026-10-26T14:17:59"
  },
  "written": "docs/examples/shelf_pantry/repaired.json",
  "written_sha256": "458167a86e7f85aa",
@@ -1358,13 +1360,13 @@
   "program": "docs/examples/shelf_pantry/program.json",
   "seconds": 2.0,
   "supports": {
+   "bowl_1": 0.1854944963311723,
    "rack": [
     0.1761926052127704,
     0.583385268538216,
     1.016203074623572
    ],
-   "bowl_3": 0.19548790297807078,
-   "bowl_1": 0.1854944963311723
+   "bowl_3": 0.19548790297807078
   },
   "max_hover_m": 0.004415463575232009,
   "free_fall_bound_m_s": 0.2943321174218879,

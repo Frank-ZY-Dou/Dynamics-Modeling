@@ -3,9 +3,9 @@
  "program": "docs/examples/shelf_books/program_round1.json",
  "seconds": 2.0,
  "supports": {
-  "notebook_3": 0.08800171967595823,
   "notebook_1": 0.06797034014016395,
   "notebook_2": 0.0779860299080611,
+  "notebook_3": 0.08800171967595823,
   "case": [
    0.05795465037226677,
    0.3150005042552948,

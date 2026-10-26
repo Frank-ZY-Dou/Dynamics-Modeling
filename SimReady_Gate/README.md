@@ -270,8 +270,11 @@ the programs, every tool output and both certificates are in
 
 | round | repair | outcome | settle (hull / CoACD) |
 |---|---|---|---|
-| 1 | 82 → 0 pairs, planar RMSD 0.331 m, 30 s | `place(hammer_8)` missed by 7.3 cm: the 33 cm hammer does not fit at the requested corner next to the bin | 0.40 / 0.33 m/s, pass |
-| 2 | 82 → 0 pairs, planar RMSD 0.326 m, 30 s | the exact hammer target dropped (the request only asks for it out of the way on the right, which `right_of` states); every predicate holds, `ready: true` | 0.32 / 0.29 m/s, pass |
+| 1 | 82 → 0 pairs, planar RMSD 0.335 m, 10 s | `place(hammer_8)` missed by 5.3 cm: the 33 cm hammer does not fit at the requested corner next to the bin, the hammer and the bin end at the table's edge, the ladle 2.6 cm beyond its 22 cm | 0.38 / 0.33 m/s, pass |
+| 2 | 82 → 0 pairs, planar RMSD 0.326 m, 7 s | the exact hammer target dropped (the request only asks for it out of the way on the right, which `right_of` states); every predicate holds, `ready: true` | 0.38 / 0.28 m/s, pass |
+
+Round 1's report lists the rewrites of its failed statements: drop the hammer's target, relax the
+ladle's radius to 24.7 cm, or make the 2 cm edge inset a preference, which the request rules out.
 
 The heap itself, settled as is, reaches 4.8 m/s with eleven bodies off the table (hull proxies)
 and 3.8 m/s with one (CoACD). The program's schedule starts the continuation at s = 0.3, large
@@ -308,12 +311,14 @@ certificate is in [`docs/examples/`](docs/examples/); the layouts come from `exp
 
 | example | request | repair | settle (hull / CoACD) |
 |---|---|---|---|
-| `shelf_books` | books upright by height, spines out; the two tallest on top; notebooks stacked at the back | 18 → 0 pairs, 12 s | 0.06 / 0.16 m/s |
+| `shelf_books` | books upright by height, spines out; the two tallest on top; notebooks stacked at the back | 18 → 0 pairs, 13 s | 0.06 / 0.16 m/s |
 | `shelf_pantry` | 45 things, heavy ones low; mugs and soup in a front row, handles right; cans in a 2 × 9 grid; jars by mass | 23 → 0 pairs, 28 s | 0.87 / 0.21 m/s |
-| `shelf_fix` | 45 things in rows 3 mm too tight: fix them, moving nothing more than 2 cm | 36 → 0 pairs, 19 s | 0.11 / 0.04 m/s |
+| `shelf_fix` | 45 things in rows 3 mm too tight: fix them, moving nothing more than 2 cm | 36 → 0 pairs, 20 s | 0.11 / 0.04 m/s |
 
 - `shelf_books` took two rounds: the first lined up the books' centres, so their spines could not
-  line up too; the second uses `edge=min`.
+  line up too; the second uses `edge=min`. Round 1's report lists the nearest relaxations (the row's
+  tolerance from 1.0 to 1.3 cm, a spine from 5 to 8 mm off its line); they accept its layout, but
+  the request puts every spine 1 cm behind the front edge, which `edge=min` keeps.
 - The hull settle fills the bowls in, and the upper bowls slide off; CoACD keeps their shape.
 
 ## The agent loop

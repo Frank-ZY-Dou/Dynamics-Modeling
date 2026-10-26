@@ -7,9 +7,9 @@
  "min_score_after": 0.0,
  "contained_after": [],
  "floating_after": [],
- "rmsd_xy": 0.3255718951752328,
+ "rmsd_xy": 0.32562497483339836,
  "steps": 44,
- "time_s": 29.94,
+ "time_s": 6.51,
  "predicates": [
   [
    "on_support(pineapple_slices_can,table)",
@@ -254,7 +254,7 @@
   [
    "within(remote_control,table.top)",
    true,
-   0.00015980298772719226
+   0.0001577626199195381
   ],
   [
    "within(pitcher,table.top)",
@@ -304,7 +304,7 @@
   [
    "within(bin_b02,table.top)",
    true,
-   0.0004479862590006656
+   0.00036641748423082987
   ],
   [
    "within(orange_01,table.top)",
@@ -314,22 +314,22 @@
   [
    "place(pitcher)",
    true,
-   6.958747056177637e-14
+   6.964746253365383e-14
   ],
   [
    "place(bowl)",
    true,
-   0.006348617820965891
+   0.0065626151216901804
   ],
   [
    "place(ladle)",
    true,
-   0.00342387095888541
+   0.003295846342340298
   ],
   [
    "place(spoon_big)",
    true,
-   3.91939029565298e-12
+   1.8947026114226815e-10
   ],
   [
    "place(orange_02)",
@@ -384,22 +384,22 @@
   [
    "place(plasticjerrican_a01)",
    true,
-   0.003804237519395647
+   0.0008710670312262567
   ],
   [
    "place(bin_b02)",
    true,
-   0.03770960120621027
+   0.036661084003875535
   ],
   [
    "place(remote_control)",
    true,
-   0.020174270656237864
+   0.02020729901755116
   ],
   [
    "place(spatula_17)",
    true,
-   0.00047994949191211377
+   0.0004555563856644511
   ],
   [
    "place(raisin_box)",
@@ -407,106 +407,109 @@
    0.0
   ],
   [
-   "in_front_of(bowl,pitcher,gap=0.12)",
+   "farther(bowl,pitcher,gap=0.12)",
    true,
-   0.07944296076334334
+   0.0797536715704692
   ],
   [
-   "near(ladle,bowl,r=0.22)",
+   "close_to(ladle,bowl,r=0.22)",
    true,
-   0.21016093129995447
+   0.21038616077940328
   ],
   [
-   "near(spoon_big,bowl,r=0.22)",
+   "close_to(spoon_big,bowl,r=0.22)",
    true,
-   0.15367687678073197
+   0.1534422072613442
   ],
   [
-   "near(lime01,orange_02,r=0.12)",
+   "close_to(lime01,orange_02,r=0.12)",
    true,
    0.09999999999999996
   ],
   [
-   "near(lemon_02,orange_02,r=0.12)",
+   "close_to(lemon_02,orange_02,r=0.12)",
    true,
    0.09999999999999998
   ],
   [
-   "near(orange_01,orange_02,r=0.12)",
+   "close_to(orange_01,orange_02,r=0.12)",
    true,
    0.10198039027185567
   ],
   [
    "left_of(orange_02,bowl,gap=0.18)",
    true,
-   0.1536758672115902
+   0.15344200948916437
   ],
   [
-   "in_front_of(pineapple_slices_can,bowl,gap=0.12)",
+   "farther(pineapple_slices_can,bowl,gap=0.12)",
    true,
-   0.06055703923672029
+   0.06024632842959399
   ],
   [
-   "in_front_of(tomato_sauce_can,bowl,gap=0.12)",
+   "farther(tomato_sauce_can,bowl,gap=0.12)",
    true,
-   0.06055703923672029
+   0.06024632842959399
   ],
   [
-   "in_front_of(peas_and_carrots,bowl,gap=0.12)",
+   "farther(peas_and_carrots,bowl,gap=0.12)",
    true,
-   0.06055703923672029
+   0.06024632842959399
   ],
   [
-   "in_front_of(bbq_sauce_bottle,bowl,gap=0.12)",
+   "farther(bbq_sauce_bottle,bowl,gap=0.12)",
    true,
-   0.06055703923672029
+   0.06024632842959399
   ],
   [
-   "in_front_of(whitepackerbottle_a01,bowl,gap=0.12)",
+   "farther(whitepackerbottle_a01,bowl,gap=0.12)",
    true,
-   0.06055703923672029
+   0.06024632842959399
   ],
   [
-   "in_front_of(whitepackerbottle_a02,bowl,gap=0.12)",
+   "farther(whitepackerbottle_a02,bowl,gap=0.12)",
    true,
-   0.06055703923672029
+   0.06024632842959399
   ],
   [
-   "in_front_of(plasticjerrican_a01,bowl,gap=0.12)",
+   "farther(plasticjerrican_a01,bowl,gap=0.12)",
    true,
-   0.03369491101888944
+   0.0310579949795049
   ],
   [
    "right_of(hammer_8,bowl,gap=0.22)",
    true,
-   -4.561544464018463e-05
+   -4.979931021781292e-05
   ],
   [
    "right_of(bin_b02,bowl,gap=0.25)",
    true,
-   0.1387452226381813
+   0.13990584660783617
   ],
   [
    "right_of(remote_control,bowl,gap=0.22)",
    true,
-   0.18922061466570197
+   0.1896121137673921
   ],
   [
    "right_of(spatula_17,bowl,gap=0.12)",
    true,
-   0.03637962785964294
+   0.03662239830143027
   ]
  ],
  "failed_predicates": [],
+ "preferences": [],
+ "failed_preferences": [],
  "clearance": null,
  "notes": [
-  "RoboLab frame: the robot at -x looks along +x; 'in front of X' means larger x than X and 'left of X' means larger y. So the far edge of the table ('the back') is larger x: the back row is in_front_of the bowl.",
+  "RoboLab frame: the robot at -x looks along +x; 'in front of X' means larger x than X and 'left of X' means larger y. So the far edge of the table ('the back') is larger x: the back row is farther than the bowl.",
   "targets were chosen from the table rectangle x[0.20, 0.90] y[-0.50, 0.50] and the listed object sizes; the continuation resolves any residual overlap",
   "round 2: the certificate reported place(hammer_8) missed by 7 cm (the 33 cm hammer does not fit at the requested corner next to the bin); the request only asks for it 'out of the way on the right', which right_of(hammer_8, bowl, gap=0.22) states, so the exact target is dropped"
  ],
  "solver_notes": [
-  "a program row was not met within the step at 11 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
-  "the contacts exceeded the trust region at 1 step(s); those steps served the contacts alone"
+  "spoon_big: a copy of 2000 faces lost part of the body; the repair ran on one of 8000",
+  "a program row was not met within the step at 16 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+  "the contacts exceeded the trust region at 3 step(s); those steps served the contacts alone"
  ],
  "dropped_children": [],
  "continuation": {
@@ -516,7 +519,7 @@
  },
  "synthetic_table": null,
  "written": "results/videos/pile_n20/agent_repaired.json",
- "written_sha256": "84e634720ad9d74c",
+ "written_sha256": "a4fd6fd1779d3a4d",
  "certificate": "results/videos/pile_n20/agent_repaired.certificate.json"
 }
 repair exit=0

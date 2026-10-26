@@ -9,7 +9,7 @@
  "floating_after": [],
  "rmsd_xy": 0.011322314494541462,
  "steps": 20,
- "time_s": 18.97,
+ "time_s": 20.2,
  "predicates": [
   [
    "upright(mug_1)",
@@ -1115,14 +1115,13 @@
   },
   "program": {
    "path": "docs/examples/shelf_fix/program.json",
-   "sha256": "9f3bbedd5d0b3a38",
-   "dsl": "program\n  no_penetration(*, margin=0.002)\n  upright(*)\n  on_support(*, rack)\n  max_move(*, d=0.02)\n  max_turn(*, deg=10)",
+   "sha256": "fbee9420ab0b9783",
+   "dsl": "schedule\n  margin = 0.002\nprogram\n  no_penetration(*)\n  upright(*)\n  on_support(*, rack)\n  max_move(*, d=0.02)\n  max_turn(*, deg=10)",
    "json": {
     "intent": "A minimal fix: every body stays on its shelf and nearly where it is; only the interpenetration goes.",
     "statements": [
      {
       "op": "no_penetration",
-      "margin": 0.002,
       "reason": "simulation-ready: nothing interpenetrates; a 2 mm clearance keeps the motion small"
      },
      {
@@ -1148,10 +1147,14 @@
       "deg": 10,
       "reason": "turns at most 10 degrees"
      }
-    ]
+    ],
+    "schedule": {
+     "margin": 0.002
+    }
    }
   },
-  "params": {
+  "schedule": {
+   "margin": 0.002,
    "s_min": 0.05,
    "ds_max": 0.05,
    "tail_iters": 30,
@@ -1164,7 +1167,6 @@
    "verify_gap_tol": 0.002,
    "verify_sink_tol": 0.001,
    "defaults": {
-    "margin": 0.005,
     "inset": 0.02,
     "gap": 0.05
    },
@@ -1263,7 +1265,7 @@
    }
   },
   "software": {
-   "git": "cf436021680a",
+   "git": "4eb4e2f19652",
    "python": "3.11.17",
    "numpy": "2.4.6",
    "trimesh": "5.2.0",
@@ -1272,7 +1274,7 @@
    "mujoco": "3.17.0",
    "pxr": null
   },
-  "time": "2026-10-26T04:00:57"
+  "time": "2026-10-26T14:23:32"
  },
  "written": "docs/examples/shelf_fix/repaired.json",
  "written_sha256": "04102b5e91f59d41",

@@ -9,7 +9,7 @@
  "floating_after": [],
  "rmsd_xy": 0.12392717843574555,
  "steps": 22,
- "time_s": 12.47,
+ "time_s": 12.56,
  "predicates": [
   [
    "upright(book_1)",
@@ -330,14 +330,13 @@
   },
   "program": {
    "path": "docs/examples/shelf_books/program.json",
-   "sha256": "fa4021025581b538",
-   "dsl": "program\n  no_penetration(*, margin=0.005)\n  upright(*)\n  on_support(book_*, case.level2)\n  on_support(book_2, case.level4)\n  on_support(book_3, case.level4)\n  yaw(book_*, axis=front, deg=180)\n  row(book_1, book_4, book_5, book_6, book_7, gap=0.005, start=left, order=-height, mid=0, edge=min)\n  flush(book_1, case.level2, side=near, gap=0.01)\n  row(book_2, book_3, gap=0.005, start=left, order=-height, edge=min)\n  flush(book_3, case.level4, side=left, gap=0.02)\n  flush(book_2, case.level4, side=near, gap=0.01)\n  flush(book_3, case.level4, side=near, gap=0.01)\n  on_support(notebook_1, case.level1)\n  stack(notebook_1, notebook_2, notebook_3, notebook_4)\n  yaw(notebook_*, deg=90, mod=180)\n  flush(notebook_1, case.level1, side=far, gap=0.01)\n  at(notebook_1, y=0)",
+   "sha256": "0f880b6bb3628d55",
+   "dsl": "program\n  no_penetration(*)\n  upright(*)\n  on_support(book_*, case.level2)\n  on_support(book_2, case.level4)\n  on_support(book_3, case.level4)\n  yaw(book_*, axis=front, deg=180)\n  row(book_1, book_4, book_5, book_6, book_7, gap=0.005, start=left, order=-height, mid=0, edge=min)\n  flush(book_1, case.level2, side=near, gap=0.01)\n  row(book_2, book_3, gap=0.005, start=left, order=-height, edge=min)\n  flush(book_3, case.level4, side=left, gap=0.02)\n  flush(book_2, case.level4, side=near, gap=0.01)\n  flush(book_3, case.level4, side=near, gap=0.01)\n  on_support(notebook_1, case.level1)\n  stack(notebook_1, notebook_2, notebook_3, notebook_4)\n  yaw(notebook_*, deg=90, mod=180)\n  flush(notebook_1, case.level1, side=far, gap=0.01)\n  at(notebook_1, y=0)",
    "json": {
     "intent": "Books upright with their spines out: the five that fit on the middle shelf by height, the two taller ones on top; the notebooks stacked at the back of the bottom shelf.",
     "statements": [
      {
       "op": "no_penetration",
-      "margin": 0.005,
       "reason": "nothing interpenetrates"
      },
      {
@@ -470,7 +469,8 @@
     ]
    }
   },
-  "params": {
+  "schedule": {
+   "margin": 0.005,
    "s_min": 0.05,
    "ds_max": 0.05,
    "tail_iters": 30,
@@ -483,7 +483,6 @@
    "verify_gap_tol": 0.002,
    "verify_sink_tol": 0.001,
    "defaults": {
-    "margin": 0.005,
     "inset": 0.02,
     "gap": 0.05
    },
@@ -582,7 +581,7 @@
    }
   },
   "software": {
-   "git": "cf436021680a",
+   "git": "4eb4e2f19652",
    "python": "3.11.17",
    "numpy": "2.4.6",
    "trimesh": "5.2.0",
@@ -591,7 +590,7 @@
    "mujoco": "3.17.0",
    "pxr": null
   },
-  "time": "2026-10-26T03:50:29"
+  "time": "2026-10-26T14:16:38"
  },
  "written": "docs/examples/shelf_books/repaired.json",
  "written_sha256": "1bb2deede92f48a2",
@@ -600,14 +599,14 @@
   "program": "docs/examples/shelf_books/program.json",
   "seconds": 2.0,
   "supports": {
+   "notebook_3": 0.08800171967595821,
    "notebook_1": 0.06797034014016395,
-   "notebook_2": 0.07798602990806108,
    "case": [
     0.05795465037226677,
     0.3150005042552948,
     0.8768095103096568
    ],
-   "notebook_3": 0.08800171967595821
+   "notebook_2": 0.07798602990806108
   },
   "max_hover_m": 2.1728682911836827e-06,
   "free_fall_bound_m_s": 0.006529293673363442,
