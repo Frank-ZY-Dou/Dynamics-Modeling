@@ -59,7 +59,7 @@ def _st(op, **kw):
     return {"op": op, **kw}
 
 
-BASE = [_st("no_penetration", margin=0.005), _st("on_support", a="*", b="table"), _st("upright", a="*"),
+BASE = [_st("no_penetration"), _st("on_support", a="*", b="table"), _st("upright", a="*"),
         _st("within", a="*", b="table.top", inset=0.02)]
 
 
@@ -91,7 +91,7 @@ def setting():
         _st("beside", a="fork", b="plate", side="left", gap=0.025, max=0.045), _st("beside", a="knife", b="plate", side="right", gap=0.025, max=0.045),
         _st("beside", a="spoon", b="knife", side="right", gap=0.025), _st("beside", a="mug", b="fork", side="left", gap=0.035),
         _st("facing", a="mug", axis="-x", tol=10),
-        _st("in_front_of", a="glass", b="plate", gap=0.12), _st("near", a="glass", b="knife", r=0.14)]}
+        _st("farther", a="glass", b="plate", gap=0.12), _st("close_to", a="glass", b="knife", r=0.14)]}
     return Task("setting", len(objs), objs, {"kind": "heap", "center": (0.55, 0.0), "radius": 0.10}, request, checks, ref)
 
 
@@ -158,7 +158,7 @@ def fruit_cans(n=10):
         _st("within", a=c, b="table.top", y1=-0.27) for c in cn] + [_st("row", members=cn, start="near", gap=0.025, tol=0.005)] + [
         _st("within", a="bowl", y0=-0.18, y1=0.18), _st("reach", a="bowl", r=0.75, min=0.57),
         _st("keep_out", a="*", x0=0.29, x1=0.51, y0=-0.11, y1=0.11)] + (
-        [_st("near", a="mug", b="bowl", r=0.18), _st("within", a="mug", y0=-0.18, y1=0.18)] if n >= 16 else []) + (
+        [_st("close_to", a="mug", b="bowl", r=0.18), _st("within", a="mug", y0=-0.18, y1=0.18)] if n >= 16 else []) + (
         [_st("place", a="bowl", x=0.64, y=0.05), _st("place", a="mug", x=0.70, y=-0.10)] if n >= 24 else []) + (
         [_st("clearance", a=j, gap=0.035) for j in jn])}
     return Task("fruit_cans", n, objs, {"kind": "heap", "center": (0.55, 0.0), "radius": {10: 0.15, 16: 0.18, 24: 0.22}[n]}, request, checks, ref)
@@ -236,10 +236,10 @@ def palletize(n=4):
         out += R.rows_parallel_to(sc, names, "y", 3, 0.01) + [R.yaw_square(sc, names, 3.0), R.min_clearance(sc, names, 0.01)]
         return out + R.generic(sc, support="pallet")
     rows = [names[:2], names[2:]] if n == 4 else [names[i:i + 3] for i in range(0, len(names), 3)]
-    ref = {"statements": [_st("no_penetration", margin=0.005), _st("on_support", a="*", b="pallet"), _st("upright", a="*"),
+    ref = {"statements": [_st("no_penetration"), _st("on_support", a="*", b="pallet"), _st("upright", a="*"),
                           _st("within", a="*", b="pallet.top", inset=0.03), _st("yaw", a="*", deg=0, mod=90, tol=2),
                           _st("clearance", a="*", gap=0.015)] + [_st("row", members=r_, start="right", gap=0.02, tol=0.005) for r_ in rows] + (
-        [_st("in_front_of", a=rows[1][0], b=rows[0][0], gap=0.30)] if len(rows) > 1 else [])}
+        [_st("farther", a=rows[1][0], b=rows[0][0], gap=0.30)] if len(rows) > 1 else [])}
     return Task("palletize", n, objs, {"kind": "heap", "center": (0.70, 0.0), "radius": 0.15}, request, checks, ref, support="pallet")
 
 
@@ -271,9 +271,9 @@ def kitchen_prep():
     ref = {"statements": BASE + [
         _st("at", a="board", x=0.45, y=0.0, tol=0.01), _st("yaw", a="board", deg=0, axis="long", tol=3),
         _st("parallel", a="knife", b="board", tol=3), _st("parallel", a="spoon", b="knife", tol=3),
-        _st("row", members=["spoon", "knife", "board"], start="right", gap=0.03), _st("near", a="knife", b="board", r=0.17),
+        _st("row", members=["spoon", "knife", "board"], start="right", gap=0.03), _st("close_to", a="knife", b="board", r=0.17),
         _st("left_of", a="bowl", b="board", gap=0.32), _st("cluster", members=fn, r=0.10)] + [
-        _st("in_front_of", a=f, b="bowl", gap=0.12) for f in fn] + [
+        _st("farther", a=f, b="bowl", gap=0.12) for f in fn] + [
         _st("row", members=dn, start="right", gap=0.03, tol=0.005), _st("reach", a="bottle", r=0.88, min=0.79),
         _st("reach", a="can_1", r=0.88, min=0.79), _st("reach", a="can_2", r=0.88, min=0.79)] + [
         _st("min_distance", a=o[0], b="board", r=0.27) for o in objs if o[0] not in ("board", "knife", "spoon")]}
@@ -290,8 +290,9 @@ def pack(n=10):
 
     def checks(sc, st):
         return [R.in_region(sc, names, x0, x1, y0, y1, label="square")] + R.generic(sc)
-    ref = {"statements": [_st("no_penetration", margin=0.002), _st("on_support", a="*", b="table"), _st("upright", a="*"),
-                          _st("within", a="*", x0=x0 + 0.002, x1=x1 - 0.002, y0=y0 + 0.002, y1=y1 - 0.002)]}
+    ref = {"statements": [_st("no_penetration"), _st("on_support", a="*", b="table"), _st("upright", a="*"),
+                          _st("within", a="*", x0=x0 + 0.002, x1=x1 - 0.002, y0=y0 + 0.002, y1=y1 - 0.002)],
+           "schedule": {"margin": 0.002}}
     return Task("pack", n, fruit, {"kind": "heap", "center": (0.56, 0.0), "radius": 0.12}, request, checks, ref)
 
 

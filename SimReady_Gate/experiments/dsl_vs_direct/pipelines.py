@@ -15,14 +15,21 @@ import time
 
 import numpy as np
 
-from simready.cli import load_any, repair_scene, INPUT_ERRORS
+from simready.cli import load_any, repair_scene, rewrite_report, INPUT_ERRORS
 from simready.dsl.schema import validate_program_json, ProgramError, V0_OPS, V0_FIELDS
-from simready.dsl.model import parse_program
+from simready.dsl.model import parse_program, schedule_of
 from simready.dsl.compile import support_height_for
 from simready.gates.verify import verify_scene
 from simready.repair.upright_s4r import rotz, _lift_clear
 
-SOLVER = {"s_min": 0.05, "ds_max": 0.05, "tail": 40, "max_xy_step": 0.05}
+# the comparison's schedule: fixed for every trial but the margin, which a program may set (schedule.margin)
+SCHEDULE_FIXED = {"s_min": 0.05, "ds_max": 0.05, "tail_iters": 40, "proxy_faces": 2000}
+MAX_XY_STEP = 0.05
+REWRITES_NOTE = ("rewrites: for each statement whose requirement failed (its index in your statements), relax gives "
+                 "{keyword: [your value, the nearest value at which it holds on the layout the repair returned]} and weaken "
+                 "says whether it may become a preference (soft) or be removed (drop); accepted_if_relaxed and "
+                 "accepted_if_weakened say whether those edits make that layout pass. Your next program is repaired again "
+                 "from the same starting scene.")
 
 
 def _elapsed(t0, c0, clock):
@@ -34,8 +41,9 @@ def _elapsed(t0, c0, clock):
     return time.time() - t0
 
 
-def run_program(layout_path, obj: dict, v0_only: bool = False, clock: dict | None = None):
-    """(final scene, report, self_ok, solver seconds)."""
+def run_program(layout_path, obj: dict, v0_only: bool = False, rewrites: bool = False, clock: dict | None = None):
+    """(final scene, report, self_ok, solver seconds); with `rewrites`, the report of a failed requirement
+    carries the rewrites of the statements that failed (simready.cli.rewrite_report)."""
     sc = load_any(str(layout_path))
     t0, c0 = time.time(), time.process_time()
     try:
@@ -51,12 +59,17 @@ def run_program(layout_path, obj: dict, v0_only: bool = False, clock: dict | Non
                     raise ProgramError(f"statement {i} ({op}): fields {sorted(extra)} are not available")
         dsl, notes = validate_program_json(obj, sc)
         prog = parse_program(dsl)
-        out = repair_scene(sc, prog, s_min=SOLVER["s_min"], ds_max=SOLVER["ds_max"], tail=SOLVER["tail"], max_xy_step=SOLVER["max_xy_step"])
+        if set(prog.schedule) - {"margin"}:
+            raise ProgramError(f"the schedule takes only margin here, not {sorted(set(prog.schedule) - {'margin'})}")
+        out = repair_scene(sc, prog, schedule={**schedule_of(prog), **SCHEDULE_FIXED}, max_xy_step=MAX_XY_STEP)
     except INPUT_ERRORS as e:
         return sc, {"ok": False, "error": f"{type(e).__name__}: {e}"}, False, _elapsed(t0, c0, clock)
     report = {"ok": bool(out["ok"]), "pen_after": out["after"].pen_pairs,
               "failed_predicates": [(n, None if v is None else round(float(v), 4)) for n, ok, v in out["hard"] if not ok],
               "failed_preferences": [n for n, ok, _ in out["prefs"] if not ok], "solver_notes": out["solver_notes"][:4]}
+    if rewrites and report["failed_predicates"]:
+        contacts_ok = out["after"].pen_pairs == 0 and (out["clearance"] is None or out["clearance"]["pass"])
+        report.update(rewrite_report(prog, sc, out["hard"], obj, contacts_ok), rewrites_note=REWRITES_NOTE)
     return sc, report, bool(out["ok"]), _elapsed(t0, c0, clock)
 
 
@@ -130,12 +143,12 @@ def generic_repair(sc, support: str = "table", on: dict | None = None, clock: di
     another (`on`, typed_supports) stays on it."""
     names = {b.name for b in sc.free()}
     rest = "".join(f"  on_support({n}, {s})\n" for n, s in sorted((on or {}).items()) if n in names and s in names and s != n)
-    prog = parse_program(f"program\n  no_penetration(*, margin=0.005)\n  on_support(*, {support})\n{rest}  upright(*)\n"
+    prog = parse_program(f"program\n  no_penetration(*)\n  on_support(*, {support})\n{rest}  upright(*)\n"
                          f"  within(*, {support}.top, inset=0.01)\n")
     sc2 = copy.deepcopy(sc)
     t0, c0 = time.time(), time.process_time()
     try:
-        out = repair_scene(sc2, prog, s_min=SOLVER["s_min"], ds_max=SOLVER["ds_max"], tail=SOLVER["tail"], max_xy_step=SOLVER["max_xy_step"])
+        out = repair_scene(sc2, prog, schedule={**schedule_of(prog), **SCHEDULE_FIXED}, max_xy_step=MAX_XY_STEP)
         ok = bool(out["ok"])
     except INPUT_ERRORS:
         ok = False

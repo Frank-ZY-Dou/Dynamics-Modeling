@@ -3,7 +3,6 @@
  "statements": [
   {
    "op": "no_penetration",
-   "margin": 0.002,
    "reason": "simulation-ready: nothing interpenetrates; a 2 mm clearance keeps the motion small"
   },
   {
@@ -29,5 +28,8 @@
    "deg": 10,
    "reason": "turns at most 10 degrees"
   }
- ]
+ ],
+ "schedule": {
+  "margin": 0.002
+ }
 }

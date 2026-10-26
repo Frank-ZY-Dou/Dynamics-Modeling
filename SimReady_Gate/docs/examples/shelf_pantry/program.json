@@ -1,7 +1,7 @@
 {
  "intent": "A stocked rack by weight: the mugs and soup cans in a front row and two stacks of bowls behind them on the bottom shelf, the cans in a 2 x 9 grid on the second, the jars by mass and the bottles behind them on the third.",
  "statements": [
-  {"op": "no_penetration", "margin": 0.003, "reason": "nothing interpenetrates"},
+  {"op": "no_penetration", "reason": "nothing interpenetrates"},
   {"op": "upright", "a": "*", "reason": "everything stands as it rests"},
   {"op": "within", "a": "*", "b": "rack", "x0": 0.57, "reason": "at least 3 cm behind the shelves' front edge (x = 0.54)"},
   {"op": "on_support", "a": "mug_*", "b": "rack.level1", "reason": "mugs (1.35 to 1.75 kg) on the bottom shelf"},
@@ -13,7 +13,7 @@
   {"op": "on_support", "a": "bowl_3", "b": "rack.level1", "reason": "the second stack on the bottom shelf too"},
   {"op": "stack", "members": ["bowl_1", "bowl_2"], "reason": "two bowls stacked"},
   {"op": "stack", "members": ["bowl_3", "bowl_4"], "reason": "the other two stacked"},
-  {"op": "within", "a": "bowl_*", "b": "rack.level1", "x0": 0.70, "reason": "behind the row (mugs at most 12 cm deep from x = 0.57)"},
+  {"op": "within", "a": "bowl_*", "b": "rack.level1", "x0": 0.7, "reason": "behind the row (mugs at most 12 cm deep from x = 0.57)"},
   {"op": "on_support", "a": "can_*", "b": "rack.level2", "reason": "the drink cans on the second shelf"},
   {"op": "grid", "members": ["can_*"], "cols": 9, "dx": 0.09, "dy": 0.09, "reason": "two rows of nine; a 9 cm pitch leaves about 2 cm between cans 6 to 7 cm wide"},
   {"op": "on_support", "a": "jar_*", "b": "rack.level3", "reason": "the paint jars on the third shelf"},
@@ -22,5 +22,6 @@
   {"op": "on_support", "a": "bottle_*", "b": "rack.level3", "reason": "the bottles on the third shelf"},
   {"op": "row", "members": ["bottle_*"], "gap": 0.02, "reason": "in a row"},
   {"op": "within", "a": "bottle_*", "b": "rack.level3", "x0": 0.72, "reason": "behind the jars"}
- ]
+ ],
+ "schedule": {"margin": 0.003}
 }

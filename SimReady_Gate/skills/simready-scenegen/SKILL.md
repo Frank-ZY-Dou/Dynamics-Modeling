@@ -49,10 +49,18 @@ report on stdout; `summarize`, `prompt` and `verify` print text.
    `on_support` predicate whose value is `null` means the body's bottom is over no part of that
    support at all. `solver_notes` says when a statement could not be met within a step of the continuation.
 5. Route failures, never override the numbers (at most 3 rounds in total, then report failure):
+   - a failed requirement: the report's `rewrites` name each failed statement (its index in the JSON
+     `statements`) with `relax`, the nearest values of its own bounds at which it holds on the layout
+     returned (`{"gap": [written, nearest]}`), and `weaken` (`soft`: it may become a preference;
+     `drop`: it may be removed). `accepted_if_relaxed` / `accepted_if_weakened` say whether those
+     edits make that layout pass. Apply a rewrite only when the request allows it (a number the
+     request states is not yours to relax); otherwise change what the statement asks for, or
+     another statement, and rerun step 4 (the repair starts again from the same scene).
+   - a tight packing whose `solver_notes` say the contacts set the program rows aside: lower the
+     clearance the repair keeps, `"schedule": {"margin": 0.002}` (default 0.005 m); it changes how
+     the repair gets there, never what is accepted.
    - `pen_after > 0` (tight packing, nested containers): shrink the intent — fewer objects,
      a larger region, or different objects — and go back to step 2.
-   - a failed relational predicate (`left_of`, `near`, ...): relax `gap`/`r` or change the pair
-     in the JSON and rerun step 4.
    - a failed `within`/`inside`: the region is too small for the objects; enlarge the region or
      drop an object. Positions are not statements — do not try to "move" a body by editing.
    - `check` refusing a level ("leaves ... m under the surface above it"): the body does not fit

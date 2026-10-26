@@ -3,7 +3,7 @@
 Text form (one statement per line, '#' comments, `*` = every free body):
 
     program
-      no_penetration(*, margin=0.01)
+      no_penetration(*)
       fixed(table)
       on_support(mug, table)      upright(mug)
       within(mug, table.top, inset=0.02)
@@ -13,7 +13,7 @@ Text form (one statement per line, '#' comments, `*` = every free body):
       inside(mug, tray)
       left_of(mug, bowl, axis=y, gap=0.05)
       min_distance(mug, bowl, r=0.10)
-      near(mug, bowl, r=0.25)
+      close_to(mug, bowl, r=0.25)
       minimize displacement(*)
       prefer(bowl, pose=intent, w=0.1)
       # v1: the robot and the task
@@ -37,6 +37,8 @@ Text form (one statement per line, '#' comments, `*` = every free body):
       max_move(*, d=0.03)   max_turn(*, deg=10)      stack(box_1, box_2, box_3)   balanced_on(box_2, box_1)
       beside(fork, plate, side=left, gap=0.02, max=0.05)   # footprints 2-5 cm apart, the fork on the plate's left
       left_of(mug, bowl, gap=0.10, soft=0.5)         # soft=: a preference, reported but not required
+    schedule
+      margin = 0.003                                 # how the repair gets there, never what is accepted
     gate
       G2: min_gap >= 1e-3
       G5: v_max <= 0.05, dx <= 0.01
@@ -61,10 +63,10 @@ def is_wildcard(tok: str) -> bool:
 
 
 REGION_KW = {"side", "frac", "depth", "x0", "x1", "y0", "y1"}
-KEYWORDS = {"no_penetration": {"margin"}, "within": {"inset", "soft"} | REGION_KW, "inside": {"inset", "soft"},
+KEYWORDS = {"no_penetration": set(), "within": {"inset", "soft"} | REGION_KW, "inside": {"inset", "soft"},
             "place": {"x", "y", "yaw", "w"},
-            "left_of": {"gap", "axis", "soft"}, "right_of": {"gap", "axis", "soft"}, "in_front_of": {"gap", "axis", "soft"},
-            "behind": {"gap", "axis", "soft"}, "min_distance": {"r", "soft"}, "near": {"r", "soft"}, "prefer": {"pose", "w"},
+            "left_of": {"gap", "axis", "soft"}, "right_of": {"gap", "axis", "soft"}, "farther": {"gap", "axis", "soft"},
+            "nearer": {"gap", "axis", "soft"}, "min_distance": {"r", "soft"}, "close_to": {"r", "soft"}, "prefer": {"pose", "w"},
             # v1
             "reach": {"r", "min", "x", "y", "soft"}, "clearance": {"gap"}, "at": {"x", "y", "tol", "soft"},
             "beside": {"side", "gap", "max", "soft"},
@@ -81,7 +83,7 @@ NUMERIC_KW = {"margin", "inset", "x", "y", "yaw", "w", "gap", "r", "min", "max",
               "dx", "dy", "frac", "depth", "x0", "x1", "y0", "y1", "d", "soft", "mid", "angle"}
 SIGNED_KW = {"x", "y", "yaw", "deg", "dx", "dy", "x0", "x1", "y0", "y1", "mid", "angle"}
 # keywords whose value is a word, and the words each statement accepts
-WORDS = {"axis": {"left_of": {"x", "y"}, "right_of": {"x", "y"}, "in_front_of": {"x", "y"}, "behind": {"x", "y"},
+WORDS = {"axis": {"left_of": {"x", "y"}, "right_of": {"x", "y"}, "farther": {"x", "y"}, "nearer": {"x", "y"},
                   "align": {"x", "y"}, "evenly_spaced": {"x", "y"}, "symmetric": {"x", "y"}, "between": {"x", "y"},
                   "row": {"x", "y"}, "facing": {"x", "y", "+x", "-x", "+y", "-y", "front", "handle"},
                   "yaw": {"x", "y", "+x", "-x", "+y", "-y", "long", "short", "front", "handle"}, "parallel": {"x", "y", "long", "short"},
@@ -98,7 +100,7 @@ WORDS = {"axis": {"left_of": {"x", "y"}, "right_of": {"x", "y"}, "in_front_of": 
          "pose": {"prefer": {"intent"}}}
 STATEMENTS = {
     "no_penetration", "place", "fixed", "on_support", "upright", "within", "inside",
-    "left_of", "right_of", "in_front_of", "behind", "min_distance", "near",
+    "left_of", "right_of", "farther", "nearer", "min_distance", "close_to",
     "minimize", "prefer",
     "reach", "clearance", "approach", "facing", "yaw", "parallel", "at", "beside",
     "row", "align", "evenly_spaced", "grid", "ring", "cluster", "symmetric", "between", "centered", "offset", "attach",
@@ -106,8 +108,8 @@ STATEMENTS = {
 }
 # positional arguments each statement takes: (min, max); None = unbounded
 ARITY = {"no_penetration": (1, 1), "place": (1, 1), "fixed": (1, None), "on_support": (2, 2), "upright": (1, 1),
-         "within": (1, 2), "inside": (2, 2), "left_of": (2, 2), "right_of": (2, 2), "in_front_of": (2, 2),
-         "behind": (2, 2), "min_distance": (2, 2), "near": (2, 2), "minimize": (2, 2), "prefer": (1, 1),
+         "within": (1, 2), "inside": (2, 2), "left_of": (2, 2), "right_of": (2, 2), "farther": (2, 2),
+         "nearer": (2, 2), "min_distance": (2, 2), "close_to": (2, 2), "minimize": (2, 2), "prefer": (1, 1),
          "reach": (1, 1), "clearance": (1, 1), "at": (1, 1), "beside": (2, 2), "approach": (1, 1), "facing": (1, 2), "yaw": (1, 1), "parallel": (2, 2),
          "row": (2, None), "align": (2, None), "evenly_spaced": (3, None), "grid": (2, None), "ring": (3, None), "cluster": (2, None),
          "symmetric": (3, 3), "between": (3, 3), "centered": (2, 2), "offset": (2, 2), "attach": (2, 2),
@@ -121,7 +123,14 @@ START_LINE = {"left": "y", "right": "y", "near": "x", "far": "x"}
 ONE_BODY = {"place", "centered", "offset", "symmetric", "between"}
 # keywords a statement cannot do without
 REQUIRED = {"reach": {"r"}, "clearance": {"gap"}, "beside": {"side"}, "flush": {"side"}, "yaw": {"deg"}, "grid": {"cols"}, "ring": {"r"}, "cluster": {"r"},
-            "max_move": {"d"}, "max_turn": {"deg"}, "min_distance": {"r"}, "near": {"r"}}
+            "max_move": {"d"}, "max_turn": {"deg"}, "min_distance": {"r"}, "close_to": {"r"}}
+# the schedule: how the repair reaches a layout the program accepts, never what it accepts (a program's `schedule`
+# section; the certificate records the one used): the clearance the contacts keep, the continuation's first scale and
+# largest scale step, the closing steps at full scale, and the faces of the decimated copies the repair runs on
+SCHEDULE = {"margin": 0.005, "s_min": 0.05, "ds_max": 0.05, "tail_iters": 30, "proxy_faces": 2000}
+SCHEDULE_RANGE = {"margin": (0.0, 0.05), "s_min": (0.01, 1.0), "ds_max": (0.005, 1.0), "tail_iters": (0, 500),
+                  "proxy_faces": (100, 100000)}
+SCHEDULE_INT = {"tail_iters", "proxy_faces"}
 # gate sections, their fields and the only operator each field takes
 GATES = {"G2": {"min_gap": ">="}, "G5": {"v_max": "<=", "dx": "<="}}
 
@@ -147,6 +156,7 @@ class Statement:
 class Program:
     statements: list = field(default_factory=list)
     gate: dict = field(default_factory=dict)
+    schedule: dict = field(default_factory=dict)
     source: str = ""
 
     def of(self, name: str):
@@ -183,6 +193,9 @@ def check_statement(name: str, args: list, kw: dict, where: str = "") -> None:
     """The rules a statement must meet whichever way it was written (text or JSON); raises
     SyntaxError naming the statement."""
     at = f"{where}: " if where else ""
+    if name == "no_penetration" and "margin" in kw:
+        raise SyntaxError(f"{at}no_penetration takes no margin: the clearance the repair keeps is part of the "
+                          "schedule (a `schedule` section: margin = ...), not of a statement")
     lo_n, hi_n = ARITY[name]
     if name in GROUP and any(is_wildcard(a) for a in args):
         lo_n = 1                              # counted once the wildcards are expanded on a scene
@@ -243,6 +256,29 @@ def check_statement(name: str, args: list, kw: dict, where: str = "") -> None:
             raise SyntaxError(f"{at}{lo_k}= must be smaller than {hi_k}=")
 
 
+def check_schedule(key: str, value, seen: dict, where: str):
+    """A schedule entry, checked: one of SCHEDULE, within SCHEDULE_RANGE, given once; returns the value."""
+    if key not in SCHEDULE:
+        raise SyntaxError(f"{where}: the schedule has {', '.join(SCHEDULE)}, not '{key}'")
+    if key in seen:
+        raise SyntaxError(f"{where}: {key} is scheduled twice")
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+        raise SyntaxError(f"{where}: {key} must be a number, got {value!r}")
+    lo, hi = SCHEDULE_RANGE[key]
+    if not lo <= value <= hi:
+        raise SyntaxError(f"{where}: {key} = {value:g} is outside [{lo:g}, {hi:g}]")
+    if key in SCHEDULE_INT:
+        if value != int(value):
+            raise SyntaxError(f"{where}: {key} must be a whole number, got {value:g}")
+        return int(value)
+    return float(value)
+
+
+def schedule_of(program) -> dict:
+    """The schedule a repair of `program` runs with: SCHEDULE with the program's own entries."""
+    return {**SCHEDULE, **program.schedule}
+
+
 def parse_program(text: str) -> Program:
     prog = Program(source=text)
     section = "program"
@@ -251,8 +287,17 @@ def parse_program(text: str) -> Program:
         if not line:
             continue
         head = line.split()[0]
-        if head in ("program", "gate", "scene"):
+        if head in ("program", "gate", "scene", "schedule"):
+            if line != head:
+                raise SyntaxError(f"line {ln}: a section header stands alone on its line: '{line}'")
             section = head
+            continue
+        if section == "schedule":
+            for term in line.split(","):
+                mm = re.match(r"^\s*(\w+)\s*=\s*(\S+)\s*$", term)
+                if not mm:
+                    raise SyntaxError(f"line {ln}: a schedule line is key = value: '{term.strip()}'")
+                prog.schedule[mm.group(1)] = check_schedule(mm.group(1), _val(mm.group(2)), prog.schedule, f"line {ln}")
             continue
         if section == "gate":
             m = re.match(r"^(G\d+)\s*:\s*(.*)$", line)

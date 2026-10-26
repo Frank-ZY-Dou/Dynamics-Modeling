@@ -2,9 +2,9 @@
 
 Frame convention = RoboLab's (robot at the origin looking along +x, table in front of it):
   left_of(a,b)     : a.y >= b.y + gap        right_of(a,b)  : a.y <= b.y - gap
-  in_front_of(a,b) : a.x >= b.x + gap        behind(a,b)    : a.x <= b.x - gap
-(RoboLab predicates.md: left-of = +Y, front-of = +X.) Regions name their sides near (-x, toward
-the robot), far (+x), left (+y) and right (-y).
+  farther(a,b)     : a.x >= b.x + gap        nearer(a,b)    : a.x <= b.x - gap
+(RoboLab predicates.md: left-of = +Y, front-of = +X, here `farther` from the robot.) Regions name
+their sides near (-x, toward the robot), far (+x), left (+y) and right (-y).
 
 Per-step rows are linear in (dx, dy, dyaw) of free bodies. Region rows use the exact
 projection interval of the scaled, yawed footprint (not a symmetric half-extent), and regions
@@ -15,6 +15,7 @@ text and the JSON path.
 """
 from __future__ import annotations
 
+import copy
 import fnmatch
 import math
 import re
@@ -23,13 +24,13 @@ import numpy as np
 
 from ..scene.model import LEVEL_MIN_HEADROOM, Scene, Body, support_levels
 from ..repair.upright_s4r import RepairSpec, decompose_zyx
-from .model import ARITY, GROUP, Program, Statement, is_wildcard
-from .schema import DEFAULTS
+from .model import ARITY, GROUP, KEYWORDS, Program, Statement, is_wildcard, schedule_of
+from .schema import DEFAULTS, OP_DEFAULTS
 from . import statements as V1
 
 AXIS = {"x": 0, "y": 1}
-REL = {"left_of": ("y", +1), "right_of": ("y", -1), "in_front_of": ("x", +1), "behind": ("x", -1)}
-BINARY = {"on_support", "within", "inside", "min_distance", "near", "parallel", "centered", "offset", "attach",
+REL = {"left_of": ("y", +1), "right_of": ("y", -1), "farther": ("x", +1), "nearer": ("x", -1)}
+BINARY = {"on_support", "within", "inside", "min_distance", "close_to", "parallel", "centered", "offset", "attach",
           "balanced_on", "keep_out", "facing", "beside", "flush"} | set(REL)
 V1_ROWS = {"reach", "at", "beside", "facing", "yaw", "parallel", "max_turn", "row", "align", "evenly_spaced", "grid", "ring", "cluster",
            "symmetric", "between", "centered", "offset", "attach", "keep_out", "flush", "approach", "max_move", "balanced_on", "stack"}
@@ -99,7 +100,7 @@ def expand_names(program: Program, scene: Scene) -> Program:
             out.extend(cache[free])
         else:
             out.append(st)
-    return Program(statements=out, gate=program.gate, source=program.source)
+    return Program(statements=out, gate=program.gate, schedule=program.schedule, source=program.source)
 
 
 def _expand(st: Statement, scene: Scene) -> list:
@@ -293,6 +294,16 @@ def _drop_height(scene: Scene, body: Body, support: Body, below: float | None = 
     return float(np.max(S[ok] - (B[ok] - z_low)))
 
 
+def _pull(pulls: dict, a: str, rank: int, st, pull, target) -> None:
+    """Record the pull of `place` (rank 3, a named body) or `prefer` (rank 1 for *, 2 for a pattern, 3 for a name) on
+    body a: the higher rank holds whatever the statement order, and two pulls of the same rank are an error."""
+    old = pulls.get(a)
+    if old is not None and old[0] == rank:
+        raise CompileError(f"{a} is pulled by both {old[1]!r} and {st!r}: keep one")
+    if old is None or rank > old[0]:
+        pulls[a] = (rank, st, pull, target)
+
+
 def effective_supports(program: Program, scene: Scene) -> dict:
     """body -> the support it rests on (see effective_support_refs)."""
     return {nm: _ref(tok) for nm, tok in effective_support_refs(program, scene).items()}
@@ -301,9 +312,9 @@ def effective_supports(program: Program, scene: Scene) -> dict:
 def effective_support_refs(program: Program, scene: Scene) -> dict:
     """body -> the reference of the support it rests on, as written (`shelf.level2` for a level). A body named in
     on_support or in a stack keeps that support over one that a pattern gives it (on_support(can_*, tray)), and a
-    pattern's over the one of on_support(*, ...), whatever the statement order; between statements of the same kind
-    the later one wins."""
-    out, prio = {}, {}
+    pattern's over the one of on_support(*, ...), whatever the statement order. Two statements of the same rank that
+    give a body different supports are an error."""
+    out, prio, by = {}, {}, {}
     for st in expand_names(program, scene).statements:
         if st.name == "on_support":
             sup = _ref(st.args[1])
@@ -319,8 +330,11 @@ def effective_support_refs(program: Program, scene: Scene) -> dict:
         else:
             continue
         for nm, sup in pairs:
-            if p >= prio.get(nm, 0):
-                out[nm], prio[nm] = sup, p
+            if p > prio.get(nm, 0):
+                out[nm], prio[nm], by[nm] = sup, p, st
+            elif p == prio[nm] and sup != out[nm]:
+                raise CompileError(f"{nm} rests on {out[nm]} by {by[nm]!r} and on {sup} by {st!r}: say which (a body named "
+                                   f"outranks a pattern, a pattern outranks *)")
     return out
 
 
@@ -339,23 +353,17 @@ def _check_reference(scene: Scene, st: Statement, tok: str) -> None:
         raise CompileError(f"{e} ({st!r})") from None
 
 
-def _program_margin(program: Program) -> float:
-    return next((float(st.kw.get("margin", DEFAULTS["margin"])) for st in program.statements if st.name == "no_penetration"),
-                DEFAULTS["margin"])
-
-
 def _height(scene: Scene, nm: str, upright: set) -> float:
     """A body's height as it will rest: its own up extent when it is kept upright, else its present extent."""
     b = scene[nm]
     return float(np.ptp(b.verts[:, 2])) if nm in upright else b.extent_along(scene.up)
 
 
-def _level_seat(scene: Scene, program: Program, nm: str, tok: str, upright: set) -> float:
+def _level_seat(scene: Scene, nm: str, tok: str, upright: set, margin: float) -> float:
     """Height of the level `tok` a body rests on; the body must fit under the fixture's surface above it, with the
-    program's margin."""
+    repair's margin."""
     lv = V1.level_of(scene, tok)
     h = _height(scene, nm, upright)
-    margin = _program_margin(program)
     if h + margin > lv.headroom:
         room = [f"{_ref(tok)}.level{o.index} ({'open above' if math.isinf(o.headroom) else f'{o.headroom:.3f} m'})"
                 for o in support_levels(scene, scene[_ref(tok)]) if h + margin <= o.headroom]
@@ -366,7 +374,7 @@ def _level_seat(scene: Scene, program: Program, nm: str, tok: str, upright: set)
 
 def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
     spec = RepairSpec(supports={})
-    spec.d_hat = DEFAULTS["margin"]
+    spec.d_hat = schedule_of(program)["margin"]          # the program's schedule; a caller may set d_hat itself
     for k, v in overrides.items():
         setattr(spec, k, v)
     # `fixed` statements first: wildcards must not depend on statement order
@@ -397,6 +405,7 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
     rects_dyn = {}      # body -> [(statement, ref_body, inset, label, weight)] for free references
     rels = []           # (a, b, axis, sign, gap, weight)
     dists = []          # (a, b, kind, r, weight)
+    pulls = {}          # body -> (rank, statement, (point, weight), place target or None): see _pull
     dyn_support = []    # (body, free support)
     v1 = []             # row generators of the v1 statements
     refs = effective_support_refs(program, scene)
@@ -405,7 +414,7 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
     for nm, sup in supports.items():
         b = scene[nm]
         if V1.level_of(scene, refs[nm]) is not None:
-            spec.supports[nm] = _level_seat(scene, program, nm, refs[nm], upright)
+            spec.supports[nm] = _level_seat(scene, nm, refs[nm], upright, spec.d_hat)
         else:
             spec.supports[nm] = support_height_for(scene, b, scene[sup], from_above=not scene[sup].fixed)
         spec.support_of[nm] = sup
@@ -415,7 +424,7 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
     # its footprint on that level, the margin inside its rectangle, as a contact does: the repair takes one contact
     # witness per pair, which for the body and its fixture is the board it rests on, and that one hides the walls and
     # the rounded edge of a top. A body stacked on such a body keeps the same bounds.
-    margin = _program_margin(program)
+    margin = spec.d_hat
     for nm, sup in supports.items():
         levels = support_levels(scene, scene[sup]) if scene[sup].fixed else []
         lv = V1.level_of(scene, refs[nm]) if levels else None
@@ -450,7 +459,7 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
         if n in ("fixed", "minimize", "on_support"):
             continue
         if n == "no_penetration":
-            spec.d_hat = float(st.kw.get("margin", DEFAULTS["margin"]))
+            continue                          # the contacts are always rows; the clearance they keep is the schedule's
         elif n == "upright":
             spec.upright.update(_bodies(scene, st.args[0]))
         elif n in ("within", "inside"):
@@ -467,15 +476,16 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
             gap = float(st.kw.get("gap", DEFAULTS["gap"]))
             for a in _bodies(scene, st.args[0], exclude=(st.args[1],)):
                 rels.append((a, st.args[1], axis, sign, gap, w))
-        elif n in ("min_distance", "near"):
+        elif n in ("min_distance", "close_to"):
             if "r" not in st.kw:
                 raise CompileError(f"{n} needs r=: {st!r}")
             for a in _bodies(scene, st.args[0], exclude=(st.args[1],)):
                 dists.append((a, st.args[1], n, float(st.kw["r"]), w))
         elif n == "prefer":
             w = float(st.kw.get("w", 0.1))
+            rank = 1 if st.args[0] == "*" else 2 if is_wildcard(st.args[0]) else 3
             for a in _bodies(scene, st.args[0]):
-                spec.prefer[a] = (scene[a].center[:2].copy(), w)
+                _pull(pulls, a, rank, st, (scene[a].center[:2].copy(), w), None)
         elif n == "place":
             a = st.args[0]
             if a == "*" or a not in scene.names():
@@ -483,8 +493,8 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
             if "x" not in st.kw or "y" not in st.kw:
                 raise CompileError(f"place needs x= and y=: {st!r}")
             yaw = float(st.kw["yaw"]) if "yaw" in st.kw else None
-            spec.place[a] = (float(st.kw["x"]), float(st.kw["y"]), yaw)
-            spec.prefer[a] = (np.array([float(st.kw["x"]), float(st.kw["y"])]), float(st.kw.get("w", 1.0)))
+            _pull(pulls, a, 3, st, (np.array([float(st.kw["x"]), float(st.kw["y"])]), float(st.kw.get("w", 1.0))),
+                  (float(st.kw["x"]), float(st.kw["y"]), yaw))
         elif n == "clearance":
             for nm in _bodies(scene, st.args[0]):
                 spec.margins[nm] = max(spec.margins.get(nm, 0.0), float(st.kw["gap"]))
@@ -495,6 +505,10 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
                 raise CompileError(str(e)) from None
         else:
             raise CompileError(f"unsupported statement {n}")
+    for a, (_, _, pull, target) in pulls.items():
+        spec.prefer[a] = pull
+        if target is not None:
+            spec.place[a] = target
     if v1 and not spec.project_iters and "project_iters" not in overrides:
         spec.project_iters = 12          # relational layouts are reached at the shrunken scale first
     for a, b, *_ in rels + dists:
@@ -566,7 +580,8 @@ def compile_program(program: Program, scene: Scene, **overrides) -> RepairSpec:
 def check_predicates(program: Program, scene: Scene, tol: float = 2e-3, upright_deg: float = 1.0, place_tol: float = PLACE_TOL,
                      angle_tol: float = ANGLE_TOL):
     """Evaluate every statement on the final scene. Returns [Predicate(name, ok, value)]; the
-    predicates of soft statements have `.soft` set.
+    predicates of soft statements have `.soft` set, and every predicate's `.statement` is the
+    statement of `program` it comes from.
     on_support is judged by the body's lowest point against the support SURFACE under its bottom
     (vertical lines down), a geometric fact independent of the numbers the repair used; a body whose
     bottom is over no part of the support fails with value None, whatever its height.
@@ -574,95 +589,206 @@ def check_predicates(program: Program, scene: Scene, tol: float = 2e-3, upright_
     and `place_tol` (m) are the tolerances; the repair's verdict uses the defaults, a check on
     settled poses passes looser ones. max_move, max_turn and attach are measured from the poses
     the program was compiled on."""
+    refs = effective_support_refs(expand_names(program, scene), scene)
     out = []
-    program = expand_names(program, scene)
-    refs = effective_support_refs(program, scene)
+    for st in program.statements:
+        for part in expand_names(Program(statements=[st]), scene).statements:
+            for p in statement_predicates(part, scene, refs, tol, upright_deg, place_tol, angle_tol):
+                p.statement = st
+                out.append(p)
+    return out
+
+
+def _on_support_pred(scene: Scene, nm: str, sup: str, label: str, level, tol: float):
+    b = scene[nm]
+    h = support_height_for(scene, b, scene[sup], require_hit=True, from_above=not scene[sup].fixed)
+    if h is None or (level is not None and abs(h - level.z) > max(tol, 0.5 * LEVEL_MIN_HEADROOM)):
+        return _pred(label, False, None if h is None else float((b.world_vertices() @ scene.up).min()) - level.z)
+    if level is not None:                 # on the level: over its rectangle, not only touching its board
+        lo, hi = V1.body_aabb(b)
+        if max(level.x0 - lo[0], hi[0] - level.x1, level.y0 - lo[1], hi[1] - level.y1) > tol:
+            return _pred(label, False, max(level.x0 - lo[0], hi[0] - level.x1, level.y0 - lo[1], hi[1] - level.y1))
+    g = float((b.world_vertices() @ scene.up).min()) - h
+    from ..gates.verify import pair_signed_distances
+
+    def gap(down: float = 0.0) -> float:
+        """Signed distance of the meshes with the body lowered by `down`."""
+        c0 = b.center
+        b.center = c0 - down * np.asarray(scene.up, dtype=np.float64)
+        try:
+            pairs = pair_signed_distances([scene[sup], b], prefilter=down + tol, skip_fixed_pairs=False, containment=False)
+        finally:
+            b.center = c0
+        return float(pairs[0][2]) if pairs else math.inf
+
+    if abs(g) <= tol:
+        # the lines under the body can meet the support through a hole in the body:
+        # the body's mesh must also come within the tolerance of the support's mesh
+        ok = gap() <= tol
+    else:
+        # the sampled surface under the body can miss its highest point (a board's edge, a fold of a base), and the
+        # repair lifts a body clear of what it would cut into: a body higher than the sampled surface rests all the
+        # same when its mesh touches the support's and lowering it by twice the tolerance cuts into the support
+        ok = g > tol and abs(gap()) <= tol and gap(2.0 * tol) < 0.0
+    return _pred(label, ok, g)
+
+
+def statement_predicates(st: Statement, scene: Scene, refs: dict, tol: float = 2e-3, upright_deg: float = 1.0,
+                         place_tol: float = PLACE_TOL, angle_tol: float = ANGLE_TOL) -> list:
+    """The predicates of one statement of an expanded program (expand_names), with the support of
+    every body that effective_support_refs gives the program; the tolerances as check_predicates."""
+    out = []
     supports = {nm: _ref(tok) for nm, tok in refs.items()}
 
     def bodies_fn(tok, exclude=()):
         return _bodies(scene, tok, exclude=exclude)
 
-    def on_support_pred(nm, sup, label, level=None):
-        b = scene[nm]
-        h = support_height_for(scene, b, scene[sup], require_hit=True, from_above=not scene[sup].fixed)
-        if h is None or (level is not None and abs(h - level.z) > max(tol, 0.5 * LEVEL_MIN_HEADROOM)):
-            return _pred(label, False, None if h is None else float((b.world_vertices() @ scene.up).min()) - level.z)
-        if level is not None:                 # on the level: over its rectangle, not only touching its board
-            lo, hi = V1.body_aabb(b)
-            if max(level.x0 - lo[0], hi[0] - level.x1, level.y0 - lo[1], hi[1] - level.y1) > tol:
-                return _pred(label, False, max(level.x0 - lo[0], hi[0] - level.x1, level.y0 - lo[1], hi[1] - level.y1))
-        g = float((b.world_vertices() @ scene.up).min()) - h
-        from ..gates.verify import pair_signed_distances
+    n = st.name
+    soft = st.soft
+    if n == "on_support":
+        sup, level = _ref(st.args[1]), V1.level_of(scene, st.args[1])
+        for nm in _bodies(scene, st.args[0], exclude=(sup,)):
+            if is_wildcard(st.args[0]) and refs.get(nm) != st.args[1]:
+                continue                  # a body named elsewhere rests on another support, or on another level
+            out.append(_on_support_pred(scene, nm, sup, f"on_support({nm},{st.args[1] if level else sup})", level, tol))
+    elif n == "stack":
+        for lower, upper in zip(st.args, st.args[1:]):
+            out.append(_on_support_pred(scene, upper, lower, f"stack({upper},{lower}):on", None, tol))
+        out.extend(_pred(*p) for p in V1.check_v1(st, scene, supports, tol, angle_tol, bodies_fn))
+    elif n == "upright":
+        for nm in _bodies(scene, st.args[0]):
+            _, roll, pitch = decompose_zyx(scene[nm].rotation)
+            t = max(abs(roll), abs(pitch))
+            out.append(_pred(f"upright({nm})", t <= math.radians(upright_deg), t))
+    elif n in ("within", "inside"):
+        inset = _inset_of(scene, st)
+        ref = _ref(st.args[1]) if len(st.args) > 1 else None
+        xmin, xmax, ymin, ymax = _region(scene, st, inset)
+        label = st.args[1] if ref else "region"
+        for nm in _bodies(scene, st.args[0], exclude=(ref,) if ref else ()):
+            lo, hi = scene[nm].world_aabb()
+            viol = max(xmin - lo[0], hi[0] - xmax, ymin - lo[1], hi[1] - ymax, 0.0)
+            out.append(_pred(f"{n}({nm},{label})", viol <= tol, viol, soft))
+    elif n in REL:
+        axis, sign = REL[n]
+        axis = st.kw.get("axis", axis); gap = float(st.kw.get("gap", DEFAULTS["gap"]))
+        ax = AXIS[axis]
+        for a in _bodies(scene, st.args[0], exclude=(st.args[1],)):
+            v = sign * (scene[a].center[ax] - scene[st.args[1]].center[ax]) - gap
+            out.append(_pred(f"{n}({a},{st.args[1]},gap={gap:g})", v >= -tol, v, soft))
+    elif n in ("min_distance", "close_to"):
+        r = float(st.kw["r"])
+        for a in _bodies(scene, st.args[0], exclude=(st.args[1],)):
+            d = float(np.linalg.norm(scene[a].center[:2] - scene[st.args[1]].center[:2]))
+            ok = d >= r - tol if n == "min_distance" else d <= r + tol
+            out.append(_pred(f"{n}({a},{st.args[1]},r={r:g})", ok, d, soft))
+    elif n == "place":
+        a = st.args[0]
+        d = float(np.linalg.norm(scene[a].center[:2] - np.array([float(st.kw["x"]), float(st.kw["y"])])))
+        out.append(_pred(f"place({a})", d <= place_tol, d))      # a soft target: reported against a loose tolerance
+    elif n == "clearance" or n in V1_ROWS:
+        try:
+            for p in V1.check_v1(st, scene, supports, tol, angle_tol, bodies_fn):
+                out.append(_pred(*p, soft=soft))
+        except V1.StatementError as e:
+            raise CompileError(str(e)) from None
+    return out
 
-        def gap(down: float = 0.0) -> float:
-            """Signed distance of the meshes with the body lowered by `down`."""
-            c0 = b.center
-            b.center = c0 - down * np.asarray(scene.up, dtype=np.float64)
-            try:
-                pairs = pair_signed_distances([scene[sup], b], prefilter=down + tol, skip_fixed_pairs=False, containment=False)
-            finally:
-                b.center = c0
-            return float(pairs[0][2]) if pairs else math.inf
 
-        if abs(g) <= tol:
-            # the lines under the body can meet the support through a hole in the body:
-            # the body's mesh must also come within the tolerance of the support's mesh
-            ok = gap() <= tol
-        else:
-            # the sampled surface under the body can miss its highest point (a board's edge, a fold of a base), and the
-            # repair lifts a body clear of what it would cut into: a body higher than the sampled surface rests all the
-            # same when its mesh touches the support's and lowering it by twice the tolerance cuts into the support
-            ok = g > tol and abs(gap()) <= tol and gap(2.0 * tol) < 0.0
-        return _pred(label, ok, g)
+# A requirement's own bounds, and the way each asks less: +1 when a larger value does, -1 when a smaller
+# one does. Where a statement puts a body (a region's edges, a side, a target, a level) is what it asks,
+# not how strictly, and is never relaxed.
+RELAX = {**{op: {"gap": -1} for op in REL}, "close_to": {"r": 1}, "min_distance": {"r": -1}, "reach": {"r": 1, "min": -1},
+         "beside": {"gap": -1, "max": 1}, "within": {"inset": -1}, "keep_out": {"gap": -1}, "clearance": {"gap": -1},
+         "approach": {"length": -1, "width": -1}, "row": {"gap": -1, "tol": 1}, "between": {"gap": -1}, "cluster": {"r": 1},
+         "max_move": {"d": 1}, "max_turn": {"deg": 1}, "balanced_on": {"margin": -1},
+         **{op: {"tol": 1} for op in ("at", "offset", "centered", "attach", "symmetric", "align", "evenly_spaced", "grid", "ring",
+                                       "flush", "stack", "facing", "yaw", "parallel")}}
+RELAX_DEG = {("facing", "tol"), ("yaw", "tol"), ("parallel", "tol"), ("max_turn", "deg")}     # in degrees; the others in metres
+RELAX_STEP = {"m": 1e-3, "deg": 0.5}                 # the resolution of a relaxed value
+EXACT = 1e-9                                         # a predicate without the check's slack, up to rounding
+STRUCTURE = {"no_penetration", "fixed", "on_support", "upright", "stack"}     # what rests where and what moves: never weakened
 
-    for st in program.statements:
-        n = st.name
-        soft = st.soft
-        if n == "on_support":
-            sup, level = _ref(st.args[1]), V1.level_of(scene, st.args[1])
-            for nm in _bodies(scene, st.args[0], exclude=(sup,)):
-                if is_wildcard(st.args[0]) and refs.get(nm) != st.args[1]:
-                    continue                  # a body named elsewhere rests on another support, or on another level
-                out.append(on_support_pred(nm, sup, f"on_support({nm},{st.args[1] if level else sup})", level))
-        elif n == "stack":
-            for lower, upper in zip(st.args, st.args[1:]):
-                out.append(on_support_pred(upper, lower, f"stack({upper},{lower}):on"))
-            out.extend(_pred(*p) for p in V1.check_v1(st, scene, supports, tol, angle_tol, bodies_fn))
-        elif n == "upright":
-            for nm in _bodies(scene, st.args[0]):
-                _, roll, pitch = decompose_zyx(scene[nm].rotation)
-                t = max(abs(roll), abs(pitch))
-                out.append(_pred(f"upright({nm})", t <= math.radians(upright_deg), t))
-        elif n in ("within", "inside"):
-            inset = _inset_of(scene, st)
-            ref = _ref(st.args[1]) if len(st.args) > 1 else None
-            xmin, xmax, ymin, ymax = _region(scene, st, inset)
-            label = st.args[1] if ref else "region"
-            for nm in _bodies(scene, st.args[0], exclude=(ref,) if ref else ()):
-                lo, hi = scene[nm].world_aabb()
-                viol = max(xmin - lo[0], hi[0] - xmax, ymin - lo[1], hi[1] - ymax, 0.0)
-                out.append(_pred(f"{n}({nm},{label})", viol <= tol, viol, soft))
-        elif n in REL:
-            axis, sign = REL[n]
-            axis = st.kw.get("axis", axis); gap = float(st.kw.get("gap", DEFAULTS["gap"]))
-            ax = AXIS[axis]
-            for a in _bodies(scene, st.args[0], exclude=(st.args[1],)):
-                v = sign * (scene[a].center[ax] - scene[st.args[1]].center[ax]) - gap
-                out.append(_pred(f"{n}({a},{st.args[1]},gap={gap:g})", v >= -tol, v, soft))
-        elif n in ("min_distance", "near"):
-            r = float(st.kw["r"])
-            for a in _bodies(scene, st.args[0], exclude=(st.args[1],)):
-                d = float(np.linalg.norm(scene[a].center[:2] - scene[st.args[1]].center[:2]))
-                ok = d >= r - tol if n == "min_distance" else d <= r + tol
-                out.append(_pred(f"{n}({a},{st.args[1]},r={r:g})", ok, d, soft))
-        elif n == "place":
-            a = st.args[0]
-            d = float(np.linalg.norm(scene[a].center[:2] - np.array([float(st.kw["x"]), float(st.kw["y"])])))
-            out.append(_pred(f"place({a})", d <= place_tol, d))      # a soft target: reported against a loose tolerance
-        elif n == "clearance" or n in V1_ROWS:
-            try:
-                for p in V1.check_v1(st, scene, supports, tol, angle_tol, bodies_fn):
-                    out.append(_pred(*p, soft=soft))
-            except V1.StatementError as e:
-                raise CompileError(str(e)) from None
+
+def _bound_value(scene: Scene, st: Statement, key: str):
+    """The value of a statement's bound: its keyword, or the default the compiler applies; None when the
+    statement has no such bound (beside without max=)."""
+    if key in st.kw:
+        return float(st.kw[key])
+    if key == "inset":
+        return _inset_of(scene, st)
+    if st.name in REL:
+        return float(DEFAULTS["gap"])
+    v = OP_DEFAULTS.get(st.name, {}).get(key)
+    return None if v is None else float(v)
+
+
+def _nearest_holding(holds, start: float, bound: float, step: float):
+    """The value nearest `start` on the grid of `step`, between `start` and `bound`, at which `holds` is true
+    (`bound` itself when no grid point before it is); None when it is false at `bound`. `holds` is monotone:
+    true at a value, it is true at every value beyond it toward `bound` (binary search on the grid)."""
+    if holds(start):
+        return start
+    if not holds(bound):
+        return None
+    sign = 1 if bound > start else -1
+    first = math.floor(round(start / step, 6)) + 1 if sign > 0 else math.ceil(round(start / step, 6)) - 1
+    last = math.floor(round(bound / step, 6)) if sign > 0 else math.ceil(round(bound / step, 6))
+
+    def at(j):
+        return round((first + sign * j) * step, 9)
+
+    lo, hi = -1, sign * (last - first)              # false at lo (start), true at hi
+    if hi < 0 or not holds(at(hi)):
+        return bound
+    while hi - lo > 1:
+        mid = (lo + hi) // 2
+        lo, hi = (lo, mid) if holds(at(mid)) else (mid, hi)
+    return at(hi)
+
+
+def rewrites(program: Program, scene: Scene, predicates: list) -> list:
+    """The edits under which each failed requirement holds on `scene`, one statement at a time.
+
+    For every statement of `program` with a failed requirement among `predicates` (check_predicates on
+    `scene`): `relax`, the tightest values of its own bounds (RELAX) at which it holds on the scene, each
+    found on the statement's predicate without the check's slack, to 1 mm or 0.5 degree, in turn with the
+    bounds after it at their loosest; and `weaken`, "soft" (a preference) or "drop" when the statement may
+    become one or be removed (never what rests where, what is fixed or upright). Every edit asks less than
+    the statement did: a layout the program accepted, the edited program accepts too; `relax` keeps the
+    value it replaces. Returns [{"statement": its index in program.statements, "text", "relax": {key: [old,
+    new]} or None, "weaken": "soft" | "drop" | None}]."""
+    failed = {id(p.statement) for p in predicates if not p.soft and not p[1]}
+    refs = effective_support_refs(expand_names(program, scene), scene)
+    lo = np.min([b.world_aabb()[0] for b in scene.bodies], 0)
+    hi = np.max([b.world_aabb()[1] for b in scene.bodies], 0)
+    span = float(np.linalg.norm((hi - lo)[:2]))              # no length in the scene exceeds it
+    out = []
+    for k, st in enumerate(program.statements):
+        if id(st) not in failed:
+            continue
+        parts = expand_names(Program(statements=[st]), scene).statements
+
+        def holds(values, parts=parts):
+            for part in parts:
+                q = copy.copy(part)                         # keeps the poses compile_program recorded on it
+                q.kw = {**part.kw, **values}
+                if not all(p[1] for p in statement_predicates(q, scene, refs, tol=EXACT, angle_tol=EXACT)):
+                    return False
+            return True
+
+        old = {key: _bound_value(scene, st, key) for key in RELAX.get(st.name, {})}
+        old = {key: v for key, v in old.items() if v is not None}
+        far = {key: 0.0 if RELAX[st.name][key] < 0 else v + (180.0 if (st.name, key) in RELAX_DEG else span) for key, v in old.items()}
+        relax = None
+        if old and holds(far):
+            new = dict(far)
+            for key in old:
+                step = RELAX_STEP["deg" if (st.name, key) in RELAX_DEG else "m"]
+                new[key] = _nearest_holding(lambda v, key=key: holds({**new, key: v}), old[key], far[key], step)
+            relax = {key: [old[key], new[key]] for key in old if new[key] != old[key]}
+            if not relax:
+                raise RuntimeError(f"{st!r} failed on the scene and holds there at its own bounds")
+        weaken = None if st.name in STRUCTURE else ("soft" if "soft" in KEYWORDS[st.name] else "drop")
+        out.append({"statement": k, "text": repr(st), "relax": relax, "weaken": weaken})
     return out

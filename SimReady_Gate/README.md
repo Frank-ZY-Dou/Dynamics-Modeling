@@ -33,6 +33,7 @@
 
 ## 📢 Updates
 
+* [October 2026] **A written semantics.** What a program accepts is defined statement by statement; the repair's settings form a separate `schedule`; relations along x read `farther` and `nearer`; a failed requirement comes with the nearest relaxation under which it holds ([the language](docs/DSL.md#what-a-program-means)).
 * [October 2026] **Rings.** `ring` spaces bodies evenly on a circle and can turn each one in or out; the RoboCasa demo lays a heap out as a ring ([demo](#a-robocasa-counter)).
 * [October 2026] **Shelves.** A fixture's levels are supports and regions (`case.level2`), with `flush` and rows that line up an edge; three bookcase and rack examples ([Example 3](#example-3-shelves)).
 * [October 2026] **Scenario 3D Collection assets.** 37 AI-generated tabletop objects of [scenario-labs/3d-collection](https://huggingface.co/datasets/scenario-labs/3d-collection) (CC BY 4.0, credit: Scenario) can be named in layouts, with estimated mass, friction and handle side ([assets](#assets)).
@@ -170,12 +171,12 @@ justify it):
 
 ```json
 {"statements": [
-  {"op": "no_penetration", "margin": 0.005, "reason": "no interpenetration"},
+  {"op": "no_penetration", "reason": "no interpenetration"},
   {"op": "fixed", "a": "table"}, {"op": "fixed", "a": "franka_table"}, {"op": "fixed", "a": "GroundPlane"},
   {"op": "on_support", "a": "*", "b": "table", "reason": "everything stays on the table"},
   {"op": "upright", "a": "*"},
   {"op": "within", "a": "*", "b": "table.top", "inset": 0.0},
-  {"op": "in_front_of", "a": "keyboard", "b": "smartphone", "gap": 0.05, "reason": "keyboard in front of the phone, 5 cm"},
+  {"op": "farther", "a": "keyboard", "b": "smartphone", "gap": 0.05, "reason": "keyboard in front of the phone, 5 cm"},
   {"op": "minimize"}],
  "gate": {"settle_v_max": 1.0, "settle_dx": 0.15},
  "assumptions": ["'in front of' read in RoboLab's frame: +x, away from the robot"]}
@@ -198,8 +199,8 @@ poses into a copy of the USD and reads it back:
 
 ```
 $ python -m simready.cli repair "$ROBOLAB_DIR/assets/scenes/workdesk_snacks.usda" program.json --out workdesk_repaired.usda
-{"ok": true, "pen_before": 12, "pen_after": 0, "rmsd_xy": 0.033, "time_s": 45.9,
- "failed_predicates": [], "written_pose_error_m": 1.2e-06,
+{"ok": true, "pen_before": 12, "pen_after": 0, "rmsd_xy": 0.037, "time_s": 3.4,
+ "failed_predicates": [], "written_pose_error_m": 2.1e-05,
  "certificate": "workdesk_repaired.certificate.json"}
 ```
 
@@ -214,8 +215,8 @@ The repaired scene is simulated twice in MuJoCo, with the proxies a physics engi
 ```
 $ python -m simready.cli settle workdesk_repaired.usda --program program.json
 {"pass": true, "thresholds": {"v_max": 1.0, "d_max": 0.15, "source": "program gate"},
- "hull":  {"peak_speed": 0.570, "peak_disp": 0.0659, "left_support": [], "pass": true},
- "coacd": {"peak_speed": 0.556, "peak_disp": 0.0596, "left_support": [], "pass": true}}
+ "hull":  {"peak_speed": 0.577, "peak_disp": 0.0604, "left_support": [], "pass": true},
+ "coacd": {"peak_speed": 0.561, "peak_disp": 0.0594, "left_support": [], "pass": true}}
 ```
 
 ![MuJoCo settle, as shipped versus repaired](docs/media/workdesk_settle.png)
@@ -224,7 +225,8 @@ $ python -m simready.cli settle workdesk_repaired.usda --program program.json
 
 `workdesk_repaired.certificate.json` records the outcome with its provenance: the program text and
 JSON, the hashes of the scene read and the scene written and of every asset file the bodies came
-from, the git commit, library versions, the tolerances, the predicate values, the settle report.
+from, the git commit, library versions, the schedule, the tolerances, the predicate values, the
+settle report.
 `settle` adds its report to the certificate only when the scene it was given hashes to the one the
 repair wrote, the program to the one the repair used and every asset to what the repair read, and
 then sets `ready`: the repair's `ok` and the settle's `pass`. Any other certificate is left as it
@@ -254,8 +256,8 @@ relations that make the request checkable:
 {"op": "place", "a": "bowl", "x": 0.62, "y": 0.00, "reason": "bowl in front (+x) of the pitcher"},
 {"op": "place", "a": "orange_02", "x": 0.48, "y": 0.34, "reason": "fruit group on the left (+y)"},
 {"op": "place", "a": "pineapple_slices_can", "x": 0.80, "y": 0.42, "reason": "cans and bottles in a row at the back (+x)"},
-{"op": "in_front_of", "a": "bowl", "b": "pitcher", "gap": 0.12},
-{"op": "near", "a": "ladle", "b": "bowl", "r": 0.22},
+{"op": "farther", "a": "bowl", "b": "pitcher", "gap": 0.12},
+{"op": "close_to", "a": "ladle", "b": "bowl", "r": 0.22},
 {"op": "left_of", "a": "orange_02", "b": "bowl", "gap": 0.18},
 {"op": "right_of", "a": "hammer_8", "b": "bowl", "gap": 0.22},
 ...
@@ -272,8 +274,8 @@ the programs, every tool output and both certificates are in
 | 2 | 82 → 0 pairs, planar RMSD 0.326 m, 30 s | the exact hammer target dropped (the request only asks for it out of the way on the right, which `right_of` states); every predicate holds, `ready: true` | 0.32 / 0.29 m/s, pass |
 
 The heap itself, settled as is, reaches 4.8 m/s with eleven bodies off the table (hull proxies)
-and 3.8 m/s with one (CoACD). The continuation here starts at s = 0.3, large enough to see the
-bodies while they are placed; the certificate records the value.
+and 3.8 m/s with one (CoACD). The program's schedule starts the continuation at s = 0.3, large
+enough to see the bodies while they are placed; the certificate records it.
 
 The settle report also re-evaluates the program on the settled poses (`after_settle`). It shows
 what the peak-speed and displacement thresholds do not: the round fruit rolls out of `upright`
@@ -341,13 +343,15 @@ overlaps, with the target kept as a soft pull. The pipeline is shrink, arrange, 
 
 ```
 program
-  no_penetration(*, margin=0.01)
+  no_penetration(*)
   fixed(table)   on_support(*, table)   upright(*)
   within(*, table.top, inset=0.02)
   place(bowl, x=0.62, y=0.00)            # a target pose in the shrunken scale-space (soft)
-  in_front_of(bowl, pitcher, gap=0.12)   # a.x >= b.x + gap in RoboLab's frame (front = +x, left = +y)
-  near(ladle, bowl, r=0.22)   left_of(orange_02, bowl, gap=0.18)   right_of(hammer_8, bowl, gap=0.22)
+  farther(bowl, pitcher, gap=0.12)       # farther from the robot: a.x >= b.x + gap (+x away from it, +y left)
+  close_to(ladle, bowl, r=0.22)   left_of(orange_02, bowl, gap=0.18)   right_of(hammer_8, bowl, gap=0.22)
   minimize displacement(*)
+schedule
+  margin = 0.01                          # how the repair gets there, never what is accepted
 gate
   G5: v_max <= 1.0, dx <= 0.15
 ```
@@ -355,15 +359,19 @@ gate
 | statement | compiles to |
 |---|---|
 | `minimize displacement(*)` / `prefer(a, w)` | the QP objective: minimum-norm step, plus a pull toward a pose |
-| `no_penetration(*, margin)` | the clearance of every contact row S4R generates from FCL |
+| `no_penetration(*)` | every contact row S4R generates from FCL |
 | `on_support(a, B)`, `upright(a)` | a's lowest point on B's surface, roll/pitch to zero (removed from the QP variables) |
 | `within(a, R)`, `inside(a, C)` | per-step rectangle rows on a's exact projected footprint |
-| `left_of / right_of / in_front_of / behind (a, b, gap)`, `min_distance / near (a, b, r)` | linear rows on the reference centers |
+| `left_of / right_of / farther / nearer (a, b, gap)`, `min_distance / close_to (a, b, r)` | linear rows on the reference centers |
 | `place(a, x, y, yaw)` | a's pose at the shrunken scale, and a soft pull while the scale is restored |
+| `schedule` | the contacts' clearance (`margin`) and the continuation's steps: how S4R gets there, never what is accepted |
 | `gate` | thresholds for the verifier and the settle test, not the QP |
 
 Every statement that constrains a pose also becomes a predicate that the final scene is checked
-against, and a line of the certificate.
+against, and a line of the certificate. A program is the conjunction of its statements; what it
+accepts, statement by statement, is in [docs/DSL.md](docs/DSL.md#what-a-program-means). When a
+requirement fails, the report gives each failed statement the nearest values of its bounds under
+which it holds on the layout returned ([rewrites](docs/DSL.md#when-a-requirement-fails)).
 
 ### What robot scenes ask for
 

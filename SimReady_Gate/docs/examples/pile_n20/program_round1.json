@@ -2,7 +2,6 @@
  "statements": [
   {
    "op": "no_penetration",
-   "margin": 0.01,
    "reason": "nothing interpenetrating, keep 1 cm clearance"
   },
   {
@@ -179,40 +178,40 @@
    "reason": "not mentioned: keep it near where it was, out of the working area"
   },
   {
-   "op": "in_front_of",
+   "op": "farther",
    "a": "bowl",
    "b": "pitcher",
    "gap": 0.12,
    "reason": "checkable form of 'bowl in front of the pitcher'"
   },
   {
-   "op": "near",
+   "op": "close_to",
    "a": "ladle",
    "b": "bowl",
    "r": 0.22,
    "reason": "within reach of the bowl"
   },
   {
-   "op": "near",
+   "op": "close_to",
    "a": "spoon_big",
    "b": "bowl",
    "r": 0.22,
    "reason": "within reach of the bowl"
   },
   {
-   "op": "near",
+   "op": "close_to",
    "a": "lime01",
    "b": "orange_02",
    "r": 0.12
   },
   {
-   "op": "near",
+   "op": "close_to",
    "a": "lemon_02",
    "b": "orange_02",
    "r": 0.12
   },
   {
-   "op": "near",
+   "op": "close_to",
    "a": "orange_01",
    "b": "orange_02",
    "r": 0.12
@@ -225,49 +224,49 @@
    "reason": "fruit on the left"
   },
   {
-   "op": "in_front_of",
+   "op": "farther",
    "a": "pineapple_slices_can",
    "b": "bowl",
    "gap": 0.12,
    "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
   },
   {
-   "op": "in_front_of",
+   "op": "farther",
    "a": "tomato_sauce_can",
    "b": "bowl",
    "gap": 0.12,
    "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
   },
   {
-   "op": "in_front_of",
+   "op": "farther",
    "a": "peas_and_carrots",
    "b": "bowl",
    "gap": 0.12,
    "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
   },
   {
-   "op": "in_front_of",
+   "op": "farther",
    "a": "bbq_sauce_bottle",
    "b": "bowl",
    "gap": 0.12,
    "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
   },
   {
-   "op": "in_front_of",
+   "op": "farther",
    "a": "whitepackerbottle_a01",
    "b": "bowl",
    "gap": 0.12,
    "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
   },
   {
-   "op": "in_front_of",
+   "op": "farther",
    "a": "whitepackerbottle_a02",
    "b": "bowl",
    "gap": 0.12,
    "reason": "the back row is the far edge of the table: +x, i.e. 'in front of' the bowl in RoboLab's robot-centred frame"
   },
   {
-   "op": "in_front_of",
+   "op": "farther",
    "a": "plasticjerrican_a01",
    "b": "bowl",
    "gap": 0.12,
@@ -307,7 +306,11 @@
   "settle_dx": 0.15
  },
  "assumptions": [
-  "RoboLab frame: the robot at -x looks along +x; 'in front of X' means larger x than X and 'left of X' means larger y. So the far edge of the table ('the back') is larger x: the back row is in_front_of the bowl.",
+  "RoboLab frame: the robot at -x looks along +x; 'in front of X' means larger x than X and 'left of X' means larger y. So the far edge of the table ('the back') is larger x: the back row is farther than the bowl.",
   "targets were chosen from the table rectangle x[0.20, 0.90] y[-0.50, 0.50] and the listed object sizes; the continuation resolves any residual overlap"
- ]
+ ],
+ "schedule": {
+  "margin": 0.01,
+  "s_min": 0.3
+ }
 }

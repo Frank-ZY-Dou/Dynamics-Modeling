@@ -46,7 +46,7 @@ from mjcf_to_obj import export_object, export_box  # noqa: E402
 
 FPS = 30
 TOP = RL.COUNTER[2]
-RING = ("program\n  no_penetration(*, margin=0.003)\n  fixed(counter)\n  on_support(*, counter)   upright(*)\n"
+RING = ("schedule\n  margin = 0.003\nprogram\n  no_penetration(*)\n  fixed(counter)\n  on_support(*, counter)   upright(*)\n"
         "  ring(*, r={r:g}, x=0, y=0)\n")
 HEAP = 0.10            # with --ring, the objects start within this distance of the counter's centre
 

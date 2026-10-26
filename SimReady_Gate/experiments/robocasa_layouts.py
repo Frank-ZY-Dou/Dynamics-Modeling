@@ -77,7 +77,7 @@ def run_cell(n, seed, verbose=False):
         return {"n": n, "seed": seed, "sampler": "RandomizationError"}
     raw = scene_from(placed); pcs = pieces_for(raw, placed)
     rep = copy.deepcopy(raw)
-    prog = parse_program("program\n  no_penetration(*, margin=0.003)\n  fixed(counter)\n  on_support(*, counter)   upright(*)\n  within(*, counter.top, inset=0.0)\n  minimize displacement(*)\n")
+    prog = parse_program("schedule\n  margin = 0.003\nprogram\n  no_penetration(*)\n  fixed(counter)\n  on_support(*, counter)   upright(*)\n  within(*, counter.top, inset=0.0)\n  minimize displacement(*)\n")
     spec = compile_program(prog, rep, s_min=0.05, ds_max=0.05, tail_iters=30)
     t0 = time.time()
     with MeshProxy(rep, faces=2000, slab_tops={"counter": COUNTER[2]}):

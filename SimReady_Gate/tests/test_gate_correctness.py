@@ -284,7 +284,7 @@ class Solver(unittest.TestCase):
     def test_overlapping_boxes_are_separated(self):
         a = box("a", (0.1, 0.1, 0.1), (0.0, 0.0, 0.05)); b = box("b", (0.1, 0.1, 0.1), (0.07, 0.0, 0.05))   # 3 cm overlap
         sc = table_scene(a, b)
-        prog = parse_program("program\n  no_penetration(*, margin=0.005)\n  on_support(*, table)\n  upright(*)\n  within(*, table.top, inset=0.05)")
+        prog = parse_program("program\n  no_penetration(*)\n  on_support(*, table)\n  upright(*)\n  within(*, table.top, inset=0.05)")
         spec = compile_program(prog, sc, ds_max=0.1, tail_iters=20)
         res = repair_upright(sc, spec)
         self.assertEqual(res.pen_before, 1)
@@ -299,7 +299,7 @@ class Solver(unittest.TestCase):
         # a placement target inside a fixed obstacle: the contacts win, the predicate reports it
         a = box("a", (0.1, 0.1, 0.1), (0.0, 0.0, 0.05)); b = box("b", (0.1, 0.1, 0.1), (0.3, 0.0, 0.05))
         sc = table_scene(a, b)
-        prog = parse_program("program\n  no_penetration(*, margin=0.005)\n  fixed(b)\n  on_support(*, table)\n  place(a, x=0.3, y=0.0, w=1.0)")
+        prog = parse_program("program\n  no_penetration(*)\n  fixed(b)\n  on_support(*, table)\n  place(a, x=0.3, y=0.0, w=1.0)")
         spec = compile_program(prog, sc, ds_max=0.1, tail_iters=20)
         res = repair_upright(sc, spec)
         self.assertEqual(res.pen_after, 0)
@@ -314,14 +314,14 @@ class Solver(unittest.TestCase):
         wall = box("wall", (0.02, 1.0, 0.2), (0.2, 0.0, 0.1), fixed=True)
         a = box("a", (0.1, 0.1, 0.1), (0.0, 0.0, 0.05))
         sc = table_scene(wall, a)
-        prog = parse_program("program\n  no_penetration(*, margin=0.005)\n  on_support(a, table)\n  within(a, table.top, inset=0.0)\n  in_front_of(a, wall, gap=0.1)")
+        prog = parse_program("program\n  no_penetration(*)\n  on_support(a, table)\n  within(a, table.top, inset=0.0)\n  farther(a, wall, gap=0.1)")
         spec = compile_program(prog, sc, ds_max=0.1, tail_iters=10)
         res = repair_upright(sc, spec)
         self.assertEqual(res.pen_after, 0)
         self.assertGreaterEqual(res.relaxed_steps, 1)
         self.assertTrue(any(t[4] > 1e-3 for t in res.trace))
         preds = {n: ok for n, ok, _ in check_predicates(prog, sc)}
-        self.assertFalse(preds["in_front_of(a,wall,gap=0.1)"])
+        self.assertFalse(preds["farther(a,wall,gap=0.1)"])
         self.assertTrue(preds["within(a,table.top)"] and preds["on_support(a,table)"])
         self.assertLess(sc["a"].center[0], 0.2)                           # it stayed behind the wall
 
@@ -342,7 +342,7 @@ class Solver(unittest.TestCase):
         from simready.repair import upright_s4r as U
         a = box("a", (0.1, 0.1, 0.1), (0.0, 0.0, 0.05)); b = box("b", (0.1, 0.1, 0.1), (0.02, 0.0, 0.05))   # overlap even at s = 0.9
         sc = table_scene(a, b)
-        prog = parse_program("program\n  no_penetration(*, margin=0.005)\n  on_support(*, table)")
+        prog = parse_program("program\n  no_penetration(*)\n  on_support(*, table)")
         spec = compile_program(prog, sc, s_min=0.9, ds_max=0.05, tail_iters=0)
         original = U._solve_qp
         U._solve_qp = lambda *args, **kw: (-1, None, 0.0, 0.0)
@@ -361,7 +361,7 @@ class Solver(unittest.TestCase):
     def test_steps_respect_the_trust_region(self):
         a = box("a", (0.1, 0.1, 0.1), (0.0, 0.0, 0.05)); b = box("b", (0.1, 0.1, 0.1), (0.02, 0.0, 0.05))   # 8 cm overlap
         sc = table_scene(a, b)
-        prog = parse_program("program\n  no_penetration(*, margin=0.005)\n  on_support(*, table)")
+        prog = parse_program("program\n  no_penetration(*)\n  on_support(*, table)")
         spec = compile_program(prog, sc, s_min=1.0, tail_iters=1, max_xy_step=0.01)
         before = np.array([bd.center[:2].copy() for bd in sc.free()])
         repair_upright(sc, spec)
@@ -426,10 +426,11 @@ class Scenes(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             scene = os.path.join(d, "s.usda"); prog = os.path.join(d, "p.json"); out = os.path.join(d, "s_repaired.usda")
             write_usda(scene)
-            json.dump({"statements": [{"op": "no_penetration"}, {"op": "on_support", "a": "mug", "b": "table"}, {"op": "upright", "a": "mug"}]}, open(prog, "w"))
+            json.dump({"statements": [{"op": "no_penetration"}, {"op": "on_support", "a": "mug", "b": "table"}, {"op": "upright", "a": "mug"}],
+                       "schedule": {"tail_iters": 2}}, open(prog, "w"))
             buf = io.StringIO()
             with contextlib.redirect_stdout(buf), self.assertRaises(SystemExit) as cm:
-                main(["repair", scene, prog, "--out", out, "--tail", "2"])
+                main(["repair", scene, prog, "--out", out])
             self.assertEqual(cm.exception.code, 1)
             report = json.loads(buf.getvalue())
             self.assertFalse(report["ok"])

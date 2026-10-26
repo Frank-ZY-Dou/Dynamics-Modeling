@@ -3,8 +3,8 @@ later by viz/blender_render.py (no text overlays):
 
   gate = [the layout as written (penetrating bodies tinted) -> S4R scale continuation -> the repaired layout]
 
-The repair is the one `simready.cli repair` runs, with the parameters the example's certificate records, and its
-last frame must be the example's repaired.json. The packages must have been fetched with their textures
+The repair is the one `simready.cli repair` runs, with the schedule of the example's program (the one its certificate
+records), and its last frame must be the example's repaired.json. The packages must have been fetched with their textures
 (python -m simready.cli assets fetch <package> --repo <repo> --textures).
 
     python viz/make_example_video.py docs/examples/shelf_books --out results/videos/shelf_books --azim 210 --elev 10 --dist 1.6 --target 0.65 0 0.62
@@ -25,6 +25,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1])); sys.path.insert(0, str(Path(__file__).resolve().parent))
 from simready.cli import load_any, load_program, repair_scene  # noqa: E402
+from simready.dsl.model import schedule_of  # noqa: E402
 from simready.gates import verify_scene  # noqa: E402
 from simready.io.nvidia_assets import package_dir, read_package  # noqa: E402
 from render_frames import interpolate  # noqa: E402
@@ -79,10 +80,9 @@ def main():
     def on_step(st):
         states.append({sc.bodies[k].name: (sc.bodies[k].center.copy(), sc.bodies[k].rotation.copy(), st.body_scale(k)) for k in st.free})
 
-    p = cert["provenance"]["params"]
-    rep = repair_scene(sc, prog, s_min=p["s_min"], ds_max=p["ds_max"], tail=p["tail_iters"], proxy_faces=p["proxy_faces"], on_step=on_step)
-    if any("started again" in n for n in rep["solver_notes"]):
-        raise RuntimeError("the repair started again with a smaller margin: the recorded steps are not one solve")
+    if cert["provenance"]["schedule"] != schedule_of(prog):
+        raise ValueError(f"the certificate's schedule {cert['provenance']['schedule']} is not the program's {schedule_of(prog)}")
+    rep = repair_scene(sc, prog, on_step=on_step)
     states.append(poses(sc))
     done = {o["name"]: o for o in json.loads((ex / "repaired.json").read_text())["objects"]}
     dx = dyaw = 0.0

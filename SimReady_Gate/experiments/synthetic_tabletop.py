@@ -34,7 +34,7 @@ def main(N=8, seed=3, target=0.12):
     scene = Scene(bodies)
     prog = parse_program(f"""
 program
-  no_penetration(*, margin=0.005)
+  no_penetration(*)
   fixed(table)
   on_support(*, table)   upright(*)
   within(*, table.top, inset=0.03)

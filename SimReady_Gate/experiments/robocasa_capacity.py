@@ -26,7 +26,7 @@ from robocasa_sampler import ObjectSpec, sample_layout, PlacementError
 import trimesh
 
 TOP = RL.COUNTER[2]
-PROGRAM = ("program\n  no_penetration(*, margin=0.003)\n  fixed(counter)  fixed(region)\n  on_support(*, counter)   upright(*)\n"
+PROGRAM = ("schedule\n  margin = 0.003\nprogram\n  no_penetration(*)\n  fixed(counter)  fixed(region)\n  on_support(*, counter)   upright(*)\n"
            "  within(*, region, inset=0.0)\n  minimize displacement(*)\n")
 
 

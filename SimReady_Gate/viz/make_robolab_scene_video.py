@@ -30,6 +30,7 @@ from simready.gates import verify_scene  # noqa: E402
 from simready.gates.settle_mujoco import settle_and_measure  # noqa: E402
 from simready.io.usd_io import load_scene_usda, body_from_object_usd  # noqa: E402
 from simready.dsl import parse_program, compile_program, check_predicates  # noqa: E402
+from simready.dsl.model import schedule_of  # noqa: E402
 from simready.repair import repair_upright  # noqa: E402
 from simready.repair.upright_s4r import reseat_on_supports, polish_full_mesh  # noqa: E402
 from render_frames import interpolate, quat_wxyz_to_R  # noqa: E402
@@ -50,21 +51,22 @@ def ser(frame):
 
 def program_for(scene, support, margin=0.003, inset=0.0, extra=""):
     fixed = "  ".join(f"fixed({b.name})" for b in scene.bodies if b.fixed)
-    return (f"program\n  no_penetration(*, margin={margin})\n  {fixed}\n  on_support(*, {support})   upright(*)\n"
+    return (f"schedule\n  margin = {margin:g}\nprogram\n  no_penetration(*)\n  {fixed}\n  on_support(*, {support})   upright(*)\n"
             f"  within(*, {support}.top, inset={inset})\n  minimize displacement(*)\n{extra}")
 
 
-def repair(scene, text, tops, record=True, faces=2000, s_min=0.05):
+def repair(scene, text, tops, record=True):
     sc = copy.deepcopy(scene)
     prog = parse_program(text)
-    spec = compile_program(prog, sc, s_min=s_min, ds_max=0.05, tail_iters=30)
+    sch = schedule_of(prog)                  # the program's schedule (the pile's starts its continuation at s_min = 0.3)
+    spec = compile_program(prog, sc, s_min=sch["s_min"], ds_max=sch["ds_max"], tail_iters=sch["tail_iters"])
     states = []
 
     def on_step(st):
         states.append((st.scale, {sc.bodies[k].name: (sc.bodies[k].center.copy(), sc.bodies[k].rotation.copy(), st.body_scale(k)) for k in st.free}))
 
     t0 = time.time()
-    with MeshProxy(sc, faces=faces, slab_tops=tops):
+    with MeshProxy(sc, faces=sch["proxy_faces"], slab_tops=tops):
         res = repair_upright(sc, spec, on_step=on_step if record else None)
     reseat_on_supports(sc, spec)
     if verify_scene(sc).pen_pairs > 0:
@@ -81,7 +83,6 @@ def main():
     ap.add_argument("--pile", nargs=2, type=int, metavar=("N", "SEED"), help="N catalog objects dropped into a small region of RoboLab's base scene (heavy overlap)")
     ap.add_argument("--pile-radius", type=float, default=0.13); ap.add_argument("--program", help="DSL program file for --pile (default: generic)")
     ap.add_argument("--orbit", type=float, default=0.0, help="camera azimuth sweep (deg) over the gate sequence")
-    ap.add_argument("--s-min", type=float, default=0.05, help="initial scale of the continuation (larger values keep the shrunken bodies visible)")
     ap.add_argument("--out", required=True); ap.add_argument("--support", default="table")
     ap.add_argument("--repair-seconds", type=float, default=7.0); ap.add_argument("--hold-seconds", type=float, default=2.0)
     ap.add_argument("--settle-seconds", type=float, default=2.5); ap.add_argument("--inset", type=float, default=0.10)
@@ -147,7 +148,7 @@ def main():
 
     # --- S4R, G5, route ----------------------------------------------------------------------------------
     text = layout_program if (a.layout or (a.pile and layout_program)) else program_for(raw, support, margin=0.01, inset=0.02)
-    rep, res, states, t_rep, fails = repair(raw, text, tops, s_min=a.s_min)
+    rep, res, states, t_rep, fails = repair(raw, text, tops)
     v_rep = verify_scene(rep)
     g5 = {m: settle_and_measure(rep, seconds=a.settle_seconds, timestep=1 / 600, support_tops=tops, decompose_free=(m == "coacd"), record_every=20)
           for m in ("hull", "coacd")}
@@ -155,7 +156,7 @@ def main():
     routed, g5r, t_route = None, None, 0.0
     if off_support:
         text2 = text.rstrip() + "".join(f"\n  within({c}, {support}.top, inset={a.inset})" for c in off_support) + "\n"
-        routed, _, _, t_route, _ = repair(raw, text2, tops, record=False, s_min=a.s_min)
+        routed, _, _, t_route, _ = repair(raw, text2, tops, record=False)
         g5r = {m: settle_and_measure(routed, seconds=a.settle_seconds, timestep=1 / 600, support_tops=tops, decompose_free=(m == "coacd"), record_every=20)
                for m in ("hull", "coacd")}
     g5_raw = {m: settle_and_measure(raw, seconds=a.settle_seconds, timestep=1 / 600, support_tops=tops, decompose_free=(m == "coacd"), record_every=20)

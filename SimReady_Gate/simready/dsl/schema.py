@@ -16,11 +16,11 @@ import re
 import numpy as np
 
 from ..scene.model import Scene, support_levels
-from .model import check_statement, is_wildcard, GROUP, PATTERN_RE
+from .model import check_statement, check_schedule, is_wildcard, GROUP, PATTERN_RE, SCHEDULE
 
 AXIS_WORDS = ("x", "y", "+x", "-x", "+y", "-y", "long", "short", "front", "handle")   # the axis words of any statement
 OPS = ["no_penetration", "place", "fixed", "on_support", "upright", "within", "inside",
-       "left_of", "right_of", "in_front_of", "behind", "min_distance", "near", "minimize", "prefer",
+       "left_of", "right_of", "farther", "nearer", "min_distance", "close_to", "minimize", "prefer",
        "reach", "clearance", "approach", "facing", "yaw", "parallel", "at", "beside",
        "row", "align", "evenly_spaced", "grid", "ring", "cluster", "symmetric", "between", "centered", "offset", "attach",
        "keep_out", "flush", "max_move", "max_turn", "stack", "balanced_on"]
@@ -68,13 +68,17 @@ PROGRAM_SCHEMA = {
             }
         },
         "assumptions": {"type": "array", "items": {"type": "string"}},
+        "schedule": {"type": "object", "additionalProperties": False, "properties": {
+            "margin": {"type": "number", "minimum": 0, "maximum": 0.05,
+                       "description": "the clearance the repair keeps between bodies (default 0.005 m); lower it for a tight "
+                                      "packing. It changes how the repair gets there, never what the program requires"}}},
         "gate": {"type": "object", "properties": {
             "min_gap": {"type": "number"}, "settle_v_max": {"type": "number"}, "settle_dx": {"type": "number"}}}
     },
     "additionalProperties": False
 }
 
-DEFAULTS = {"margin": 0.005, "inset": 0.02, "gap": 0.05}
+DEFAULTS = {"inset": 0.02, "gap": 0.05}
 # defaults of the v1 statements, applied by the compiler when a keyword is omitted (recorded in certificates)
 OP_DEFAULTS = {
     "reach": {"min": 0.0, "x": 0.0, "y": 0.0},
@@ -108,12 +112,12 @@ class ProgramError(ValueError):
 
 
 FIELDS = {
-    "no_penetration": {"a", "margin"}, "fixed": {"a"}, "on_support": {"a", "b"}, "upright": {"a"},
+    "no_penetration": {"a"}, "fixed": {"a"}, "on_support": {"a", "b"}, "upright": {"a"},
     "within": {"a", "b", "inset", "side", "frac", "depth", "x0", "x1", "y0", "y1", "soft"},
     "inside": {"a", "b", "inset", "soft"}, "place": {"a", "x", "y", "yaw", "w"},
     "left_of": {"a", "b", "gap", "axis", "soft"}, "right_of": {"a", "b", "gap", "axis", "soft"},
-    "in_front_of": {"a", "b", "gap", "axis", "soft"}, "behind": {"a", "b", "gap", "axis", "soft"},
-    "min_distance": {"a", "b", "r", "soft"}, "near": {"a", "b", "r", "soft"}, "minimize": {"a"}, "prefer": {"a", "w"},
+    "farther": {"a", "b", "gap", "axis", "soft"}, "nearer": {"a", "b", "gap", "axis", "soft"},
+    "min_distance": {"a", "b", "r", "soft"}, "close_to": {"a", "b", "r", "soft"}, "minimize": {"a"}, "prefer": {"a", "w"},
     "reach": {"a", "r", "min", "x", "y", "soft"}, "clearance": {"a", "gap"}, "at": {"a", "x", "y", "tol", "soft"},
     "beside": {"a", "b", "side", "gap", "max", "soft"},
     "approach": {"a", "length", "width", "toward", "x", "y", "soft"},
@@ -178,7 +182,7 @@ def validate_program_json(obj: dict, scene: Scene) -> tuple[str, list[str]]:
             raise ProgramError(f"statement {i}: {op} needs two different bodies")
         if op == "no_penetration":
             seen_nopen = True
-            lines.append(f"  no_penetration(*, margin={st.get('margin', DEFAULTS['margin'])})")
+            lines.append("  no_penetration(*)")
         elif op == "fixed":
             need(a, "a"); lines.append(f"  fixed({a})")
         elif op == "on_support":
@@ -203,7 +207,7 @@ def validate_program_json(obj: dict, scene: Scene) -> tuple[str, list[str]]:
             if "soft" in st:
                 kws.append(f"soft={_fmt(st['soft'])}")
             lines.append(f"  inside({a}, {b}{''.join(', ' + k for k in kws)})")
-        elif op in ("left_of", "right_of", "in_front_of", "behind"):
+        elif op in ("left_of", "right_of", "farther", "nearer"):
             need(a, "a"); need(b, "b")
             if a == b:
                 raise ProgramError(f"statement {i}: {op} needs two different bodies")
@@ -212,7 +216,7 @@ def validate_program_json(obj: dict, scene: Scene) -> tuple[str, list[str]]:
                 raise ProgramError(f"statement {i} ({op}): axis must be x or y")
             soft = f", soft={_fmt(st['soft'])}" if "soft" in st else ""
             lines.append(f"  {op}({a}, {b}, gap={st.get('gap', DEFAULTS['gap'])}{axis}{soft})")
-        elif op in ("min_distance", "near"):
+        elif op in ("min_distance", "close_to"):
             need(a, "a"); need(b, "b")
             if "r" not in st:
                 raise ProgramError(f"statement {i} ({op}): needs r")
@@ -227,8 +231,10 @@ def validate_program_json(obj: dict, scene: Scene) -> tuple[str, list[str]]:
         else:
             raise ProgramError(f"statement {i}: unknown op {op}")
     if not seen_nopen:
-        lines.insert(1, f"  no_penetration(*, margin={DEFAULTS['margin']})")
+        lines.insert(1, "  no_penetration(*)")
         notes.append("no_penetration added by default")
+    if obj.get("schedule"):             # first: statements appended to the text stay in the program section
+        lines[:0] = ["schedule"] + [f"  {k} = {_fmt(v)}" for k, v in obj["schedule"].items()]
     g = obj.get("gate") or {}
     if g:
         lines.append("gate")
@@ -242,6 +248,17 @@ def validate_program_json(obj: dict, scene: Scene) -> tuple[str, list[str]]:
                 parts.append(f"dx <= {g['settle_dx']}")
             lines.append("  G5: " + ", ".join(parts))
     return "\n".join(lines), notes
+
+
+def json_index(obj: dict, program) -> list:
+    """For each statement of `program`, parsed from the text validate_program_json wrote for `obj`, the index of
+    the JSON statement it was written from (one each, in order); None for the no_penetration(*) the text adds
+    when `obj` has none."""
+    ops = [st["op"] for st in obj["statements"]]
+    index = ([] if "no_penetration" in ops else [None]) + list(range(len(ops)))
+    if [st.name for st in program.statements] != ["no_penetration" if i is None else ops[i] for i in index]:
+        raise ValueError("the program was not parsed from the text written for this JSON")
+    return index
 
 
 def _v1_line(i, op, st, need, tags, notes):
@@ -303,11 +320,20 @@ def _check_shape(obj):
     something that is passed through into the program text."""
     if not isinstance(obj, dict) or not isinstance(obj.get("statements"), list):
         raise ProgramError("program must be an object with a 'statements' list")
-    extra = set(obj) - {"statements", "intent", "assumptions", "gate"}
+    extra = set(obj) - {"statements", "intent", "assumptions", "gate", "schedule"}
     if extra:
         raise ProgramError(f"unknown program fields: {sorted(extra)}")
     if "intent" in obj and not isinstance(obj["intent"], str):
         raise ProgramError("intent must be a string")
+    if "schedule" in obj:
+        if not isinstance(obj["schedule"], dict):
+            raise ProgramError("schedule must be an object")
+        seen = {}
+        for k, v in obj["schedule"].items():
+            try:
+                seen[k] = check_schedule(k, v, seen, "schedule")
+            except SyntaxError as e:
+                raise ProgramError(str(e)) from None
     if "assumptions" in obj and (not isinstance(obj["assumptions"], list)
                                  or not all(isinstance(s, str) for s in obj["assumptions"])):
         raise ProgramError("assumptions must be a list of strings")
@@ -315,6 +341,9 @@ def _check_shape(obj):
         if not isinstance(st, dict) or not isinstance(st.get("op"), str) or st["op"] not in FIELDS:
             raise ProgramError(f"statement {i}: 'op' must be one of {sorted(FIELDS)}")
         op = st["op"]
+        if op == "no_penetration" and "margin" in st:
+            raise ProgramError(f"statement {i} (no_penetration): the clearance the repair keeps is part of the "
+                               "schedule (\"schedule\": {\"margin\": ...}), not of a statement")
         unknown = set(st) - FIELDS[op] - {"op", "reason"}
         if unknown:
             raise ProgramError(f"statement {i} ({op}): fields {sorted(unknown)} do not belong to {op}")
@@ -415,7 +444,7 @@ def op_schema(scene=None, ops=None) -> dict:
         if "reason" in props:
             fields["reason"] = props["reason"]
         need = ["op"] + (["members"] if op in GROUP else ["a"] if "a" in table[op] and op not in ("no_penetration", "minimize") else [])
-        if op in ("on_support", "inside", "left_of", "right_of", "in_front_of", "behind", "min_distance", "near", "parallel",
+        if op in ("on_support", "inside", "left_of", "right_of", "farther", "nearer", "min_distance", "close_to", "parallel",
                   "centered", "offset", "attach", "balanced_on", "beside", "symmetric", "between", "flush"):
             need.append("b")
         if op in ("symmetric", "between"):
@@ -464,7 +493,7 @@ def scene_summary(scene: Scene) -> str:
 LANGUAGE = """Statements (a, b, c are body names; members is a list of names, in order; in a and in members,
 * is every free body and a pattern such as can_* or fruit_? every free body whose name matches, in
 natural order (can_2 before can_10), leaving out bodies the statement names itself):
-  no_penetration(margin)                 nothing interpenetrates; margin is the clearance the solver keeps
+  no_penetration                         nothing interpenetrates
   fixed(a)                               a does not move
   on_support(a, b)   upright(a)          a rests on b (b.levelK: on level K of a fixture, from 1 at the bottom,
                                          which must leave a room above for a's height); a keeps its resting
@@ -480,8 +509,9 @@ natural order (can_2 before can_10), leaving out bodies the statement names itse
                                          b's rectangle (b, b.top or b.levelK), within tol (default 0.005)
   beside(a, b, side, gap, max)           a's footprint on b's side (left|right|near|far) with between gap and
                                          max of table between the two footprints (max optional)
-  left_of | right_of | in_front_of | behind (a, b, gap)    relations of the centres, gap between centres
-  near(a, b, r) | min_distance(a, b, r)  centre distance at most / at least r
+  left_of | right_of | farther | nearer (a, b, gap)    relations of the centres (farther: from the robot, +x),
+                                         gap between centres
+  close_to(a, b, r) | min_distance(a, b, r)  centre distance at most / at least r
   at(a, x, y, tol)                       a's centre at x and/or y, within tol (default 0.01)
   reach(a, r, min)                       a's centre within r of the robot base (and at least min from it);
                                          x, y move the base
@@ -528,30 +558,35 @@ natural order (can_2 before can_10), leaving out bodies the statement names itse
   minimize                               minimum displacement
 Any statement other than no_penetration, fixed, on_support, upright, place, clearance and stack takes
 soft (0 to 1]: a preference with that weight, which may yield; it is reported but not required."""
+SCHEDULE_TEXT = (f"\nThe program's optional schedule.margin (default {SCHEDULE['margin']:g} m) is the clearance the repair keeps "
+                 "between bodies; lower it for a tight packing. It changes how the repair gets there, never what the "
+                 "statements require.")
+LANGUAGE += SCHEDULE_TEXT
 
 
 V0_OPS = ["no_penetration", "place", "fixed", "on_support", "upright", "within", "inside", "left_of", "right_of",
-          "in_front_of", "behind", "min_distance", "near", "minimize", "prefer"]
+          "farther", "nearer", "min_distance", "close_to", "minimize", "prefer"]
 LANGUAGE_V0 = """Statements (a, b are body names):
-  no_penetration(margin)                 nothing interpenetrates; margin is the clearance the solver keeps
+  no_penetration                         nothing interpenetrates
   fixed(a)                               a does not move
   on_support(a, b)   upright(a)          a rests on b; a keeps its resting orientation (no roll or pitch)
   within(a, b, inset)                    a's footprint inside b (b.top: b's top rectangle), inset from its edge
   inside(a, b)                           a inside container b
   beside(a, b, side, gap, max)           a's footprint on b's side (left|right|near|far) with between gap and
                                          max of table between the two footprints (max optional)
-  left_of | right_of | in_front_of | behind (a, b, gap)    relations of the centres, gap between centres
-  near(a, b, r) | min_distance(a, b, r)  centre distance at most / at least r
+  left_of | right_of | farther | nearer (a, b, gap)    relations of the centres (farther: from the robot, +x),
+                                         gap between centres
+  close_to(a, b, r) | min_distance(a, b, r)  centre distance at most / at least r
   place(a, x, y, yaw)                    a target pose in the shrunken scale-space (a soft pull)
   prefer(a, w)                           a pull toward a's present pose
-  minimize                               minimum displacement"""
+  minimize                               minimum displacement""" + SCHEDULE_TEXT
 
 
 # the fields each statement took before v1 (no regions, no preferences)
-V0_FIELDS = {"no_penetration": {"a", "margin"}, "fixed": {"a"}, "on_support": {"a", "b"}, "upright": {"a"},
+V0_FIELDS = {"no_penetration": {"a"}, "fixed": {"a"}, "on_support": {"a", "b"}, "upright": {"a"},
              "within": {"a", "b", "inset"}, "inside": {"a", "b", "inset"}, "place": {"a", "x", "y", "yaw", "w"},
-             "left_of": {"a", "b", "gap", "axis"}, "right_of": {"a", "b", "gap", "axis"}, "in_front_of": {"a", "b", "gap", "axis"},
-             "behind": {"a", "b", "gap", "axis"}, "min_distance": {"a", "b", "r"}, "near": {"a", "b", "r"}, "minimize": {"a"},
+             "left_of": {"a", "b", "gap", "axis"}, "right_of": {"a", "b", "gap", "axis"}, "farther": {"a", "b", "gap", "axis"},
+             "nearer": {"a", "b", "gap", "axis"}, "min_distance": {"a", "b", "r"}, "close_to": {"a", "b", "r"}, "minimize": {"a"},
              "prefer": {"a", "w"}}
 
 
@@ -591,8 +626,8 @@ def system_prompt(ops=None, language: str | None = None, with_schema: bool = Tru
 objectives over named bodies. Output ONLY a JSON object matching the schema below.
 
 Frame: metres and degrees, z up. The robot base is at (0, 0) and looks along +x: +x is away from the
-robot ("far"), -x toward it ("near"), +y is left, -y right. RoboLab convention: left_of(a,b) means
-a.y >= b.y + gap; in_front_of(a,b) means a.x >= b.x + gap.
+robot ("far"), -x toward it ("near"), +y is left, -y right. left_of(a,b) means a.y >= b.y + gap;
+farther(a,b) means a.x >= b.x + gap (a farther from the robot than b).
 
 Rules:
 - Use only bodies listed in the scene. {wild_rule}

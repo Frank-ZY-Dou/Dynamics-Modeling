@@ -27,15 +27,14 @@ from .errors import GeometryQueryError
 from .scene.model import Scene, Body, slab_proxy, MeshProxy
 from .gates.verify import verify_scene, PEN_EPS, TOUCH_EPS
 from .gates.clearance import check_clearance
-from .dsl.model import parse_program
-from .dsl.compile import compile_program, check_predicates, CompileError
-from .dsl.schema import prompt_for, validate_program_json, scene_summary, ProgramError, DEFAULTS, OP_DEFAULTS
+from .dsl.model import parse_program, schedule_of
+from .dsl.compile import compile_program, check_predicates, rewrites, CompileError
+from .dsl.schema import prompt_for, validate_program_json, json_index, scene_summary, ProgramError, DEFAULTS, OP_DEFAULTS
 from .dsl.text2dsl import strict_json_loads
 from .io.paths import portable, expand
 from .repair.upright_s4r import repair_upright, reseat_on_supports, polish_full_mesh
 
 SCENE_EXT = (".usda", ".usd", ".usdc")
-MIN_MARGIN = 1e-3         # m: the least clearance a repair keeps when it lowers the program's margin (repair_scene)
 INPUT_ERRORS = (ProgramError, CompileError, SyntaxError, KeyError, ValueError, OSError, GeometryQueryError, RuntimeError)
 
 
@@ -202,7 +201,7 @@ def asset_hashes(scene: Scene) -> dict:
     return out
 
 
-def provenance(scene_path, program_path=None, dsl=None, raw=None, params=None, assets=None):
+def provenance(scene_path, program_path, dsl, raw, schedule, assets=None):
     try:
         git = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(Path(__file__).resolve().parents[1]), capture_output=True, text=True).stdout.strip()[:12]
     except Exception:  # noqa: BLE001
@@ -215,7 +214,7 @@ def provenance(scene_path, program_path=None, dsl=None, raw=None, params=None, a
             versions[mod] = None
     return {"scene": {"path": scene_path, "sha256": sha16(scene_path)}, "assets": assets or {},
             "program": {"path": program_path, "sha256": sha16(program_path) if program_path else None,
-            "dsl": dsl, "json": raw}, "params": params or {}, "tolerances": {"pen_eps": PEN_EPS, "touch_eps": TOUCH_EPS, "predicate_tol": 2e-3,
+            "dsl": dsl, "json": raw}, "schedule": schedule, "tolerances": {"pen_eps": PEN_EPS, "touch_eps": TOUCH_EPS, "predicate_tol": 2e-3,
             "verify_gap_tol": 2e-3, "verify_sink_tol": 1e-3, "defaults": DEFAULTS, "statement_defaults": OP_DEFAULTS}, "software": {"git": git, "python": platform.python_version(), **versions},
             "time": time.strftime("%Y-%m-%dT%H:%M:%S")}
 
@@ -258,7 +257,7 @@ def cmd_check(a):
     sc = load_any(a.scene)
     try:
         prog, dsl, notes, _ = load_program(a.program, sc)
-        spec = compile_program(prog, copy.deepcopy(sc))
+        spec = compile_program(prog, copy.deepcopy(sc))           # with the program's schedule
         from .repair.upright_s4r import State, decompose_zyx
         sc2 = copy.deepcopy(sc); compile_program(prog, sc2)
         free = [k for k, b in enumerate(sc2.bodies) if not b.fixed]
@@ -285,87 +284,68 @@ def cmd_verify(a):
     sys.exit(0 if rep.pen_pairs == 0 else 1)
 
 
-def repair_scene(sc: Scene, prog, s_min: float = 0.05, ds_max: float = 0.05, tail: int = 30, proxy_faces: int = 2000,
-                 verbose: bool = False, on_step=None, **spec_overrides) -> dict:
+def repair_scene(sc: Scene, prog, schedule: dict | None = None, verbose: bool = False, on_step=None, **spec_overrides) -> dict:
     """The repair `cmd_repair` runs, on a loaded scene and a parsed program (the scene is changed in
     place): compile, S4R on decimated proxies and support slabs, re-seat, verify on the full meshes,
-    polish when the proxies left a residual, check every predicate. Returns the parts of the
+    polish on them when the proxies left a residual, check every predicate. The schedule (SCHEDULE's
+    keys; the program's own, schedule_of, unless a caller gives one) chooses among the layouts the
+    program accepts and never changes what it accepts; the report carries it. Returns the parts of the
     report; raises the INPUT_ERRORS a bad program or input gives. on_step(state) is passed to the
     solver (the frames of viz/make_example_video.py)."""
-    spec = compile_program(prog, sc, s_min=s_min, ds_max=ds_max, tail_iters=tail, **spec_overrides)
+    sch = schedule_of(prog) if schedule is None else schedule
+    margin, s_min, ds_max, tail, proxy_faces = (sch[k] for k in ("margin", "s_min", "ds_max", "tail_iters", "proxy_faces"))
+    spec = compile_program(prog, sc, d_hat=margin, s_min=s_min, ds_max=ds_max, tail_iters=tail, **spec_overrides)
     before = verify_scene(sc)          # after the program has fixed its bodies: the same pairs as `after`
     t0 = time.time()
-    poses = {b.name: (b.center.copy(), b.rotation.copy()) for b in sc.bodies}
     xy_start = {b.name: b.center[:2].copy() for b in sc.free()}
-
-    def attempt(spec):
-        tops = {sup: min(h for b, h in spec.supports.items() if spec.support_of.get(b) == sup) for sup in set(spec.support_of.values())}
-        solver_notes = []
-        with quiet_stdout():
-            proxy = MeshProxy(sc, faces=proxy_faces, slab_tops=tops)
-            with proxy:                   # repair on decimated meshes + support slabs; verify on full meshes
-                res = repair_upright(sc, spec, verbose=verbose, on_step=on_step)
-            solver_notes += proxy.notes + res.notes
-            reseat_on_supports(sc, spec)
+    tops = {sup: min(h for b, h in spec.supports.items() if spec.support_of.get(b) == sup) for sup in set(spec.support_of.values())}
+    solver_notes = []
+    with quiet_stdout():
+        proxy = MeshProxy(sc, faces=proxy_faces, slab_tops=tops)
+        with proxy:                   # repair on decimated meshes + support slabs; verify on full meshes
+            res = repair_upright(sc, spec, verbose=verbose, on_step=on_step)
+        solver_notes += proxy.notes + res.notes
+        reseat_on_supports(sc, spec)
+        after = verify_scene(sc)
+        if after.pen_pairs > 0:                       # proxy residuals: polish on the full meshes
+            res2 = polish_full_mesh(sc, spec, iters=tail, verbose=verbose, on_step=on_step)
+            reseat_on_supports(sc, spec); res.steps += res2.steps; solver_notes += res2.notes
             after = verify_scene(sc)
-            if after.pen_pairs > 0:                       # proxy residuals: polish on the full meshes
-                res2 = polish_full_mesh(sc, spec, iters=tail, verbose=verbose, on_step=on_step)
-                reseat_on_supports(sc, spec); res.steps += res2.steps; solver_notes += res2.notes
-                after = verify_scene(sc)
-        preds = check_predicates(prog, sc)
-        hard = [p for p in preds if not p.soft]; prefs = [p for p in preds if p.soft]
-        moved = [float(np.sum((b.center[:2] - xy_start[b.name]) ** 2)) for b in sc.free()]
-        rmsd_xy = float(np.sqrt(np.mean(moved))) if moved else 0.0    # over the whole run, the full-mesh polish included
-        ok = after.pen_pairs == 0 and all(p[1] for p in hard)
-        clearance = None
-        if "min_gap" in prog.gate.get("G2", {}):
-            clearance = check_clearance(sc, prog.gate["G2"]["min_gap"][1], spec.support_of)
-            ok = ok and clearance["pass"]
-        return {"ok": ok, "spec": spec, "res": res, "before": before, "after": after, "hard": hard, "prefs": prefs,
-                "rmsd_xy": rmsd_xy, "clearance": clearance, "solver_notes": solver_notes,
-                "poses": {b.name: (b.center.copy(), b.rotation.copy()) for b in sc.bodies}}
+    preds = check_predicates(prog, sc)
+    hard = [p for p in preds if not p.soft]; prefs = [p for p in preds if p.soft]
+    moved = [float(np.sum((b.center[:2] - xy_start[b.name]) ** 2)) for b in sc.free()]
+    rmsd_xy = float(np.sqrt(np.mean(moved))) if moved else 0.0    # over the whole run, the full-mesh polish included
+    ok = after.pen_pairs == 0 and all(p[1] for p in hard)
+    clearance = None
+    if "min_gap" in prog.gate.get("G2", {}):
+        clearance = check_clearance(sc, prog.gate["G2"]["min_gap"][1], spec.support_of)
+        ok = ok and clearance["pass"]
+    return {"ok": ok, "spec": spec, "res": res, "before": before, "after": after, "hard": hard, "prefs": prefs,
+            "rmsd_xy": rmsd_xy, "clearance": clearance, "solver_notes": solver_notes, "time_s": time.time() - t0,
+            "schedule": dict(sch)}
 
-    def worse(a, b):
-        """Whether attempt a ends worse than b: penetration first, then the requirements that fail, then by how much."""
-        key = lambda o: (not o["ok"], o["after"].pen_pairs, sum(not p[1] for p in o["hard"]),
-                         sum(abs(float(p[2])) for p in o["hard"] if not p[1] and p[2] is not None))
-        return key(a) > key(b)
 
-    out = best = attempt(spec)
-    margin, tried = spec.d_hat, []
-    # The clearance the solver keeps between bodies is a margin of its own, not a requirement (a requirement is a
-    # predicate; no predicate asks for it). When the contacts with that margin have set the program aside in the
-    # closing steps and a requirement fails, the repair starts again from the same poses with half the margin, at
-    # most twice and not below MIN_MARGIN, and keeps the attempt that ends best.
-    while (not out["ok"] and out["after"].pen_pairs == 0 and margin > MIN_MARGIN + 1e-12
-           and any("closing steps" in n for n in out["solver_notes"]) and margin > spec.d_hat / 4 + 1e-12):
-        margin = max(MIN_MARGIN, margin / 2)
-        for b in sc.bodies:
-            b.center, b.rotation = poses[b.name][0].copy(), poses[b.name][1].copy()
-        spec2 = compile_program(prog, sc, s_min=s_min, ds_max=ds_max, tail_iters=tail, **spec_overrides)
-        spec2.d_hat = margin
-        tried.append(margin)
-        out = attempt(spec2)
-        out["solver_notes"].append(f"the contacts kept the program's margin of {1000 * spec.d_hat:g} mm and set a requirement aside; "
-                                   f"the repair started again from the same poses with a margin of {1000 * margin:g} mm")
-        if worse(best, out):
-            best = out
-    if best is not out:
-        for b in sc.bodies:
-            b.center, b.rotation = best["poses"][b.name][0].copy(), best["poses"][b.name][1].copy()
-    if tried and best["spec"].d_hat == spec.d_hat:
-        best["solver_notes"].append("the repair also started again with margins of " + " and ".join(f"{1000 * m:g} mm" for m in tried)
-                                    + ", and ended no better")
-    best.pop("poses")
-    best["time_s"] = time.time() - t0
-    return best
+def rewrite_report(prog, sc: Scene, hard: list, raw, contacts_ok: bool) -> dict:
+    """The rewrites of the requirements that failed on the repaired scene (dsl.compile.rewrites), each naming
+    its statement as the program was written (its index in the JSON `statements`, or its line in a text
+    program). With no pair penetrating and the G2 clearance kept (`contacts_ok`), the layout returned is
+    accepted once every failed statement is relaxed as listed (`accepted_if_relaxed`), or once those that
+    cannot be are weakened instead (`accepted_if_weakened`)."""
+    index = json_index(raw, prog) if raw is not None else None
+    out = []
+    for r in rewrites(prog, sc, hard):
+        k = r.pop("statement")
+        out.append({"statement": index[k]} if index is not None else {"line": prog.statements[k].line})
+        out[-1].update(r)
+    return {"rewrites": out, "accepted_if_relaxed": contacts_ok and all(r["relax"] for r in out),
+            "accepted_if_weakened": contacts_ok and all(r["relax"] or r["weaken"] for r in out)}
 
 
 def cmd_repair(a):
     sc = load_any(a.scene)
     try:
         prog, dsl, notes, raw = load_program(a.program, sc)
-        out = repair_scene(sc, prog, s_min=a.s_min, ds_max=a.ds_max, tail=a.tail, proxy_faces=a.proxy_faces, verbose=a.verbose)
+        out = repair_scene(sc, prog, verbose=a.verbose)
     except INPUT_ERRORS as e:
         fail_input(e)
     ok, res, before, after, hard, prefs = out["ok"], out["res"], out["before"], out["after"], out["hard"], out["prefs"]
@@ -374,7 +354,6 @@ def cmd_repair(a):
     if dropped:
         ok = False
         notes = notes + [f"unresolved assets were not verified: {dropped}"]
-    params = {"s_min": a.s_min, "ds_max": a.ds_max, "tail_iters": a.tail, "proxy_faces": a.proxy_faces}
     report = {"ok": ok, "scene": a.scene, "program": a.program, "pen_before": before.pen_pairs, "pen_after": after.pen_pairs,
               "min_score_after": after.min_signed, "contained_after": after.contained, "floating_after": after.floating,
               "rmsd_xy": rmsd_xy, "steps": res.steps, "time_s": round(out["time_s"], 2),
@@ -385,7 +364,9 @@ def cmd_repair(a):
               "clearance": clearance, "notes": notes, "solver_notes": solver_notes, "dropped_children": dropped,
               "continuation": {"complete": res.continuation_complete, "last_accepted_scale": res.last_accepted_scale, "termination": res.termination},
               "synthetic_table": sc.meta.get("synthetic_table"),
-              "provenance": provenance(a.scene, a.program, dsl, raw, params, asset_hashes(sc))}
+              "provenance": provenance(a.scene, a.program, dsl, raw, out["schedule"], asset_hashes(sc))}
+    if report["failed_predicates"]:
+        report.update(rewrite_report(prog, sc, hard, raw, after.pen_pairs == 0 and (clearance is None or clearance["pass"])))
     if a.out:
         out_is_usd = a.out.endswith(SCENE_EXT)
         if out_is_usd != a.scene.endswith(SCENE_EXT):
@@ -625,9 +606,7 @@ def main(argv=None):
     s = sub.add_parser("check"); s.add_argument("scene"); s.add_argument("program"); s.set_defaults(fn=cmd_check)
     s = sub.add_parser("verify"); s.add_argument("scene"); s.set_defaults(fn=cmd_verify)
     s = sub.add_parser("repair"); s.add_argument("scene"); s.add_argument("program"); s.add_argument("--out")
-    s.add_argument("--s-min", type=float, default=0.05); s.add_argument("--ds-max", type=float, default=0.05)
-    s.add_argument("--tail", type=int, default=30); s.add_argument("--verbose", action="store_true")
-    s.add_argument("--proxy-faces", type=int, default=2000); s.set_defaults(fn=cmd_repair)
+    s.add_argument("--verbose", action="store_true"); s.set_defaults(fn=cmd_repair)    # the schedule is the program's
     s = sub.add_parser("settle"); s.add_argument("scene"); s.add_argument("--program"); s.add_argument("--seconds", type=float, default=2.0)
     s.add_argument("--proxy", choices=("hull", "coacd", "both"), default="both"); s.add_argument("--hull-verts", type=int, default=256)
     s.add_argument("--v-max", type=float, default=1.0, help="peak body speed allowed (m/s) unless the program's gate says otherwise")

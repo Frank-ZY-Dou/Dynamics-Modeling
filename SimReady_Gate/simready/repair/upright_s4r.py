@@ -495,7 +495,7 @@ def repair_upright(scene: Scene, spec: RepairSpec, verbose: bool = False, on_ste
         projected = project()
         miss = shortfall()
         if miss > 1e-3 and spec.project_restarts:
-            # A program with non-convex statements (min_distance, in_front_of, a cluster, a disjunction) can stop
+            # A program with non-convex statements (min_distance, farther, a cluster, a disjunction) can stop
             # short from where the bodies start: its linearized rows push a body straight away from what it must
             # avoid, never around it. While the bodies are small, the program alone is solved again from other
             # starts (each body anywhere over its support, in a sequence the scene fixes), and the poses that come

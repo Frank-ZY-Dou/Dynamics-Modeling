@@ -3,6 +3,8 @@ isolated CLI calls (llm.py), in three conditions.
 
   dsl_v1   the model writes a SimReady program (every statement); the gate compiles and repairs it
   dsl_v0   the same with the statements the language had before v1 (no rows, grids, headings, regions)
+  dsl_v1_rewrites  dsl_v1 whose report, when a requirement fails, also carries the rewrites of the statements
+           that failed (simready.cli.rewrite_report); its first round is dsl_v1's (not run by default)
   direct   the model writes the final pose of every free body; no program, no solver
   (direct+repair, computed from direct's answers without another call: its poses repaired by S4R with
    only the geometric statements every task shares)
@@ -56,13 +58,14 @@ DIRECT_SCHEMA = {"type": "object", "properties": {"poses": {"type": "array", "it
 
 def conditions():
     from simready.dsl.schema import system_prompt, V0_OPS
-    return {"dsl_v1": system_prompt(with_schema=False, reasons=False), "dsl_v0": system_prompt(ops=V0_OPS, with_schema=False, reasons=False),
-            "direct": DIRECT_SYSTEM}
+    v1 = system_prompt(with_schema=False, reasons=False)
+    return {"dsl_v1": v1, "dsl_v0": system_prompt(ops=V0_OPS, with_schema=False, reasons=False), "direct": DIRECT_SYSTEM,
+            "dsl_v1_rewrites": v1}
 
 
 def schemas():
     from simready.dsl.schema import op_schema, V0_OPS
-    return {"dsl_v1": op_schema(), "dsl_v0": op_schema(ops=V0_OPS), "direct": DIRECT_SCHEMA}
+    return {"dsl_v1": op_schema(), "dsl_v0": op_schema(ops=V0_OPS), "direct": DIRECT_SCHEMA, "dsl_v1_rewrites": op_schema()}
 
 
 def sanitize(obj, home=str(Path.home())):
@@ -113,7 +116,8 @@ def run_trial(job):
         elif cond == "direct":
             final, report, self_ok, t_solve = P.run_poses(layout, answer, task.support, clock=clock)
         else:
-            final, report, self_ok, t_solve = P.run_program(layout, answer, v0_only=cond == "dsl_v0", clock=clock)
+            final, report, self_ok, t_solve = P.run_program(layout, answer, v0_only=cond == "dsl_v0", rewrites=cond == "dsl_v1_rewrites",
+                                                            clock=clock)
         passed, checks = P.grade(task, final, start)
         rec.update({"report": report, "self_ok": self_ok, "solve_s": t_solve, "solve_cpu_s": clock.get("cpu_s", 0.0), "rubric_ok": passed,
                     "rubric_failed": [c for c in checks if not c[1]],
@@ -163,6 +167,11 @@ def main():
         replay_meta = json.loads((Path(a.replay) / "run_meta.json").read_text())
         a.model, a.effort, a.rounds = replay_meta["model"], replay_meta["effort"], replay_meta["rounds"]
         a.seeds, a.conditions = replay_meta["seeds"], replay_meta["conditions"]
+        for c in a.conditions:           # a recorded answer answers the system prompt and the format it was given
+            if ((Path(a.replay) / f"system_{c}.txt").read_text() != conditions()[c]
+                    or json.loads((Path(a.replay) / f"schema_{c}.json").read_text()) != schemas()[c]):
+                sys.exit(f"--replay: the system prompt or the answer format of {c} is not the recorded run's, so its recorded "
+                         "answers answer another prompt; run without --replay")
     import tasks as T, llm
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     keys = [t.key for t in T.all_tasks() if not a.tasks or t.key in a.tasks or t.name in a.tasks]

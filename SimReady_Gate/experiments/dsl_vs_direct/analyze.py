@@ -19,7 +19,7 @@ from pathlib import Path
 
 import numpy as np
 
-ORDER = ["dsl_v1", "dsl_v0", "direct", "direct+repair"]
+ORDER = ["dsl_v1", "dsl_v0", "direct", "direct+repair", "dsl_v1_rewrites"]
 HELD_OUT = {"tool_layout", "desk"}          # tasks.HELD_OUT: written after the language was frozen
 
 

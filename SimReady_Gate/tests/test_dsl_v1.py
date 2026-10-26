@@ -1,7 +1,7 @@
 """Regression tests for the v1 statements: parsing and JSON validation, the rows they compile to
 (checked against finite differences of their own residuals), the repair reaching them on small box
-scenes, preferences giving way to requirements, and programs the contacts contradict. Run with
-`python -m unittest discover tests`.
+scenes, preferences giving way to requirements, programs the contacts contradict, and the rewrites of
+failed requirements. Run with `python -m unittest discover tests`.
 """
 import contextlib
 import copy
@@ -21,8 +21,10 @@ sys.path.insert(0, ROOT)
 
 from simready.scene.model import Scene, Body  # noqa: E402
 from simready.dsl.schema import validate_program_json, ProgramError, api_schema, prompt_for, scene_summary  # noqa: E402
-from simready.dsl.model import parse_program  # noqa: E402
+from simready.dsl.model import parse_program, schedule_of  # noqa: E402
 from simready.dsl.compile import compile_program, check_predicates, effective_supports, CompileError  # noqa: E402
+from simready.dsl.compile import RELAX, RELAX_DEG, expand_names, effective_support_refs, rewrites, statement_predicates  # noqa: E402
+from simready.dsl.model import Program, Statement  # noqa: E402
 from simready.dsl import statements as V1  # noqa: E402
 from simready.repair.upright_s4r import State, repair_upright, rotz  # noqa: E402
 from simready.gates.verify import verify_scene  # noqa: E402
@@ -39,7 +41,7 @@ def table_scene(*objects):
     return Scene([table, *objects])
 
 
-HEAD = "program\n  no_penetration(*, margin=0.005)\n  on_support(*, table)\n  upright(*)\n  within(*, table.top, inset=0.02)\n"
+HEAD = "program\n  no_penetration(*)\n  on_support(*, table)\n  upright(*)\n  within(*, table.top, inset=0.02)\n"
 
 
 def state_of(sc, scale=1.0):
@@ -423,7 +425,7 @@ class Seating(unittest.TestCase):
         sc = table_scene(carton, box("top", (0.2, 0.2, 0.1), (0.5, 0.0, 0.16)))
         from simready.cli import repair_scene
         prog = parse_program("program\n  no_penetration(*)\n  upright(*)\n  on_support(carton, table)\n  stack(carton, top)\n")
-        out = repair_scene(sc, prog, tail=10)
+        out = repair_scene(sc, prog, schedule=dict(schedule_of(prog), tail_iters=10))
         self.assertEqual(out["after"].pen_pairs, 0)
         self.assertGreaterEqual(float(sc["top"].world_aabb()[0][2]), float(sc["carton"].world_aabb()[1][2]) - 1e-4)
         self.assertTrue(out["ok"], [p[0] for p in out["hard"] if not p[1]])
@@ -501,7 +503,7 @@ def bookcase(name="case", at=(0.75, 0.0, 0.0)):
     return Body.from_mesh(name, m.vertices, m.faces, fixed=True, tags={"support", "fixture"})
 
 
-SHELF = "program\n  no_penetration(*, margin=0.005)\n  upright(*)\n"
+SHELF = "program\n  no_penetration(*)\n  upright(*)\n"
 
 
 def bowl(name, at, bottom=0.07, top=0.13, height=0.06, wall=0.008):
@@ -641,6 +643,56 @@ class Shelves(unittest.TestCase):
                          ["properties"]["b"]["enum"], ["table", "a", "table.top", "a.top"])        # one level: as before
 
 
+class Composition(unittest.TestCase):
+    """A program is a conjunction: a body's support and its pull come from the most specific statement that names it,
+    whatever the order, and two of the same rank are an error."""
+
+    def scene(self):
+        return table_scene(box("tray", (0.3, 0.3, 0.02), (0.5, 0.0, 0.01)), box("a", (0.05, 0.05, 0.05), (0.5, 0.2, 0.025)),
+                           box("b", (0.05, 0.05, 0.05), (0.6, -0.2, 0.025)))
+
+    def test_same_rank_supports_are_an_error(self):
+        for text in ("on_support(a, table)\n  on_support(a, tray)", "on_support(*, table)\n  on_support(*, tray)",
+                     "stack(tray, a)\n  on_support(a, table)"):
+            with self.assertRaises(CompileError, msg=text):
+                effective_supports(parse_program("program\n  " + text), self.scene())
+
+    def test_a_named_support_outranks_a_pattern_in_either_order(self):
+        for text in ("on_support(*, table)\n  on_support(a, tray)", "on_support(a, tray)\n  on_support(*, table)"):
+            sup = effective_supports(parse_program("program\n  " + text), self.scene())
+            self.assertEqual((sup["a"], sup["b"]), ("tray", "table"), text)
+
+    def test_two_pulls_of_one_rank_are_an_error(self):
+        for text in ("place(a, x=0.5, y=0.1)\n  place(a, x=0.6, y=0.1)", "prefer(a, w=0.2)\n  place(a, x=0.5, y=0.1)"):
+            with self.assertRaises(CompileError, msg=text):
+                compile_program(parse_program(HEAD + "  " + text + "\n"), self.scene())
+
+    def test_the_margin_belongs_to_the_schedule(self):
+        with self.assertRaises(SyntaxError):
+            parse_program("program\n  no_penetration(*, margin=0.005)")
+        with self.assertRaises(ProgramError):
+            validate_program_json({"statements": [{"op": "no_penetration", "margin": 0.005}]}, self.scene())
+        prog = parse_program(HEAD)
+        self.assertEqual(compile_program(prog, self.scene()).d_hat, 0.005)              # the repair's default clearance
+        self.assertEqual(compile_program(prog, self.scene(), d_hat=0.002).d_hat, 0.002)
+        prog = parse_program(HEAD + "schedule\n  margin = 0.002, s_min = 0.3\n")
+        self.assertEqual((prog.schedule, schedule_of(prog)["tail_iters"]), ({"margin": 0.002, "s_min": 0.3}, 30))
+        for bad in ("margin = 0.2", "speed = 1", "margin = 0.002\n  margin = 0.003", "tail_iters = 2.5"):
+            with self.assertRaises(SyntaxError, msg=bad):
+                parse_program(HEAD + "schedule\n  " + bad + "\n")
+        dsl, _ = validate_program_json({"statements": [{"op": "upright", "a": "*"}], "schedule": {"margin": 0.002}}, self.scene())
+        self.assertEqual(parse_program(dsl).schedule, {"margin": 0.002})
+        with self.assertRaises(ProgramError):
+            validate_program_json({"statements": [{"op": "upright", "a": "*"}], "schedule": {"margin": -1}}, self.scene())
+
+    def test_a_named_place_outranks_a_pattern_prefer_in_either_order(self):
+        for text in ("prefer(*, w=0.1)\n  place(a, x=0.45, y=0.3)", "place(a, x=0.45, y=0.3)\n  prefer(*, w=0.1)"):
+            spec = compile_program(parse_program(HEAD + "  " + text + "\n"), self.scene())
+            self.assertEqual(spec.place["a"][:2], (0.45, 0.3), text)
+            self.assertTrue(np.allclose(spec.prefer["a"][0], [0.45, 0.3]), text)
+            self.assertNotIn("b", spec.place)
+
+
 class FreeSupports(unittest.TestCase):
     def test_a_bowl_sunk_in_a_bowl_rises_to_its_seat(self):
         from simready.repair.upright_s4r import _drop_clear, LIFT_MAX
@@ -687,6 +739,135 @@ class Rings(unittest.TestCase):
         dsl, _ = validate_program_json({"statements": [{"op": "ring", "members": ["a", "b", "c"], "r": 0.12, "angle": -90,
                                                         "face": "out", "axis": "+x"}]}, sc)
         self.assertIn("ring(a, b, c, r=0.12, axis=+x, angle=-90, face=out)", dsl)
+
+
+def strictly_holds(sc, prog, st, values) -> bool:
+    """The statement `st` of `prog`, with `values` for some of its keywords, holds on the scene without the check's slack."""
+    refs = effective_support_refs(expand_names(prog, sc), sc)
+    for part in expand_names(Program(statements=[st]), sc).statements:
+        q = copy.copy(part)
+        q.kw = {**part.kw, **values}
+        if not all(p[1] for p in statement_predicates(q, sc, refs, tol=1e-9, angle_tol=1e-9)):
+            return False
+    return True
+
+
+# one statement of every kind RELAX knows, over the bodies a, b, c of Rewrites.scene (max_move, max_turn and attach
+# are measured from the poses compile_program saw)
+RELAXABLE = ["left_of(a, b, gap=0.3)", "right_of(a, b, gap=0.1)", "farther(a, b, gap=0.1)", "nearer(a, b, gap=0.1)",
+             "close_to(a, b, r=0.05)", "min_distance(a, b, r=0.2)", "reach(c, r=0.5, min=0.2)",
+             "beside(a, b, side=left, gap=0.05, max=0.08)", "within(a, table.top, inset=0.3)",
+             "keep_out(a, x0=0.4, x1=0.6, y0=0.0, y1=0.2, gap=0.02)", "clearance(a, gap=0.05)", "approach(a, length=0.3, width=0.2)",
+             "row(a, b, c, axis=y, gap=0.02, tol=0.005)", "between(a, b, c, axis=y, gap=0.05)", "cluster(a, b, c, r=0.05)",
+             "max_move(a, d=0.01)", "max_turn(c, deg=2)", "balanced_on(a, b, margin=0.03)", "at(b, x=0.45, y=0.1, tol=0.01)",
+             "offset(a, b, dx=0.0, dy=0.2, tol=0.01)", "centered(a, b, tol=0.01)", "attach(a, b, tol=0.01)",
+             "symmetric(a, b, c, axis=y, tol=0.01)", "align(a, b, c, axis=x, tol=0.005)", "evenly_spaced(a, b, c, axis=y, tol=0.005)",
+             "grid(a, b, c, cols=2, tol=0.01)", "ring(a, b, c, r=0.1, tol=0.01)", "flush(a, table.top, side=near, gap=0.1, tol=0.005)",
+             "facing(c, axis=+x, tol=5)", "yaw(c, deg=0, tol=5)", "parallel(a, c, axis=x, tol=5)"]
+
+
+class Rewrites(unittest.TestCase):
+    """When requirements fail, the report gives each failed statement its nearest relaxation, found on the statement's own
+    predicate, and says whether it may be weakened; every rewrite asks less, and names the statement as it was written."""
+
+    def scene(self):
+        return table_scene(box("a", (0.1, 0.1, 0.1), (0.5, 0.1, 0.05)), box("b", (0.1, 0.1, 0.1), (0.5, 0.0, 0.05)),
+                           box("c", (0.08, 0.08, 0.1), (0.62, -0.05, 0.05), yaw=0.3))
+
+    def rewritten(self, text, sc=None):
+        sc = sc or self.scene()
+        prog = parse_program(HEAD + text)
+        compile_program(prog, sc)
+        preds = check_predicates(prog, sc)
+        return sc, prog, preds, rewrites(prog, sc, preds)
+
+    def test_the_nearest_value_that_holds(self):
+        cases = {"left_of(a, b, gap=0.3)": {"gap": [0.3, 0.1]}, "close_to(a, b, r=0.05)": {"r": [0.05, 0.1]},
+                 "min_distance(a, b, r=0.2)": {"r": [0.2, 0.1]}, "at(b, x=0.45, tol=0.01)": {"tol": [0.01, 0.05]},
+                 "beside(a, b, side=left, gap=0.05, max=0.08)": {"gap": [0.05, 0.0]}, "clearance(a, gap=0.05)": {"gap": [0.05, 0.0]},
+                 "within(a, table.top, inset=0.3)": {"inset": [0.3, 0.25]}}
+        for text, relax in cases.items():
+            sc, prog, _, rws = self.rewritten("  " + text + "\n")
+            self.assertEqual([r["relax"] for r in rws], [relax], text)
+            st = prog.statements[rws[0]["statement"]]
+            edited = Statement(st.name, list(st.args), {**st.kw, **{k: v[1] for k, v in relax.items()}})
+            prog2 = parse_program(HEAD + "  " + repr(edited) + "\n")
+            compile_program(prog2, sc)
+            self.assertTrue(all(p[1] for p in check_predicates(prog2, sc)), text)        # the edited program accepts the layout
+
+    def test_one_step_tighter_fails(self):
+        sc = self.scene()
+        sc["c"].center = sc["c"].center + np.array([0.03, 0.02, 0.0])
+        sc["c"].rotation = rotz(0.5)
+        prog = parse_program(HEAD + "".join(f"  {t}\n" for t in RELAXABLE))
+        compile_program(prog, self.scene())                     # the reference poses of max_move, max_turn and attach
+        preds = check_predicates(prog, sc)
+        found = 0
+        for r in rewrites(prog, sc, preds):
+            st = prog.statements[r["statement"]]
+            for key, (old, new) in (r["relax"] or {}).items():
+                step = 0.5 if (st.name, key) in RELAX_DEG else 1e-3
+                values = {k: v[1] for k, v in r["relax"].items()}
+                self.assertTrue(strictly_holds(sc, prog, st, values), r)
+                tighter = round(new - RELAX[st.name][key] * step, 9)
+                if (RELAX[st.name][key] < 0 or tighter >= 0) and tighter != old:
+                    self.assertFalse(strictly_holds(sc, prog, st, {**values, key: tighter}), (r, key))
+                found += 1
+        self.assertGreater(found, 10)
+
+    def test_every_bound_asks_less_the_further_it_is_relaxed(self):
+        # the property the search for the nearest value rests on: along each bound, once the statement holds it keeps
+        # holding; on layouts scattered at random and on layouts near a row along y (a, b, c in order, as row asks)
+        rng = np.random.default_rng(7)
+        switched = set()
+        for trial in range(8):
+            base = self.scene()
+            prog = parse_program(HEAD + "".join(f"  {t}\n" for t in RELAXABLE))
+            compile_program(prog, base)
+            sc = self.scene()
+            for k, nm in enumerate("abc"):
+                if trial < 4:
+                    sc[nm].center = sc[nm].center + np.array([*rng.uniform(-0.12, 0.12, 2), 0.0])
+                    sc[nm].rotation = rotz(float(rng.uniform(-1.0, 1.0)))
+                else:
+                    sc[nm].center = np.array([0.5 + rng.normal(0.0, 0.01), 0.14 * (k - 1) + rng.normal(0.0, 0.01), 0.05])
+                    sc[nm].rotation = rotz(float(rng.normal(0.0, 0.03)))
+            for st in prog.statements:
+                for key, way in RELAX.get(st.name, {}).items():
+                    if key not in st.kw:
+                        continue
+                    hi = 180.0 if (st.name, key) in RELAX_DEG else 1.0
+                    # from the strictest value to the loosest (an inset from its own value: a larger one can leave the region
+                    # no room, which the compiler refuses)
+                    values = np.linspace(0.0, hi, 25) if way > 0 else np.linspace(float(st.kw[key]) if key == "inset" else hi, 0.0, 25)
+                    seen = [strictly_holds(sc, prog, st, {key: float(v)}) for v in values]
+                    self.assertEqual(seen, sorted(seen), f"{st!r}: {key}")
+                    if len(set(seen)) == 2:
+                        switched.add((st.name, key))
+        self.assertGreaterEqual(len(switched), 30)                  # the bounds seen to switch from failing to holding
+
+    def test_what_rests_where_is_never_weakened(self):
+        _, _, _, rws = self.rewritten("  left_of(b, a, gap=0.0)\n  place(a, x=0.3, y=0.3)\n  clearance(a, gap=0.05)\n")
+        self.assertEqual([(r["relax"], r["weaken"]) for r in rws], [(None, "soft"), (None, "drop"), ({"gap": [0.05, 0.0]}, "drop")])
+        sc = self.scene()
+        sc["a"].center = sc["a"].center + np.array([0.0, 0.0, 0.05])                  # off its support
+        _, _, _, rws = self.rewritten("", sc)
+        self.assertEqual([(r["text"], r["weaken"]) for r in rws], [("on_support(*, table)", None)])
+
+    def test_the_report_names_the_json_statement(self):
+        from simready.cli import rewrite_report
+        rest = [{"op": "on_support", "a": "*", "b": "table"}, {"op": "upright", "a": "*"}]
+        left = {"op": "left_of", "a": "a", "b": "b", "gap": 0.3}
+        place = {"op": "place", "a": "a", "x": 0.3, "y": 0.3}
+        for statements, failed, relaxed in ((rest + [left], [2], True), ([{"op": "no_penetration"}] + rest + [place, left], [3, 4], False)):
+            sc = self.scene()
+            obj = {"statements": statements}
+            dsl, _ = validate_program_json(obj, sc)
+            prog = parse_program(dsl)
+            compile_program(prog, sc)
+            rep = rewrite_report(prog, sc, [p for p in check_predicates(prog, sc) if not p.soft], obj, True)
+            self.assertEqual([r["statement"] for r in rep["rewrites"]], failed)
+            self.assertEqual((rep["accepted_if_relaxed"], rep["accepted_if_weakened"]), (relaxed, True))
 
 
 if __name__ == "__main__":

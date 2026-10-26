@@ -24,7 +24,7 @@ from simready.repair.upright_s4r import reseat_on_supports, polish_full_mesh
 from simready.io.usd_io import body_from_object_usd, load_scene_usda
 from robolab_offline_layouts import get_layout, BASE_SCENE, ROBOLAB
 
-REL = {"left-of": "left_of", "right-of": "right_of", "front-of": "in_front_of", "back-of": "behind"}
+REL = {"left-of": "left_of", "right-of": "right_of", "front-of": "farther", "back-of": "nearer"}   # RoboLab's front = +x
 _BASE = None
 
 
@@ -56,7 +56,7 @@ def seat_scene(scene, support="table"):
 
 
 def program_from_layout(L, margin=0.005, support="table"):
-    lines = ["program", f"  no_penetration(*, margin={margin})", "  fixed(table)  fixed(franka_table)  fixed(GroundPlane)",
+    lines = ["schedule", f"  margin = {margin:g}", "program", "  no_penetration(*)", "  fixed(table)  fixed(franka_table)  fixed(GroundPlane)",
              f"  on_support(*, {support})   upright(*)",
              f"  within(*, {support}.top, inset=0.0)"]
     for a, b, rt, dist in L["relations"]:
