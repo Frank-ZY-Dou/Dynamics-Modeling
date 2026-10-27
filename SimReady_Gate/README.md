@@ -63,7 +63,7 @@ python -m unittest discover tests        # regression tests
 
 - `rtree` runs trimesh's ray and point-in-mesh queries. A query that cannot be evaluated is an error (exit code 2), never "no hit".
 - `fast-simplification` decimates the bodies: the continuation runs on 2000-face copies and verifies on the full meshes. Without it the repair warns and runs on the full meshes, several times slower.
-- Optional: `anthropic` for the SDK backend, which reads `ANTHROPIC_API_KEY` from the environment only (nothing in this repository holds a credential); Blender 4.5 for the renders in `viz/` (`BLENDER=/path/to/blender`); Genesis 1.2.3 and Isaac Sim 5.1.0 for the [engines](#-into-the-engines), each in its own environment (`bash examples/install_engines.sh <python3.11> <envs dir>`).
+- Optional: `anthropic` for the SDK backend, which reads `ANTHROPIC_API_KEY` from the environment only (nothing in this repository holds a credential); Blender 4.5 for the renders in `viz/` (`BLENDER=/path/to/blender`); Genesis 1.2.3 and Isaac Sim 5.1.0 for the [engines](#-into-the-engines), each in its own environment (`bash examples/install_engines.sh <python3.11> <envs dir>`); Isaac Sim 5.1 needs an NVIDIA driver of the 580 branch.
 
 ## 📦 Assets
 
@@ -409,14 +409,14 @@ python examples/run_isaac.py pile_export --seconds 2       # Isaac Sim (its own 
 
 Each runner takes `--record poses.json` (the world pose of every free body at 30 frames per second) and `--report report.json`; `viz/make_engine_video.py` turns the recordings into a side-by-side clip, and `viz/run_engines.sh` runs the whole check: the export, each engine for 2 s, and the clip.
 
-<p align="center"><img src="docs/media/pile_n20_engines.gif" width="100%" alt="the certified twenty-object layout simulated for 2 s in MuJoCo, Genesis and Isaac Sim, left to right"/></p>
-<p align="center"><i>The twenty-object layout certified in September 2026, 2 s in MuJoCo 3.10, Genesis 1.2.3 and Isaac Sim 4.5 (left to right), rendered from the recorded trajectories. The round fruit rolls a little (an orange by 9 cm in MuJoCo, 5 cm in Genesis, 3 cm in Isaac Sim); nothing tips over and no body leaves the table.</i></p>
+<p align="center"><img src="docs/media/pile_n20_engines.gif" width="100%" alt="Example 2's twenty-object layout simulated for 2 s in MuJoCo, Genesis and Isaac Sim, left to right"/></p>
+<p align="center"><i>The twenty-object layout of Example 2, 2 s in MuJoCo 3.17, Genesis 1.2.3 and Isaac Sim 5.1 (left to right), played in real time from the recorded trajectories. The round fruit rolls a little (an orange by 3.6 cm in MuJoCo, 5.2 cm in Genesis, 4.1 cm in Isaac Sim); no other body turns by more than 10°, and none leaves the table.</i></p>
 
 | engine | peak displacement of a free body | bodies below the ground |
 |---|---|---|
-| MuJoCo 3.10 | 0.089 m (an orange rolling, as in the settle test) | none |
-| Genesis 1.2.3, GPU, conjugate-gradient solver | 0.053 m; 0.050 m with one hull per body | none |
-| Isaac Sim 4.5 (PhysX) | 0.029 m | none |
+| MuJoCo 3.17 | 0.036 m (an orange rolling) | none |
+| Genesis 1.2.3, GPU, conjugate-gradient solver | 0.052 m (an orange rolling) | none |
+| Isaac Sim 5.1 (PhysX), RTX 5080, driver 580.65.06 | 0.042 m (an orange rolling) | none |
 
 <details>
 <summary><b>Collision proxies and the ground</b></summary>
