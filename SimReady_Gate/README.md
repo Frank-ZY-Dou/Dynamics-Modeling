@@ -455,7 +455,7 @@ Each runner takes `--record poses.json` (the world pose of every free body at 30
 <tr><td align="center"><img src="docs/media/pile_n20_gate.gif" alt="twenty RoboLab objects heaped on the table, shrunk, laid out by the model in scale-space, restored to full size"/></td></tr>
 <tr><td align="center"><img src="docs/media/pile_n20_settle.gif" alt="MuJoCo settle of the heap (left) and of the repaired layout (right)"/></td></tr>
 </table>
-<p align="center"><i>Twenty RoboLab catalog objects dropped into a 13 cm radius on RoboLab's own table (82 interpenetrating pairs), laid out for cooking and penetration-free with every predicate satisfied (<a href="#example-2-twenty-objects-from-a-heap">Example 2</a>). Below, in MuJoCo with CoACD proxies: the heap reaches 3.8 m/s and throws a body off the table; the repaired scene peaks at 0.33 m/s with nothing leaving the table.</i></p>
+<p align="center"><i>Top: twenty RoboLab catalog objects dropped into a 13 cm radius on RoboLab's own table (82 interpenetrating pairs, tinted), laid out for cooking and penetration-free with every predicate satisfied (<a href="#example-2-twenty-objects-from-a-heap">Example 2</a>). Bottom, in MuJoCo with CoACD proxies: the heap (left) reaches 3.8 m/s and throws a body off the table; the repaired scene (right) peaks at 0.33 m/s with nothing leaving the table.</i></p>
 
 ### A scene RoboLab ships
 
@@ -465,7 +465,7 @@ Each runner takes `--record poses.json` (the world pose of every free body at 30
 <td align="center"><img src="docs/media/workdesk_settle.gif" alt="MuJoCo settle of the shipped scene, before and after"/></td>
 </tr>
 </table>
-<p align="center"><i><code>workdesk_snacks</code>, already physics-settled by RoboLab's pipeline, still has three object-object interpenetrations, the largest 9.9 mm. One sentence of intent and one certificate later it is clean, with 4.0 cm of planar motion (<a href="#example-1-a-scene-robolab-ships">Example 1</a>). Right: settled in MuJoCo, as shipped and after the repair.</i></p>
+<p align="center"><i><code>workdesk_snacks</code>, already physics-settled by RoboLab's pipeline, still has three object-object interpenetrations, the largest 9.9 mm. One sentence of intent and one certificate later it is clean, with 4.0 cm of planar motion (<a href="#example-1-a-scene-robolab-ships">Example 1</a>). Left: the repair, interpenetrating bodies tinted. Middle and right: settled in MuJoCo, as shipped and after the repair.</i></p>
 
 ### A layout RoboLab's solver rejects
 
@@ -475,7 +475,7 @@ Each runner takes `--record poses.json` (the world pose of every free body at 30
 <td align="center"><img src="docs/media/layout_n10_settle.gif" alt="MuJoCo settle: as generated versus repaired"/></td>
 </tr>
 </table>
-<p align="center"><i>Ten catalog objects placed by RoboLab's own disc solver, which reports failure; seated, the layout carries four interpenetrating pairs. The gate repairs it to zero with the requested left/right/front/back relations kept. Right: in MuJoCo the generated layout tips the tomato can onto its side and moves a body 23 cm; the repaired one moves less than 1 cm.</i></p>
+<p align="center"><i>Ten catalog objects placed by RoboLab's own disc solver, which reports failure; seated, the layout carries four interpenetrating pairs. The gate repairs it to zero with the requested left/right/front/back relations kept. Left: the repair, interpenetrating bodies tinted. Middle and right: in MuJoCo, the generated layout tips the tomato can onto its side and moves a body 23 cm; the repaired one moves less than 1 cm.</i></p>
 
 ### A RoboCasa counter
 
