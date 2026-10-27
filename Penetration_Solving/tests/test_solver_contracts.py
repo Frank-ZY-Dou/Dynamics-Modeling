@@ -24,10 +24,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "s4r"))
 
 from mesh_collision import (  # noqa: E402
-    MeshObject, evaluate_mesh_object_scene, evaluate_world_collision_meshes,
+    MeshObject, MeshOracle, evaluate_mesh_object_scene, evaluate_world_collision_meshes,
 )
 from s4r_qp import (  # noqa: E402
-    PrebuiltFCLOracle, _optimize_rotations_fcl, _optimize_rotations_trimesh,
+    PrebuiltFCLOracle, _optimize_rotations_fcl, optimize_rotations_on_manifold,
     qp_status_ok, separate_coincident_centroids, solve_s4r_qp,
 )
 
@@ -407,13 +407,6 @@ class RotationHelper(unittest.TestCase):
         return min(trimesh.proximity.closest_point_naive(x, y.vertices)[1].min(),
                    trimesh.proximity.closest_point_naive(y, x.vertices)[1].min())
 
-    def test_trimesh_helper_opens_the_gap(self):
-        centers, rotations, verts, faces = self.scene()
-        before = self.gap(centers, rotations, verts, faces)
-        moved = _optimize_rotations_trimesh(centers, rotations, [1.0, 1.0], verts, faces, 2, 0.1, 1.0, 1)
-        self.assertGreater(moved, 0.0)
-        self.assertGreater(self.gap(centers, rotations, verts, faces), before)
-
     def test_fcl_helper_opens_the_gap(self):
         centers, rotations, verts, faces = self.scene()
         before = self.gap(centers, rotations, verts, faces)
@@ -567,6 +560,31 @@ class ContactWitness(unittest.TestCase):
         self.assertAlmostEqual(_exit_translation(fcl, body, thin, box_body, box_thin, x), 0.001, delta=1e-9)
         thick, box_thick = self._posed(fcl, trimesh.creation.box(extents=(0.1, 0.1, 0.1)), t=np.array([0.1, 0.0, 0.0]))
         self.assertAlmostEqual(_exit_translation(fcl, body, thick, box_body, box_thick, x), 0.851, delta=1e-9)
+
+
+class RemovedTrimeshBackend(unittest.TestCase):
+    """FCL is the only contact and distance backend: asking for the removed
+    trimesh path is an error that says so, never a silent switch to FCL."""
+
+    def test_every_request_for_the_trimesh_path_is_an_error(self):
+        objects = [box_object([0, 0, 0]), box_object([0.15, 0, 0])]
+        with self.assertRaisesRegex(ValueError, "removed"):
+            solve(objects, contact_backend="trimesh")
+        centers, rotations, verts, faces = RotationHelper().scene()
+        with self.assertRaisesRegex(ValueError, "removed"):
+            optimize_rotations_on_manifold(centers, rotations, [1.0, 1.0], verts, faces, 2, 0.1, 1.0,
+                                           contact_backend="trimesh")
+        meshes = [trimesh.creation.box(extents=[0.2] * 3), trimesh.creation.box(extents=[0.2] * 3)]
+        with self.assertRaisesRegex(ValueError, "removed"):
+            evaluate_world_collision_meshes(meshes, use_fcl=False)
+        os.environ["MESH_EVAL_USE_FCL"] = "0"
+        try:
+            with self.assertRaisesRegex(ValueError, "removed"):
+                evaluate_world_collision_meshes(meshes)
+        finally:
+            os.environ.pop("MESH_EVAL_USE_FCL", None)
+        with self.assertRaisesRegex(ValueError, "removed"):
+            MeshOracle(objects, use_fcl=False)
 
 
 class NoGuessedDirection(unittest.TestCase):

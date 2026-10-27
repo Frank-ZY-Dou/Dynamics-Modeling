@@ -1,9 +1,8 @@
 """Triangle-mesh collision oracle for non-convex Kubric objects.
 
-Default pair-signed-distance backend is FCL (both during the solve loop in
-MeshOracle and in the end-of-run evaluator evaluate_world_collision_meshes);
-python-fcl is required. MESH_EVAL_USE_FCL=0 (or use_fcl=False) asks for the
-trimesh.proximity path instead.
+Pair signed distances come from FCL (python-fcl, required), both during the
+solve loop in MeshOracle and in the end-of-run evaluator
+evaluate_world_collision_meshes.
 Provides SignedDistanceOracle and PenetrationDepthOracle interfaces.
 """
 from __future__ import annotations
@@ -24,10 +23,12 @@ from common import PairPenetration, PairSignedDistance
 from box_collision import euler_to_rotation_matrix
 
 
-# Default for the end-of-run scene evaluator. FCL is ~5-20× faster than the
-# trimesh.proximity path on dense non-convex meshes because it reuses a
-# pre-built BVH per body and avoids rebuilding bounds_tree per pair-query.
-EVAL_USE_FCL = os.environ.get("MESH_EVAL_USE_FCL", "1") != "0"
+def _fcl_only(use_fcl) -> None:
+    """FCL is the only pair-distance backend: a request for the trimesh path
+    (use_fcl=False, or MESH_EVAL_USE_FCL=0 for the evaluator) is an error."""
+    if use_fcl is False or (use_fcl is None and os.environ.get("MESH_EVAL_USE_FCL") == "0"):
+        raise ValueError("the trimesh pair-distance path has been removed: pair distances come from FCL only "
+                         "(drop use_fcl=False and MESH_EVAL_USE_FCL=0)")
 
 
 @dataclass
@@ -134,13 +135,6 @@ def outward_faces(verts, faces) -> np.ndarray:
     return f
 
 
-def _safe_normalize(v: np.ndarray) -> np.ndarray:
-    n = np.linalg.norm(v)
-    if n < 1e-12:
-        return np.array([1.0, 0.0, 0.0])
-    return v / n
-
-
 def _aabb_overlap(
     amin: np.ndarray, amax: np.ndarray,
     bmin: np.ndarray, bmax: np.ndarray,
@@ -194,51 +188,6 @@ def _contains_points(mesh: trimesh.Trimesh, points: np.ndarray) -> np.ndarray:
     if len(points) == 0:
         return np.zeros(0, dtype=bool)
     return np.asarray(mesh.contains(points), dtype=bool)
-
-
-def _pair_signed_distance_from_samples(
-    mesh_i: trimesh.Trimesh,
-    sample_j_in_i: np.ndarray,
-    mesh_j: trimesh.Trimesh,
-    sample_i_in_j: np.ndarray,
-    direction_hint: np.ndarray,
-) -> tuple[float, np.ndarray]:
-    """Compute signed distance from per-mesh probe points in matching frames."""
-    closest_on_i, dist_j_to_i, _ = trimesh.proximity.closest_point(mesh_i, sample_j_in_i)
-    closest_on_j, dist_i_to_j, _ = trimesh.proximity.closest_point(mesh_j, sample_i_in_j)
-
-    inside_j_in_i = _contains_points(mesh_i, sample_j_in_i)
-    inside_i_in_j = _contains_points(mesh_j, sample_i_in_j)
-    has_pen = bool(np.any(inside_j_in_i) or np.any(inside_i_in_j))
-
-    if has_pen:
-        depth_a = float(dist_j_to_i[inside_j_in_i].max()) if np.any(inside_j_in_i) else 0.0
-        depth_b = float(dist_i_to_j[inside_i_in_j].max()) if np.any(inside_i_in_j) else 0.0
-
-        if depth_a >= depth_b and np.any(inside_j_in_i):
-            mask_dists = np.where(inside_j_in_i, dist_j_to_i, -1.0)
-            deepest_idx = int(np.argmax(mask_dists))
-            raw_dir = closest_on_i[deepest_idx] - sample_j_in_i[deepest_idx]
-        else:
-            mask_dists = np.where(inside_i_in_j, dist_i_to_j, -1.0)
-            deepest_idx = int(np.argmax(mask_dists))
-            raw_dir = -(closest_on_j[deepest_idx] - sample_i_in_j[deepest_idx])
-
-        direction = _safe_normalize(raw_dir if np.linalg.norm(raw_dir) >= 1e-12 else direction_hint)
-        return -max(depth_a, depth_b), direction
-
-    min_j = float(dist_j_to_i.min())
-    min_i = float(dist_i_to_j.min())
-    if min_j <= min_i:
-        idx = int(np.argmin(dist_j_to_i))
-        raw_dir = sample_j_in_i[idx] - closest_on_i[idx]
-        direction = _safe_normalize(raw_dir if np.linalg.norm(raw_dir) >= 1e-12 else direction_hint)
-        return min_j, direction
-
-    idx = int(np.argmin(dist_i_to_j))
-    raw_dir = closest_on_j[idx] - sample_i_in_j[idx]
-    direction = _safe_normalize(raw_dir if np.linalg.norm(raw_dir) >= 1e-12 else direction_hint)
-    return min_i, direction
 
 
 def _aabb_nested(bounds_inner: np.ndarray, bounds_outer: np.ndarray, tol: float = 1e-12) -> bool:
@@ -603,23 +552,20 @@ def evaluate_world_collision_meshes(
 ) -> MeshSceneStats:
     """Evaluate penetrating pairs and min signed distance for world-space meshes.
 
-    Default backend is FCL (EVAL_USE_FCL), matching the solver's narrowphase so
-    solver/oracle/evaluator agree: surface crossings through collide(), and a
-    body lying entirely inside another (invisible to both FCL queries) through
-    a containment test on AABB-nested pairs. ``use_fcl=False`` (or
-    MESH_EVAL_USE_FCL=0) asks for trimesh.proximity instead.
+    FCL, the solver's narrowphase, so solver/oracle/evaluator agree: surface
+    crossings through collide(), and a body lying entirely inside another
+    (invisible to both FCL queries) through a containment test on
+    AABB-nested pairs. ``use_fcl=False`` and MESH_EVAL_USE_FCL=0, which asked
+    for the removed trimesh path, are errors.
     """
-    if use_fcl is None:
-        use_fcl = EVAL_USE_FCL
+    _fcl_only(use_fcl)
 
     n = len(meshes)
     if n < 2:
         return MeshSceneStats(pen_pairs=0, max_penetration=0.0,
                               min_signed_distance=float("inf"))
 
-    fcl_mod, fcl_bvh = (None, None)
-    if use_fcl:
-        fcl_mod, fcl_bvh = _build_fcl_bvhs(meshes)
+    fcl_mod, fcl_bvh = _build_fcl_bvhs(meshes)
 
     # ── Vectorized AABB overlap + gap check over all N(N-1)/2 pairs ──
     # Was a Python double-loop with 50M `_aabb_overlap` calls at N=10000;
@@ -640,24 +586,10 @@ def evaluate_world_collision_meshes(
     # Default signed distance = AABB gap (≥0). For overlapping pairs, override.
     signed_distances = gaps.copy()
 
-    overlap_pair_idx = np.where(overlap_mask)[0]
-    if len(overlap_pair_idx) > 0:
-        if use_fcl:
-            for k in overlap_pair_idx:
-                i, j = int(idx_i[k]), int(idx_j[k])
-                signed_distances[k] = _fcl_pair_signed_distance(
-                    fcl_mod, fcl_bvh[i], fcl_bvh[j], meshes[i], meshes[j])
-        else:
-            centroids = [np.asarray(m.centroid, dtype=np.float64) for m in meshes]
-            for k in overlap_pair_idx:
-                i, j = int(idx_i[k]), int(idx_j[k])
-                verts_i = np.asarray(meshes[i].vertices, dtype=np.float64)
-                verts_j = np.asarray(meshes[j].vertices, dtype=np.float64)
-                sd, _ = _pair_signed_distance_from_samples(
-                    meshes[i], verts_j, meshes[j], verts_i,
-                    centroids[j] - centroids[i],
-                )
-                signed_distances[k] = sd
+    for k in np.where(overlap_mask)[0]:
+        i, j = int(idx_i[k]), int(idx_j[k])
+        signed_distances[k] = _fcl_pair_signed_distance(
+            fcl_mod, fcl_bvh[i], fcl_bvh[j], meshes[i], meshes[j])
 
     pen_mask = signed_distances < 0.0
     pen_pairs = int(pen_mask.sum())
@@ -712,16 +644,17 @@ def _aabb_candidate_pairs(lo: np.ndarray, hi: np.ndarray, margin: float):
 
 
 class MeshOracle:
-    """Collision oracle for oriented triangle meshes using trimesh proximity.
+    """Collision oracle for oriented triangle meshes on FCL.
 
     Uses collision_geometry (watertight) for signed distance queries.
     Implements both SignedDistanceOracle and PenetrationDepthOracle protocols.
+    ``use_fcl=False``, which asked for the removed trimesh path, is an error.
     """
 
     def __init__(self, objects: List[MeshObject], use_fcl: bool = True):
+        _fcl_only(bool(use_fcl))
         self.objects = objects
         self.n = len(objects)
-        self.use_fcl = use_fcl
 
         # Pre-compute: rotated + scaled collision vertices and trimesh objects
         # Both S4R and baselines use collision_geometry (watertight, required by IPC)
@@ -744,18 +677,15 @@ class MeshOracle:
 
         # FCL BVH models: one per body, built once (scale=1, at origin; the
         # pose is applied via fcl.Transform in _precise_pair_query).
+        import fcl as _fcl
+        self._fcl = _fcl
         self._fcl_bvh: List = []
-        if self.use_fcl:
-            import fcl as _fcl
-            self._fcl = _fcl
-            for faces, verts_rot in zip(self._faces, self._rotated_verts):
-                m = _fcl.BVHModel()
-                m.beginModel(len(verts_rot), len(faces))
-                m.addSubModel(verts_rot.astype(np.float64), faces)
-                m.endModel()
-                self._fcl_bvh.append(m)
-        else:
-            self._fcl = None
+        for faces, verts_rot in zip(self._faces, self._rotated_verts):
+            m = _fcl.BVHModel()
+            m.beginModel(len(verts_rot), len(faces))
+            m.addSubModel(verts_rot.astype(np.float64), faces)
+            m.endModel()
+            self._fcl_bvh.append(m)
 
     def _broadphase(self, centers: np.ndarray, margin: float):
         """Vectorized AABB broadphase over all N(N-1)/2 pairs,
@@ -871,95 +801,52 @@ class MeshOracle:
     ) -> tuple[float, np.ndarray]:
         """Compute signed distance between mesh i and mesh j.
 
-        By default uses FCL BVH distance() + collide() (same primitive as
-        \\name's fcl contact backend, so solver/oracle/evaluator agree);
-        with use_fcl=False, trimesh.closest_point + _contains_points (ray-cast
-        inside test).
+        FCL BVH distance() + collide(), the primitive of the solver's FCL
+        contact backend, so solver/oracle/evaluator agree.
 
         Returns (signed_distance, direction_ij) where:
           signed_distance < 0 means penetration
           signed_distance > 0 means separation
           direction_ij points from i toward j
         """
-        if self.use_fcl:
-            fcl = self._fcl
-            ident3 = np.eye(3)
-            o_i = fcl.CollisionObject(self._fcl_bvh[i],
-                                      fcl.Transform(ident3, np.asarray(ci, dtype=np.float64)))
-            o_j = fcl.CollisionObject(self._fcl_bvh[j],
-                                      fcl.Transform(ident3, np.asarray(cj, dtype=np.float64)))
-            req = fcl.DistanceRequest(enable_nearest_points=True,
-                                      enable_signed_distance=True)
-            res = fcl.DistanceResult()
-            d = fcl.distance(o_i, o_j, req, res)
-            box_i = (self._local_aabb_min[i] + ci, self._local_aabb_max[i] + ci)
-            box_j = (self._local_aabb_min[j] + cj, self._local_aabb_max[j] + cj)
-            if d > 0.0:
-                cp_i = np.asarray(res.nearest_points[0], dtype=np.float64)
-                cp_j = np.asarray(res.nearest_points[1], dtype=np.float64)
-                # Surfaces apart: disjoint, or one body entirely inside the
-                # other. Only AABB-nested pairs can nest; those are checked
-                # by containment in the body-local meshes (no rebuild), and
-                # a nested pair's depth and direction are those of the
-                # translation that parts it the least.
-                if self._nested(i, j, ci, cj, cp_i, cp_j):
-                    t, u = _least_separating_direction(fcl, o_i, o_j, box_i, box_j)
-                    return -t, u
-                raw = cp_j - cp_i
-                gap = float(np.linalg.norm(raw))
-                if gap < 1e-12:
-                    raise RuntimeError(f"bodies {i} and {j}: FCL puts them {d} apart with coinciding nearest "
-                                       "points, so the pair has no direction")
-                return float(d), raw / gap
-            # Overlap: the witness of the crossing. Its normal, the exit
-            # direction of the second body through the crossed triangles, is
-            # used as is (aligning it to the centroid line would flip it
-            # inside a cavity of a non-convex body).
-            contacts = _fcl_all_contacts(fcl, o_i, o_j)
-            if not contacts:
-                raise _no_crossing_at_zero_distance(d)
-            depth, n, _ = _contact_witness(fcl, o_i, o_j, contacts, box_i, box_j)
-            return -depth, n
-
-        # ---------- use_fcl=False: trimesh + ray-cast inside test ----------
-        mesh_i = self._meshes[i]
-        mesh_j = self._meshes[j]
-        verts_i = self._rotated_verts[i]
-        verts_j = self._rotated_verts[j]
-        offset = cj - ci
-        pts_j_in_i = verts_j + offset
-        pts_i_in_j = verts_i - offset
-
-        closest_on_i, dist_j_to_i, _ = trimesh.proximity.closest_point(mesh_i, pts_j_in_i)
-        closest_on_j, dist_i_to_j, _ = trimesh.proximity.closest_point(mesh_j, pts_i_in_j)
-
-        # Inside test via ray-cast (same helper the evaluator uses).
-        inside_j_in_i = _contains_points(mesh_i, pts_j_in_i)
-        inside_i_in_j = _contains_points(mesh_j, pts_i_in_j)
-
-        has_pen = bool(np.any(inside_j_in_i) or np.any(inside_i_in_j))
-        if has_pen:
-            depth_a = float(dist_j_to_i[inside_j_in_i].max()) if np.any(inside_j_in_i) else 0.0
-            depth_b = float(dist_i_to_j[inside_i_in_j].max()) if np.any(inside_i_in_j) else 0.0
-            if depth_a >= depth_b and np.any(inside_j_in_i):
-                mask = np.where(inside_j_in_i, dist_j_to_i, -1.0)
-                k = int(np.argmax(mask))
-                raw = closest_on_i[k] - pts_j_in_i[k]
-            else:
-                mask = np.where(inside_i_in_j, dist_i_to_j, -1.0)
-                k = int(np.argmax(mask))
-                raw = -(closest_on_j[k] - pts_i_in_j[k])
-            return -max(depth_a, depth_b), _safe_normalize(raw)
-
-        min_j = float(dist_j_to_i.min())
-        min_i = float(dist_i_to_j.min())
-        if min_j <= min_i:
-            k = int(np.argmin(dist_j_to_i))
-            raw = pts_j_in_i[k] - closest_on_i[k]
-            return min_j, _safe_normalize(raw)
-        k = int(np.argmin(dist_i_to_j))
-        raw = closest_on_j[k] - pts_i_in_j[k]
-        return min_i, _safe_normalize(raw)
+        fcl = self._fcl
+        ident3 = np.eye(3)
+        o_i = fcl.CollisionObject(self._fcl_bvh[i],
+                                  fcl.Transform(ident3, np.asarray(ci, dtype=np.float64)))
+        o_j = fcl.CollisionObject(self._fcl_bvh[j],
+                                  fcl.Transform(ident3, np.asarray(cj, dtype=np.float64)))
+        req = fcl.DistanceRequest(enable_nearest_points=True,
+                                  enable_signed_distance=True)
+        res = fcl.DistanceResult()
+        d = fcl.distance(o_i, o_j, req, res)
+        box_i = (self._local_aabb_min[i] + ci, self._local_aabb_max[i] + ci)
+        box_j = (self._local_aabb_min[j] + cj, self._local_aabb_max[j] + cj)
+        if d > 0.0:
+            cp_i = np.asarray(res.nearest_points[0], dtype=np.float64)
+            cp_j = np.asarray(res.nearest_points[1], dtype=np.float64)
+            # Surfaces apart: disjoint, or one body entirely inside the
+            # other. Only AABB-nested pairs can nest; those are checked
+            # by containment in the body-local meshes (no rebuild), and
+            # a nested pair's depth and direction are those of the
+            # translation that parts it the least.
+            if self._nested(i, j, ci, cj, cp_i, cp_j):
+                t, u = _least_separating_direction(fcl, o_i, o_j, box_i, box_j)
+                return -t, u
+            raw = cp_j - cp_i
+            gap = float(np.linalg.norm(raw))
+            if gap < 1e-12:
+                raise RuntimeError(f"bodies {i} and {j}: FCL puts them {d} apart with coinciding nearest "
+                                   "points, so the pair has no direction")
+            return float(d), raw / gap
+        # Overlap: the witness of the crossing. Its normal, the exit
+        # direction of the second body through the crossed triangles, is
+        # used as is (aligning it to the centroid line would flip it
+        # inside a cavity of a non-convex body).
+        contacts = _fcl_all_contacts(fcl, o_i, o_j)
+        if not contacts:
+            raise _no_crossing_at_zero_distance(d)
+        depth, n, _ = _contact_witness(fcl, o_i, o_j, contacts, box_i, box_j)
+        return -depth, n
 
 
 def scan_eligible_objects(

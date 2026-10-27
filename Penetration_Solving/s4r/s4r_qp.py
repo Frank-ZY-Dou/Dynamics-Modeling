@@ -646,7 +646,15 @@ def _assemble_constraints(active, ds, d_hat, centers, rots, active_bodies,
 # Main solver
 # ─────────────────────────────────────────────────────────────────────
 
-_BACKENDS = ('trimesh', 'fcl', 'fcl_prebuilt', 'warp')
+_BACKENDS = ('fcl', 'fcl_prebuilt', 'warp')
+
+
+def _check_backend(contact_backend) -> None:
+    if contact_backend == 'trimesh':
+        raise ValueError("contact_backend 'trimesh' has been removed: contacts come from FCL "
+                         "('fcl' or 'fcl_prebuilt') or from the Warp GPU oracle ('warp')")
+    if contact_backend not in _BACKENDS:
+        raise ValueError(f"contact_backend must be one of {_BACKENDS}, got {contact_backend!r}")
 
 
 def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
@@ -676,9 +684,8 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
 
     Contact backends: ``'fcl'`` and ``'fcl_prebuilt'`` are the same exact
     oracle (:class:`PrebuiltFCLOracle`, unit-scale BVHs built once);
-    ``'warp'`` is the GPU oracle in ``s4r_gpu``; ``'trimesh'`` is a
-    dependency-free vertex-sampling fallback that can miss crossings
-    between samples and is not a certificate.
+    ``'warp'`` is the GPU oracle in ``s4r_gpu``. The rotation refinement
+    (``enable_rotation``) runs on FCL with every backend.
 
     Returns a dict. Poses (``final_centers``, ``final_rotations``) are
     always scored at full scale: ``pen``/``max_pen`` come from the shared
@@ -703,8 +710,7 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
     (alpha/(1+alpha) ||c_i - c0_i|| each) and every detected pair is a
     constraint row. The full-scale tail is unchanged.
     """
-    if contact_backend not in _BACKENDS:
-        raise ValueError(f"contact_backend must be one of {_BACKENDS}, got {contact_backend!r}")
+    _check_backend(contact_backend)
     if not (np.isfinite(ds_max) and ds_max > 0.0):
         raise ValueError(f"ds_max must be a positive finite scale step, got {ds_max}")
     if not (np.isfinite(d_hat) and d_hat >= 0.0):
@@ -865,9 +871,6 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
     def build_mesh(i, s=None):
         return trimesh.Trimesh(vertices=world_verts(i, s), faces=mfaces[i], process=False)
 
-    def compute_extent(i, direction):
-        return _one_sided_support(nfs[i] * mverts[i], rots[i], direction)
-
     # ── Contact oracles ───────────────────────────────────────────────────
     _fcl_oracle = [None]
 
@@ -910,11 +913,9 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
         """
         if contact_backend == 'warp':
             return _init_warp_oracle().find_contacts(s, ds, centers, rots)
-        if contact_backend in ('fcl', 'fcl_prebuilt'):
-            return _get_fcl_oracle().find_contacts(s, ds, centers, rots,
-                                                   all_contacts=_all_contacts,
-                                                   reach=_anchor_reach[0])
-        return _find_contacts_trimesh(s, ds)
+        return _get_fcl_oracle().find_contacts(s, ds, centers, rots,
+                                               all_contacts=_all_contacts,
+                                               reach=_anchor_reach[0])
 
     def find_contacts_margin(s, ds, extra_margin, incremental=False):
         """find_contacts with an extra broadphase margin (world units), for a
@@ -930,77 +931,6 @@ def solve_s4r_qp(objects, d_hat=0.02, ds_max=0.05, max_steps=200, verbose=True,
             return find_contacts(s, ds)
         raise NotImplementedError(
             "S4R_TAIL_TARGET_MARGIN requires the FCL contact backend")
-
-    def _find_contacts_trimesh(s, ds):
-        """Dependency-free fallback: bidirectional vertex sampling with a
-        ray-cast inside test. A crossing between samples is not seen, so
-        this backend is a contact generator, not a certificate."""
-        contacts = []
-        meshes = [build_mesh(i, s) for i in range(N)]
-        for i in range(N):
-            vi = np.asarray(meshes[i].vertices)
-            ai0, ai1 = vi.min(0), vi.max(0)
-            for j in range(i + 1, N):
-                d_ij_now = float(np.linalg.norm(centers[i] - centers[j]))
-                s_contact_now = max(
-                    0.0,
-                    (d_ij_now - d_hat) / (max_extents[i] + max_extents[j] + 1e-12),
-                )
-                if s + ds < s_contact_now * 0.9:
-                    continue
-                vj = np.asarray(meshes[j].vertices)
-                aj0, aj1 = vj.min(0), vj.max(0)
-                margin = ds * (max_extents[i] + max_extents[j]) + d_hat
-                if not (np.all(ai0 - margin <= aj1) and np.all(aj0 - margin <= ai1)):
-                    continue
-
-                cl_ji, d_ji, _ = trimesh.proximity.closest_point(meshes[i], vj)
-                cl_ij, d_ij, _ = trimesh.proximity.closest_point(meshes[j], vi)
-
-                inside_ji = np.zeros(len(vj), dtype=bool)
-                mask_j_in_ai = np.all((vj >= ai0 - d_hat) & (vj <= ai1 + d_hat), axis=1)
-                if mask_j_in_ai.any():
-                    inside_ji[mask_j_in_ai] = _mesh_contains_points(meshes[i], vj[mask_j_in_ai])
-                inside_ij = np.zeros(len(vi), dtype=bool)
-                mask_i_in_aj = np.all((vi >= aj0 - d_hat) & (vi <= aj1 + d_hat), axis=1)
-                if mask_i_in_aj.any():
-                    inside_ij[mask_i_in_aj] = _mesh_contains_points(meshes[j], vi[mask_i_in_aj])
-
-                sd_ji = np.where(inside_ji, -d_ji, d_ji)
-                sd_ij = np.where(inside_ij, -d_ij, d_ij)
-                min_ji = sd_ji.min()
-                min_ij = sd_ij.min()
-                if min_ji <= min_ij:
-                    k = int(np.argmin(sd_ji))
-                    d_signed = float(sd_ji[k])
-                    if inside_ji[k]:
-                        n = cl_ji[k] - vj[k]
-                        cp_on_a, cp_on_b = vj[k].copy(), cl_ji[k].copy()
-                    else:
-                        n = vj[k] - cl_ji[k]
-                        cp_on_a, cp_on_b = cl_ji[k].copy(), vj[k].copy()
-                else:
-                    k = int(np.argmin(sd_ij))
-                    d_signed = float(sd_ij[k])
-                    if inside_ij[k]:
-                        n = -(cl_ij[k] - vi[k])
-                        cp_on_a, cp_on_b = cl_ij[k].copy(), vi[k].copy()
-                    else:
-                        n = -(vi[k] - cl_ij[k])
-                        cp_on_a, cp_on_b = vi[k].copy(), cl_ij[k].copy()
-
-                nn = np.linalg.norm(n)
-                if nn < 1e-12:
-                    n = centers[j] - centers[i]
-                    nn = np.linalg.norm(n)
-                if nn < 1e-12:
-                    continue
-                n = n / nn
-                ext_i = compute_extent(i, n)
-                ext_j = compute_extent(j, -n)
-                if d_signed < ds * (ext_i + ext_j) + d_hat:
-                    contacts.append((i, j, d_signed, n, ext_i, ext_j, cp_on_a, cp_on_b))
-        return contacts
 
     # Unified timing policy: everything from function entry to here (event
     # schedule, backend construction) is setup_time; the continuation, tail
@@ -1741,18 +1671,15 @@ def optimize_rotations_on_manifold(centers, rots, nfs, mverts, mfaces, N,
     body i (negative distance) is treated with the reversed direction, so
     the surface sweeps past it.
 
-    Backends: 'fcl' / 'fcl_prebuilt' reuse the unit-scale BVHs through
-    ``bvh_cache``/``model_verts_cache`` (populated on first use);
-    'trimesh' is the dependency-free closest-point path.
+    It runs on FCL whatever the contact backend; with 'fcl' /
+    'fcl_prebuilt' it reuses the oracle's unit-scale BVHs through
+    ``bvh_cache``/``model_verts_cache`` (populated on first use).
     """
-    use_fcl = contact_backend in ('fcl', 'fcl_prebuilt')
-    if use_fcl:
-        return _optimize_rotations_fcl(centers, rots, nfs, mverts, mfaces, N,
-                                        d_hat, scale, max_rot_iters,
-                                        bvh_cache=bvh_cache,
-                                        model_verts_cache=model_verts_cache)
-    return _optimize_rotations_trimesh(centers, rots, nfs, mverts, mfaces, N,
-                                        d_hat, scale, max_rot_iters)
+    _check_backend(contact_backend)
+    return _optimize_rotations_fcl(centers, rots, nfs, mverts, mfaces, N,
+                                    d_hat, scale, max_rot_iters,
+                                    bvh_cache=bvh_cache,
+                                    model_verts_cache=model_verts_cache)
 
 
 def _repulsive_torque(r_i, n_ij, force_mag):
@@ -1900,70 +1827,6 @@ def _optimize_rotations_fcl(centers, rots, nfs, mverts, mfaces, N,
     return total_rot
 
 
-def _optimize_rotations_trimesh(centers, rots, nfs, mverts, mfaces, N,
-                                  d_hat, scale, max_rot_iters):
-    """Dependency-free closest-point path (vertex samples of the neighbour
-    against body i's surface)."""
-    import trimesh
-
-    def world_verts_i(i):
-        return scale * nfs[i] * (rots[i] @ mverts[i].T).T + centers[i]
-
-    total_rot = 0.0
-    meshes = [trimesh.Trimesh(vertices=world_verts_i(i), faces=mfaces[i], process=False)
-              for i in range(N)]
-    for _ in range(max_rot_iters):
-        any_updated = False
-        for i in range(N):
-            vi = np.asarray(meshes[i].vertices)
-            ai0, ai1 = vi.min(0), vi.max(0)
-            torque = np.zeros(3)
-            n_contacts = 0
-            for j in range(N):
-                if j == i:
-                    continue
-                vj = np.asarray(meshes[j].vertices)
-                aj0, aj1 = vj.min(0), vj.max(0)
-                if not (np.all(ai0 - d_hat * 2 <= aj1) and np.all(aj0 - d_hat * 2 <= ai1)):
-                    continue
-                cl, dists, _ = trimesh.proximity.closest_point(meshes[i], vj)
-                near = dists < d_hat * 1.5
-                if not near.any():
-                    continue
-                inside = np.zeros(len(vj), dtype=bool)
-                inside[near] = _mesh_contains_points(meshes[i], vj[near])
-                sd = np.where(inside, -dists, dists)
-                k = int(np.argmin(sd))
-                d_min = float(sd[k])
-                if d_min < d_hat * 1.5:
-                    n_ij = vj[k] - cl[k]            # from i's surface toward j
-                    if inside[k]:
-                        n_ij = -n_ij                # neighbour point inside i
-                    nn = np.linalg.norm(n_ij)
-                    if nn < 1e-12:
-                        continue
-                    n_ij = n_ij / nn
-                    force_mag = max(0.0, d_hat - d_min)
-                    if force_mag <= 0.0:
-                        continue
-                    torque += _repulsive_torque(cl[k] - centers[i], n_ij, force_mag)
-                    n_contacts += 1
-            if n_contacts > 0 and np.linalg.norm(torque) > 1e-8:
-                omega = 0.5 * torque / n_contacts
-                nw = np.linalg.norm(omega)
-                max_step = 0.05
-                if nw > max_step:
-                    omega *= max_step / nw
-                    nw = max_step
-                rots[i] = RotLib.from_rotvec(omega).as_matrix() @ rots[i]
-                total_rot += nw
-                any_updated = True
-                meshes[i] = trimesh.Trimesh(vertices=world_verts_i(i), faces=mfaces[i], process=False)
-        if not any_updated:
-            break
-    return total_rot
-
-
 # ─────────────────────────────────────────────────────────────────────
 # Dual (contact-force space) QP
 # ─────────────────────────────────────────────────────────────────────
@@ -2014,9 +1877,8 @@ if __name__ == "__main__":
                         help='Random seed(s); the paper benchmark seeds are 42, 123, 456')
     parser.add_argument('--d-hat', type=float, default=0.02, help='Safety distance')
     parser.add_argument('--ds-max', type=float, default=0.05, help='Max scale step')
-    parser.add_argument('--contact-backend', choices=['trimesh', 'fcl', 'fcl_prebuilt', 'warp'],
-                        default='fcl_prebuilt',
-                        help='Collision backend (fcl/fcl_prebuilt = exact FCL oracle; warp = NVIDIA Warp GPU)')
+    parser.add_argument('--contact-backend', default='fcl_prebuilt',
+                        help='Collision backend: fcl or fcl_prebuilt (exact FCL oracle), warp (NVIDIA Warp GPU)')
     parser.add_argument('--M', type=int, default=3,
                         help='Revalidation interval: full collision detection every M steps '
                              '(benchmark default M=3; M=1 detects every step)')
@@ -2026,6 +1888,7 @@ if __name__ == "__main__":
     parser.add_argument('--dual', action='store_true', help='Use the dual QP formulation')
     parser.add_argument('--verbose', '-v', action='store_true')
     args = parser.parse_args()
+    _check_backend(args.contact_backend)
 
     from make_scene import make_scene
 
