@@ -425,9 +425,11 @@ class RotationHelper(unittest.TestCase):
 class ContactWitness(unittest.TestCase):
     """The witness of a crossing pair (depth, normal, position) is taken from
     every contact FCL reports, so it does not depend on the order of the
-    contacts, which follows FCL's traversal of the two BVHs. When the normals
-    cancel, the normal is the direction that separates the pair with the least
-    translation and the depth that translation."""
+    contacts, which follows FCL's traversal of the two BVHs. Its normal is the
+    direction of the summed contact normals and its depth the translation
+    along it that parts the pair. When the normals cancel, the normal is the
+    direction that separates the pair with the least translation and the
+    depth that translation."""
 
     @staticmethod
     def _pair():
@@ -511,6 +513,89 @@ class ContactWitness(unittest.TestCase):
         t, u = _least_separating_direction(fcl, big, cube, box_big, box_cube)
         self.assertAlmostEqual(t, 0.06, delta=1e-6)
         np.testing.assert_allclose(u, (0.0, 0.0, 1.0), rtol=0, atol=1e-9)
+
+    def test_depth_is_the_translation_along_the_normal(self):
+        # a box 0.05 into the +x side of a cube: every contact normal is +x, and the
+        # depth is how far the box moves along it until the pair is apart
+        import fcl
+        from mesh_collision import _contact_witness, _fcl_all_contacts
+        cube, box_cube = self._posed(fcl, trimesh.creation.box(extents=(0.2, 0.2, 0.2)))
+        other, box_other = self._posed(fcl, trimesh.creation.box(extents=(0.2, 0.16, 0.12)), t=np.array([0.15, 0.01, -0.02]))
+        depth, n, _ = _contact_witness(fcl, cube, other, _fcl_all_contacts(fcl, cube, other), box_cube, box_other)
+        np.testing.assert_allclose(n, (1.0, 0.0, 0.0), rtol=0, atol=1e-12)
+        self.assertAlmostEqual(depth, 0.05, delta=1e-9)
+
+    def test_search_in_a_plane_keeps_to_the_plane(self):
+        # a cube 0.02 into the top of another and 0.08 into its +y side: lifting it parts
+        # the pair the least, but among horizontal moves the least is 0.08 along +y
+        import fcl
+        from mesh_collision import _least_separating_direction
+        a, box_a = self._posed(fcl, trimesh.creation.box(extents=(0.2, 0.2, 0.2)))
+        b, box_b = self._posed(fcl, trimesh.creation.box(extents=(0.2, 0.2, 0.2)), t=np.array([0.05, 0.12, 0.18]))
+        t, u = _least_separating_direction(fcl, a, b, box_a, box_b)
+        self.assertAlmostEqual(t, 0.02, delta=1e-9)
+        np.testing.assert_allclose(u, (0.0, 0.0, 1.0), rtol=0, atol=1e-12)
+        t, u = _least_separating_direction(fcl, a, b, box_a, box_b, plane_normal=(0.0, 0.0, 1.0))
+        self.assertAlmostEqual(t, 0.08, delta=1e-9)
+        np.testing.assert_allclose(u, (0.0, 1.0, 0.0), rtol=0, atol=1e-12)
+
+    def test_a_crossing_shorter_than_a_grid_step_can_be_missed(self):
+        # the documented limit of _exit_translation's grid: body i is a cube with a plate
+        # 0.002 thick 0.8 beyond it. A plate across the cube's +x face, 0.002 thick too,
+        # crosses that far plate for 0.004 of its way, less than one grid step (0.025):
+        # the grid misses it and the translation is that of leaving the cube, 0.001. A box
+        # 0.1 thick crosses the far plate for 0.102 and leaves it at 0.851.
+        import fcl
+        from mesh_collision import _exit_translation
+        far = trimesh.util.concatenate([trimesh.creation.box(extents=(0.2, 0.2, 0.2)),
+                                        trimesh.creation.box(extents=(0.002, 0.2, 0.2)).apply_translation([0.9, 0.0, 0.0])])
+        body, box_body = self._posed(fcl, far)
+        x = np.array([1.0, 0.0, 0.0])
+        thin, box_thin = self._posed(fcl, trimesh.creation.box(extents=(0.002, 0.1, 0.1)), t=np.array([0.1, 0.0, 0.0]))
+        self.assertAlmostEqual(_exit_translation(fcl, body, thin, box_body, box_thin, x), 0.001, delta=1e-9)
+        thick, box_thick = self._posed(fcl, trimesh.creation.box(extents=(0.1, 0.1, 0.1)), t=np.array([0.1, 0.0, 0.0]))
+        self.assertAlmostEqual(_exit_translation(fcl, body, thick, box_body, box_thick, x), 0.851, delta=1e-9)
+
+
+class NoGuessedDirection(unittest.TestCase):
+    """A pair at distance zero whose surfaces FCL finds no crossing for has no
+    depth or direction: the evaluator and the oracle report it instead of
+    choosing one."""
+
+    def test_zero_distance_without_a_crossing_contact_is_an_error(self):
+        import mesh_collision
+        import s4r_qp
+        saved = (mesh_collision._fcl_all_contacts, s4r_qp._fcl_all_contacts)
+        mesh_collision._fcl_all_contacts = s4r_qp._fcl_all_contacts = lambda *args: []
+        try:
+            a = trimesh.creation.box(extents=[0.2] * 3)
+            b = trimesh.creation.box(extents=[0.2] * 3)
+            b.apply_translation([0.15, 0.0, 0.0])
+            with self.assertRaises(RuntimeError):
+                evaluate_world_collision_meshes([a, b])
+            objects = [box_object([0, 0, 0]), box_object([0.15, 0, 0])]
+            oracle = PrebuiltFCLOracle([o.normalize_factor for o in objects], [o.collision_verts_model for o in objects],
+                                       [o.collision_faces for o in objects], d_hat=0.02)
+            with self.assertRaises(RuntimeError):
+                oracle.find_contacts(1.0, 0.0, np.array([o.center for o in objects]), [o.rotation for o in objects])
+        finally:
+            mesh_collision._fcl_all_contacts, s4r_qp._fcl_all_contacts = saved
+
+
+class UprightContacts(unittest.TestCase):
+    def test_penetrating_pair_is_parted_horizontally(self):
+        # two cubes standing on the plane, 0.03 into each other along x: the pair's
+        # normal is the least horizontal move, +x, and its depth that move
+        sys.path.insert(0, str(ROOT / "examples"))
+        import run_upright
+        cube = trimesh.creation.box(extents=(0.2, 0.2, 0.2))
+        instances = [run_upright.AssetInstance("cube", np.asarray(cube.vertices, dtype=np.float64),
+                                               np.asarray(cube.faces), np.zeros(3), 1.0) for _ in range(2)]
+        zero = np.zeros(2)
+        c = run_upright.fcl_contacts(instances, np.array([[0.0, 0.0], [0.17, 0.0]]), zero, zero, zero, 1.0, 1.0)
+        self.assertEqual([(x[0], x[1]) for x in c], [(0, 1)])
+        self.assertAlmostEqual(c[0][2], -0.03, delta=1e-9)
+        np.testing.assert_allclose(c[0][3], (1.0, 0.0, 0.0), rtol=0, atol=1e-12)
 
 
 def _bvh(verts, faces):

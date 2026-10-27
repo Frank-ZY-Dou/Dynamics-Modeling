@@ -28,10 +28,11 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 from mesh_collision import _contains_points as _mesh_contains_points  # noqa: E402
-from mesh_collision import _vertex_components, _nested_component_contact, _piece_layout, _piece_boxes, _any_piece_nested  # noqa: E402
+from mesh_collision import _vertex_components, _piece_inside, _piece_layout, _piece_boxes, _any_piece_nested  # noqa: E402
 from mesh_collision import _signed_volume  # noqa: E402
 from mesh_collision import _aabb_candidate_pairs  # noqa: E402
-from mesh_collision import _fcl_all_contacts, _contact_witness  # noqa: E402
+from mesh_collision import _fcl_all_contacts, _contact_witness, _least_separating_direction  # noqa: E402
+from mesh_collision import _no_crossing_at_zero_distance  # noqa: E402
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -207,11 +208,6 @@ def _one_sided_support(model_verts, rot, direction) -> float:
     support to dominate the true reach."""
     projs = model_verts @ (rot.T @ direction)
     return float(max(projs.max(), 0.0))
-
-
-def _projected_width(model_verts, rot, direction) -> float:
-    projs = model_verts @ (rot.T @ direction)
-    return float(projs.max() - projs.min())
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -422,19 +418,24 @@ class PrebuiltFCLOracle:
             if d_u > 0.0:
                 cp_i_u = np.asarray(res.nearest_points[0], dtype=np.float64)
                 cp_j_u = np.asarray(res.nearest_points[1], dtype=np.float64)
-                nested = self._nested_contact(i, j, cp_i_u, cp_j_u, d_u, s, lo, hi, C, rots, piece_boxes)
-                if nested is not None:
-                    d_signed, n_raw, cp_on_a, cp_on_b = nested
+                cp_on_a = cp_i_u * s
+                cp_on_b = cp_j_u * s
+                if self._nested(i, j, cp_i_u, cp_j_u, s, lo, hi, C, rots, piece_boxes):
+                    # one body inside the other: the translation that parts the pair the least
+                    t_u, n = _least_separating_direction(fcl, fcl_objs[i], fcl_objs[j], (lo[i], hi[i]), (lo[j], hi[j]))
+                    d_signed = -t_u * s
                 else:
-                    n_raw = cp_j_u - cp_i_u
+                    raw = cp_j_u - cp_i_u
+                    gap = float(np.linalg.norm(raw))
+                    if gap < 1e-12:
+                        raise RuntimeError(f"bodies {i} and {j}: FCL puts them {d_u * s} apart with coinciding "
+                                           "nearest points, so the pair has no direction")
+                    n = raw / gap
                     d_signed = d_u * s
-                    cp_on_a = cp_i_u * s
-                    cp_on_b = cp_j_u * s
             else:
                 pair_contacts = _fcl_all_contacts(fcl, fcl_objs[i], fcl_objs[j])
                 if not pair_contacts:
-                    new_cache[(i, j)] = (0.0, None)
-                    continue
+                    raise _no_crossing_at_zero_distance(d_u * s)
                 if all_contacts:
                     # Diagnostic ablation: every reported triangle contact
                     # becomes its own constraint row instead of the single
@@ -453,21 +454,13 @@ class PrebuiltFCLOracle:
                                          pos_world.copy(),
                                          pos_world + n_k * depth_world))
                     continue
-                depth_u, n_raw, pos_u = _contact_witness(fcl, fcl_objs[i], fcl_objs[j], pair_contacts, (lo[i], hi[i]), (lo[j], hi[j]))
+                depth_u, n, pos_u = _contact_witness(fcl, fcl_objs[i], fcl_objs[j], pair_contacts, (lo[i], hi[i]), (lo[j], hi[j]))
                 depth_world = depth_u * s
                 pos_world = pos_u * s
                 cp_on_a = pos_world.copy()
-                cp_on_b = pos_world + n_raw * depth_world
+                cp_on_b = pos_world + n * depth_world
                 d_signed = -depth_world
 
-            nn = np.linalg.norm(n_raw)
-            if nn < 1e-12:
-                n_raw = C[j] - C[i]
-                nn = np.linalg.norm(n_raw)
-            if nn < 1e-12:
-                new_cache[(i, j)] = (d_signed, None)
-                continue
-            n = n_raw / nn
             ext_i = self.support(i, rots[i], n)
             ext_j = self.support(j, rots[j], -n)
             threshold = ds * (ext_i + ext_j) + d_hat
@@ -519,64 +512,26 @@ class PrebuiltFCLOracle:
                 return None
         return st
 
-    def _nested_contact(self, i, j, cp_i_u, cp_j_u, d_u, s, lo, hi, C, rots, piece_boxes):
-        """Containment check for a separated-by-FCL pair: the whole body when
-        the AABBs nest, or one closed piece of a multi-piece body inside the
-        other body (the bodies' AABBs need not nest then).
-
-        Returns (d_signed, n, cp_on_i, cp_on_j) in world units, else None.
-        n follows the i->j convention: moving j along +n (i along -n)
-        carries the inner body toward the outer surface; |d_signed| is the
-        surface gap plus the inner body's (or piece's) width along n.
-        """
+    def _nested(self, i, j, cp_i_u, cp_j_u, s, lo, hi, C, rots, piece_boxes) -> bool:
+        """Whether one body of a pair FCL reports as apart lies inside the
+        other: the whole body when the AABBs nest (the inner body's witness
+        point inside the outer body), or one closed piece of a multi-piece
+        body inside the other body (the bodies' AABBs need not nest then)."""
         inv_s = 1.0 / s
-        j_in_i = bool(np.all(lo[j] >= lo[i] - 1e-12) and np.all(hi[j] <= hi[i] + 1e-12))
-        i_in_j = bool(np.all(lo[i] >= lo[j] - 1e-12) and np.all(hi[i] <= hi[j] + 1e-12))
-        if j_in_i or i_in_j:
-            if j_in_i:
-                outer, inner, q_u = i, j, cp_j_u
-            else:
-                outer, inner, q_u = j, i, cp_i_u
-            p_local = rots[outer].T @ (q_u - C[outer] * inv_s)
-            if self._contains_model_point(outer, p_local):
-                n_raw = cp_i_u - cp_j_u
-                nn = np.linalg.norm(n_raw)
-                if nn < 1e-12:
-                    return None
-                n = n_raw / nn
-                width = s * _projected_width(self.model_verts[inner], rots[inner], n)
-                d_signed = -(d_u * s + width)
-                return d_signed, n, cp_i_u * s, cp_j_u * s
+        for outer, inner_lo, inner_hi, q_u in ((i, lo[j], hi[j], cp_j_u), (j, lo[i], hi[i], cp_i_u)):
+            if (np.all(inner_lo >= lo[outer] - 1e-12) and np.all(inner_hi <= hi[outer] + 1e-12)
+                    and self._contains_model_point(outer, rots[outer].T @ (q_u - C[outer] * inv_s))):
+                return True
         # a piece can only be inside the other body when its box nests in that body's box
         if not (_any_piece_nested(piece_boxes.get(j), lo[i], hi[i]) or _any_piece_nested(piece_boxes.get(i), lo[j], hi[j])):
-            return None
-        comps_i = self._components(i)
-        comps_j = self._components(j)
+            return False
         Vi = (rots[i] @ self.model_verts[i].T).T + C[i] * inv_s
         Vj = (rots[j] @ self.model_verts[j].T).T + C[j] * inv_s
 
         def contains(k):
             return lambda p: self._contains_model_point(k, rots[k].T @ (p - C[k] * inv_s))
 
-        def closest(k):
-            def f(pts):
-                p_local = (rots[k].T @ (pts - C[k] * inv_s).T).T
-                q, dist, _ = trimesh.proximity.closest_point(self._model_trimesh(k), p_local)
-                return (rots[k] @ np.asarray(q, dtype=np.float64).T).T + C[k] * inv_s, dist
-            return f
-
-        hit = _nested_component_contact(Vi, comps_i, Vj, comps_j,
-                                        contains(i), contains(j), closest(i), closest(j))
-        if hit is None:
-            return None
-        d_u2, n, cpi_u, cpj_u = hit
-        if n is None:
-            n_raw = cp_i_u - cp_j_u
-            nn = np.linalg.norm(n_raw)
-            if nn < 1e-12:
-                return None
-            n = n_raw / nn
-        return d_u2 * s, n, cpi_u * s, cpj_u * s
+        return _piece_inside(Vi, self._components(i), Vj, self._components(j), contains(i), contains(j))
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -1874,24 +1829,25 @@ def _optimize_rotations_fcl(centers, rots, nfs, mverts, mfaces, N,
                 if d_u > 0.0:
                     cp_i_u = np.asarray(res.nearest_points[0], dtype=np.float64)
                     cp_j_u = np.asarray(res.nearest_points[1], dtype=np.float64)
-                    n_raw = cp_j_u - cp_i_u          # from i's surface toward j
+                    raw = cp_j_u - cp_i_u          # from i's surface toward j
+                    gap = float(np.linalg.norm(raw))
+                    if gap < 1e-12:
+                        raise RuntimeError(f"bodies {i} and {j}: FCL puts them {d_u * scale} apart with "
+                                           "coinciding nearest points, so the pair has no direction")
+                    n_ij = raw / gap
                     cl_world = cp_i_u * scale
                     d_min_world = d_u * scale
                 else:
                     pair_contacts = _fcl_all_contacts(fcl, fcl_objs[i], fcl_objs[j])
                     if not pair_contacts:
-                        continue
-                    # The reported normal is the exit direction of body j
-                    # (second argument) through the crossed triangle.
-                    depth_u, n_raw, pos_u = _contact_witness(fcl, fcl_objs[i], fcl_objs[j], pair_contacts,
-                                                             (np.array(aabbs[i][:3]), np.array(aabbs[i][3:])),
-                                                             (np.array(aabbs[j][:3]), np.array(aabbs[j][3:])))
+                        raise _no_crossing_at_zero_distance(d_u * scale)
+                    # The witness normal is the exit direction of body j
+                    # (second argument) through the crossed triangles.
+                    depth_u, n_ij, pos_u = _contact_witness(fcl, fcl_objs[i], fcl_objs[j], pair_contacts,
+                                                            (np.array(aabbs[i][:3]), np.array(aabbs[i][3:])),
+                                                            (np.array(aabbs[j][:3]), np.array(aabbs[j][3:])))
                     cl_world = pos_u * scale
                     d_min_world = -depth_u * scale
-                nn = np.linalg.norm(n_raw)
-                if nn < 1e-12:
-                    continue
-                n_ij = n_raw / nn
                 force_mag = max(0.0, d_hat - d_min_world)
                 if force_mag <= 0.0:
                     continue

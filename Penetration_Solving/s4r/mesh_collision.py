@@ -318,94 +318,62 @@ def _mesh_components(mesh: trimesh.Trimesh) -> list:
     return comps
 
 
-def _nested_component_contact(verts_i, comps_i, verts_j, comps_j,
-                              contains_i, contains_j, closest_i, closest_j,
-                              tol: float = 1e-12):
-    """Containment of one connected component of a body inside the other
+def _piece_inside(verts_i, comps_i, verts_j, comps_j, contains_i, contains_j,
+                  tol: float = 1e-12) -> bool:
+    """Whether one connected component of a body lies inside the other
     body, for a pair whose surfaces FCL reports as apart. A body made of
     several closed pieces can have one piece inside the other body while the
     bodies' AABBs do not nest, which the whole-body test cannot see; only
     bodies with more than one component are examined here.
 
-    ``contains_k(p)`` tests one point against body k; ``closest_k(pts)``
-    returns (closest points on body k's surface, distances). Returns
-    (d_signed, n, cp_i, cp_j) or None: d_signed is minus the surface gap
-    plus the component's width along n, and n follows the i->j convention
-    (moving j along +n carries the inner component toward the outer
-    surface); n is None when the witness points coincide.
+    ``contains_k(p)`` tests one point against body k. The surfaces are
+    apart, so one vertex of a piece inside the other body means the whole
+    piece is.
     """
     lo_i, hi_i = verts_i.min(axis=0), verts_i.max(axis=0)
     lo_j, hi_j = verts_j.min(axis=0), verts_j.max(axis=0)
-    for comps, verts, lo_o, hi_o, contains, closest, inner_is_j in (
-            (comps_j, verts_j, lo_i, hi_i, contains_i, closest_i, True),
-            (comps_i, verts_i, lo_j, hi_j, contains_j, closest_j, False)):
+    for comps, verts, lo_o, hi_o, contains in ((comps_j, verts_j, lo_i, hi_i, contains_i),
+                                               (comps_i, verts_i, lo_j, hi_j, contains_j)):
         if len(comps) < 2:
             continue
         for idx in comps:
             cv = verts[idx]
-            if not (np.all(cv.min(axis=0) >= lo_o - tol) and np.all(cv.max(axis=0) <= hi_o + tol)):
-                continue
-            if not contains(cv[0]):   # surfaces apart: one vertex inside means the piece is inside
-                continue
-            q, dist = closest(cv)
-            k = int(np.argmin(dist))
-            gap = float(dist[k])
-            q_k = np.asarray(q[k], dtype=np.float64)
-            cp_i, cp_j = (q_k, cv[k]) if inner_is_j else (cv[k], q_k)
-            n = cp_i - cp_j
-            nn = np.linalg.norm(n)
-            if nn < 1e-12:
-                return -gap, None, cp_i, cp_j
-            n = n / nn
-            proj = cv @ n
-            return -float(gap + (proj.max() - proj.min())), n, cp_i, cp_j
-    return None
+            if (np.all(cv.min(axis=0) >= lo_o - tol) and np.all(cv.max(axis=0) <= hi_o + tol)
+                    and contains(cv[0])):
+                return True
+    return False
 
 
-def _nested_signed_distance(mesh_i, mesh_j, cp_i, cp_j, d):
-    """Containment check for a pair FCL reports as separated by ``d``.
+def _nested(mesh_i, mesh_j, cp_i, cp_j) -> bool:
+    """Whether one body of a pair FCL reports as apart lies inside the other.
 
     Two closed surfaces that do not intersect are either disjoint or one
     lies inside the other; FCL sees only the surfaces and returns a
-    positive distance in both cases. When the AABBs nest, one surface
-    point of the inner body is tested for containment in the outer one
-    (ray parity); a body made of several closed pieces is also checked
+    positive distance in both cases. When the AABBs nest, the inner body's
+    witness point (cp_i or cp_j) is tested for containment in the outer
+    one (ray parity); a body made of several closed pieces is also checked
     piece by piece, since one piece can sit inside the other body while
-    the bodies' AABBs do not nest. Returns a negative signed distance
-    whose magnitude is the surface gap plus the inner body's (or piece's)
-    width along the exit direction (a depth for the correction rows, not
-    the minimal freeing translation), or None when the bodies are
-    disjoint.
+    the bodies' AABBs do not nest.
     """
-    outer = None
-    if _aabb_nested(mesh_j.bounds, mesh_i.bounds):
-        outer, inner, q = mesh_i, mesh_j, cp_j
-    elif _aabb_nested(mesh_i.bounds, mesh_j.bounds):
-        outer, inner, q = mesh_j, mesh_i, cp_i
-    if outer is not None and _contains_points(outer, np.asarray(q, dtype=np.float64)[None, :])[0]:
-        n = np.asarray(cp_i, dtype=np.float64) - np.asarray(cp_j, dtype=np.float64)
-        nn = np.linalg.norm(n)
-        if nn < 1e-12:
-            return -float(d)
-        n = n / nn
-        proj = np.asarray(inner.vertices, dtype=np.float64) @ n
-        return -float(d + (proj.max() - proj.min()))  # gap plus the inner width along n
+    if _aabb_nested(mesh_j.bounds, mesh_i.bounds) and _contains_points(
+            mesh_i, np.asarray(cp_j, dtype=np.float64)[None, :])[0]:
+        return True
+    if _aabb_nested(mesh_i.bounds, mesh_j.bounds) and _contains_points(
+            mesh_j, np.asarray(cp_i, dtype=np.float64)[None, :])[0]:
+        return True
     comps_i = _mesh_components(mesh_i)
     comps_j = _mesh_components(mesh_j)
     if len(comps_i) < 2 and len(comps_j) < 2:
-        return None
+        return False
     # a piece can only be inside the other body when its box nests in that body's box
     if not (_any_piece_nested(_mesh_piece_boxes(mesh_j), mesh_i.bounds[0], mesh_i.bounds[1])
             or _any_piece_nested(_mesh_piece_boxes(mesh_i), mesh_j.bounds[0], mesh_j.bounds[1])):
-        return None
-    hit = _nested_component_contact(
+        return False
+    return _piece_inside(
         np.asarray(mesh_i.vertices, dtype=np.float64), comps_i,
         np.asarray(mesh_j.vertices, dtype=np.float64), comps_j,
         lambda p: bool(_contains_points(mesh_i, p[None, :])[0]),
-        lambda p: bool(_contains_points(mesh_j, p[None, :])[0]),
-        lambda pts: trimesh.proximity.closest_point(mesh_i, pts)[:2],
-        lambda pts: trimesh.proximity.closest_point(mesh_j, pts)[:2])
-    return None if hit is None else hit[0]
+        lambda p: bool(_contains_points(mesh_j, p[None, :])[0]))
 
 
 def _fcl_all_contacts(fcl_mod, o_i, o_j) -> list:
@@ -439,112 +407,162 @@ def _fibonacci_sphere(n: int) -> np.ndarray:
     return np.column_stack([r * np.cos(a), r * np.sin(a), z])
 
 
-def _least_separating_direction(fcl_mod, o_i, o_j, box_i, box_j) -> tuple[float, np.ndarray]:
-    """(t, u): the direction u along which moving body j (o_j) separates it
-    from body i with the least translation t, and that translation: the pair's
-    penetration depth and its direction, the step that the QP, minimizing the
-    motion, would take for this pair alone.
+def _exit_translation(fcl_mod, o_i, o_j, box_i, box_j, u) -> float:
+    """How far body j (o_j) moves along the unit direction u until it and
+    body i are apart: the last translation along u at which they still
+    intersect, not the first at which they are apart. FCL tests whether the
+    surfaces cross, so a body inside the other reads as apart, but past the
+    last crossing neither can be inside the other. Past the separation of
+    their boxes along u (box_i, box_j: (lo, hi) in the objects' frame) they
+    cannot meet, so a grid of SEPARATION_GRID steps from there down to zero
+    finds the last step at which they intersect, and SEPARATION_BISECT
+    bisections refine it; at zero the pair is taken to intersect (its
+    surfaces cross, or one body is inside the other).
 
-    Along u, t(u) is the last translation at which the bodies still intersect,
-    not the first at which they are apart: FCL tests whether the surfaces
-    cross, so a body inside the other reads as apart, but past the last
-    crossing neither can be inside the other. Past the separation of their
-    boxes (box_i, box_j: (lo, hi) in the objects' frame) they cannot meet, so a
-    grid from there down to zero finds the last intersecting step and
-    bisection refines it. t(u) is not convex in u: the search takes the best
-    of the directions of SEPARATION_DIRECTIONS points of a Fibonacci sphere,
-    of both bodies' axes and of the line between the boxes' centres, each
-    either way, then polls four directions at an angle from the best and moves
-    to the best of them that shortens t, halving the angle when none does.
-    Every direction comes with its opposite, so neither body is favoured; a
-    tie keeps the earlier direction. o_j is put back where it was.
+    A crossing that lasts less than one grid step (two thin parts passing
+    each other, a thin wall the inner body leaves through) can fall between
+    two steps and is then not seen: the translation returned is that of the
+    last crossing the grid sees, short of the true one, and the next exact
+    contact check finds the pair still crossing. o_j is put back where it
+    was.
     """
+    u = np.asarray(u, dtype=np.float64)
     lo_i, hi_i = (np.asarray(x, dtype=np.float64) for x in box_i)
     lo_j, hi_j = (np.asarray(x, dtype=np.float64) for x in box_j)
-    axes = list(_fibonacci_sphere(SEPARATION_DIRECTIONS))
-    for o in (o_i, o_j):
-        R = np.asarray(o.getRotation(), dtype=np.float64)
-        axes += [R[:, k] for k in range(3)]
-    d = 0.5 * (lo_j + hi_j) - 0.5 * (lo_i + hi_i)
-    if np.linalg.norm(d) > 1e-12:
-        axes.append(d)
     t0 = np.asarray(o_j.getTranslation(), dtype=np.float64)
     req = fcl_mod.CollisionRequest(num_max_contacts=1, enable_contact=False)
 
-    def intersect(t, u):
+    def intersect(t):
         o_j.setTranslation(t0 + t * u)
         res = fcl_mod.CollisionResult()
         fcl_mod.collide(o_i, o_j, req, res)
         return bool(res.is_collision)
 
-    def exit_translation(u):
+    try:
         top = float(np.maximum(u * lo_i, u * hi_i).sum() + np.maximum(-u * lo_j, -u * hi_j).sum())
         step = top / SEPARATION_GRID
         k = SEPARATION_GRID - 1
-        while k > 0 and not intersect(k * step, u):
+        while k > 0 and not intersect(k * step):
             k -= 1
-        lo_t, hi_t = k * step, (k + 1) * step       # they intersect at lo_t (at 0 they cross), not at hi_t
+        lo_t, hi_t = k * step, (k + 1) * step       # they intersect at lo_t, not at hi_t
         for _ in range(SEPARATION_BISECT):
             mid = 0.5 * (lo_t + hi_t)
-            if intersect(mid, u):
+            if intersect(mid):
                 lo_t = mid
             else:
                 hi_t = mid
         return hi_t
+    finally:
+        o_j.setTranslation(t0)
+
+
+def _least_separating_direction(fcl_mod, o_i, o_j, box_i, box_j,
+                                plane_normal=None) -> tuple[float, np.ndarray]:
+    """(t, u): the direction u along which moving body j (o_j) separates it
+    from body i with the least translation t, and that translation
+    (_exit_translation): the pair's penetration depth and its direction, the
+    step that the QP, minimizing the motion, would take for this pair alone.
+    With ``plane_normal``, u is searched among the directions of the plane
+    perpendicular to it (an upright body moves only horizontally).
+
+    t(u) is not convex in u: the search takes the best of the directions of
+    SEPARATION_DIRECTIONS points of a Fibonacci sphere (in a plane:
+    SEPARATION_DIRECTIONS directions over half a turn), of both bodies' axes
+    and of the line between the boxes' centres (in a plane, their parts in
+    it, unless those vanish), each either way, then polls directions at an
+    angle from the best (four on the sphere, two in a plane) and moves to the
+    best of them that shortens t, halving the angle when none does. Every
+    direction comes with its opposite, so neither body is favoured; a tie
+    keeps the earlier direction.
+    """
+    lo_i, hi_i = (np.asarray(x, dtype=np.float64) for x in box_i)
+    lo_j, hi_j = (np.asarray(x, dtype=np.float64) for x in box_j)
+    if plane_normal is None:
+        p = None
+        axes = list(_fibonacci_sphere(SEPARATION_DIRECTIONS))
+    else:
+        p = np.asarray(plane_normal, dtype=np.float64)
+        p = p / np.linalg.norm(p)
+        e1 = np.cross(p, np.eye(3)[int(np.argmin(np.abs(p)))])
+        e1 /= np.linalg.norm(e1)
+        e2 = np.cross(p, e1)
+        turn = np.pi * np.arange(SEPARATION_DIRECTIONS) / SEPARATION_DIRECTIONS
+        axes = list(np.cos(turn)[:, None] * e1 + np.sin(turn)[:, None] * e2)
+    extra = [np.asarray(o.getRotation(), dtype=np.float64)[:, k] for o in (o_i, o_j) for k in range(3)]
+    extra.append(0.5 * (lo_j + hi_j) - 0.5 * (lo_i + hi_i))
+    for v in extra:
+        if p is not None:
+            v = v - (v @ p) * p
+        if np.linalg.norm(v) > 1e-12:
+            axes.append(v)
 
     def best_of(dirs, best):
         for u in dirs:
             u = u / np.linalg.norm(u)
-            t = exit_translation(u)
+            t = _exit_translation(fcl_mod, o_i, o_j, box_i, box_j, u)
             if best is None or t < best[0]:
                 best = (t, u)
         return best
 
-    try:
-        best = best_of([sign * a for a in axes for sign in (1.0, -1.0)], None)
-        angle = SEPARATION_TURN[0]
-        while angle > SEPARATION_TURN[1]:
-            u = best[1]
+    best = best_of([sign * a for a in axes for sign in (1.0, -1.0)], None)
+    angle = SEPARATION_TURN[0]
+    while angle > SEPARATION_TURN[1]:
+        u = best[1]
+        if p is None:
             a = np.cross(u, np.eye(3)[int(np.argmin(np.abs(u)))])
             a /= np.linalg.norm(a)
             b = np.cross(u, a)
-            polled = best_of([np.cos(angle) * u + np.sin(angle) * v for v in (a, -a, b, -b)], best)
-            if polled is best:
-                angle *= 0.5
-            best = polled
-    finally:
-        o_j.setTranslation(t0)
+            sides = (a, -a, b, -b)
+        else:
+            q = np.cross(p, u)
+            sides = (q, -q)
+        polled = best_of([np.cos(angle) * u + np.sin(angle) * v for v in sides], best)
+        if polled is best:
+            angle *= 0.5
+        best = polled
     return best
 
 
 def _contact_witness(fcl_mod, o_i, o_j, contacts: list, box_i, box_j) -> tuple[float, np.ndarray, np.ndarray]:
     """(depth, normal, position) standing for a non-empty list of FCL contacts
-    of one pair, whatever order FCL lists them in: the deepest depth, the
-    direction of the sum of the contacts' normals (FCL's own: the exit
-    direction of the second body through each crossed triangle) and the mean
-    of their positions. The deepest contact alone is a poor witness: FCL's
-    depth of a triangle pair grows with the triangles, so the deepest is often
-    an outlier, and its normal is that of one triangle. When the normals cancel
-    (a symmetric overlap), the sum gives no direction, and the contacts' depths
-    belong to directions that cancel: the normal is then the direction along
-    which the pair parts with the least translation, and that translation is
-    the depth (_least_separating_direction; box_i, box_j: the bodies' boxes in
+    of one pair, whatever order FCL lists them in: the direction of the sum of
+    the contacts' normals (FCL's own: the exit direction of the second body
+    through each crossed triangle), how far body j moves along it until the
+    pair is apart (_exit_translation), and the mean of their positions. The
+    contacts are summed in a fixed order of their values, so the witness does
+    not depend on the order of FCL's traversal of the two BVHs.
+
+    When the normals cancel (a symmetric overlap), the sum gives no
+    direction: the normal is then the direction along which the pair parts
+    with the least translation, and that translation is the depth
+    (_least_separating_direction). Either way the depth is the translation
+    along the normal that parts the pair (box_i, box_j: the bodies' boxes in
     the frame of o_i and o_j).
     """
-    depth = max(float(c.penetration_depth) for c in contacts)
-    pos = np.mean([np.asarray(c.pos, dtype=np.float64) for c in contacts], axis=0)
-    normal = np.sum([np.asarray(c.normal, dtype=np.float64) for c in contacts], axis=0)
-    if np.linalg.norm(normal) < 1e-9 * len(contacts):
-        depth, normal = _least_separating_direction(fcl_mod, o_i, o_j, box_i, box_j)
-    return depth, normal / np.linalg.norm(normal), pos
+    rec = np.array([[*c.normal, *c.pos] for c in contacts], dtype=np.float64)
+    rec = rec[np.lexsort(rec.T[::-1])]
+    pos = rec[:, 3:].mean(axis=0)
+    normal = rec[:, :3].sum(axis=0)
+    norm = float(np.linalg.norm(normal))
+    if norm < 1e-9 * len(contacts):
+        depth, u = _least_separating_direction(fcl_mod, o_i, o_j, box_i, box_j)
+        return depth, u, pos
+    u = normal / norm
+    return _exit_translation(fcl_mod, o_i, o_j, box_i, box_j, u), u, pos
+
+
+def _no_crossing_at_zero_distance(d) -> RuntimeError:
+    return RuntimeError(f"FCL puts the pair at distance {d} but finds no crossing triangle pair: its distance and "
+                        "collision tests disagree at their tolerance, and the pair has no depth or direction")
 
 
 def _fcl_pair_signed_distance(fcl_mod, bvh_i, bvh_j, mesh_i, mesh_j) -> float:
     """FCL signed distance between two BVHs whose verts are already in world
     coords (those of the trimesh objects mesh_i, mesh_j): distance() when the
-    surfaces are apart, collide() when they cross (exact triangle-pair
-    penetration depth). A pair whose surfaces are apart but whose AABBs nest
-    is also checked for one body lying entirely inside the other.
+    surfaces are apart, minus the witness depth (_contact_witness) when they
+    cross. A pair whose surfaces are apart but whose AABBs nest is also
+    checked for one body lying entirely inside the other; its depth is then
+    the translation that parts it the least (_least_separating_direction).
     """
     ident3 = np.eye(3)
     zero3 = np.zeros(3)
@@ -555,15 +573,12 @@ def _fcl_pair_signed_distance(fcl_mod, bvh_i, bvh_j, mesh_i, mesh_j) -> float:
     res = fcl_mod.DistanceResult()
     d = fcl_mod.distance(o_i, o_j, req, res)
     if d > 0.0:
-        nested = _nested_signed_distance(
-            mesh_i, mesh_j, res.nearest_points[0], res.nearest_points[1], d)
-        if nested is not None:
-            return nested
+        if _nested(mesh_i, mesh_j, res.nearest_points[0], res.nearest_points[1]):
+            return -_least_separating_direction(fcl_mod, o_i, o_j, mesh_i.bounds, mesh_j.bounds)[0]
         return float(d)
-    # Overlap: use collide() to extract exact penetration depth.
     contacts = _fcl_all_contacts(fcl_mod, o_i, o_j)
     if not contacts:
-        return 0.0
+        raise _no_crossing_at_zero_distance(d)
     return -_contact_witness(fcl_mod, o_i, o_j, contacts, mesh_i.bounds, mesh_j.bounds)[0]
 
 
@@ -819,50 +834,36 @@ class MeshOracle:
                                            direction_ij=direction))
         return out
 
-    def _nested_signed_distance(self, i, j, ci, cj, cp_i, cp_j, d):
-        """Containment for a pair whose surfaces are apart: the whole body
-        (nested AABBs) or one closed piece of a multi-piece body. Returns
-        (signed distance, direction i->j or None) or None."""
+    def _nested(self, i, j, ci, cj, cp_i, cp_j) -> bool:
+        """Whether one body of a pair whose surfaces are apart lies inside the
+        other: the whole body (nested AABBs) or one closed piece of a
+        multi-piece body (see the module's _nested)."""
         lo_i = self._local_aabb_min[i] + ci; hi_i = self._local_aabb_max[i] + ci
         lo_j = self._local_aabb_min[j] + cj; hi_j = self._local_aabb_max[j] + cj
-        outer = None
-        if _aabb_nested(np.stack([lo_j, hi_j]), np.stack([lo_i, hi_i])):
-            outer, c_out, inner, q = i, ci, j, cp_j
-        elif _aabb_nested(np.stack([lo_i, hi_i]), np.stack([lo_j, hi_j])):
-            outer, c_out, inner, q = j, cj, i, cp_i
-        if outer is not None and _contains_points(self._meshes[outer], (np.asarray(q, dtype=np.float64) - c_out)[None, :])[0]:
-            n = np.asarray(cp_i, dtype=np.float64) - np.asarray(cp_j, dtype=np.float64)
-            nn = np.linalg.norm(n)
-            if nn < 1e-12:
-                return -float(d), None
-            n = n / nn
-            proj = self._rotated_verts[inner] @ n
-            return -float(d + (proj.max() - proj.min())), n
+        if _aabb_nested(np.stack([lo_j, hi_j]), np.stack([lo_i, hi_i])) and _contains_points(
+                self._meshes[i], (np.asarray(cp_j, dtype=np.float64) - ci)[None, :])[0]:
+            return True
+        if _aabb_nested(np.stack([lo_i, hi_i]), np.stack([lo_j, hi_j])) and _contains_points(
+                self._meshes[j], (np.asarray(cp_i, dtype=np.float64) - cj)[None, :])[0]:
+            return True
         mi, mj = self._meshes[i], self._meshes[j]
         comps_i = _mesh_components(mi)
         comps_j = _mesh_components(mj)
         if len(comps_i) < 2 and len(comps_j) < 2:
-            return None
+            return False
         # a piece can only be inside the other body when its box nests in that body's box
         # (the oracle's meshes sit at the origin: shift the other body's box instead)
         if not (_any_piece_nested(_mesh_piece_boxes(mj), lo_i - cj, hi_i - cj)
                 or _any_piece_nested(_mesh_piece_boxes(mi), lo_j - ci, hi_j - ci)):
-            return None
+            return False
 
         def contains(m, c):
             return lambda p: bool(_contains_points(m, (p - c)[None, :])[0])
 
-        def closest(m, c):
-            def f(pts):
-                q, dist, _ = trimesh.proximity.closest_point(m, pts - c)
-                return q + c, dist
-            return f
-
-        hit = _nested_component_contact(
+        return _piece_inside(
             np.asarray(mi.vertices, dtype=np.float64) + ci, comps_i,
             np.asarray(mj.vertices, dtype=np.float64) + cj, comps_j,
-            contains(mi, ci), contains(mj, cj), closest(mi, ci), closest(mj, cj))
-        return None if hit is None else (hit[0], hit[1])
+            contains(mi, ci), contains(mj, cj))
 
     def _precise_pair_query(
         self, i: int, j: int,
@@ -891,35 +892,34 @@ class MeshOracle:
                                       enable_signed_distance=True)
             res = fcl.DistanceResult()
             d = fcl.distance(o_i, o_j, req, res)
+            box_i = (self._local_aabb_min[i] + ci, self._local_aabb_max[i] + ci)
+            box_j = (self._local_aabb_min[j] + cj, self._local_aabb_max[j] + cj)
             if d > 0.0:
                 cp_i = np.asarray(res.nearest_points[0], dtype=np.float64)
                 cp_j = np.asarray(res.nearest_points[1], dtype=np.float64)
-                raw = cp_j - cp_i
                 # Surfaces apart: disjoint, or one body entirely inside the
                 # other. Only AABB-nested pairs can nest; those are checked
-                # by containment in the body-local meshes (no rebuild).
-                nested = self._nested_signed_distance(i, j, ci, cj, cp_i, cp_j, d)
-                if nested is not None:
-                    sd, n = nested
-                    if n is None:
-                        n = _safe_normalize(cp_i - cp_j if np.linalg.norm(raw) > 1e-12 else cj - ci)
-                    return float(sd), n
-                return float(d), _safe_normalize(raw if np.linalg.norm(raw) > 1e-12
-                                                 else cj - ci)
-            # Overlap: get penetration info. The reported normal is the exit
-            # direction of the second body through the crossed triangle and
-            # is used as is (aligning it to the centroid line would flip it
+                # by containment in the body-local meshes (no rebuild), and
+                # a nested pair's depth and direction are those of the
+                # translation that parts it the least.
+                if self._nested(i, j, ci, cj, cp_i, cp_j):
+                    t, u = _least_separating_direction(fcl, o_i, o_j, box_i, box_j)
+                    return -t, u
+                raw = cp_j - cp_i
+                gap = float(np.linalg.norm(raw))
+                if gap < 1e-12:
+                    raise RuntimeError(f"bodies {i} and {j}: FCL puts them {d} apart with coinciding nearest "
+                                       "points, so the pair has no direction")
+                return float(d), raw / gap
+            # Overlap: the witness of the crossing. Its normal, the exit
+            # direction of the second body through the crossed triangles, is
+            # used as is (aligning it to the centroid line would flip it
             # inside a cavity of a non-convex body).
             contacts = _fcl_all_contacts(fcl, o_i, o_j)
             if not contacts:
-                # Distance=0 but not colliding: touching; treat as sd=0.
-                return 0.0, _safe_normalize(cj - ci)
-            depth, raw, _ = _contact_witness(fcl, o_i, o_j, contacts,
-                                             (self._local_aabb_min[i] + ci, self._local_aabb_max[i] + ci),
-                                             (self._local_aabb_min[j] + cj, self._local_aabb_max[j] + cj))
-            if np.linalg.norm(raw) < 1e-12:
-                raw = cj - ci
-            return -depth, _safe_normalize(raw)
+                raise _no_crossing_at_zero_distance(d)
+            depth, n, _ = _contact_witness(fcl, o_i, o_j, contacts, box_i, box_j)
+            return -depth, n
 
         # ---------- use_fcl=False: trimesh + ray-cast inside test ----------
         mesh_i = self._meshes[i]
