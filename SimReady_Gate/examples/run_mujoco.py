@@ -6,7 +6,8 @@ Loads `<export_dir>/scene.xml` as written by `python -m simready.cli export`, st
 simulation and prints one JSON object: peak speed, peak and final displacement per free body,
 the bodies that fell below the ground height, and MuJoCo's warning counters (a reset after a
 bad state would show up there). `--record poses.json` also writes the world pose of every free
-body at `--record-fps` frames per second (position, quaternion wxyz), for rendering.
+body at `--record-fps` frames per second (position, quaternion wxyz), for rendering; `--report` writes the report
+to a file too.
 """
 import argparse
 import json
@@ -20,6 +21,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("export_dir"); ap.add_argument("--seconds", type=float, default=2.0)
     ap.add_argument("--record", default="", help="write the world pose of every free body at --record-fps to this JSON file")
+    ap.add_argument("--report", default="", help="also write the printed report to this JSON file")
     ap.add_argument("--record-fps", type=float, default=30.0)
     a = ap.parse_args()
     manifest = json.load(open(os.path.join(a.export_dir, "manifest.json")))
@@ -53,10 +55,13 @@ def main():
                    "record_fps": a.record_fps, "quaternion": "wxyz", "frames": frames}, open(a.record, "w"))
     final = {n: round(float(np.linalg.norm(data.xpos[i] - p0[n])), 4) for n, i in ids.items()}
     warnings = {mujoco.mjtWarning(k).name: int(data.warning[k].number) for k in range(len(data.warning)) if data.warning[k].number}
-    print(json.dumps({"engine": "mujoco", "version": mujoco.__version__, "steps": steps, "sim_seconds": steps * model.opt.timestep,
-                      "peak_speed": round(peak_v, 3), "peak_disp": round(max(peak_d.values(), default=0.0), 4),
-                      "final_disp": final, "below_ground": [n for n, i in ids.items() if data.xpos[i][2] < manifest["ground_z"]],
-                      "engine_warnings": warnings}, indent=1))
+    report = {"engine": "mujoco", "version": mujoco.__version__, "steps": steps, "sim_seconds": steps * model.opt.timestep,
+              "peak_speed": round(peak_v, 3), "peak_disp": round(max(peak_d.values(), default=0.0), 4),
+              "final_disp": final, "below_ground": [n for n, i in ids.items() if data.xpos[i][2] < manifest["ground_z"]],
+              "engine_warnings": warnings}
+    print(json.dumps(report, indent=1))
+    if a.report:
+        json.dump(report, open(a.report, "w"), indent=1)
 
 
 if __name__ == "__main__":

@@ -10,7 +10,8 @@ camera of an existing shots.json (the textured OBJs and the camera of the Exampl
 
 Stage 2 (``--assemble``): after ``viz/run_blender_hq.sh <out>/shots.json settle <panel> <gpu>
 <out>/blender_settle`` has rendered every panel, put the panels side by side (``--labels`` writes
-the engine name and time into each panel) and encode ``engines.mp4`` and ``engines.gif``.
+the engine name and time into each panel) and encode ``engines.gif`` (``viz/make_gif.py``, in real
+time at ``--gif-fps``); ``--mp4`` also writes ``engines.mp4``, which needs ffmpeg.
 
     python viz/make_engine_video.py --out results/videos/pile_n20_engines --assemble
 """
@@ -20,6 +21,7 @@ import argparse
 import glob
 import json
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -27,6 +29,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from make_gif import encode as encode_gif  # noqa: E402
 from render_frames import encode, hstack, overlay, quat_wxyz_to_R  # noqa: E402
 
 INK = (0.12, 0.12, 0.12)
@@ -71,7 +74,7 @@ def build_shots(base, records, out, seconds, fps):
     print("wrote", out / "shots.json", "panels", len(labels), "frames per panel", len(times), flush=True)
 
 
-def assemble(out, fps, gif_width, gif_fps, labels_on=False):
+def assemble(out, fps, gif_width, gif_fps, labels_on=False, mp4=False):
     out = Path(out)
     shots = json.load(open(out / "shots.json"))
     labels = {e["panel"]: e["label"] for e in shots["engines"]}
@@ -91,12 +94,13 @@ def assemble(out, fps, gif_width, gif_fps, labels_on=False):
                 overlay(str(png), [(labels[k], (40, 32), 44, INK, True), (f"t = {times[(k, f)]:.2f} s", (40, 92), 30, GREY, False)])
             pngs.append(png)
         hstack(pngs, tmp / f"f_{f:05d}.png", gap=8)
-    encode(tmp, out / "engines.mp4", fps=fps)
-    gif = out / "engines.gif"
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(out / "engines.mp4"), "-vf",
-                    f"fps={gif_fps},scale={gif_width}:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=192[p];[s1][p]paletteuse=dither=bayer:bayer_scale=4",
-                    str(gif)], check=True)
-    print("wrote", out / "engines.mp4", "and", gif, "frames", n, flush=True)
+    step = max(1, round(fps / gif_fps))      # every step-th frame, shown for its own time: the clip plays in real time
+    encode_gif(sorted(glob.glob(str(tmp / "f_*.png")))[::step], str(out / "engines.gif"), gif_width, round(1000 * step / fps))
+    if mp4:
+        if shutil.which("ffmpeg") is None:
+            raise SystemExit("--mp4 needs ffmpeg on the PATH")
+        encode(tmp, out / "engines.mp4", fps=fps)
+    print("wrote", out / "engines.gif", *(["and", out / "engines.mp4"] if mp4 else []), "frames", n, flush=True)
 
 
 def main():
@@ -107,9 +111,10 @@ def main():
     ap.add_argument("--seconds", type=float, default=2.0); ap.add_argument("--fps", type=int, default=30)
     ap.add_argument("--assemble", action="store_true"); ap.add_argument("--gif-width", type=int, default=1440); ap.add_argument("--gif-fps", type=float, default=12.5)
     ap.add_argument("--labels", action="store_true", help="write the engine name and time into each panel (off: the caption names the panels)")
+    ap.add_argument("--mp4", action="store_true", help="also encode engines.mp4 (needs ffmpeg)")
     a = ap.parse_args()
     if a.assemble:
-        assemble(a.out, a.fps, a.gif_width, a.gif_fps, labels_on=a.labels)
+        assemble(a.out, a.fps, a.gif_width, a.gif_fps, labels_on=a.labels, mp4=a.mp4)
     else:
         records = [tuple(r.split("=", 1)) for r in a.record]
         if not records:

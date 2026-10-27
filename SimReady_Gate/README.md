@@ -121,7 +121,7 @@ supports. SimReady Gate is the layer between a scene generator and the simulator
 <td align="center"><img src="docs/media/layout_n10_settle.gif" alt="MuJoCo settle: as generated versus repaired" /></td>
 </tr>
 <tr>
-<td colspan="2"><sub>Ten catalog objects placed by RoboLab's own disc solver in its base scene; the solver reports failure and the layout carries four interpenetrating pairs once seated. The gate repairs it to zero with the requested left/right/front/back relations kept. Right: settled in MuJoCo, the generated layout tips the pitcher over and sends an orange rolling a third of a metre across the table; the repaired one stays at rest.</sub></td>
+<td colspan="2"><sub>Ten catalog objects placed by RoboLab's own disc solver in its base scene; the solver reports failure and the layout carries four interpenetrating pairs once seated. The gate repairs it to zero with the requested left/right/front/back relations kept. Right: settled in MuJoCo, the generated layout tips the tomato can onto its side and moves a body 23 cm; the repaired one moves less than 1 cm.</sub></td>
 </tr>
 </table>
 
@@ -542,7 +542,10 @@ python examples/run_isaac.py pile_export --seconds 2                  # Isaac Si
 ```
 
 Each runner takes `--record poses.json` to write the world pose of every free body at 30 frames
-per second; `viz/make_engine_video.py` turns the three recordings into the side-by-side clip.
+per second and `--report report.json` to keep its report; `viz/make_engine_video.py` turns the three
+recordings into the side-by-side clip. `examples/install_engines.sh` installs Genesis 1.2.3 and
+Isaac Sim 5.1.0 in their own environments, and `viz/run_engines.sh` runs the whole check: the
+export, each engine for 2 s, and the clip.
 
 The twenty-object layout certified in September 2026, exported and simulated for 2 s in each engine
 on this machine; the three panels below are the recorded trajectories (`--record`), MuJoCo,

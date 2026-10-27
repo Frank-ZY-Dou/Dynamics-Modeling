@@ -6,7 +6,8 @@ Reads `<export_dir>/manifest.json` as written by `python -m simready.cli export`
 body as a mesh entity (fixed bodies as static geometry, the rest as rigid bodies that Genesis
 convexifies or decomposes), steps the simulation and prints one JSON object with the peak and
 final displacement per free body and the bodies that ended below the ground height.
-`--record poses.json` also writes the world pose of every free body at `--record-fps`.
+`--record poses.json` also writes the world pose of every free body at `--record-fps`; `--report` writes the
+report to a file too.
 """
 import argparse
 import json
@@ -23,6 +24,7 @@ def main():
     ap.add_argument("--substeps", type=int, default=4)
     ap.add_argument("--solver", choices=("cg", "newton"), default="cg", help="Genesis constraint solver")
     ap.add_argument("--record", default="", help="write the world pose of every free body at --record-fps to this JSON file")
+    ap.add_argument("--report", default="", help="also write the printed report to this JSON file")
     ap.add_argument("--record-fps", type=float, default=30.0)
     a = ap.parse_args()
     import genesis as gs
@@ -76,10 +78,12 @@ def main():
                    "quaternion": "wxyz", "frames": frames}, open(a.record, "w"))
     final = {n: round(float(np.linalg.norm(pos(entities[n][0]) - p0[n])), 4) for n in free}
     below = [n for n in free if float(pos(entities[n][0])[2]) < manifest["ground_z"]]
-    print(json.dumps({"engine": "genesis", "version": gs.__version__, "backend": "cpu" if a.cpu else "gpu", "solver": a.solver,
-                      "collision": "convex hull" if a.convex else "convex decomposition",
-                      "steps": steps, "sim_seconds": steps * dt,
-                      "peak_disp": round(max(peak.values(), default=0.0), 4), "final_disp": final, "below_ground": below}, indent=1))
+    report = {"engine": "genesis", "version": gs.__version__, "backend": "cpu" if a.cpu else "gpu", "solver": a.solver,
+              "collision": "convex hull" if a.convex else "convex decomposition", "steps": steps, "sim_seconds": steps * dt,
+              "peak_disp": round(max(peak.values(), default=0.0), 4), "final_disp": final, "below_ground": below}
+    print(json.dumps(report, indent=1))
+    if a.report:
+        json.dump(report, open(a.report, "w"), indent=1)
 
 
 if __name__ == "__main__":

@@ -36,14 +36,20 @@ TEXTURE_ROLES = ("RGB", "RGBA", "NORMAL", "ORM", "METALLIC", "ROUGHNESS", "OCCLU
 
 
 def _texture_files(xml_path):
-    """texture name -> its file (relative to the XML directory), from the XML's <texture> elements."""
+    """texture name -> (its file, relative to the XML directory; the colour space the XML declares, or None), from the
+    XML's <texture> elements."""
     root = ET.parse(xml_path).getroot(); base = Path(xml_path).parent
     out = {}
     for t in root.iter("texture"):
         f = t.get("file")
         if f:
-            out[t.get("name")] = str((Path(f) if Path(f).is_absolute() else base / f).resolve())
+            out[t.get("name")] = (str((Path(f) if Path(f).is_absolute() else base / f).resolve()), t.get("colorspace"))
     return out
+
+
+# how a colour texture's values are decoded: as the XML declares it, and when it declares nothing as sRGB, the encoding
+# of 8-bit colour images (MuJoCo 3.17 compiles an undeclared texture as linear; the record keeps both)
+DECLARED_COLORSPACE = {"sRGB": "sRGB", "linear": "raw", None: "sRGB"}
 
 
 def _record(model, g, tex_files, xml_path):
@@ -90,14 +96,17 @@ def _record(model, g, tex_files, xml_path):
         tname = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_TEXTURE, texid)
         if tname not in tex_files:
             raise ValueError(f"{xml_path}: texture {tname} of material {name} has no file in the XML")
-        space = int(model.tex_colorspace[texid])
-        if space not in (int(mujoco.mjtColorSpace.mjCOLORSPACE_SRGB), int(mujoco.mjtColorSpace.mjCOLORSPACE_LINEAR)):
-            raise ValueError(f"{xml_path}: texture {tname} leaves its colour space to MuJoCo (colorspace auto), not carried into the export")
-        if not os.path.exists(tex_files[tname]):
-            rec["missing"] = [tex_files[tname]]
+        tfile, declared = tex_files[tname]
+        if declared not in DECLARED_COLORSPACE:
+            raise ValueError(f"{xml_path}: texture {tname} declares the colour space {declared!r}, not carried into the export")
+        compiled = {int(mujoco.mjtColorSpace.mjCOLORSPACE_SRGB): "sRGB", int(mujoco.mjtColorSpace.mjCOLORSPACE_LINEAR): "linear",
+                    int(mujoco.mjtColorSpace.mjCOLORSPACE_AUTO): "auto"}[int(model.tex_colorspace[texid])]
+        rec["mujoco"]["texture_colorspace"] = {"declared": declared, "compiled": compiled}
+        if not os.path.exists(tfile):
+            rec["missing"] = [tfile]
         else:
-            rec["diffuse_texture"], rec["diffuse_tint"] = tex_files[tname], rgba[:3]
-            rec["diffuse_texture_colorspace"] = "sRGB" if space == int(mujoco.mjtColorSpace.mjCOLORSPACE_SRGB) else "raw"
+            rec["diffuse_texture"], rec["diffuse_tint"] = tfile, rgba[:3]
+            rec["diffuse_texture_colorspace"] = DECLARED_COLORSPACE[declared]
         rec["texture_scale"] = repeat
     else:
         rec["diffuse_color"] = rgba[:3]

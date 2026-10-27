@@ -6,11 +6,13 @@ Opens `<export_dir>/scene.usda` as written by `python -m simready.cli export` (U
 bodies, colliders, a physics scene and a ground slab), plays the PhysX simulation, and prints one
 JSON object with the peak and final displacement per free body and the bodies that ended below
 the ground height. Run it with Isaac Sim's own Python (the `isaacsim` package). `--record
-poses.json` also writes the world pose of every free body at `--record-fps`.
+poses.json` also writes the world pose of every free body at `--record-fps`; `--report` writes the report to a
+file too.
 """
 import argparse
 import json
 import os
+from importlib.metadata import version
 
 import numpy as np
 
@@ -19,6 +21,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("export_dir"); ap.add_argument("--seconds", type=float, default=2.0)
     ap.add_argument("--record", default="", help="write the world pose of every free body at --record-fps to this JSON file")
+    ap.add_argument("--report", default="", help="also write the printed report to this JSON file")
     ap.add_argument("--record-fps", type=float, default=30.0)
     a = ap.parse_args()
     from isaacsim import SimulationApp
@@ -72,8 +75,11 @@ def main():
                        "frames": frames}, open(a.record, "w"))
         final = {n: round(float(np.linalg.norm(pos(p) - p0[n])), 4) for n, p in prims.items()}
         below = [n for n, p in prims.items() if pos(p)[2] < manifest["ground_z"]]
-        print(json.dumps({"engine": "isaac_sim", "steps": steps, "sim_seconds": steps * float(manifest["timestep"]),
-                          "peak_disp": round(max(peak.values(), default=0.0), 4), "final_disp": final, "below_ground": below}, indent=1), flush=True)
+        report = {"engine": "isaac_sim", "version": version("isaacsim"), "steps": steps, "sim_seconds": steps * float(manifest["timestep"]),
+                  "peak_disp": round(max(peak.values(), default=0.0), 4), "final_disp": final, "below_ground": below}
+        print(json.dumps(report, indent=1), flush=True)
+        if a.report:
+            json.dump(report, open(a.report, "w"), indent=1)
     finally:
         app.close()
 
