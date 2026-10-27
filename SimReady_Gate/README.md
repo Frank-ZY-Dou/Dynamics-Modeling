@@ -232,7 +232,7 @@ $ python -m simready.cli check "$ROBOLAB_DIR/assets/scenes/workdesk_snacks.usda"
 
 ```
 $ python -m simready.cli repair "$ROBOLAB_DIR/assets/scenes/workdesk_snacks.usda" program.json --out workdesk_repaired.usda
-{"ok": true, "pen_before": 12, "pen_after": 0, "rmsd_xy": 0.037, "time_s": 3.4,
+{"ok": true, "pen_before": 12, "pen_after": 0, "rmsd_xy": 0.037, "time_s": 3.5,
  "failed_predicates": [], "written_pose_error_m": 2.1e-05,
  "certificate": "workdesk_repaired.certificate.json"}
 ```
@@ -242,8 +242,8 @@ $ python -m simready.cli repair "$ROBOLAB_DIR/assets/scenes/workdesk_snacks.usda
 ```
 $ python -m simready.cli settle workdesk_repaired.usda --program program.json
 {"pass": true, "thresholds": {"v_max": 1.0, "d_max": 0.15, "source": "program gate"},
- "hull":  {"peak_speed": 0.577, "peak_disp": 0.0604, "left_support": [], "pass": true},
- "coacd": {"peak_speed": 0.561, "peak_disp": 0.0594, "left_support": [], "pass": true}}
+ "hull":  {"peak_speed": 0.351, "peak_disp": 0.0144, "left_support": [], "pass": true},
+ "coacd": {"peak_speed": 0.256, "peak_disp": 0.0134, "left_support": [], "pass": true}}
 ```
 
 <p align="center"><img src="docs/media/workdesk_settle.png" width="100%" alt="MuJoCo settle, as shipped versus repaired"/></p>
@@ -465,7 +465,7 @@ Each runner takes `--record poses.json` (the world pose of every free body at 30
 <td align="center"><img src="docs/media/workdesk_settle.gif" alt="MuJoCo settle of the shipped scene, before and after"/></td>
 </tr>
 </table>
-<p align="center"><i><code>workdesk_snacks</code>, already physics-settled by RoboLab's pipeline, still has three object-object interpenetrations, the largest 9.9 mm. One sentence of intent and one certificate later it is clean, with 3.3 cm of planar motion (<a href="#example-1-a-scene-robolab-ships">Example 1</a>). Right: settled in MuJoCo, as shipped and after the repair.</i></p>
+<p align="center"><i><code>workdesk_snacks</code>, already physics-settled by RoboLab's pipeline, still has three object-object interpenetrations, the largest 9.9 mm. One sentence of intent and one certificate later it is clean, with 4.0 cm of planar motion (<a href="#example-1-a-scene-robolab-ships">Example 1</a>). Right: settled in MuJoCo, as shipped and after the repair.</i></p>
 
 ### A layout RoboLab's solver rejects
 

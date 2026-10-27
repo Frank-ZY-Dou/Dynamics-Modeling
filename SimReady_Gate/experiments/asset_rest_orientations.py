@@ -35,8 +35,10 @@ def tipping_deg(dims) -> float:
 
 
 def shipped_up_axes(robolab: Path, catalog: dict) -> dict:
-    """{asset name: [(axis, scene), ...]} over every shipped scene."""
+    """{asset name: [(axis, scene), ...]} over every shipped scene, the axes of the frame the asset's
+    file authors it in (the catalog's frame, see simready.io.usd_io.asset_frame_rotation)."""
     from pxr import Usd, UsdGeom
+    from simready.io.usd_io import asset_frame_rotation
     out = collections.defaultdict(list)
     for sp in sorted((robolab / "assets" / "scenes").glob("*.usda")):
         st = Usd.Stage.Open(str(sp))
@@ -49,7 +51,8 @@ def shipped_up_axes(robolab: Path, catalog: dict) -> dict:
                 continue
             m = cache.GetLocalToWorldTransform(prim)
             M = np.array([[m[i][j] for j in range(4)] for i in range(4)])
-            upc = M[:3, 2]                          # world-Z component of each authored axis
+            R_frame = asset_frame_rotation(prim)
+            upc = M[:3, 2] if R_frame is None else R_frame @ M[:3, 2]   # world-Z component of each authored axis
             k = int(np.argmax(np.abs(upc)))
             out[key].append((("+" if upc[k] > 0 else "-") + "xyz"[k], sp.name))
     return out

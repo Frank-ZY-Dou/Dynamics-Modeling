@@ -3,7 +3,8 @@
 A scene .usda holds a `world` Xform whose children are fixtures (payloads
 under assets/fixtures) and objects (payloads under assets/objects), each
 with translate/orient/scale xformOps. Every Mesh prim below a child is
-gathered in world space, re-expressed in the child's rotation frame and
+gathered in world space, re-expressed in the frame the child's asset file
+authors it in (the child's own rotation frame when the scene authors it) and
 AABB-centred to form one Body.
 """
 from __future__ import annotations
@@ -123,6 +124,33 @@ def child_source(child, scene_path):
     return srcpath, payload_targets
 
 
+def asset_frame_rotation(child) -> np.ndarray | None:
+    """Rotation from a scene child's local frame to the frame its asset file authors it in, the
+    frame `load_object_usd` reads that asset in and the catalog and the rest table describe; None
+    for a child that brings in no asset file. The scene's transform ops on the child replace the
+    ones the asset's root prim carries in its file, so a rotation there (RoboLab's computer mouse:
+    90 degrees about x over a Y-up mesh) is not in the child's local frame: a body left in that
+    frame reads as lying on its side, and `upright` stands it on end."""
+    from pxr import Sdf, Usd, UsdGeom
+    found = []
+    for spec in child.GetPrimStack():
+        for arcs in (spec.payloadList, spec.referenceList):
+            for item in arcs.GetAddedOrExplicitItems():
+                if not item.assetPath:
+                    continue                          # an arc inside this scene: the scene authors the child
+                path = Sdf.ComputeAssetPathRelativeToLayer(spec.layer, item.assetPath)
+                stage = Usd.Stage.Open(path)
+                prim = stage.GetPrimAtPath(item.primPath) if not item.primPath.isEmpty else stage.GetDefaultPrim()
+                if not prim or not prim.IsValid():
+                    raise ValueError(f"{child.GetPath()}: {path} has no prim {item.primPath or '(default prim)'}")
+                found.append(_rotation_from_affine(_matrix_np(UsdGeom.XformCache().GetLocalToWorldTransform(prim))[0]))
+    if not found:
+        return None
+    if any(np.abs(R - found[0]).max() > 1e-9 for R in found[1:]):
+        raise ValueError(f"{child.GetPath()}: its asset files author it in different frames")
+    return found[0]
+
+
 def _stage_frame(stage, path):
     """(metersPerUnit, upAxis) as authored, None for each the stage does not author. Every stage
     read here works in metres, Z up: one that says otherwise is refused rather than read as if it
@@ -193,9 +221,14 @@ def load_scene_usda(path, fixture_key: str = "fixtures", world_prim: str | None 
         Rc = _rotation_from_affine(Rc_aff)
         local = (Rc.T @ (Vw - tc).T).T
         srcpath, payload_targets = child_source(child, path)
-        # An asset whose authored pose cannot stand is re-expressed in its resting frame
-        # (simready.io.asset_rest): the vertices turn once, the pose rotation absorbs the
-        # inverse, the world geometry is unchanged.
+        # The body is expressed in the frame its asset file authors it in (asset_frame_rotation), and
+        # an asset whose authored pose cannot stand in its resting frame (simready.io.asset_rest):
+        # each time the vertices turn, the pose rotation absorbs the inverse, and the world geometry
+        # is unchanged.
+        R_frame = asset_frame_rotation(child)
+        if R_frame is not None:
+            local = local @ R_frame.T
+            Rc = Rc @ R_frame.T
         R_rest = rest_rotation(srcpath or child.GetName()) if payload_targets else rest_rotation(child.GetName())
         if R_rest is not None:
             local = local @ R_rest.T
@@ -216,6 +249,8 @@ def load_scene_usda(path, fixture_key: str = "fixtures", world_prim: str | None 
                 tags.add("ground")
         meta = {"prim": str(child.GetPath()), "n_mesh_prims": len(meshes),
                 "c_model": c_model.copy(), "center_loaded": center.copy()}
+        if R_frame is not None:
+            meta["asset_frame_rotation"] = R_frame.copy()
         if R_rest is not None:
             meta["rest_rotation"] = R_rest.copy()
         bodies.append(Body(name=child.GetName(), verts=local - c_model, faces=Fw, center=center,
@@ -276,9 +311,11 @@ def write_scene_poses(scene: Scene, src_path, out_path, world_prim: str | None =
             raise ValueError(f"{b.name}: no c_model / center_loaded in meta; load the scene with load_scene_usda")
         # the child's authored scale is baked into its mesh (local = R_old^T (world - t_old)), so the
         # new world pose is T(t_new) R_new S_old with S_old = R_old^T R_aff; a body kept in its
-        # resting frame (meta rest_rotation) turns back into the authored frame here
+        # resting frame (meta rest_rotation) and its asset's frame (meta asset_frame_rotation)
+        # turns back into the child's own frame here
         S_old = R_old.T @ R_old_aff
-        R_authored = b.rotation @ np.asarray(b.meta.get("rest_rotation", np.eye(3)), dtype=np.float64)
+        R_child = (b.rotation @ np.asarray(b.meta.get("rest_rotation", np.eye(3)), dtype=np.float64)
+                   @ np.asarray(b.meta.get("asset_frame_rotation", np.eye(3)), dtype=np.float64))
         t_new_w = b.center - b.rotation @ c_model
         # express in the parent's frame (a prim that resets the xform stack ignores its parent)
         xf = UsdGeom.Xformable(prim)
@@ -289,7 +326,7 @@ def write_scene_poses(scene: Scene, src_path, out_path, world_prim: str | None =
             P_aff, P_t = _matrix_np(cache.GetLocalToWorldTransform(prim.GetParent()))
         P_inv = np.linalg.inv(P_aff)
         t_loc = P_inv @ (t_new_w - P_t)
-        M_loc = P_inv @ (R_authored @ S_old)
+        M_loc = P_inv @ (R_child @ S_old)
         R_loc = _rotation_from_affine(M_loc)
         S_loc = R_loc.T @ M_loc
         scale = np.diag(S_loc)

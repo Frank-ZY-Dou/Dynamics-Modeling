@@ -654,6 +654,71 @@ class RestOrientation(unittest.TestCase):
         d = rest_dims(c["dims"], rest_rotation("remote_control"))
         self.assertLess(d[2], 0.03)
 
+    def test_asset_root_rotation_is_part_of_the_body_frame(self):
+        # an asset whose root prim turns a Y-up mesh to Z-up (as RoboLab's computer mouse does), placed
+        # by a scene whose own ops replace the root's: the body is read in the asset's frame
+        from simready.io.usd_io import body_from_object_usd, load_scene_usda, write_scene_poses
+        from simready.repair.upright_s4r import decompose_zyx
+
+        def mesh(extents, indent):
+            m = trimesh.creation.box(extents=extents)
+            pts = ", ".join(f"({x:.4f}, {y:.4f}, {z:.4f})" for x, y, z in m.vertices)
+            idx = ", ".join(str(int(i)) for i in m.faces.reshape(-1))
+            return (f'{indent}def Mesh "geo" {{\n{indent}    point3f[] points = [{pts}]\n'
+                    f'{indent}    int[] faceVertexCounts = [{", ".join(["3"] * len(m.faces))}]\n'
+                    f'{indent}    int[] faceVertexIndices = [{idx}]\n{indent}}}\n')
+
+        def qmul(a, b):
+            w1, x1, y1, z1 = a
+            w2, x2, y2, z2 = b
+            return (w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2, w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
+                    w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2, w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2)
+
+        head = '#usda 1.0\n(\n    defaultPrim = "{}"\n    metersPerUnit = 1\n    upAxis = "Z"\n)\n\n'
+        q = qmul((math.cos(math.radians(15.0)), 0.0, 0.0, math.sin(math.radians(15.0))),      # a 30 degree yaw
+                 (math.cos(math.radians(45.0)), math.sin(math.radians(45.0)), 0.0, 0.0))     # after the root's turn
+        with tempfile.TemporaryDirectory() as d:
+            asset, scene = os.path.join(d, "mouse.usda"), os.path.join(d, "scene.usda")
+            Path(asset).write_text(head.format("Asset") + 'def Xform "Asset" {\n    float3 xformOp:rotateXYZ = (90, 0, 0)\n'
+                                   '    uniform token[] xformOpOrder = ["xformOp:rotateXYZ"]\n' + mesh((0.06, 0.04, 0.11), "    ") + "}\n")
+            Path(scene).write_text(head.format("World") + 'def Xform "World" {\n'
+                                   '    def Xform "table" {\n        double3 xformOp:translate = (0, 0, -0.025)\n'
+                                   '        uniform token[] xformOpOrder = ["xformOp:translate"]\n' + mesh((1.0, 1.0, 0.05), "        ") + "    }\n"
+                                   '    def Xform "mouse" (\n        prepend payload = @./mouse.usda@\n    )\n    {\n'
+                                   '        double3 xformOp:translate = (0.3, 0.1, 0.02)\n'
+                                   f'        quatf xformOp:orient = ({q[0]:.9f}, {q[1]:.9f}, {q[2]:.9f}, {q[3]:.9f})\n'
+                                   '        float3 xformOp:scale = (1, 1, 1)\n'
+                                   '        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:orient", "xformOp:scale"]\n    }\n}\n')
+            sc = load_scene_usda(scene)
+            b = sc["mouse"]
+            authored = body_from_object_usd("mouse", asset, (0.0, 0.0, 0.0)).verts
+            np.testing.assert_allclose(np.ptp(authored, axis=0), [0.06, 0.11, 0.04], atol=1e-6)
+            np.testing.assert_allclose(np.ptp(b.verts, axis=0), [0.06, 0.11, 0.04], atol=1e-6)
+            yaw, roll, pitch = decompose_zyx(b.rotation)
+            self.assertLess(max(abs(roll), abs(pitch)), 1e-6, "lying as placed reads as upright in the asset's frame")
+            self.assertAlmostEqual(math.degrees(yaw), 30.0, places=4)
+            v = b.world_vertices()
+            self.assertAlmostEqual(float(v[:, 2].min()), 0.0, places=6)
+            self.assertAlmostEqual(float(v[:, 2].max()), 0.04, places=6)
+            b.rotation = rotz(math.radians(10.0)) @ b.rotation
+            b.center = b.center + np.array([0.02, -0.01, 0.0])
+            want = b.world_vertices()
+            out = os.path.join(d, "moved.usda")
+            write_scene_poses(sc, scene, out)
+            got = load_scene_usda(out)["mouse"]
+            np.testing.assert_allclose(np.sort(got.world_vertices(), axis=0), np.sort(want, axis=0), atol=1e-6)
+            _, roll, pitch = decompose_zyx(got.rotation)
+            self.assertLess(max(abs(roll), abs(pitch)), 1e-6)
+
+    @unittest.skipUnless(_WORKDESK.exists(), "needs the RoboLab checkout")
+    def test_shipped_mouse_lies_flat(self):
+        from simready.io.usd_io import load_scene_usda
+        from simready.repair.upright_s4r import decompose_zyx
+        b = load_scene_usda(str(_WORKDESK))["computer_mouse"]
+        _, roll, pitch = decompose_zyx(b.rotation)
+        self.assertLess(math.degrees(max(abs(roll), abs(pitch))), 1.0, "the mouse lies on its base as shipped")
+        self.assertLess(float(np.ptp(b.verts[:, 2])), 0.05)
+
 
 def write_op_order_usda(path, world_scale=None):
     """A Z-up scene whose free bodies author their xform ops in orders other than translate,

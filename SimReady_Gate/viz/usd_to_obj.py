@@ -723,7 +723,7 @@ def _display_colour_record(prim, mats):
 def _gather(root, xcache, usd_path, to_local=None):
     """Collect triangles, uvs and per-face materials below `root`, in world coordinates of its
     stage or, with to_local=(Rc, tc), in the frame Rc^T (x - tc) (the scene child's frame with
-    its scale baked in, exactly as simready.io.usd_io.load_scene_usda builds body meshes)."""
+    its scale baked in, the frame simready.io.usd_io.load_scene_usda starts a body mesh from)."""
     from pxr import Usd, UsdGeom, UsdShade
     V, VT, F, FT, FM = [], [], [], [], []      # vertices, uvs, tri vertex idx, tri uv idx (or -1), tri material key
     mats = {}
@@ -909,11 +909,12 @@ def export(usd_path, out_dir, name=None, rotation=None):
 
 
 def export_scene(usda_path, out_dir, world_prim=None):
-    """Every child of the scene's world prim as its own OBJ in the child's local frame with the
-    child's scale baked in; returns {child_name: info} with `c_model` (AABB centre of the local
-    mesh), `center` and `rotation` matching load_scene_usda's Body for that child."""
+    """Every child of the scene's world prim as its own OBJ in the body frame load_scene_usda gives
+    it (its asset's frame, then its resting frame) with the child's scale baked in; returns
+    {child_name: info} with `c_model` (AABB centre of the local mesh), `center` and `rotation`
+    matching load_scene_usda's Body for that child."""
     from pxr import Usd, UsdGeom
-    from simready.io.usd_io import _rotation_from_affine, child_source
+    from simready.io.usd_io import _rotation_from_affine, asset_frame_rotation, child_source
     from simready.io.asset_rest import rest_rotation
     usda_path = str(usda_path)
     stage = Usd.Stage.Open(usda_path)
@@ -931,6 +932,10 @@ def export_scene(usda_path, out_dir, world_prim=None):
         if g is None:
             continue
         srcpath, payload_targets = child_source(child, usda_path)
+        R_frame = asset_frame_rotation(child)
+        if R_frame is not None:                # same asset frame as load_scene_usda
+            g = _rotate_gathered(g, R_frame)
+            Rc = Rc @ R_frame.T
         R_rest = rest_rotation(srcpath or child.GetName()) if payload_targets else rest_rotation(child.GetName())
         if R_rest is not None:                 # same resting frame as load_scene_usda
             g = _rotate_gathered(g, R_rest)
