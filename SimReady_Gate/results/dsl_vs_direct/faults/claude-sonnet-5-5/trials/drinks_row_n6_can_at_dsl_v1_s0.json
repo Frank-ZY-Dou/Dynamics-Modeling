@@ -1,0 +1,190 @@
+{
+ "task": "drinks_row_n6",
+ "family": "drinks_row",
+ "n": 6,
+ "condition": "dsl_v1",
+ "seed": 0,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": null,
+   "message_chars": 1577,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_1",
+       "can_2",
+       "can_3",
+       "can_4",
+       "can_5",
+       "bottle_1"
+      ],
+      "start": "left",
+      "gap": 0.025,
+      "order": "height",
+      "spacing": "even",
+      "mid": 0.0,
+      "tol": 0.004
+     },
+     {
+      "op": "at",
+      "a": "*",
+      "x": 0.75,
+      "tol": 0.004
+     },
+     {
+      "op": "at",
+      "a": "can_1",
+      "y": 0.0,
+      "tol": 0.005
+     }
+    ]
+   },
+   "answer_from": "fault",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "row(can_1,can_2,can_3,can_4,can_5,bottle_1):order",
+      0.0213
+     ],
+     [
+      "row(can_1,can_2,can_3,can_4,can_5,bottle_1):even",
+      0.0091
+     ],
+     [
+      "row(can_1,can_2,can_3,can_4,can_5,bottle_1):mid",
+      0.0128
+     ],
+     [
+      "at(can_1)",
+      0.0138
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 55 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 4 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 1.4405345916748047,
+   "solve_cpu_s": 1.440688728000005,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 7
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 5.7335216999053955,
+    "duration_ms": 5060,
+    "duration_api_ms": 5027,
+    "cost_usd": 0.0144877,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1875,
+     "cache_read": 12037,
+     "output": 578,
+     "thinking": 335
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2661,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_*",
+       "bottle_1"
+      ],
+      "axis": "y",
+      "start": "left",
+      "gap": 0.025,
+      "order": "height",
+      "spacing": "even",
+      "mid": 0
+     },
+     {
+      "op": "at",
+      "a": "*",
+      "x": 0.75,
+      "tol": 0.004
+     }
+    ],
+    "schedule": {
+     "margin": 0.005
+    }
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 0.9882602691650391,
+   "solve_cpu_s": 0.9882199050000011,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 6
+  }
+ ],
+ "n_rounds": 2,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true,
+ "fault": {
+  "name": "can_at",
+  "kind": "conflict"
+ }
+}

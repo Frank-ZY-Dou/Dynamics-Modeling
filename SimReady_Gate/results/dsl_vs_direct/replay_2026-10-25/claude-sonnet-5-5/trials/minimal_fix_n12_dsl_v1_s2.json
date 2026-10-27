@@ -1,0 +1,84 @@
+{
+ "task": "minimal_fix_n12",
+ "family": "minimal_fix",
+ "n": 12,
+ "condition": "dsl_v1",
+ "seed": 2,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 2.528992176055908,
+    "duration_ms": 1807,
+    "duration_api_ms": 1756,
+    "cost_usd": 0.0094229,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1669,
+     "cache_read": 10529,
+     "output": 169,
+     "thinking": 0
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1937,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "max_move",
+      "a": "*",
+      "d": 0.03
+     },
+     {
+      "op": "max_turn",
+      "a": "*",
+      "deg": 10
+     },
+     {
+      "op": "minimize"
+     }
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 2.5653231143951416,
+   "solve_cpu_s": 2.5509033200000033,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 7
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

@@ -11,28 +11,214 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 23.152344226837158,
-    "duration_ms": 22623,
-    "duration_api_ms": 22597,
-    "cost_usd": 0.00261879,
+    "wall_s": 58.46061158180237,
+    "duration_ms": 57880,
+    "duration_api_ms": 57849,
+    "cost_usd": 0.006671469999999999,
     "usage": {
      "input": 2,
-     "cache_creation": 1494,
-     "cache_read": 10529,
-     "output": 4429,
-     "thinking": 4269
+     "cache_creation": 1582,
+     "cache_read": 12037,
+     "output": 12469,
+     "thinking": 11483
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1518,
+   "message_chars": 1763,
    "answer": {
     "statements": [
      {
       "op": "on_support",
       "a": "*",
-      "b": "table"
+      "b": "table.level2",
+      "reason": "every piece rests on the table"
+     },
+     {
+      "op": "upright",
+      "a": "*",
+      "reason": "pieces keep their resting orientation on the table"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.005,
+      "reason": "pieces stay on the table top"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "x0": 0.42,
+      "x1": 0.7,
+      "y0": -0.14,
+      "y1": 0.14,
+      "inset": 0.005,
+      "reason": "every piece entirely inside the square x 0.42 to 0.70, y -0.14 to 0.14"
+     },
+     {
+      "op": "no_penetration",
+      "reason": "nothing interpenetrates"
+     },
+     {
+      "op": "yaw",
+      "a": "fruit_3",
+      "deg": 0,
+      "axis": "long",
+      "mod": 180,
+      "tol": 15,
+      "soft": 0.5,
+      "reason": "banana lies lengthwise along the square to fit the packing"
+     },
+     {
+      "op": "yaw",
+      "a": "fruit_7",
+      "deg": 0,
+      "axis": "long",
+      "mod": 180,
+      "tol": 15,
+      "soft": 0.5,
+      "reason": "banana lies lengthwise along the square to fit the packing"
+     },
+     {
+      "op": "place",
+      "a": "fruit_3",
+      "x": 0.51,
+      "y": 0.095,
+      "yaw": 0,
+      "reason": "seed: banana in the upper row"
+     },
+     {
+      "op": "place",
+      "a": "fruit_9",
+      "x": 0.64,
+      "y": 0.095,
+      "yaw": 0,
+      "reason": "seed: apple beside the upper banana"
+     },
+     {
+      "op": "place",
+      "a": "fruit_7",
+      "x": 0.5,
+      "y": -0.095,
+      "yaw": 0,
+      "reason": "seed: banana in the lower row"
+     },
+     {
+      "op": "place",
+      "a": "fruit_8",
+      "x": 0.63,
+      "y": -0.095,
+      "yaw": 0,
+      "reason": "seed: tangerine beside the lower banana"
+     },
+     {
+      "op": "place",
+      "a": "fruit_6",
+      "x": 0.455,
+      "y": 0,
+      "yaw": 0,
+      "reason": "seed: middle row"
+     },
+     {
+      "op": "place",
+      "a": "fruit_10",
+      "x": 0.56,
+      "y": 0,
+      "yaw": 0,
+      "reason": "seed: middle row"
+     },
+     {
+      "op": "place",
+      "a": "fruit_2",
+      "x": 0.66,
+      "y": 0,
+      "yaw": 0,
+      "reason": "seed: middle row"
+     },
+     {
+      "op": "place",
+      "a": "fruit_1",
+      "x": 0.52,
+      "y": 0.05,
+      "yaw": 0,
+      "reason": "seed: remaining apple"
+     },
+     {
+      "op": "place",
+      "a": "fruit_4",
+      "x": 0.6,
+      "y": -0.05,
+      "yaw": 0,
+      "reason": "seed: remaining tangerine"
+     },
+     {
+      "op": "place",
+      "a": "fruit_5",
+      "x": 0.44,
+      "y": -0.05,
+      "yaw": 0,
+      "reason": "seed: remaining apple"
+     }
+    ],
+    "schedule": {
+     "margin": 0.003
+    }
+   },
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "within(fruit_3,region)",
+      0.003
+     ],
+     [
+      "within(fruit_7,region)",
+      0.0021
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "pairs still penetrated in the closing steps of the tail; 2 step(s) served the contacts alone, the program rows set aside",
+     "a program row was not met within the step at 16 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 4 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 2.102057933807373,
+   "solve_cpu_s": 2.102169936000003,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 17
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 126.19693732261658,
+    "duration_ms": 125567,
+    "duration_api_ms": 125537,
+    "cost_usd": 0.01503487,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2824,
+     "cache_read": 12037,
+     "output": 28699,
+     "thinking": 27860
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 4320,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
      },
      {
       "op": "upright",
@@ -41,38 +227,312 @@
      {
       "op": "within",
       "a": "*",
+      "b": "table.top",
+      "inset": 0.005
+     },
+     {
+      "op": "within",
+      "a": "*",
       "x0": 0.42,
       "x1": 0.7,
       "y0": -0.14,
-      "y1": 0.14
+      "y1": 0.14,
+      "inset": 0
      },
      {
-      "op": "no_penetration",
-      "margin": 0.002
+      "op": "no_penetration"
      },
      {
-      "op": "minimize"
+      "op": "yaw",
+      "a": "fruit_3",
+      "deg": 0,
+      "axis": "long",
+      "mod": 180,
+      "tol": 15,
+      "soft": 0.5
+     },
+     {
+      "op": "yaw",
+      "a": "fruit_7",
+      "deg": 0,
+      "axis": "long",
+      "mod": 180,
+      "tol": 15,
+      "soft": 0.5
+     },
+     {
+      "op": "place",
+      "a": "fruit_3",
+      "x": 0.51,
+      "y": -0.095,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "fruit_6",
+      "x": 0.635,
+      "y": -0.1,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_7",
+      "x": 0.505,
+      "y": -0.02,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "fruit_4",
+      "x": 0.64,
+      "y": -0.02,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_5",
+      "x": 0.46,
+      "y": 0.04,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_8",
+      "x": 0.54,
+      "y": 0.04,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_9",
+      "x": 0.63,
+      "y": 0.04,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "fruit_1",
+      "x": 0.46,
+      "y": 0.105,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_2",
+      "x": 0.54,
+      "y": 0.105,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_10",
+      "x": 0.63,
+      "y": 0.105,
+      "yaw": 0
      }
+    ],
+    "schedule": {
+     "margin": 0.001
+    },
+    "intent": "Pack all ten fruit upright on the table inside the square x 0.42\u20130.70, y -0.14\u20130.14, without overlaps, with bananas lying lengthwise."
+   },
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "within(fruit_10,region)",
+      0.0022
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "pairs still penetrated in the closing steps of the tail; 1 step(s) served the contacts alone, the program rows set aside"
     ]
    },
-   "answer_from": "recorded",
-   "report": {
-    "ok": true,
-    "pen_after": 0,
-    "failed_predicates": [],
-    "failed_preferences": [],
-    "solver_notes": []
-   },
-   "self_ok": true,
-   "solve_s": 1.1377160549163818,
-   "solve_cpu_s": 1.1377590499999997,
+   "self_ok": false,
+   "solve_s": 1.8361895084381104,
+   "solve_cpu_s": 1.836415639000002,
    "rubric_ok": true,
    "rubric_failed": [],
-   "answer_items": 5
+   "answer_items": 17
+  },
+  {
+   "round": 3,
+   "llm": {
+    "ok": true,
+    "wall_s": 135.24896001815796,
+    "duration_ms": 134715,
+    "duration_api_ms": 134688,
+    "cost_usd": 0.01525807,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2485,
+     "cache_read": 12037,
+     "output": 29281,
+     "thinking": 28453
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 3417,
+   "answer": {
+    "intent": "Pack all ten fruit upright on the table inside the square x 0.42 to 0.70, y -0.14 to 0.14, with no overlaps and both bananas lying lengthwise along x.",
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.005
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "x0": 0.42,
+      "x1": 0.7,
+      "y0": -0.14,
+      "y1": 0.14,
+      "inset": 0
+     },
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "yaw",
+      "a": "fruit_3",
+      "deg": 0,
+      "axis": "long",
+      "mod": 180,
+      "tol": 10
+     },
+     {
+      "op": "yaw",
+      "a": "fruit_7",
+      "deg": 0,
+      "axis": "long",
+      "mod": 180,
+      "tol": 10
+     },
+     {
+      "op": "place",
+      "a": "fruit_3",
+      "x": 0.505,
+      "y": -0.095,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_4",
+      "x": 0.65,
+      "y": -0.095,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_7",
+      "x": 0.5,
+      "y": -0.02,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_8",
+      "x": 0.65,
+      "y": -0.02,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_1",
+      "x": 0.455,
+      "y": 0.045,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_2",
+      "x": 0.545,
+      "y": 0.045,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_6",
+      "x": 0.635,
+      "y": 0.045,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_5",
+      "x": 0.455,
+      "y": 0.105,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_9",
+      "x": 0.545,
+      "y": 0.105,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_10",
+      "x": 0.635,
+      "y": 0.105,
+      "yaw": 0
+     }
+    ],
+    "schedule": {
+     "margin": 0.001
+    }
+   },
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "within(fruit_9,region)",
+      0.0059
+     ],
+     [
+      "within(fruit_10,region)",
+      0.0051
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "pairs still penetrated in the closing steps of the tail; 2 step(s) served the contacts alone, the program rows set aside",
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 2.036834955215454,
+   "solve_cpu_s": 2.0371224419999976,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "in_square(10 bodies)",
+     false,
+     0.0059
+    ]
+   ],
+   "answer_items": 17
   }
  ],
- "n_rounds": 1,
- "success": true,
+ "n_rounds": 3,
+ "success": false,
  "first_round_success": true,
- "self_ok": true
+ "self_ok": false
 }

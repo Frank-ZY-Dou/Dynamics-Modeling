@@ -11,63 +11,62 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 18.031815767288208,
-    "duration_ms": 17500,
-    "duration_api_ms": 17472,
-    "cost_usd": 0.00217613,
+    "wall_s": 14.19928503036499,
+    "duration_ms": 13580,
+    "duration_api_ms": 13551,
+    "cost_usd": 0.00183783,
     "usage": {
      "input": 2,
-     "cache_creation": 1314,
+     "cache_creation": 1365,
      "cache_read": 913,
-     "output": 3808,
-     "thinking": 3551
+     "output": 3111,
+     "thinking": 2881
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1320,
+   "message_chars": 1511,
    "answer": {
     "poses": [
      {
       "name": "box_1",
-      "x": 0.47,
-      "y": -0.35,
+      "x": 0.455,
+      "y": -0.36,
       "yaw": 90
      },
      {
       "name": "box_2",
-      "x": 0.47,
+      "x": 0.455,
       "y": 0,
       "yaw": 90
      },
      {
       "name": "box_3",
-      "x": 0.47,
-      "y": 0.35,
+      "x": 0.455,
+      "y": 0.36,
       "yaw": 90
      },
      {
       "name": "box_4",
-      "x": 0.8,
-      "y": -0.35,
-      "yaw": 90
-     },
-     {
-      "name": "box_5",
-      "x": 0.8,
+      "x": 0.76,
       "y": 0,
       "yaw": 0
      },
      {
+      "name": "box_5",
+      "x": 0.76,
+      "y": -0.36,
+      "yaw": 0
+     },
+     {
       "name": "box_6",
-      "x": 0.8,
-      "y": 0.35,
+      "x": 0.76,
+      "y": 0.36,
       "yaw": 0
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -76,28 +75,22 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 0.23836088180541992,
-   "solve_cpu_s": 0.238389509000001,
-   "rubric_ok": false,
-   "rubric_failed": [
-    [
-     "min_clearance",
-     false,
-     0.0052
-    ]
-   ],
+   "solve_s": 0.21698403358459473,
+   "solve_cpu_s": 0.21701457899999355,
+   "rubric_ok": true,
+   "rubric_failed": [],
    "answer_items": 6,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 0.5478160381317139,
-    "solve_cpu_s": 0.5480108369999925,
+    "solve_s": 0.569049596786499,
+    "solve_cpu_s": 0.5690977860000146,
     "rubric_failed": []
    }
   }
  ],
  "n_rounds": 1,
- "success": false,
- "first_round_success": false,
+ "success": true,
+ "first_round_success": true,
  "self_ok": true
 }

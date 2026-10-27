@@ -11,22 +11,22 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 8.450398683547974,
-    "duration_ms": 7792,
-    "duration_api_ms": 7745,
-    "cost_usd": 0.0224826,
+    "wall_s": 5.386430263519287,
+    "duration_ms": 4666,
+    "duration_api_ms": 4631,
+    "cost_usd": 0.0202386,
     "usage": {
      "input": 2,
-     "cache_creation": 1289,
+     "cache_creation": 1336,
      "cache_read": 913,
-     "output": 599,
-     "thinking": 350
+     "output": 468,
+     "thinking": 219
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1341,
+   "message_chars": 1530,
    "answer": {
     "poses": [
      {
@@ -51,25 +51,24 @@
      },
      {
       "name": "apple",
-      "x": 0.62,
-      "y": 0.15,
+      "x": 0.5,
+      "y": 0.2,
       "yaw": -6
      },
      {
-      "name": "cup",
-      "x": 0.48,
-      "y": 0.15,
-      "yaw": -31
+      "name": "can",
+      "x": 0.62,
+      "y": 0.2,
+      "yaw": 177
      },
      {
-      "name": "can",
-      "x": 0.55,
-      "y": 0.3,
-      "yaw": 177
+      "name": "cup",
+      "x": 0.74,
+      "y": 0.2,
+      "yaw": -31
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -78,28 +77,17 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 0.365222692489624,
-   "solve_cpu_s": 0.36461838399999635,
+   "solve_s": 0.3343086242675781,
+   "solve_cpu_s": 0.33437858399999243,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 6,
    "direct_repair": {
-    "rubric_ok": false,
+    "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 3.071129322052002,
-    "solve_cpu_s": 3.0473964050000006,
-    "rubric_failed": [
-     [
-      "centred(box_medium,box_large)",
-      false,
-      0.0697
-     ],
-     [
-      "centred(box_small,box_medium)",
-      false,
-      0.1394
-     ]
-    ]
+    "solve_s": 1.4095053672790527,
+    "solve_cpu_s": 1.4098311260000003,
+    "rubric_failed": []
    }
   }
  ],

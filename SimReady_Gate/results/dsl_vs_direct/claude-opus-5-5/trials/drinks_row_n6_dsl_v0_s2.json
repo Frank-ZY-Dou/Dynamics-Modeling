@@ -11,22 +11,22 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 11.097947359085083,
-    "duration_ms": 10377,
-    "duration_api_ms": 10345,
-    "cost_usd": 0.0351684,
+    "wall_s": 11.947351932525635,
+    "duration_ms": 11340,
+    "duration_api_ms": 11311,
+    "cost_usd": 0.0376794,
     "usage": {
      "input": 2,
-     "cache_creation": 1321,
-     "cache_read": 3962,
-     "output": 1190,
-     "thinking": 583
+     "cache_creation": 1369,
+     "cache_read": 4297,
+     "output": 1293,
+     "thinking": 668
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1388,
+   "message_chars": 1577,
    "answer": {
     "statements": [
      {
@@ -34,57 +34,12 @@
      },
      {
       "op": "on_support",
-      "a": "can_1",
-      "b": "table"
-     },
-     {
-      "op": "on_support",
-      "a": "can_2",
-      "b": "table"
-     },
-     {
-      "op": "on_support",
-      "a": "can_3",
-      "b": "table"
-     },
-     {
-      "op": "on_support",
-      "a": "can_4",
-      "b": "table"
-     },
-     {
-      "op": "on_support",
-      "a": "can_5",
-      "b": "table"
-     },
-     {
-      "op": "on_support",
-      "a": "bottle_1",
+      "a": "*",
       "b": "table"
      },
      {
       "op": "upright",
-      "a": "can_1"
-     },
-     {
-      "op": "upright",
-      "a": "can_2"
-     },
-     {
-      "op": "upright",
-      "a": "can_3"
-     },
-     {
-      "op": "upright",
-      "a": "can_4"
-     },
-     {
-      "op": "upright",
-      "a": "can_5"
-     },
-     {
-      "op": "upright",
-      "a": "bottle_1"
+      "a": "*"
      },
      {
       "op": "within",
@@ -130,31 +85,39 @@
      {
       "op": "left_of",
       "a": "can_4",
-      "b": "can_5"
+      "b": "can_5",
+      "gap": 0.085
      },
      {
       "op": "left_of",
       "a": "can_5",
-      "b": "can_1"
+      "b": "can_1",
+      "gap": 0.085
      },
      {
       "op": "left_of",
       "a": "can_1",
-      "b": "can_2"
+      "b": "can_2",
+      "gap": 0.085
      },
      {
       "op": "left_of",
       "a": "can_2",
-      "b": "can_3"
+      "b": "can_3",
+      "gap": 0.075
      },
      {
       "op": "left_of",
       "a": "can_3",
-      "b": "bottle_1"
+      "b": "bottle_1",
+      "gap": 0.075
      }
+    ],
+    "assumptions": [
+     "can_1, can_2 and can_3 are all 0.12 m tall, so their order among themselves doesn't matter; they are placed as can_1, can_2, can_3 from left to right.",
+     "No statement can express the shared line at x 0.70\u20130.80, equal spacing within 1 cm, or a midpoint on y=0. All three are only targeted by soft place pulls (x=0.75, 0.10 m pitch, y from +0.25 to -0.25). They are not enforced and need a separate check."
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -163,11 +126,11 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 1.0756747722625732,
-   "solve_cpu_s": 1.0758854219999998,
+   "solve_s": 0.9064779281616211,
+   "solve_cpu_s": 0.9066669759999995,
    "rubric_ok": true,
    "rubric_failed": [],
-   "answer_items": 25
+   "answer_items": 15
   }
  ],
  "n_rounds": 1,

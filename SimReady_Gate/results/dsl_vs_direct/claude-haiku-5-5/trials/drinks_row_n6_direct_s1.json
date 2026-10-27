@@ -11,63 +11,62 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 6.340901851654053,
-    "duration_ms": 5749,
-    "duration_api_ms": 5719,
-    "cost_usd": 0.00069325,
+    "wall_s": 9.510275602340698,
+    "duration_ms": 8120,
+    "duration_api_ms": 8083,
+    "cost_usd": 0.00111253,
     "usage": {
      "input": 2,
-     "cache_creation": 401,
-     "cache_read": 1835,
-     "output": 1189,
-     "thinking": 956
+     "cache_creation": 1371,
+     "cache_read": 913,
+     "output": 1658,
+     "thinking": 1404
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1383,
+   "message_chars": 1572,
    "answer": {
     "poses": [
      {
       "name": "can_4",
       "x": 0.75,
-      "y": 0.25,
+      "y": 0.3,
       "yaw": 0
      },
      {
       "name": "can_5",
       "x": 0.75,
-      "y": 0.15,
+      "y": 0.18,
       "yaw": 0
      },
      {
       "name": "can_1",
       "x": 0.75,
-      "y": 0.05,
+      "y": 0.06,
       "yaw": 0
      },
      {
       "name": "can_2",
       "x": 0.75,
-      "y": -0.05,
+      "y": -0.06,
       "yaw": 0
      },
      {
       "name": "can_3",
       "x": 0.75,
-      "y": -0.15,
+      "y": -0.18,
       "yaw": 0
      },
      {
       "name": "bottle_1",
       "x": 0.75,
-      "y": -0.25,
+      "y": -0.3,
       "yaw": 0
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -76,16 +75,16 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 0.4846317768096924,
-   "solve_cpu_s": 0.48469238400000014,
+   "solve_s": 0.4111051559448242,
+   "solve_cpu_s": 0.411127692,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 6,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 1.0088496208190918,
-    "solve_cpu_s": 1.008435832,
+    "solve_s": 0.8472354412078857,
+    "solve_cpu_s": 0.8473574810000004,
     "rubric_failed": []
    }
   }

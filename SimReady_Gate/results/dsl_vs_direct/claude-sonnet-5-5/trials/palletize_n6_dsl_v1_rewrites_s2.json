@@ -1,0 +1,122 @@
+{
+ "task": "palletize_n6",
+ "family": "palletize",
+ "n": 6,
+ "condition": "dsl_v1_rewrites",
+ "seed": 2,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 7.906314134597778,
+    "duration_ms": 7111,
+    "duration_api_ms": 7083,
+    "cost_usd": 0.015829700000000002,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1343,
+     "cache_read": 12037,
+     "output": 925,
+     "thinking": 584
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1518,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "pallet.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "pallet.level2",
+      "inset": 0.02
+     },
+     {
+      "op": "yaw",
+      "a": "*",
+      "deg": 0,
+      "mod": 90,
+      "tol": 2
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_1",
+       "box_2",
+       "box_3"
+      ],
+      "axis": "y",
+      "gap": 0.015
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_4",
+       "box_5",
+       "box_6"
+      ],
+      "axis": "y",
+      "gap": 0.015
+     },
+     {
+      "op": "beside",
+      "a": "box_4",
+      "b": "box_1",
+      "side": "far",
+      "gap": 0.015
+     },
+     {
+      "op": "beside",
+      "a": "box_5",
+      "b": "box_2",
+      "side": "far",
+      "gap": 0.015
+     },
+     {
+      "op": "beside",
+      "a": "box_6",
+      "b": "box_3",
+      "side": "far",
+      "gap": 0.015
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 2 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 0.8799183368682861,
+   "solve_cpu_s": 0.8795124409999993,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 10
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

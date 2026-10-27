@@ -1,0 +1,144 @@
+{
+ "task": "pack_n10",
+ "family": "pack",
+ "n": 10,
+ "condition": "dsl_v0",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 39.92680072784424,
+    "duration_ms": 39462,
+    "duration_api_ms": 39435,
+    "cost_usd": 0.004155969999999999,
+    "usage": {
+     "input": 2,
+     "cache_creation": 401,
+     "cache_read": 5057,
+     "output": 8050,
+     "thinking": 7542
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1533,
+   "answer": {
+    "intent": "Pack all ten fruit upright on the table inside the square x 0.42 to 0.70, y -0.14 to 0.14, without interpenetration.",
+    "statements": [
+     {
+      "op": "no_penetration",
+      "a": "*",
+      "margin": 0.002
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "place",
+      "a": "fruit_1",
+      "x": 0.45,
+      "y": -0.09
+     },
+     {
+      "op": "place",
+      "a": "fruit_2",
+      "x": 0.45,
+      "y": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_3",
+      "x": 0.45,
+      "y": 0.09
+     },
+     {
+      "op": "place",
+      "a": "fruit_4",
+      "x": 0.55,
+      "y": -0.1
+     },
+     {
+      "op": "place",
+      "a": "fruit_5",
+      "x": 0.55,
+      "y": -0.03
+     },
+     {
+      "op": "place",
+      "a": "fruit_6",
+      "x": 0.55,
+      "y": 0.04
+     },
+     {
+      "op": "place",
+      "a": "fruit_7",
+      "x": 0.55,
+      "y": 0.11
+     },
+     {
+      "op": "place",
+      "a": "fruit_8",
+      "x": 0.65,
+      "y": -0.09
+     },
+     {
+      "op": "place",
+      "a": "fruit_9",
+      "x": 0.65,
+      "y": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_10",
+      "x": 0.65,
+      "y": 0.09
+     },
+     {
+      "op": "minimize",
+      "a": "*"
+     }
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 1.3452913761138916,
+   "solve_cpu_s": 1.3458740899999952,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "in_square(10 bodies)",
+     false,
+     0.069
+    ]
+   ],
+   "answer_items": 15
+  }
+ ],
+ "n_rounds": 1,
+ "success": false,
+ "first_round_success": false,
+ "self_ok": true
+}

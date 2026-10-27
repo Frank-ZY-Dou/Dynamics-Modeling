@@ -11,22 +11,22 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 29.579858779907227,
-    "duration_ms": 29068,
-    "duration_api_ms": 29039,
-    "cost_usd": 0.07734260000000001,
+    "wall_s": 17.788951635360718,
+    "duration_ms": 17204,
+    "duration_api_ms": 17164,
+    "cost_usd": 0.0509106,
     "usage": {
      "input": 2,
-     "cache_creation": 1889,
+     "cache_creation": 1995,
      "cache_read": 913,
-     "output": 3102,
-     "thinking": 2169
+     "output": 1738,
+     "thinking": 1331
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 2612,
+   "message_chars": 2885,
    "answer": {
     "poses": [
      {
@@ -49,39 +49,39 @@
      },
      {
       "name": "bowl",
-      "x": 0.4,
+      "x": 0.45,
       "y": 0.3,
       "yaw": 89
      },
      {
-      "name": "banana",
-      "x": 0.6,
-      "y": -0.4,
-      "yaw": 90
-     },
-     {
-      "name": "tangerine",
-      "x": 0.72,
-      "y": -0.41,
-      "yaw": 137
-     },
-     {
       "name": "apple_1",
-      "x": 0.515,
-      "y": -0.49,
+      "x": 0.6,
+      "y": 0.32,
       "yaw": -119
      },
      {
-      "name": "orange",
-      "x": 0.585,
-      "y": -0.49,
-      "yaw": 90
+      "name": "apple_2",
+      "x": 0.6,
+      "y": 0.42,
+      "yaw": -135
      },
      {
-      "name": "apple_2",
-      "x": 0.66,
-      "y": -0.49,
-      "yaw": -135
+      "name": "orange",
+      "x": 0.68,
+      "y": 0.32,
+      "yaw": 0
+     },
+     {
+      "name": "tangerine",
+      "x": 0.68,
+      "y": 0.42,
+      "yaw": 137
+     },
+     {
+      "name": "banana",
+      "x": 0.64,
+      "y": 0.5,
+      "yaw": 90
      },
      {
       "name": "bottle",
@@ -92,7 +92,7 @@
      {
       "name": "can_1",
       "x": 0.82,
-      "y": 0.1,
+      "y": 0.09,
       "yaw": -68
      },
      {
@@ -103,7 +103,6 @@
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -112,16 +111,16 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 0.6028430461883545,
-   "solve_cpu_s": 0.602935642999995,
+   "solve_s": 0.6082963943481445,
+   "solve_cpu_s": 0.6083975690000045,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 12,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 1.2892389297485352,
-    "solve_cpu_s": 1.2896296149999955,
+    "solve_s": 1.5446794033050537,
+    "solve_cpu_s": 1.5449958119999962,
     "rubric_failed": []
    }
   }

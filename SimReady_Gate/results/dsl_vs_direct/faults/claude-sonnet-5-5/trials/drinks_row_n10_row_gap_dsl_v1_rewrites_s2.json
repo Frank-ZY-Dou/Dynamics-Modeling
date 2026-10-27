@@ -1,0 +1,268 @@
+{
+ "task": "drinks_row_n10",
+ "family": "drinks_row",
+ "n": 10,
+ "condition": "dsl_v1_rewrites",
+ "seed": 2,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": null,
+   "message_chars": 2183,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_1",
+       "can_2",
+       "can_3",
+       "can_4",
+       "can_5",
+       "can_6",
+       "bottle_1",
+       "bottle_2",
+       "glass_1",
+       "glass_2"
+      ],
+      "start": "left",
+      "gap": 0.22,
+      "order": "height",
+      "spacing": "even",
+      "mid": 0.0,
+      "tol": 0.004
+     },
+     {
+      "op": "at",
+      "a": "*",
+      "x": 0.75,
+      "tol": 0.004
+     }
+    ]
+   },
+   "answer_from": "fault",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "on_support(bottle_1,table)",
+      null
+     ],
+     [
+      "within(bottle_1,table.top)",
+      0.0779
+     ],
+     [
+      "within(glass_2,table.top)",
+      0.0769
+     ],
+     [
+      "row(can_1,can_2,can_3,can_4,can_5,can_6,bottle_1,bottle_2,glass_1,glass_2):order",
+      0.14
+     ],
+     [
+      "row(can_1,can_2,can_3,can_4,can_5,can_6,bottle_1,bottle_2,glass_1,glass_2):even",
+      0.0082
+     ],
+     [
+      "row(can_1,can_2,can_3,can_4,can_5,can_6,bottle_1,bottle_2,glass_1,glass_2):mid",
+      0.0064
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 59 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 12 step(s) before the scale was restored, after 8 other start(s) of the bodies over their supports"
+    ],
+    "rewrites": [
+     {
+      "statement": 1,
+      "text": "on_support(*, table)",
+      "relax": null,
+      "weaken": null
+     },
+     {
+      "statement": 3,
+      "text": "within(*, table.top, inset=0.02)",
+      "relax": null,
+      "weaken": "soft"
+     },
+     {
+      "statement": 4,
+      "text": "row(can_1, can_2, can_3, can_4, can_5, can_6, bottle_1, bottle_2, glass_1, glass_2, gap=0.22, start=left, order=height, spacing=even, mid=0.0, tol=0.004)",
+      "relax": {
+       "gap": [
+        0.22,
+        0.139
+       ],
+       "tol": [
+        0.004,
+        0.009
+       ]
+      },
+      "weaken": "soft"
+     }
+    ],
+    "accepted_if_relaxed": false,
+    "accepted_if_weakened": false,
+    "rewrites_note": "rewrites: for each statement whose requirement failed (its index in your statements), relax gives {keyword: [your value, the nearest value at which it holds on the layout the repair returned]} and weaken says whether it may become a preference (soft) or be removed (drop); accepted_if_relaxed and accepted_if_weakened say whether those edits make that layout pass. schedule_rewrites: the repair run again from the same starting scene with a smaller schedule margin ([yours, tried]), and what it ended with; the schedule never changes what is accepted. Your next program is repaired again from the same starting scene.",
+    "schedule_rewrites": [
+     {
+      "margin": [
+       0.005,
+       0.0025
+      ],
+      "ok": false,
+      "pen_after": 0,
+      "failed_predicates": [
+       "within(bottle_1,table.top)",
+       "within(glass_2,table.top)",
+       "row(can_1,can_2,can_3,can_4,can_5,can_6,bottle_1,bottle_2,glass_1,glass_2):order",
+       "row(can_1,can_2,can_3,can_4,can_5,can_6,bottle_1,bottle_2,glass_1,glass_2):even"
+      ]
+     },
+     {
+      "margin": [
+       0.005,
+       0.00125
+      ],
+      "ok": false,
+      "pen_after": 0,
+      "failed_predicates": [
+       "within(bottle_1,table.top)",
+       "within(glass_2,table.top)",
+       "row(can_1,can_2,can_3,can_4,can_5,can_6,bottle_1,bottle_2,glass_1,glass_2):order",
+       "row(can_1,can_2,can_3,can_4,can_5,can_6,bottle_1,bottle_2,glass_1,glass_2):even"
+      ]
+     }
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 9.023554801940918,
+   "solve_cpu_s": 9.214563043999995,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "supported",
+     false,
+     1
+    ],
+    [
+     "in_support_top(10 bodies)",
+     false,
+     0.0579
+    ]
+   ],
+   "answer_items": 6
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 6.341067790985107,
+    "duration_ms": 5678,
+    "duration_api_ms": 5647,
+    "cost_usd": 0.0191617,
+    "usage": {
+     "input": 2,
+     "cache_creation": 3151,
+     "cache_read": 12037,
+     "output": 535,
+     "thinking": 316
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 5285,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_*",
+       "bottle_*",
+       "glass_*"
+      ],
+      "axis": "y",
+      "start": "left",
+      "gap": 0.02,
+      "order": "height",
+      "spacing": "even",
+      "mid": 0,
+      "tol": 0.008
+     },
+     {
+      "op": "at",
+      "a": "*",
+      "x": 0.75,
+      "tol": 0.008
+     }
+    ]
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 6 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 4 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 2.3101351261138916,
+   "solve_cpu_s": 2.3100016100000005,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 6
+  }
+ ],
+ "n_rounds": 2,
+ "success": true,
+ "first_round_success": false,
+ "self_ok": true,
+ "fault": {
+  "name": "row_gap",
+  "kind": "tight"
+ }
+}

@@ -24,9 +24,6 @@
         "type": "string",
         "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
        },
-       "margin": {
-        "type": "number"
-       },
        "reason": {
         "type": "string",
         "description": "which words in the request justify this statement"
@@ -108,7 +105,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "reason": {
         "type": "string",
@@ -157,7 +154,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "inset": {
         "type": "number"
@@ -186,7 +183,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "inset": {
         "type": "number"
@@ -223,7 +220,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "gap": {
         "type": "number"
@@ -260,7 +257,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "gap": {
         "type": "number"
@@ -282,7 +279,7 @@
       "properties": {
        "op": {
         "type": "string",
-        "const": "in_front_of"
+        "const": "farther"
        },
        "a": {
         "type": "string",
@@ -297,7 +294,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "gap": {
         "type": "number"
@@ -319,7 +316,7 @@
       "properties": {
        "op": {
         "type": "string",
-        "const": "behind"
+        "const": "nearer"
        },
        "a": {
         "type": "string",
@@ -334,7 +331,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "gap": {
         "type": "number"
@@ -364,7 +361,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "r": {
         "type": "number"
@@ -387,7 +384,7 @@
       "properties": {
        "op": {
         "type": "string",
-        "const": "near"
+        "const": "close_to"
        },
        "a": {
         "type": "string",
@@ -395,7 +392,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "r": {
         "type": "number"
@@ -466,6 +463,16 @@
    "type": "array",
    "items": {
     "type": "string"
+   }
+  },
+  "schedule": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "margin": {
+     "type": "number",
+     "description": "the clearance the repair keeps between bodies (default 0.005 m); lower it for a tight packing. It changes how the repair gets there, never what the program requires"
+    }
    }
   },
   "gate": {

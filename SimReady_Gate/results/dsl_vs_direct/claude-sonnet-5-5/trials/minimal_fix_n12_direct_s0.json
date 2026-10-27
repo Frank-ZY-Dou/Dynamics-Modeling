@@ -11,46 +11,46 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 10.813106536865234,
-    "duration_ms": 10186,
-    "duration_api_ms": 10141,
-    "cost_usd": 0.0204633,
+    "wall_s": 14.440959215164185,
+    "duration_ms": 13715,
+    "duration_api_ms": 13675,
+    "cost_usd": 0.022711299999999997,
     "usage": {
      "input": 2,
-     "cache_creation": 1667,
+     "cache_creation": 1754,
      "cache_read": 913,
-     "output": 1370,
-     "thinking": 961
+     "output": 1560,
+     "thinking": 1151
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1935,
+   "message_chars": 2208,
    "answer": {
     "poses": [
      {
       "name": "plate",
-      "x": 0.58,
+      "x": 0.585,
       "y": -0.03,
       "yaw": -172
      },
      {
       "name": "bowl",
       "x": 0.58,
-      "y": -0.46,
+      "y": -0.465,
       "yaw": 73
      },
      {
       "name": "mug",
-      "x": 0.72,
-      "y": 0.1,
+      "x": 0.725,
+      "y": 0.08,
       "yaw": 68
      },
      {
       "name": "glass",
-      "x": 0.44,
-      "y": 0.29,
+      "x": 0.45,
+      "y": 0.305,
       "yaw": 101
      },
      {
@@ -62,7 +62,7 @@
      {
       "name": "apple_2",
       "x": 0.48,
-      "y": 0.38,
+      "y": 0.382,
       "yaw": 49
      },
      {
@@ -80,12 +80,12 @@
      {
       "name": "can_2",
       "x": 0.58,
-      "y": -0.59,
+      "y": -0.585,
       "yaw": 163
      },
      {
       "name": "bottle",
-      "x": 0.72,
+      "x": 0.71,
       "y": 0.48,
       "yaw": -21
      },
@@ -103,7 +103,6 @@
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -112,16 +111,16 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 1.3549885749816895,
-   "solve_cpu_s": 1.3546604989999906,
+   "solve_s": 1.166029453277588,
+   "solve_cpu_s": 1.166132931000007,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 12,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 3.1394541263580322,
-    "solve_cpu_s": 3.138709846000012,
+    "solve_s": 2.858275890350342,
+    "solve_cpu_s": 2.858393939999999,
     "rubric_failed": []
    }
   }

@@ -1,0 +1,156 @@
+{
+ "task": "fruit_cans_n24",
+ "family": "fruit_cans",
+ "n": 24,
+ "condition": "dsl_v1_rewrites",
+ "seed": 2,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 26.977484464645386,
+    "duration_ms": 26403,
+    "duration_api_ms": 26375,
+    "cost_usd": 0.00366497,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2962,
+     "cache_read": 12037,
+     "output": 5904,
+     "thinking": 5283
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 4407,
+   "answer": {
+    "intent": "Sort the fruit to the left of the table, line the cans up along x on the right, centre the bowl and mug in the middle band, keep the centre square clear, and leave the paint jar free on the table.",
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "fixed",
+      "a": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_*",
+      "b": "table.top",
+      "x0": 0.22,
+      "x1": 0.87,
+      "y0": 0.25,
+      "y1": 0.88
+     },
+     {
+      "op": "cluster",
+      "members": [
+       "fruit_*"
+      ],
+      "r": 0.18
+     },
+     {
+      "op": "within",
+      "a": "can_*",
+      "b": "table.top",
+      "x0": 0.22,
+      "x1": 0.87,
+      "y0": -0.88,
+      "y1": -0.25
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_*"
+      ],
+      "axis": "x",
+      "start": "near",
+      "gap": 0.02
+     },
+     {
+      "op": "within",
+      "a": "bowl",
+      "b": "table.top",
+      "x0": 0.2,
+      "x1": 0.89,
+      "y0": -0.2,
+      "y1": 0.2
+     },
+     {
+      "op": "reach",
+      "a": "bowl",
+      "r": 1,
+      "min": 0.55
+     },
+     {
+      "op": "within",
+      "a": "mug",
+      "b": "table.top",
+      "x0": 0.2,
+      "x1": 0.89,
+      "y0": -0.2,
+      "y1": 0.2
+     },
+     {
+      "op": "close_to",
+      "a": "mug",
+      "b": "bowl",
+      "r": 0.2
+     },
+     {
+      "op": "keep_out",
+      "a": "*",
+      "x0": 0.3,
+      "x1": 0.5,
+      "y0": -0.1,
+      "y1": 0.1
+     },
+     {
+      "op": "clearance",
+      "a": "jar_1",
+      "gap": 0.03
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 3 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 4.68494176864624,
+   "solve_cpu_s": 4.685493485,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 15
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

@@ -1,0 +1,167 @@
+{
+ "task": "pick_ready_n8",
+ "family": "pick_ready",
+ "n": 8,
+ "condition": "dsl_v0",
+ "seed": 1,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 18.701278686523438,
+    "duration_ms": 18097,
+    "duration_api_ms": 18056,
+    "cost_usd": 0.0493004,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1510,
+     "cache_read": 3962,
+     "output": 1821,
+     "thinking": 1091
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1730,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "place",
+      "a": "mug",
+      "x": 0.52,
+      "y": 0,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "bowl",
+      "x": 0.75,
+      "y": 0
+     },
+     {
+      "op": "place",
+      "a": "apple",
+      "x": 0.72,
+      "y": 0.2
+     },
+     {
+      "op": "place",
+      "a": "can",
+      "x": 0.72,
+      "y": -0.2
+     },
+     {
+      "op": "place",
+      "a": "bottle",
+      "x": 0.5,
+      "y": 0.22
+     },
+     {
+      "op": "place",
+      "a": "screwdriver",
+      "x": 0.35,
+      "y": -0.25
+     },
+     {
+      "op": "place",
+      "a": "tape",
+      "x": 0.55,
+      "y": -0.22
+     },
+     {
+      "op": "place",
+      "a": "tumbler",
+      "x": 0.55,
+      "y": -0.42
+     },
+     {
+      "op": "min_distance",
+      "a": "bowl",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "apple",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "can",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "bottle",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "screwdriver",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "tumbler",
+      "b": "mug",
+      "r": 0.18
+     }
+    ],
+    "assumptions": [
+     "The constraint set has no statement for distance to the robot base, a corridor, an angle limit or an empty region. These are handled with soft place targets instead.",
+     "Mug yaw 0 points its -x handle at the robot base, since the mug sits at y=0.",
+     "Placement targets keep the corridor |y|<=0.075 for x<0.52 clear, keep the drop zone x[0.25,0.40] y[0.20,0.40] empty, and keep every centre within 0.8 m of the base."
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 2.462761640548706,
+   "solve_cpu_s": 2.4634391929999992,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 19
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

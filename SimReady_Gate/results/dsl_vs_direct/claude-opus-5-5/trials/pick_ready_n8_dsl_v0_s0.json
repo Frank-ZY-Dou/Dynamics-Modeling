@@ -11,30 +11,26 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 17.6589937210083,
-    "duration_ms": 17137,
-    "duration_api_ms": 17106,
-    "cost_usd": 0.0491284,
+    "wall_s": 17.154027938842773,
+    "duration_ms": 16605,
+    "duration_api_ms": 16576,
+    "cost_usd": 0.050823400000000005,
     "usage": {
      "input": 2,
-     "cache_creation": 1511,
-     "cache_read": 3962,
-     "output": 1812,
-     "thinking": 1239
+     "cache_creation": 1577,
+     "cache_read": 4297,
+     "output": 1867,
+     "thinking": 1109
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1738,
+   "message_chars": 1955,
    "answer": {
     "statements": [
      {
       "op": "no_penetration"
-     },
-     {
-      "op": "fixed",
-      "a": "table"
      },
      {
       "op": "on_support",
@@ -58,95 +54,95 @@
       "yaw": 0
      },
      {
-      "op": "min_distance",
-      "a": "bowl",
-      "b": "mug",
-      "r": 0.18
-     },
-     {
-      "op": "min_distance",
-      "a": "apple",
-      "b": "mug",
-      "r": 0.18
-     },
-     {
-      "op": "min_distance",
-      "a": "can",
-      "b": "mug",
-      "r": 0.18
-     },
-     {
-      "op": "min_distance",
-      "a": "bottle",
-      "b": "mug",
-      "r": 0.18
-     },
-     {
-      "op": "min_distance",
-      "a": "screwdriver",
-      "b": "mug",
-      "r": 0.18
-     },
-     {
-      "op": "min_distance",
-      "a": "tape",
-      "b": "mug",
-      "r": 0.18
-     },
-     {
-      "op": "min_distance",
-      "a": "tumbler",
-      "b": "mug",
-      "r": 0.18
-     },
-     {
       "op": "place",
       "a": "bowl",
-      "x": 0.72,
-      "y": 0.15
+      "x": 0.75,
+      "y": 0
      },
      {
       "op": "place",
       "a": "apple",
-      "x": 0.72,
-      "y": -0.15
+      "x": 0.45,
+      "y": -0.2
      },
      {
       "op": "place",
       "a": "can",
-      "x": 0.4,
+      "x": 0.62,
       "y": -0.22
      },
      {
       "op": "place",
       "a": "bottle",
-      "x": 0.3,
-      "y": -0.3
+      "x": 0.65,
+      "y": 0.2
      },
      {
       "op": "place",
       "a": "screwdriver",
-      "x": 0.55,
-      "y": -0.25
+      "x": 0.3,
+      "y": -0.2
      },
      {
       "op": "place",
       "a": "tape",
-      "x": 0.55,
-      "y": 0.25
+      "x": 0.75,
+      "y": -0.15,
+      "yaw": 0
      },
      {
       "op": "place",
       "a": "tumbler",
-      "x": 0.25,
-      "y": -0.15
+      "x": 0.45,
+      "y": 0.2
      },
      {
-      "op": "minimize"
+      "op": "min_distance",
+      "a": "bowl",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "apple",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "can",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "bottle",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "screwdriver",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "tumbler",
+      "b": "mug",
+      "r": 0.18
      }
+    ],
+    "assumptions": [
+     "Some requirements can't be written as statements because the robot base is not a body and there are no corridor, zone or angle statements. These are the mug's 45-60 cm distance, the handle angle, the 15 cm corridor, the drop zone and the 80 cm radius. They are handled only through place targets: the mug goes at (0.52, 0) with yaw 0, so its -x handle points at the base, and the other objects are placed outside the corridor (|y| >= 0.15 or beyond the mug), outside the drop zone, and within 0.8 m of the base."
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -155,11 +151,11 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 3.0748841762542725,
-   "solve_cpu_s": 3.0746908439999956,
+   "solve_s": 2.479198455810547,
+   "solve_cpu_s": 2.4785275579999997,
    "rubric_ok": true,
    "rubric_failed": [],
-   "answer_items": 21
+   "answer_items": 19
   }
  ],
  "n_rounds": 1,

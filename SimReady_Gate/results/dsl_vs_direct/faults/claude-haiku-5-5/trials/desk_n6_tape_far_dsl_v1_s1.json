@@ -1,0 +1,598 @@
+{
+ "task": "desk_n6",
+ "family": "desk",
+ "n": 6,
+ "condition": "dsl_v1",
+ "seed": 1,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": null,
+   "message_chars": 2065,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "at",
+      "a": "keyboard",
+      "y": 0.0,
+      "tol": 0.005
+     },
+     {
+      "op": "reach",
+      "a": "keyboard",
+      "r": 0.48,
+      "min": 0.42
+     },
+     {
+      "op": "yaw",
+      "a": "keyboard",
+      "deg": 90,
+      "axis": "long",
+      "tol": 3
+     },
+     {
+      "op": "beside",
+      "a": "mouse",
+      "b": "keyboard",
+      "side": "right",
+      "gap": 0.04,
+      "max": 0.07
+     },
+     {
+      "op": "align",
+      "members": [
+       "keyboard",
+       "mouse"
+      ],
+      "axis": "x",
+      "tol": 0.01
+     },
+     {
+      "op": "beside",
+      "a": "notebook",
+      "b": "keyboard",
+      "side": "left",
+      "gap": 0.06,
+      "max": 0.09
+     },
+     {
+      "op": "parallel",
+      "a": "notebook",
+      "b": "keyboard",
+      "tol": 3
+     },
+     {
+      "op": "beside",
+      "a": "marker",
+      "b": "notebook",
+      "side": "far",
+      "gap": 0.015,
+      "max": 0.035
+     },
+     {
+      "op": "parallel",
+      "a": "marker",
+      "b": "notebook",
+      "tol": 3
+     },
+     {
+      "op": "beside",
+      "a": "mug",
+      "b": "keyboard",
+      "side": "far",
+      "gap": 0.06
+     },
+     {
+      "op": "facing",
+      "a": "mug",
+      "axis": "-x",
+      "tol": 10
+     },
+     {
+      "op": "min_distance",
+      "a": "*",
+      "b": "tape",
+      "r": 0.75
+     }
+    ]
+   },
+   "answer_from": "fault",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "within(tape,table.top)",
+      0.0649
+     ],
+     [
+      "at(keyboard)",
+      0.0942
+     ],
+     [
+      "reach(keyboard,r=0.48)",
+      0.4993
+     ],
+     [
+      "yaw(keyboard,deg=90)",
+      4.5683
+     ],
+     [
+      "beside(mouse,keyboard,right)",
+      0.0353
+     ],
+     [
+      "align(keyboard,mouse)",
+      0.0923
+     ],
+     [
+      "beside(notebook,keyboard,left)",
+      0.0302
+     ],
+     [
+      "min_distance(mouse,tape,r=0.75)",
+      0.6608
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 54 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts exceeded the trust region at 20 step(s); those steps served the contacts alone",
+     "the program was solved alone at scale 0.05 in 5 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 3.4649786949157715,
+   "solve_cpu_s": 3.4656611440000002,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "centre_on(keyboard)",
+     false,
+     0.0942
+    ],
+    [
+     "centre_on(mouse)",
+     false,
+     0.0923
+    ],
+    [
+     "gap(keyboard->notebook,+y)",
+     false,
+     0.0302
+    ],
+    [
+     "in_support_top(6 bodies)",
+     false,
+     0.0449
+    ]
+   ],
+   "answer_items": 16
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 29.749955654144287,
+    "duration_ms": 29082,
+    "duration_api_ms": 29051,
+    "cost_usd": 0.00380697,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2457,
+     "cache_read": 12037,
+     "output": 6390,
+     "thinking": 5699
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 3904,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "at",
+      "a": "keyboard",
+      "y": 0,
+      "tol": 0.005
+     },
+     {
+      "op": "reach",
+      "a": "keyboard",
+      "r": 0.5,
+      "min": 0.4
+     },
+     {
+      "op": "yaw",
+      "a": "keyboard",
+      "deg": 90,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "mouse",
+      "b": "keyboard",
+      "side": "right",
+      "gap": 0.045,
+      "max": 0.065
+     },
+     {
+      "op": "align",
+      "members": [
+       "keyboard",
+       "mouse"
+      ],
+      "axis": "x",
+      "tol": 0.01
+     },
+     {
+      "op": "beside",
+      "a": "notebook",
+      "b": "keyboard",
+      "side": "left",
+      "gap": 0.07,
+      "max": 0.09
+     },
+     {
+      "op": "yaw",
+      "a": "notebook",
+      "deg": 90,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "parallel",
+      "a": "notebook",
+      "b": "keyboard",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "marker",
+      "b": "notebook",
+      "side": "far",
+      "gap": 0.025,
+      "max": 0.035
+     },
+     {
+      "op": "yaw",
+      "a": "marker",
+      "deg": 90,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "parallel",
+      "a": "marker",
+      "b": "notebook",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "mug",
+      "b": "keyboard",
+      "side": "far",
+      "gap": 0.05
+     },
+     {
+      "op": "facing",
+      "a": "mug",
+      "axis": "handle",
+      "x": 0,
+      "y": 0,
+      "tol": 20
+     },
+     {
+      "op": "min_distance",
+      "a": "*",
+      "b": "tape",
+      "r": 0.2
+     }
+    ]
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "yaw(keyboard,deg=90)",
+      23.75
+     ],
+     [
+      "yaw(notebook,deg=90)",
+      47.5
+     ],
+     [
+      "parallel(notebook,keyboard)",
+      23.75
+     ],
+     [
+      "yaw(marker,deg=90)",
+      66.25
+     ],
+     [
+      "parallel(marker,notebook)",
+      66.25
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 59 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 12 step(s) before the scale was restored, after 8 other start(s) of the bodies over their supports"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 4.202314615249634,
+   "solve_cpu_s": 4.203274773,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "long_axis_along(keyboard,y)",
+     false,
+     23.75
+    ],
+    [
+     "parallel(notebook,keyboard)",
+     false,
+     23.75
+    ],
+    [
+     "parallel(marker,notebook)",
+     false,
+     66.25
+    ]
+   ],
+   "answer_items": 18
+  },
+  {
+   "round": 3,
+   "llm": {
+    "ok": true,
+    "wall_s": 22.293534994125366,
+    "duration_ms": 21560,
+    "duration_api_ms": 21518,
+    "cost_usd": 0.00306287,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2459,
+     "cache_read": 12037,
+     "output": 4901,
+     "thinking": 3978
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 3897,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "place",
+      "a": "keyboard",
+      "x": 0.45,
+      "y": 0,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "mouse",
+      "x": 0.45,
+      "y": -0.41,
+      "yaw": 72
+     },
+     {
+      "op": "place",
+      "a": "notebook",
+      "x": 0.45,
+      "y": 0.405,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "marker",
+      "x": 0.57,
+      "y": 0.405,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "mug",
+      "x": 0.63,
+      "y": 0,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "tape",
+      "x": 0.35,
+      "y": -0.7,
+      "yaw": -31
+     },
+     {
+      "op": "at",
+      "a": "keyboard",
+      "y": 0,
+      "tol": 0.01
+     },
+     {
+      "op": "reach",
+      "a": "keyboard",
+      "r": 0.5,
+      "min": 0.4
+     },
+     {
+      "op": "yaw",
+      "a": "keyboard",
+      "deg": 90,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "mouse",
+      "b": "keyboard",
+      "side": "right",
+      "gap": 0.03,
+      "max": 0.08
+     },
+     {
+      "op": "align",
+      "members": [
+       "keyboard",
+       "mouse"
+      ],
+      "axis": "x",
+      "tol": 0.02
+     },
+     {
+      "op": "beside",
+      "a": "notebook",
+      "b": "keyboard",
+      "side": "left",
+      "gap": 0.05,
+      "max": 0.1
+     },
+     {
+      "op": "yaw",
+      "a": "notebook",
+      "deg": 90,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "parallel",
+      "a": "notebook",
+      "b": "keyboard",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "marker",
+      "b": "notebook",
+      "side": "far",
+      "gap": 0.01,
+      "max": 0.04
+     },
+     {
+      "op": "yaw",
+      "a": "marker",
+      "deg": 90,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "parallel",
+      "a": "marker",
+      "b": "notebook",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "mug",
+      "b": "keyboard",
+      "side": "far",
+      "gap": 0.05
+     },
+     {
+      "op": "facing",
+      "a": "mug",
+      "axis": "handle",
+      "x": 0,
+      "y": 0,
+      "tol": 20
+     },
+     {
+      "op": "min_distance",
+      "a": "*",
+      "b": "tape",
+      "r": 0.2
+     }
+    ]
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 11 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 12 step(s) before the scale was restored, after 8 other start(s) of the bodies over their supports"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 3.700563669204712,
+   "solve_cpu_s": 3.701185129999999,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 24
+  }
+ ],
+ "n_rounds": 3,
+ "success": true,
+ "first_round_success": false,
+ "self_ok": true,
+ "fault": {
+  "name": "tape_far",
+  "kind": "tight"
+ }
+}

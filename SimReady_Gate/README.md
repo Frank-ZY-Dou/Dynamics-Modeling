@@ -33,7 +33,7 @@
 
 ## 📢 Updates
 
-* [October 2026] **A written semantics.** What a program accepts is defined statement by statement; the repair's settings form a separate `schedule`; relations along x read `farther` and `nearer`; a failed requirement comes with the nearest relaxation under which it holds ([the language](docs/DSL.md#what-a-program-means)).
+* [October 2026] **A written semantics.** What a program accepts is defined statement by statement; the repair's settings form a separate `schedule`; relations along x read `farther` and `nearer`; a failed requirement comes with the nearest relaxation under which it holds ([the language](docs/DSL.md#what-a-program-means)). Run again with it, programs pass 141 / 144 against 128 / 144 for typed poses, and all 144 with the rewrites in the report ([results](#a-program-or-the-poses)).
 * [October 2026] **Rings.** `ring` spaces bodies evenly on a circle and can turn each one in or out; the RoboCasa demo lays a heap out as a ring ([demo](#a-robocasa-counter)).
 * [October 2026] **Shelves.** A fixture's levels are supports and regions (`case.level2`), with `flush` and rows that line up an edge; three bookcase and rack examples ([Example 3](#example-3-shelves)).
 * [October 2026] **Scenario 3D Collection assets.** 37 AI-generated tabletop objects of [scenario-labs/3d-collection](https://huggingface.co/datasets/scenario-labs/3d-collection) (CC BY 4.0, credit: Scenario) can be named in layouts, with estimated mass, friction and handle side ([assets](#assets)).
@@ -437,52 +437,53 @@ trial in [`results/dsl_vs_direct/`](results/dsl_vs_direct/).
 
 | model | answer | scenes that pass | output tokens / trial | cost / trial | seconds / passing scene |
 |---|---|---|---|---|---|
-| Haiku 5.5 | program | **47 / 48** | **4,020** | **$0.0024** | **22** |
-| | poses | 43 / 48 | 14,374 | $0.0075 | 70 |
-| Sonnet 5.5 | program | **48 / 48** | **620** | **$0.014** | **8** |
-| | poses | 39 / 48 | 3,223 | $0.039 | 33 |
-| Opus 5.5 | program | **48 / 48** | **764** | **$0.030** | **10** |
-| | poses | 45 / 48 | 2,481 | $0.063 | 28 |
+| Haiku 5.5 | program | **45 / 48** | **6,761** | **$0.0041** | **36** |
+| | poses | 42 / 48 | 12,474 | $0.0068 | 63 |
+| Sonnet 5.5 | program | **48 / 48** | **812** | **$0.019** | **10** |
+| | poses | 41 / 48 | 2,134 | $0.029 | 22 |
+| Opus 5.5 | program | **48 / 48** | **795** | **$0.036** | **10** |
+| | poses | 45 / 48 | 3,122 | $0.078 | 33 |
 
 - **Programs pass where poses need geometry the model cannot see.** Ten drinks came out in the
-  wrong order of height in 8 / 9 typed rows (the scene summary gives heights to the centimetre, the
-  compiler sorts on the meshes); typed cartons on a pallet fell short of the 1 cm between them in
-  2 / 9, and packed fruit interpenetrated in 2 / 9. Programs pass 143 / 144 and poses 127 / 144;
-  every scene a program produced stays at rest in MuJoCo, and two passing scenes of typed poses do
-  not (each sets a fruit on another). Where the summary says enough, typed poses do as well: they
-  stacked the three cartons centred in all nine towers.
+  wrong order of height in 7 / 9 typed rows (the scene summary gives heights to the centimetre, the
+  compiler sorts on the meshes), and packed fruit interpenetrated in 3 / 18 typed packings. Programs
+  pass 141 / 144 and poses 128 / 144; every scene of either answer stays at rest in MuJoCo. Where the
+  summary says enough, typed poses do as well: they stacked the three cartons centred in all nine
+  towers.
 - **A program does not grow with the scene.** Sorting a heap of 10, 16 and 24 objects, Haiku's poses
-  grow from 6,600 to 29,000 output tokens per trial while its programs stay between 3,500 and 5,500;
-  Sonnet's go from 1,800 to 5,900 against 350 to 980, Opus's from 1,200 to 5,300 against 820 to
-  1,020. Name patterns keep the program's length, and the solver does the per-object work.
-- **Cheaper and faster per scene.** Programs take 3.2 to 5.2 times fewer output tokens per trial,
-  cost 2.1 to 3.1 times less, and need 2.7 to 4.0 times less time per passing scene, the solver's
-  3 s per trial included. The system prompt that carries the language is longer (12-13k prompt
-  tokens per trial against 3k), and it is read from the prompt cache.
-- **Where poses do as well.** On the two held-out tasks, of six and seven objects, both answers pass
-  6 / 6 with every model; poses take less time with Haiku and Sonnet (10-16 s per passing scene
-  against 16-26 s) and about as much with Opus (14 s against 12 s): when the scene is small and
-  nothing in it needs exact geometry, the model can type the answer, and the solver's seconds are the
-  program's price.
+  grow from 6,100 to 24,300 output tokens per trial while its programs stay between 4,600 and 6,700;
+  Sonnet's go from 1,300 to 5,000 against 400 to 1,000, Opus's from 2,100 to 6,500 against 880 to
+  1,100. Name patterns keep the program's length, and the solver does the per-object work.
+- **Cheaper and faster per scene.** Programs take 1.8 to 3.9 times fewer output tokens per trial,
+  cost 1.5 to 2.2 times less, and need 1.7 to 3.3 times less time per passing scene, the solver's
+  2-3 s per trial included. The system prompt that carries the language is longer (14-18k prompt
+  tokens per trial against 3-4k), and it is read from the prompt cache.
+- **Where poses do as well.** On the two held-out tasks, of six and seven objects, programs pass
+  6 / 6 with every model and poses 6 / 6, 5 / 6 and 6 / 6; poses take less time with Haiku and Sonnet
+  (13-15 s per passing scene against 22-25 s) and about as much with Opus (14 s against 12 s): when
+  the scene is small and nothing in it needs exact geometry, the model can type the answer, and the
+  solver's seconds are the program's price.
 - **A program is reusable.** Applied unchanged to five new heaps of its task it is solved again and
-  passes 714 of the 715 scenes; with every object replaced by another asset of its category it passes
-  every scene, typed poses 56-65 %.
+  passes 697 of the 705 scenes; with every object replaced by another asset of its category it passes
+  140 of 141 scenes, typed poses 79 of 128.
 - **The new statements and the request both matter.** Programs restricted to the statements the
-  language had before pass 105 / 144; poses repaired by S4R with only the geometric statements every
-  task shares (and the supports the answer named) pass 113 / 144, fewer than the poses themselves:
+  language had before pass 106 / 144; poses repaired by S4R with only the geometric statements every
+  task shares (and the supports the answer named) pass 115 / 144, fewer than the poses themselves:
   the repair removes interpenetration but does not know the request (it pushed packed fruit out of
-  their square and moved stacked cartons off each other's centre).
+  their square).
+- **After a failure, the rewrites help.** Told the rewrites of its failed statements, each of Haiku's
+  three failing programs passes. On 92 faulted first answers per model both reports recover nearly
+  every fault; with the rewrites no request is weakened (the plain report weakened three), and after
+  a margin fault the next round takes 2.3 to 4.4 times fewer output tokens.
 
 <p align="center"><img src="docs/media/dsl_vs_direct_scaling.png" width="90%" alt="output tokens and model seconds per trial of programs and poses when sorting a heap of 10, 16 and 24 objects, for Haiku, Sonnet and Opus 5.5" /></p>
 
-The numbers are those of a replay of the first run (2026-10-24) with the current solver: the first
-answer of every trial is the first run's, and the model was called again only for a round whose
-message changed. The first run set typed poses down from their starting height, and poses passed
-110 / 144 there; both runs are published
-([the first run and the replay](docs/EVAL_DSL_vs_direct.md#the-first-run-and-the-replay)). One rubric
-check was corrected after the first model's run: "within 1 cm of a common line" had been measured
-from the centres' mean, which asks for more than the request; every round of the first run it could
-change was rebuilt and graded again.
+The numbers are those of the run of 2026-10-26 with the current language. The two earlier runs (2026-10-24
+and its replay of 2026-10-25) answered an earlier prompt and are published with it
+([the runs](docs/EVAL_DSL_vs_direct.md#the-runs)). One rubric check was corrected after the first
+model's run of the first run: "within 1 cm of a common line" had been measured from the centres'
+mean, which asks for more than the request; every round of the first run it could change was rebuilt
+and graded again.
 
 ## Getting started
 

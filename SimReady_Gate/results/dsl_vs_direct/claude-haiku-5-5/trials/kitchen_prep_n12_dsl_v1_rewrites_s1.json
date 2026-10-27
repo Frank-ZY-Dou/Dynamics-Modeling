@@ -1,0 +1,229 @@
+{
+ "task": "kitchen_prep_n12",
+ "family": "kitchen_prep",
+ "n": 12,
+ "condition": "dsl_v1_rewrites",
+ "seed": 1,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 32.0927460193634,
+    "duration_ms": 31534,
+    "duration_api_ms": 31505,
+    "cost_usd": 0.00414017,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1998,
+     "cache_read": 12037,
+     "output": 7240,
+     "thinking": 6411
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2869,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "at",
+      "a": "board",
+      "y": 0,
+      "tol": 0.01
+     },
+     {
+      "op": "reach",
+      "a": "board",
+      "r": 0.5,
+      "min": 0.4
+     },
+     {
+      "op": "yaw",
+      "a": "board",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "knife",
+      "b": "board",
+      "side": "right",
+      "gap": 0.02,
+      "max": 0.05
+     },
+     {
+      "op": "parallel",
+      "a": "knife",
+      "b": "board",
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "spoon",
+      "b": "knife",
+      "side": "right",
+      "gap": 0.02
+     },
+     {
+      "op": "parallel",
+      "a": "spoon",
+      "b": "knife",
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "bowl",
+      "b": "board",
+      "side": "left",
+      "gap": 0.05
+     },
+     {
+      "op": "min_distance",
+      "a": "bowl",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "cluster",
+      "members": [
+       "apple_1",
+       "apple_2",
+       "orange",
+       "banana",
+       "tangerine"
+      ],
+      "r": 0.12
+     },
+     {
+      "op": "farther",
+      "a": "apple_1",
+      "b": "bowl"
+     },
+     {
+      "op": "farther",
+      "a": "apple_2",
+      "b": "bowl"
+     },
+     {
+      "op": "farther",
+      "a": "orange",
+      "b": "bowl"
+     },
+     {
+      "op": "farther",
+      "a": "banana",
+      "b": "bowl"
+     },
+     {
+      "op": "farther",
+      "a": "tangerine",
+      "b": "bowl"
+     },
+     {
+      "op": "min_distance",
+      "a": "apple_1",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "apple_2",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "orange",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "banana",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "tangerine",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "row",
+      "members": [
+       "bottle",
+       "can_1",
+       "can_2"
+      ],
+      "axis": "y",
+      "gap": 0.02,
+      "mid": -0.45
+     },
+     {
+      "op": "reach",
+      "a": "bottle",
+      "r": 0.95,
+      "min": 0.75
+     },
+     {
+      "op": "reach",
+      "a": "can_1",
+      "r": 0.95,
+      "min": 0.75
+     },
+     {
+      "op": "reach",
+      "a": "can_2",
+      "r": 0.95,
+      "min": 0.75
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 5 step(s) before the scale was restored, after 1 other start(s) of the bodies over their supports"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 1.8739399909973145,
+   "solve_cpu_s": 1.8731597110000031,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 28
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

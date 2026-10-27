@@ -1,0 +1,249 @@
+{
+ "task": "drinks_row_n10",
+ "family": "drinks_row",
+ "n": 10,
+ "condition": "dsl_v1_rewrites",
+ "seed": 1,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": null,
+   "message_chars": 2181,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_1",
+       "can_2",
+       "can_3",
+       "can_4",
+       "can_5",
+       "can_6",
+       "bottle_1",
+       "bottle_2",
+       "glass_1",
+       "glass_2"
+      ],
+      "start": "left",
+      "gap": 0.025,
+      "order": "height",
+      "spacing": "even",
+      "mid": 0.0,
+      "tol": 0.004
+     },
+     {
+      "op": "at",
+      "a": "*",
+      "x": 0.75,
+      "tol": 0.004
+     },
+     {
+      "op": "place",
+      "a": "bottle_1",
+      "x": 0.75,
+      "y": 0.45
+     }
+    ]
+   },
+   "answer_from": "fault",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "row(can_1,can_2,can_3,can_4,can_5,can_6,bottle_1,bottle_2,glass_1,glass_2):order",
+      0.0167
+     ],
+     [
+      "row(can_1,can_2,can_3,can_4,can_5,can_6,bottle_1,bottle_2,glass_1,glass_2):even",
+      0.0082
+     ],
+     [
+      "row(can_1,can_2,can_3,can_4,can_5,can_6,bottle_1,bottle_2,glass_1,glass_2):mid",
+      0.0121
+     ],
+     [
+      "place(bottle_1)",
+      0.8066
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 59 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 12 step(s) before the scale was restored, after 8 other start(s) of the bodies over their supports"
+    ],
+    "rewrites": [
+     {
+      "statement": 4,
+      "text": "row(can_1, can_2, can_3, can_4, can_5, can_6, bottle_1, bottle_2, glass_1, glass_2, gap=0.025, start=left, order=height, spacing=even, mid=0.0, tol=0.004)",
+      "relax": {
+       "gap": [
+        0.025,
+        0.016
+       ],
+       "tol": [
+        0.004,
+        0.013
+       ]
+      },
+      "weaken": "soft"
+     },
+     {
+      "statement": 6,
+      "text": "place(bottle_1, x=0.75, y=0.45)",
+      "relax": null,
+      "weaken": "drop"
+     }
+    ],
+    "accepted_if_relaxed": false,
+    "accepted_if_weakened": true,
+    "rewrites_note": "rewrites: for each statement whose requirement failed (its index in your statements), relax gives {keyword: [your value, the nearest value at which it holds on the layout the repair returned]} and weaken says whether it may become a preference (soft) or be removed (drop); accepted_if_relaxed and accepted_if_weakened say whether those edits make that layout pass. schedule_rewrites: the repair run again from the same starting scene with a smaller schedule margin ([yours, tried]), and what it ended with; the schedule never changes what is accepted. Your next program is repaired again from the same starting scene.",
+    "schedule_rewrites": [
+     {
+      "margin": [
+       0.005,
+       0.0025
+      ],
+      "ok": false,
+      "pen_after": 0,
+      "failed_predicates": [
+       "row(can_1,can_2,can_3,can_4,can_5,can_6,bottle_1,bottle_2,glass_1,glass_2):order",
+       "row(can_1,can_2,can_3,can_4,can_5,can_6,bottle_1,bottle_2,glass_1,glass_2):even",
+       "row(can_1,can_2,can_3,can_4,can_5,can_6,bottle_1,bottle_2,glass_1,glass_2):mid",
+       "place(bottle_1)"
+      ]
+     },
+     {
+      "margin": [
+       0.005,
+       0.00125
+      ],
+      "ok": false,
+      "pen_after": 0,
+      "failed_predicates": [
+       "row(can_1,can_2,can_3,can_4,can_5,can_6,bottle_1,bottle_2,glass_1,glass_2):order",
+       "row(can_1,can_2,can_3,can_4,can_5,can_6,bottle_1,bottle_2,glass_1,glass_2):even",
+       "row(can_1,can_2,can_3,can_4,can_5,can_6,bottle_1,bottle_2,glass_1,glass_2):mid",
+       "place(bottle_1)"
+      ]
+     }
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 9.99982476234436,
+   "solve_cpu_s": 10.269790979,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 7
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 6.453819990158081,
+    "duration_ms": 5695,
+    "duration_api_ms": 5649,
+    "cost_usd": 0.0392234,
+    "usage": {
+     "input": 2,
+     "cache_creation": 3206,
+     "cache_read": 12037,
+     "output": 558,
+     "thinking": 339
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 5257,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_*",
+       "bottle_*",
+       "glass_*"
+      ],
+      "axis": "y",
+      "start": "left",
+      "gap": 0.02,
+      "order": "height",
+      "spacing": "even",
+      "mid": 0,
+      "tol": 0.01
+     },
+     {
+      "op": "at",
+      "a": "*",
+      "x": 0.75,
+      "tol": 0.05
+     }
+    ]
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 2 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 4 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 3.1960268020629883,
+   "solve_cpu_s": 3.195619769000004,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 6
+  }
+ ],
+ "n_rounds": 2,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true,
+ "fault": {
+  "name": "bottle_left",
+  "kind": "target"
+ }
+}

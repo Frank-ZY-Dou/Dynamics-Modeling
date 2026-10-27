@@ -11,59 +11,58 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 6.5908167362213135,
-    "duration_ms": 5989,
-    "duration_api_ms": 5941,
-    "cost_usd": 0.0007546800000000001,
+    "wall_s": 8.27253794670105,
+    "duration_ms": 7492,
+    "duration_api_ms": 7445,
+    "cost_usd": 0.00116547,
     "usage": {
      "input": 2,
-     "cache_creation": 401,
-     "cache_read": 5228,
-     "output": 1244,
-     "thinking": 952
+     "cache_creation": 1774,
+     "cache_read": 4297,
+     "output": 1535,
+     "thinking": 1248
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1935,
+   "message_chars": 2208,
    "answer": {
     "statements": [
      {
       "op": "no_penetration",
       "a": "*",
-      "reason": "Scene must be free of interpenetration."
+      "reason": "Scene must be free of interpenetration"
      },
      {
       "op": "on_support",
       "a": "*",
-      "b": "table",
-      "reason": "Everything rests on the table."
+      "b": "table.level2",
+      "reason": "Everything rests on the table top"
      },
      {
       "op": "upright",
       "a": "*",
-      "reason": "Everything rests upright on the table."
+      "reason": "Everything rests upright on the table"
      },
      {
       "op": "within",
       "a": "*",
       "b": "table.top",
-      "reason": "Objects stay on the table top while being separated."
+      "reason": "Objects stay on the table top"
      },
      {
       "op": "prefer",
       "a": "*",
-      "reason": "Keep each object near its current pose to respect the 3 cm move and 10 degree turn limits."
+      "reason": "Keep each object close to its current pose (3 cm / 10 deg limits)"
      },
      {
       "op": "minimize",
       "a": "*",
-      "reason": "Resolve overlaps with minimum displacement."
+      "reason": "Minimum displacement while removing interpenetration"
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -72,8 +71,8 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 3.032313346862793,
-   "solve_cpu_s": 3.0309786340000073,
+   "solve_s": 2.4462671279907227,
+   "solve_cpu_s": 2.446676335999996,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 6

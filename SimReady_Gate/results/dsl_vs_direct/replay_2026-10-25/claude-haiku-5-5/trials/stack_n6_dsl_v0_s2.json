@@ -1,0 +1,181 @@
+{
+ "task": "stack_n6",
+ "family": "stack",
+ "n": 6,
+ "condition": "dsl_v0",
+ "seed": 2,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 13.42429804801941,
+    "duration_ms": 12787,
+    "duration_api_ms": 12751,
+    "cost_usd": 0.00173302,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1291,
+     "cache_read": 3962,
+     "output": 2870,
+     "thinking": 2180
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1346,
+   "answer": {
+    "intent": "Stack box_large (bottom), box_medium, box_small (top) into a centred tower on the right half (y<0) of the table within 0.7 m of the robot, and place apple, can and cup on the left half (y>0), all upright and non-penetrating.",
+    "statements": [
+     {
+      "op": "no_penetration",
+      "margin": 0.005
+     },
+     {
+      "op": "fixed",
+      "a": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "box_large",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "box_large"
+     },
+     {
+      "op": "on_support",
+      "a": "box_medium",
+      "b": "box_large"
+     },
+     {
+      "op": "upright",
+      "a": "box_medium"
+     },
+     {
+      "op": "on_support",
+      "a": "box_small",
+      "b": "box_medium"
+     },
+     {
+      "op": "upright",
+      "a": "box_small"
+     },
+     {
+      "op": "on_support",
+      "a": "apple",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "apple"
+     },
+     {
+      "op": "on_support",
+      "a": "can",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "can"
+     },
+     {
+      "op": "on_support",
+      "a": "cup",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "cup"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "place",
+      "a": "box_large",
+      "x": 0.45,
+      "y": -0.25
+     },
+     {
+      "op": "place",
+      "a": "box_medium",
+      "x": 0.45,
+      "y": -0.25
+     },
+     {
+      "op": "place",
+      "a": "box_small",
+      "x": 0.45,
+      "y": -0.25
+     },
+     {
+      "op": "place",
+      "a": "apple",
+      "x": 0.4,
+      "y": 0.45
+     },
+     {
+      "op": "place",
+      "a": "can",
+      "x": 0.55,
+      "y": 0.45
+     },
+     {
+      "op": "place",
+      "a": "cup",
+      "x": 0.7,
+      "y": 0.45
+     },
+     {
+      "op": "min_distance",
+      "a": "apple",
+      "b": "can",
+      "r": 0.08
+     },
+     {
+      "op": "min_distance",
+      "a": "can",
+      "b": "cup",
+      "r": 0.08
+     },
+     {
+      "op": "min_distance",
+      "a": "apple",
+      "b": "cup",
+      "r": 0.08
+     },
+     {
+      "op": "minimize"
+     }
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "pairs still penetrated in the closing steps of the tail; 3 step(s) served the contacts alone, the program rows set aside"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 2.8920788764953613,
+   "solve_cpu_s": 2.8908514740000015,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 25
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

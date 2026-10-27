@@ -11,22 +11,22 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 15.165963411331177,
-    "duration_ms": 14582,
-    "duration_api_ms": 14545,
-    "cost_usd": 0.0415786,
+    "wall_s": 11.450684785842896,
+    "duration_ms": 10840,
+    "duration_api_ms": 10810,
+    "cost_usd": 0.035726600000000004,
     "usage": {
      "input": 2,
-     "cache_creation": 1511,
+     "cache_creation": 1577,
      "cache_read": 913,
-     "output": 1465,
-     "thinking": 803
+     "output": 1146,
+     "thinking": 859
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1734,
+   "message_chars": 1951,
    "answer": {
     "poses": [
      {
@@ -37,49 +37,48 @@
      },
      {
       "name": "bowl",
-      "x": 0.7,
+      "x": 0.72,
       "y": 0,
-      "yaw": -160
+      "yaw": 0
      },
      {
       "name": "apple",
       "x": 0.5,
-      "y": 0.22,
-      "yaw": -57
+      "y": 0.2,
+      "yaw": 0
      },
      {
       "name": "can",
       "x": 0.5,
-      "y": -0.22,
-      "yaw": 125
-     },
-     {
-      "name": "bottle",
-      "x": 0.7,
-      "y": 0.2,
-      "yaw": 102
-     },
-     {
-      "name": "screwdriver",
-      "x": 0.7,
-      "y": -0.2,
-      "yaw": 90
-     },
-     {
-      "name": "tape",
-      "x": 0.32,
       "y": -0.2,
       "yaw": 0
      },
      {
+      "name": "bottle",
+      "x": 0.68,
+      "y": 0.18,
+      "yaw": 0
+     },
+     {
       "name": "tumbler",
-      "x": 0.32,
-      "y": 0.45,
-      "yaw": 8
+      "x": 0.68,
+      "y": -0.18,
+      "yaw": 0
+     },
+     {
+      "name": "screwdriver",
+      "x": 0.35,
+      "y": -0.25,
+      "yaw": 0
+     },
+     {
+      "name": "tape",
+      "x": 0.35,
+      "y": 0.15,
+      "yaw": 0
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -88,16 +87,16 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 1.1912264823913574,
-   "solve_cpu_s": 1.1876965570000024,
+   "solve_s": 1.0316135883331299,
+   "solve_cpu_s": 1.0283379410000038,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 8,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 2.343710422515869,
-    "solve_cpu_s": 2.3267122359999988,
+    "solve_s": 2.165567636489868,
+    "solve_cpu_s": 2.1648068079999945,
     "rubric_failed": []
    }
   }

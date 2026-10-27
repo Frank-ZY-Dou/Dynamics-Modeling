@@ -1,0 +1,165 @@
+{
+ "task": "fruit_cans_n16",
+ "family": "fruit_cans",
+ "n": 16,
+ "condition": "direct",
+ "seed": 1,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 119.70585680007935,
+    "duration_ms": 119138,
+    "duration_api_ms": 119109,
+    "cost_usd": 0.01457203,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2151,
+     "cache_read": 913,
+     "output": 28265,
+     "thinking": 27703
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2903,
+   "answer": {
+    "poses": [
+     {
+      "name": "fruit_1",
+      "x": 0.48,
+      "y": 0.5,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_2",
+      "x": 0.72,
+      "y": 0.5,
+      "yaw": 90
+     },
+     {
+      "name": "fruit_3",
+      "x": 0.6,
+      "y": 0.4,
+      "yaw": 90
+     },
+     {
+      "name": "fruit_4",
+      "x": 0.56,
+      "y": 0.5,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_5",
+      "x": 0.56,
+      "y": 0.4,
+      "yaw": 0,
+      "on": "fruit_3"
+     },
+     {
+      "name": "fruit_6",
+      "x": 0.64,
+      "y": 0.5,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_7",
+      "x": 0.6,
+      "y": 0.6,
+      "yaw": 90
+     },
+     {
+      "name": "fruit_8",
+      "x": 0.64,
+      "y": 0.6,
+      "yaw": 0,
+      "on": "fruit_7"
+     },
+     {
+      "name": "can_1",
+      "x": 0.52,
+      "y": -0.4,
+      "yaw": 0
+     },
+     {
+      "name": "can_2",
+      "x": 0.25,
+      "y": -0.4,
+      "yaw": 0
+     },
+     {
+      "name": "can_3",
+      "x": 0.33,
+      "y": -0.4,
+      "yaw": 0
+     },
+     {
+      "name": "can_4",
+      "x": 0.63,
+      "y": -0.4,
+      "yaw": 0
+     },
+     {
+      "name": "can_5",
+      "x": 0.42,
+      "y": -0.4,
+      "yaw": 0
+     },
+     {
+      "name": "can_6",
+      "x": 0.76,
+      "y": -0.4,
+      "yaw": 0
+     },
+     {
+      "name": "bowl",
+      "x": 0.65,
+      "y": 0,
+      "yaw": 0
+     },
+     {
+      "name": "mug",
+      "x": 0.65,
+      "y": -0.12,
+      "yaw": 0
+     }
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "penetrating_pairs": [],
+    "not_resting_on_anything": [],
+    "off_the_support": [],
+    "missing_poses": []
+   },
+   "self_ok": true,
+   "solve_s": 1.6520118713378906,
+   "solve_cpu_s": 1.6521093420000028,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 16,
+   "direct_repair": {
+    "rubric_ok": false,
+    "self_ok": false,
+    "solve_s": 3.8895301818847656,
+    "solve_cpu_s": 3.889703098000002,
+    "rubric_failed": [
+     [
+      "supported",
+      false,
+      1
+     ]
+    ]
+   }
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

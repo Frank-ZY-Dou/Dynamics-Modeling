@@ -11,28 +11,28 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 2.454167127609253,
-    "duration_ms": 1803,
-    "duration_api_ms": 1774,
-    "cost_usd": 0.0097529,
+    "wall_s": 3.4702675342559814,
+    "duration_ms": 2714,
+    "duration_api_ms": 2686,
+    "cost_usd": 0.010383700000000001,
     "usage": {
      "input": 2,
-     "cache_creation": 1774,
-     "cache_read": 10529,
-     "output": 160,
+     "cache_creation": 1879,
+     "cache_read": 12037,
+     "output": 166,
      "thinking": 0
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1999,
+   "message_chars": 2300,
    "answer": {
     "statements": [
      {
       "op": "on_support",
       "a": "fruit_*",
-      "b": "table"
+      "b": "table.level2"
      },
      {
       "op": "upright",
@@ -41,7 +41,7 @@
      {
       "op": "within",
       "a": "fruit_*",
-      "b": "table",
+      "b": "table.level2",
       "x0": 0.4,
       "x1": 0.72,
       "y0": -0.16,
@@ -52,27 +52,127 @@
      }
     ]
    },
-   "answer_from": "recorded",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "within(fruit_12,table.level2)",
+      0.0075
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "pairs still penetrated in the closing steps of the tail; 2 step(s) served the contacts alone, the program rows set aside",
+     "a program row was not met within the step at 6 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 3.199960231781006,
+   "solve_cpu_s": 3.1974653480000086,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "in_square(14 bodies)",
+     false,
+     0.0075
+    ]
+   ],
+   "answer_items": 4
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 7.834321737289429,
+    "duration_ms": 7143,
+    "duration_api_ms": 7114,
+    "cost_usd": 0.0172157,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2197,
+     "cache_read": 12037,
+     "output": 722,
+     "thinking": 395
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 3032,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "fruit_*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_*"
+     },
+     {
+      "op": "within",
+      "a": "fruit_*",
+      "b": "table.level2",
+      "x0": 0.4,
+      "x1": 0.72,
+      "y0": -0.16,
+      "y1": 0.16
+     },
+     {
+      "op": "yaw",
+      "a": "fruit_3",
+      "deg": 90,
+      "axis": "long",
+      "mod": 180,
+      "soft": 0.5
+     },
+     {
+      "op": "yaw",
+      "a": "fruit_7",
+      "deg": 90,
+      "axis": "long",
+      "mod": 180,
+      "soft": 0.5
+     },
+     {
+      "op": "yaw",
+      "a": "fruit_11",
+      "deg": 90,
+      "axis": "long",
+      "mod": 180,
+      "soft": 0.5
+     },
+     {
+      "op": "no_penetration"
+     }
+    ],
+    "schedule": {
+     "margin": 0.001
+    }
+   },
    "report": {
     "ok": true,
     "pen_after": 0,
     "failed_predicates": [],
     "failed_preferences": [],
     "solver_notes": [
-     "a program row was not met within the step at 3 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
-     "the contacts kept the program's margin of 5 mm and set a requirement aside; the repair started again from the same poses with a margin of 2.5 mm"
+     "a program row was not met within the step at 4 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts exceeded the trust region at 1 step(s); those steps served the contacts alone",
+     "the program was solved alone at scale 0.05 in 4 step(s) before the scale was restored"
     ]
    },
    "self_ok": true,
-   "solve_s": 4.266452789306641,
-   "solve_cpu_s": 4.2676152669999965,
+   "solve_s": 2.1371874809265137,
+   "solve_cpu_s": 2.137418218999997,
    "rubric_ok": true,
    "rubric_failed": [],
-   "answer_items": 4
+   "answer_items": 7
   }
  ],
- "n_rounds": 1,
+ "n_rounds": 2,
  "success": true,
- "first_round_success": true,
+ "first_round_success": false,
  "self_ok": true
 }

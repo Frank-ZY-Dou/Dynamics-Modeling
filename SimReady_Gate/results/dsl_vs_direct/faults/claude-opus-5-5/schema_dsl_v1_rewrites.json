@@ -1,0 +1,1614 @@
+{
+ "title": "SimReadyProgram",
+ "type": "object",
+ "required": [
+  "statements"
+ ],
+ "properties": {
+  "intent": {
+   "type": "string",
+   "description": "one-sentence restatement of the layout intent"
+  },
+  "statements": {
+   "type": "array",
+   "items": {
+    "anyOf": [
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "no_penetration"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "place"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "w": {
+        "type": "number"
+       },
+       "x": {
+        "type": "number"
+       },
+       "y": {
+        "type": "number"
+       },
+       "yaw": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "x",
+       "y"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "fixed"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "on_support"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "upright"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "within"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "depth": {
+        "type": "number"
+       },
+       "frac": {
+        "type": "number"
+       },
+       "inset": {
+        "type": "number"
+       },
+       "side": {
+        "type": "string",
+        "enum": [
+         "center",
+         "far",
+         "left",
+         "near",
+         "right"
+        ]
+       },
+       "soft": {
+        "type": "number"
+       },
+       "x0": {
+        "type": "number"
+       },
+       "x1": {
+        "type": "number"
+       },
+       "y0": {
+        "type": "number"
+       },
+       "y1": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "inside"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "inset": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "left_of"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "axis": {
+        "type": "string",
+        "enum": [
+         "x",
+         "y"
+        ]
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "gap": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "right_of"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "axis": {
+        "type": "string",
+        "enum": [
+         "x",
+         "y"
+        ]
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "gap": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "farther"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "axis": {
+        "type": "string",
+        "enum": [
+         "x",
+         "y"
+        ]
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "gap": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "nearer"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "axis": {
+        "type": "string",
+        "enum": [
+         "x",
+         "y"
+        ]
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "gap": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "min_distance"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "r": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b",
+       "r"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "close_to"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "r": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b",
+       "r"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "minimize"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "prefer"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "w": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "reach"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "min": {
+        "type": "number"
+       },
+       "r": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "x": {
+        "type": "number"
+       },
+       "y": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "r"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "clearance"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "gap": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "gap"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "approach"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "length": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "toward": {
+        "type": "string",
+        "enum": [
+         "far",
+         "left",
+         "near",
+         "right",
+         "robot"
+        ]
+       },
+       "width": {
+        "type": "number"
+       },
+       "x": {
+        "type": "number"
+       },
+       "y": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "facing"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "axis": {
+        "type": "string",
+        "enum": [
+         "+x",
+         "+y",
+         "-x",
+         "-y",
+         "front",
+         "handle",
+         "x",
+         "y"
+        ]
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "tol": {
+        "type": "number"
+       },
+       "x": {
+        "type": "number"
+       },
+       "y": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "yaw"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "axis": {
+        "type": "string",
+        "enum": [
+         "+x",
+         "+y",
+         "-x",
+         "-y",
+         "front",
+         "handle",
+         "long",
+         "short",
+         "x",
+         "y"
+        ]
+       },
+       "deg": {
+        "type": "number"
+       },
+       "mod": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "tol": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "deg"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "parallel"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "axis": {
+        "type": "string",
+        "enum": [
+         "long",
+         "short",
+         "x",
+         "y"
+        ]
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "mod": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "tol": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "at"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "tol": {
+        "type": "number"
+       },
+       "x": {
+        "type": "number"
+       },
+       "y": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "beside"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "gap": {
+        "type": "number"
+       },
+       "max": {
+        "type": "number"
+       },
+       "side": {
+        "type": "string",
+        "enum": [
+         "far",
+         "left",
+         "near",
+         "right"
+        ]
+       },
+       "soft": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b",
+       "side"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "row"
+       },
+       "axis": {
+        "type": "string",
+        "enum": [
+         "x",
+         "y"
+        ]
+       },
+       "edge": {
+        "type": "string",
+        "enum": [
+         "center",
+         "max",
+         "min"
+        ]
+       },
+       "gap": {
+        "type": "number"
+       },
+       "members": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        },
+        "description": "bodies of a group statement, in order; * or a pattern (can_*) stands for the free bodies it matches"
+       },
+       "mid": {
+        "type": "number",
+        "description": "row: where along its axis the midpoint of the two end members' centres lies"
+       },
+       "order": {
+        "type": "string",
+        "enum": [
+         "-height",
+         "-length",
+         "-mass",
+         "-width",
+         "height",
+         "length",
+         "mass",
+         "width"
+        ]
+       },
+       "soft": {
+        "type": "number"
+       },
+       "spacing": {
+        "type": "string",
+        "enum": [
+         "even"
+        ]
+       },
+       "start": {
+        "type": "string",
+        "enum": [
+         "far",
+         "left",
+         "near",
+         "right"
+        ]
+       },
+       "tol": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "members"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "align"
+       },
+       "axis": {
+        "type": "string",
+        "enum": [
+         "x",
+         "y"
+        ]
+       },
+       "edge": {
+        "type": "string",
+        "enum": [
+         "center",
+         "max",
+         "min"
+        ]
+       },
+       "members": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        },
+        "description": "bodies of a group statement, in order; * or a pattern (can_*) stands for the free bodies it matches"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "tol": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "members"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "evenly_spaced"
+       },
+       "axis": {
+        "type": "string",
+        "enum": [
+         "x",
+         "y"
+        ]
+       },
+       "members": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        },
+        "description": "bodies of a group statement, in order; * or a pattern (can_*) stands for the free bodies it matches"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "tol": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "members"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "grid"
+       },
+       "cols": {
+        "type": "integer"
+       },
+       "dx": {
+        "type": "number"
+       },
+       "dy": {
+        "type": "number"
+       },
+       "members": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        },
+        "description": "bodies of a group statement, in order; * or a pattern (can_*) stands for the free bodies it matches"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "tol": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "members",
+       "cols"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "ring"
+       },
+       "angle": {
+        "type": "number",
+        "description": "ring: the angle of the first member about the centre, degrees from +x"
+       },
+       "axis": {
+        "type": "string",
+        "enum": [
+         "+x",
+         "+y",
+         "-x",
+         "-y",
+         "front",
+         "handle",
+         "x",
+         "y"
+        ]
+       },
+       "face": {
+        "type": "string",
+        "enum": [
+         "in",
+         "out"
+        ]
+       },
+       "members": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        },
+        "description": "bodies of a group statement, in order; * or a pattern (can_*) stands for the free bodies it matches"
+       },
+       "r": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "tol": {
+        "type": "number"
+       },
+       "x": {
+        "type": "number"
+       },
+       "y": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "members",
+       "r"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "cluster"
+       },
+       "members": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        },
+        "description": "bodies of a group statement, in order; * or a pattern (can_*) stands for the free bodies it matches"
+       },
+       "r": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "members",
+       "r"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "symmetric"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "axis": {
+        "type": "string",
+        "enum": [
+         "x",
+         "y"
+        ]
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "c": {
+        "type": "string",
+        "description": "third body (symmetric: the centre; between: the other end)"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "tol": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b",
+       "c"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "between"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "axis": {
+        "type": "string",
+        "enum": [
+         "x",
+         "y"
+        ]
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "c": {
+        "type": "string",
+        "description": "third body (symmetric: the centre; between: the other end)"
+       },
+       "gap": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b",
+       "c"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "centered"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "tol": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "offset"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "dx": {
+        "type": "number"
+       },
+       "dy": {
+        "type": "number"
+       },
+       "frame": {
+        "type": "string",
+        "enum": [
+         "local",
+         "world"
+        ]
+       },
+       "soft": {
+        "type": "number"
+       },
+       "tol": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "attach"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "tol": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "keep_out"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "depth": {
+        "type": "number"
+       },
+       "frac": {
+        "type": "number"
+       },
+       "gap": {
+        "type": "number"
+       },
+       "side": {
+        "type": "string",
+        "enum": [
+         "center",
+         "far",
+         "left",
+         "near",
+         "right"
+        ]
+       },
+       "soft": {
+        "type": "number"
+       },
+       "x0": {
+        "type": "number"
+       },
+       "x1": {
+        "type": "number"
+       },
+       "y0": {
+        "type": "number"
+       },
+       "y1": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "flush"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "gap": {
+        "type": "number"
+       },
+       "side": {
+        "type": "string",
+        "enum": [
+         "far",
+         "left",
+         "near",
+         "right"
+        ]
+       },
+       "soft": {
+        "type": "number"
+       },
+       "tol": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b",
+       "side"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "max_move"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "d": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "d"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "max_turn"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "deg": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "deg"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "stack"
+       },
+       "members": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        },
+        "description": "bodies of a group statement, in order; * or a pattern (can_*) stands for the free bodies it matches"
+       },
+       "tol": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "members"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "balanced_on"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "margin": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b"
+      ],
+      "additionalProperties": false
+     }
+    ]
+   }
+  },
+  "assumptions": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "schedule": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "margin": {
+     "type": "number",
+     "description": "the clearance the repair keeps between bodies (default 0.005 m); lower it for a tight packing. It changes how the repair gets there, never what the program requires"
+    }
+   }
+  },
+  "gate": {
+   "type": "object",
+   "properties": {
+    "min_gap": {
+     "type": "number"
+    },
+    "settle_v_max": {
+     "type": "number"
+    },
+    "settle_dx": {
+     "type": "number"
+    }
+   },
+   "additionalProperties": false
+  }
+ },
+ "additionalProperties": false
+}

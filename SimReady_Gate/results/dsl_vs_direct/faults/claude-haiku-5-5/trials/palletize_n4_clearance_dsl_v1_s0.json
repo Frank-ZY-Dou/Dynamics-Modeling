@@ -1,0 +1,256 @@
+{
+ "task": "palletize_n4",
+ "family": "palletize",
+ "n": 4,
+ "condition": "dsl_v1",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": null,
+   "message_chars": 1242,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "pallet"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "pallet.top",
+      "inset": 0.03
+     },
+     {
+      "op": "yaw",
+      "a": "*",
+      "deg": 0,
+      "mod": 90,
+      "tol": 2
+     },
+     {
+      "op": "clearance",
+      "a": "*",
+      "gap": 0.15
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_1",
+       "box_2"
+      ],
+      "start": "right",
+      "gap": 0.02,
+      "tol": 0.005
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_3",
+       "box_4"
+      ],
+      "start": "right",
+      "gap": 0.02,
+      "tol": 0.005
+     },
+     {
+      "op": "farther",
+      "a": "box_3",
+      "b": "box_1",
+      "gap": 0.3
+     }
+    ]
+   },
+   "answer_from": "fault",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "within(box_1,pallet.top)",
+      0.0114
+     ],
+     [
+      "within(box_3,pallet.top)",
+      0.0111
+     ],
+     [
+      "clearance(box_1,gap=0.15)",
+      0.1231
+     ],
+     [
+      "clearance(box_2,gap=0.15)",
+      0.1371
+     ],
+     [
+      "clearance(box_4,gap=0.15)",
+      0.1231
+     ],
+     [
+      "row(box_1,box_2):aligned",
+      0.0103
+     ],
+     [
+      "row(box_3,box_4):aligned",
+      0.0099
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 45 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts exceeded the trust region at 1 step(s); those steps served the contacts alone",
+     "the program was solved alone at scale 0.05 in 2 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 0.5134587287902832,
+   "solve_cpu_s": 0.5135282489999895,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 9
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 27.49264359474182,
+    "duration_ms": 26913,
+    "duration_api_ms": 26884,
+    "cost_usd": 0.00342807,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1830,
+     "cache_read": 12037,
+     "output": 5883,
+     "thinking": 5170
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2542,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration",
+      "reason": "nothing interpenetrates"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "pallet.level2",
+      "reason": "boxes rest on the pallet's top deck"
+     },
+     {
+      "op": "upright",
+      "a": "*",
+      "reason": "boxes keep their resting orientation"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "pallet.top",
+      "inset": 0.03,
+      "reason": "every box entirely on the pallet, at least 2 cm in from its edges"
+     },
+     {
+      "op": "yaw",
+      "a": "*",
+      "deg": 0,
+      "mod": 90,
+      "tol": 3,
+      "reason": "every box's sides parallel to the pallet's edges within 3 degrees"
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_1",
+       "box_2"
+      ],
+      "axis": "y",
+      "start": "right",
+      "gap": 0.02,
+      "mid": 0,
+      "reason": "rows parallel to y, centres on a common line parallel to y, at least 1 cm between boxes"
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_3",
+       "box_4"
+      ],
+      "axis": "y",
+      "start": "right",
+      "gap": 0.02,
+      "mid": 0,
+      "reason": "second row parallel to y with at most 3 boxes per row, at least 1 cm between boxes"
+     },
+     {
+      "op": "place",
+      "a": "box_1",
+      "x": 0.52,
+      "y": -0.14,
+      "yaw": 0,
+      "reason": "rough row position so the two rows stay 3 cm apart in x inside the pallet"
+     },
+     {
+      "op": "place",
+      "a": "box_2",
+      "x": 0.52,
+      "y": 0.14,
+      "yaw": 0,
+      "reason": "rough row position"
+     },
+     {
+      "op": "place",
+      "a": "box_3",
+      "x": 0.89,
+      "y": -0.15,
+      "yaw": 0,
+      "reason": "rough row position inside the pallet's far edge inset"
+     },
+     {
+      "op": "place",
+      "a": "box_4",
+      "x": 0.89,
+      "y": 0.15,
+      "yaw": 0,
+      "reason": "rough row position"
+     }
+    ]
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 0.25235462188720703,
+   "solve_cpu_s": 0.2520506920000116,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 11
+  }
+ ],
+ "n_rounds": 2,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true,
+ "fault": {
+  "name": "clearance",
+  "kind": "tight"
+ }
+}

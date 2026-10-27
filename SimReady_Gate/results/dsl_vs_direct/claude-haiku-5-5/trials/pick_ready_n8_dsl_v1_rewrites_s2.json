@@ -1,0 +1,267 @@
+{
+ "task": "pick_ready_n8",
+ "family": "pick_ready",
+ "n": 8,
+ "condition": "dsl_v1_rewrites",
+ "seed": 2,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 13.580324411392212,
+    "duration_ms": 12897,
+    "duration_api_ms": 12869,
+    "cost_usd": 0.0017835700000000002,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1580,
+     "cache_read": 12037,
+     "output": 2694,
+     "thinking": 2358
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1951,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "place",
+      "a": "mug",
+      "x": 0.52,
+      "y": 0
+     },
+     {
+      "op": "reach",
+      "a": "mug",
+      "r": 0.6,
+      "min": 0.45
+     },
+     {
+      "op": "reach",
+      "a": "*",
+      "r": 0.8
+     },
+     {
+      "op": "facing",
+      "a": "mug",
+      "axis": "handle",
+      "b": "robot",
+      "tol": 20
+     },
+     {
+      "op": "approach",
+      "a": "mug",
+      "length": 0.4,
+      "width": 0.15,
+      "toward": "robot"
+     },
+     {
+      "op": "min_distance",
+      "a": "*",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "keep_out",
+      "a": "*",
+      "x0": 0.25,
+      "x1": 0.4,
+      "y0": 0.2,
+      "y1": 0.4
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": false,
+    "error": "ProgramError: statement 7 (facing): unknown body 'robot'. Known: ['apple', 'bottle', 'bowl', 'can', 'mug', 'screwdriver', 'table', 'tape', 'tumbler']"
+   },
+   "self_ok": false,
+   "solve_s": 0.00012254714965820312,
+   "solve_cpu_s": 0.00011956100000176662,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "facing(mug)",
+     false,
+     91.8548
+    ],
+    [
+     "corridor_clear(mug)",
+     false,
+     0.0166
+    ],
+    [
+     "apart(bowl,mug)",
+     false,
+     0.0094
+    ],
+    [
+     "apart(apple,mug)",
+     false,
+     0.0871
+    ],
+    [
+     "apart(can,mug)",
+     false,
+     0.1464
+    ],
+    [
+     "apart(bottle,mug)",
+     false,
+     0.1341
+    ],
+    [
+     "apart(screwdriver,mug)",
+     false,
+     0.0888
+    ],
+    [
+     "apart(tape,mug)",
+     false,
+     0.0747
+    ],
+    [
+     "apart(tumbler,mug)",
+     false,
+     0.0332
+    ],
+    [
+     "no_penetration",
+     false,
+     16
+    ]
+   ],
+   "answer_items": 11
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 9.884591579437256,
+    "duration_ms": 9184,
+    "duration_api_ms": 9125,
+    "cost_usd": 0.0015512899999999999,
+    "usage": {
+     "input": 4,
+     "cache_creation": 2069,
+     "cache_read": 27809,
+     "output": 1718,
+     "thinking": 950
+    },
+    "num_turns": 3,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2805,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "place",
+      "a": "mug",
+      "x": 0.52,
+      "y": 0,
+      "yaw": 0
+     },
+     {
+      "op": "reach",
+      "a": "mug",
+      "r": 0.6,
+      "min": 0.45
+     },
+     {
+      "op": "reach",
+      "a": "*",
+      "r": 0.8
+     },
+     {
+      "op": "facing",
+      "a": "mug",
+      "axis": "handle",
+      "tol": 20
+     },
+     {
+      "op": "approach",
+      "a": "mug",
+      "length": 0.4,
+      "width": 0.15,
+      "toward": "robot"
+     },
+     {
+      "op": "min_distance",
+      "a": "*",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "keep_out",
+      "a": "*",
+      "x0": 0.25,
+      "x1": 0.4,
+      "y0": 0.2,
+      "y1": 0.4
+     }
+    ]
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 2 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 3.3194453716278076,
+   "solve_cpu_s": 3.3164762000000003,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 11
+  }
+ ],
+ "n_rounds": 2,
+ "success": true,
+ "first_round_success": false,
+ "self_ok": true
+}

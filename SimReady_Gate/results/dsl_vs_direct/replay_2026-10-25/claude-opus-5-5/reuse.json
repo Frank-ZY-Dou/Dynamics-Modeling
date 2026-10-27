@@ -1,0 +1,5069 @@
+{
+ "summary": {
+  "dsl_v1": {
+   "answers": 48,
+   "new_start_scenes": 240,
+   "new_start_pass_rate": 0.9958333333333333,
+   "solve_s_per_scene": 2.3521676023801166,
+   "spread_m": 0.13921794712387928,
+   "new_asset_pass_rate": 1.0
+  },
+  "direct": {
+   "answers": 45,
+   "new_start_scenes": 225,
+   "new_start_pass_rate": 0.9333333333333333,
+   "solve_s_per_scene": 0.8233775350782606,
+   "spread_m": 0.0,
+   "new_asset_pass_rate": 0.5555555555555556
+  }
+ },
+ "answers": [
+  {
+   "task": "desk_n6",
+   "condition": "direct",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.834611415863037,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.8586018085479736,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.7301034927368164,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.6140429973602295,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.784099817276001,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.6060335636138916,
+    "failed": [],
+    "swapped": {
+     "marker": "stationery_marker_thin_blue_a01",
+     "mug": "dishware_mug_coffee_b01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "desk_n6",
+   "condition": "direct",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.660569190979004,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.5476195812225342,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.6317644119262695,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.5956006050109863,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.628399133682251,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.6316285133361816,
+    "failed": [],
+    "swapped": {
+     "marker": "stationery_marker_thin_blue_a01",
+     "mug": "dishware_mug_coffee_b01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "desk_n6",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.6760680675506592,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.6654064655303955,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.5884621143341064,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.5965476036071777,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.6131889820098877,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.6504709720611572,
+    "failed": [],
+    "swapped": {
+     "marker": "stationery_marker_thin_blue_a01",
+     "mug": "dishware_mug_coffee_b01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "desk_n6",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 3.536979913711548,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 3.285505533218384,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 3.5383944511413574,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 4.222553014755249,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 3.7758941650390625,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 3.642188310623169,
+    "failed": [],
+    "swapped": {
+     "marker": "stationery_marker_thin_blue_a01",
+     "mug": "dishware_mug_coffee_b01"
+    }
+   },
+   "spread_m": 0.2499966848807212
+  },
+  {
+   "task": "desk_n6",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 3.636837959289551,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 3.2012314796447754,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 3.3964107036590576,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 3.9091734886169434,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 3.8251702785491943,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 3.8804750442504883,
+    "failed": [],
+    "swapped": {
+     "marker": "stationery_marker_thin_blue_a01",
+     "mug": "dishware_mug_coffee_b01"
+    }
+   },
+   "spread_m": 0.2499966848807212
+  },
+  {
+   "task": "desk_n6",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 3.765016555786133,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 3.380357027053833,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 3.811812400817871,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 4.6494035720825195,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 3.889101982116699,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 3.6111602783203125,
+    "failed": [],
+    "swapped": {
+     "marker": "stationery_marker_thin_blue_a01",
+     "mug": "dishware_mug_coffee_b01"
+    }
+   },
+   "spread_m": 0.2499966848807212
+  },
+  {
+   "task": "drinks_row_n10",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 3.250296115875244,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 3.2161641120910645,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 3.204190731048584,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 3.207704544067383,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 2.991111993789673,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 4.80159068107605,
+    "failed": [],
+    "swapped": {
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "can_6": "food_beverage_can_n01",
+     "bottle_1": "misc_bottle_corked_a01",
+     "bottle_2": "food_beverage_whiskyBottle_c01",
+     "glass_1": "dishware_glass_tumbler_a01",
+     "glass_2": "dishware_glass_8oz_a01"
+    }
+   },
+   "spread_m": 0.0002028071011199626
+  },
+  {
+   "task": "drinks_row_n10",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 2.671043634414673,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 2.5858120918273926,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 2.526583433151245,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 2.6038079261779785,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 2.4140193462371826,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 4.4562013149261475,
+    "failed": [],
+    "swapped": {
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "can_6": "food_beverage_can_n01",
+     "bottle_1": "misc_bottle_corked_a01",
+     "bottle_2": "food_beverage_whiskyBottle_c01",
+     "glass_1": "dishware_glass_tumbler_a01",
+     "glass_2": "dishware_glass_8oz_a01"
+    }
+   },
+   "spread_m": 0.0002082626021463792
+  },
+  {
+   "task": "drinks_row_n10",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 2.702573537826538,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 2.7530198097229004,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 2.821361780166626,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 2.555461883544922,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 2.53831148147583,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 4.906304121017456,
+    "failed": [],
+    "swapped": {
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "can_6": "food_beverage_can_n01",
+     "bottle_1": "misc_bottle_corked_a01",
+     "bottle_2": "food_beverage_whiskyBottle_c01",
+     "glass_1": "dishware_glass_tumbler_a01",
+     "glass_2": "dishware_glass_8oz_a01"
+    }
+   },
+   "spread_m": 0.0002082626021463792
+  },
+  {
+   "task": "drinks_row_n6",
+   "condition": "direct",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.44147157669067383,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.5183908939361572,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.4638364315032959,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.49259281158447266,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.46094679832458496,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 1.3581867218017578,
+    "failed": [
+     "ordered_by_height"
+    ],
+    "swapped": {
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "bottle_1": "misc_bottle_corked_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "drinks_row_n6",
+   "condition": "direct",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.48920106887817383,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.5245206356048584,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.46693897247314453,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.48701047897338867,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.46417951583862305,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 1.4197227954864502,
+    "failed": [
+     "ordered_by_height"
+    ],
+    "swapped": {
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "bottle_1": "misc_bottle_corked_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "drinks_row_n6",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.48572278022766113,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.5042731761932373,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.5179264545440674,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.5009233951568604,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.4487276077270508,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 1.4201951026916504,
+    "failed": [
+     "ordered_by_height"
+    ],
+    "swapped": {
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "bottle_1": "misc_bottle_corked_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "drinks_row_n6",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.2052783966064453,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.1582486629486084,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.1917998790740967,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.2872931957244873,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.251767635345459,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 3.7822482585906982,
+    "failed": [],
+    "swapped": {
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "bottle_1": "misc_bottle_corked_a01"
+    }
+   },
+   "spread_m": 6.034762161805259e-05
+  },
+  {
+   "task": "drinks_row_n6",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.0921499729156494,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.0632295608520508,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.0603461265563965,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.1857852935791016,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.073817491531372,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 3.354158401489258,
+    "failed": [],
+    "swapped": {
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "bottle_1": "misc_bottle_corked_a01"
+    }
+   },
+   "spread_m": 6.87875188864843e-05
+  },
+  {
+   "task": "drinks_row_n6",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.0667610168457031,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.0103960037231445,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.0221011638641357,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.1980490684509277,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.025059461593628,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 3.5055224895477295,
+    "failed": [],
+    "swapped": {
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "bottle_1": "misc_bottle_corked_a01"
+    }
+   },
+   "spread_m": 6.87875188864843e-05
+  },
+  {
+   "task": "fruit_cans_n10",
+   "condition": "direct",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.4716620445251465,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.5003931522369385,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.4806547164916992,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.49972963333129883,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.47988033294677734,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.5704197883605957,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "bowl": "kitchenware_bowl_q01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "fruit_cans_n10",
+   "condition": "direct",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.503969669342041,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.532773494720459,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.4887261390686035,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.5037450790405273,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.51607346534729,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.5686070919036865,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "bowl": "kitchenware_bowl_q01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "fruit_cans_n10",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.5147230625152588,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.5104568004608154,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.4765200614929199,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.5063903331756592,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.5160684585571289,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.599637508392334,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "bowl": "kitchenware_bowl_q01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "fruit_cans_n10",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.3048200607299805,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.2504057884216309,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.242140769958496,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.2570712566375732,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.2469820976257324,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.3366491794586182,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "bowl": "kitchenware_bowl_q01"
+    }
+   },
+   "spread_m": 0.0635737872930576
+  },
+  {
+   "task": "fruit_cans_n10",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.2942817211151123,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.3115737438201904,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.2263338565826416,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.2330780029296875,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.249574899673462,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.2911708354949951,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "bowl": "kitchenware_bowl_q01"
+    }
+   },
+   "spread_m": 0.0635737872930576
+  },
+  {
+   "task": "fruit_cans_n10",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.2729268074035645,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.2921233177185059,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.3089368343353271,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.3072547912597656,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.2410187721252441,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.3611338138580322,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "bowl": "kitchenware_bowl_q01"
+    }
+   },
+   "spread_m": 0.0635737872930576
+  },
+  {
+   "task": "fruit_cans_n16",
+   "condition": "direct",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.4225378036499023,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.3749840259552002,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.395186424255371,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.4243245124816895,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.5313737392425537,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.6068172454833984,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "can_6": "food_beverage_can_d01",
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "fruit_cans_n16",
+   "condition": "direct",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.5532379150390625,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.5570125579833984,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.5194118022918701,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.3890721797943115,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.416947364807129,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 1.311309814453125,
+    "failed": [
+     "no_penetration"
+    ],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "can_6": "food_beverage_can_d01",
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "fruit_cans_n16",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.487313985824585,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.3895626068115234,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.4359114170074463,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.3734328746795654,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.3427743911743164,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 1.4365053176879883,
+    "failed": [
+     "row_gaps(6 bodies)"
+    ],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "can_6": "food_beverage_can_d01",
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "fruit_cans_n16",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 3.602104425430298,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 3.933260202407837,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 3.913875102996826,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 3.9393136501312256,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 3.966249704360962,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 4.157456398010254,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "can_6": "food_beverage_can_d01",
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01"
+    }
+   },
+   "spread_m": 0.07292048852735751
+  },
+  {
+   "task": "fruit_cans_n16",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 3.8479502201080322,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 4.068650484085083,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 4.106635570526123,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 4.065231561660767,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 4.255111217498779,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 4.150457859039307,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "can_6": "food_beverage_can_d01",
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01"
+    }
+   },
+   "spread_m": 0.07292048852735751
+  },
+  {
+   "task": "fruit_cans_n16",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 3.8753538131713867,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 3.899928092956543,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 3.868305206298828,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 3.901120662689209,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 3.993543863296509,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 3.803755283355713,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "can_6": "food_beverage_can_d01",
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01"
+    }
+   },
+   "spread_m": 0.07292048852735751
+  },
+  {
+   "task": "fruit_cans_n24",
+   "condition": "direct",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.6564171314239502,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.78753662109375,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.7920761108398438,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.7758467197418213,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.7361500263214111,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 1.8716371059417725,
+    "failed": [
+     "row_gaps(7 bodies)"
+    ],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01",
+     "fruit_11": "food_produce_banana_g01",
+     "fruit_13": "food_produce_apple_s01",
+     "fruit_14": "food_produce_orange_d01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "can_6": "food_beverage_can_d01",
+     "can_7": "food_beverage_can_n01",
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01",
+     "jar_1": "paint_container_jar_green_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "fruit_cans_n24",
+   "condition": "direct",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.8610827922821045,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.9105703830718994,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.8930041790008545,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.8778893947601318,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.8111324310302734,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 1.7468500137329102,
+    "failed": [
+     "row_gaps(7 bodies)"
+    ],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01",
+     "fruit_11": "food_produce_banana_g01",
+     "fruit_13": "food_produce_apple_s01",
+     "fruit_14": "food_produce_orange_d01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "can_6": "food_beverage_can_d01",
+     "can_7": "food_beverage_can_n01",
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01",
+     "jar_1": "paint_container_jar_green_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "fruit_cans_n24",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.9153332710266113,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.9210257530212402,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.8728606700897217,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.9029936790466309,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.8232204914093018,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.9584527015686035,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01",
+     "fruit_11": "food_produce_banana_g01",
+     "fruit_13": "food_produce_apple_s01",
+     "fruit_14": "food_produce_orange_d01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "can_6": "food_beverage_can_d01",
+     "can_7": "food_beverage_can_n01",
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01",
+     "jar_1": "paint_container_jar_green_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "fruit_cans_n24",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 5.707768678665161,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 5.6322174072265625,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 5.373548984527588,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 5.706294775009155,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 5.408778429031372,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 5.579557657241821,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01",
+     "fruit_11": "food_produce_banana_g01",
+     "fruit_13": "food_produce_apple_s01",
+     "fruit_14": "food_produce_orange_d01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "can_6": "food_beverage_can_d01",
+     "can_7": "food_beverage_can_n01",
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01",
+     "jar_1": "paint_container_jar_green_a01"
+    }
+   },
+   "spread_m": 0.13187134155263053
+  },
+  {
+   "task": "fruit_cans_n24",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 5.80204176902771,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 5.6751556396484375,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 5.202476501464844,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 5.560256242752075,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 4.824113607406616,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 5.200438022613525,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01",
+     "fruit_11": "food_produce_banana_g01",
+     "fruit_13": "food_produce_apple_s01",
+     "fruit_14": "food_produce_orange_d01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "can_6": "food_beverage_can_d01",
+     "can_7": "food_beverage_can_n01",
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01",
+     "jar_1": "paint_container_jar_green_a01"
+    }
+   },
+   "spread_m": 0.13187134155263053
+  },
+  {
+   "task": "fruit_cans_n24",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 4.930160999298096,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 5.0179150104522705,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 4.588152647018433,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 4.923024892807007,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 4.686009883880615,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 5.327975273132324,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01",
+     "fruit_11": "food_produce_banana_g01",
+     "fruit_13": "food_produce_apple_s01",
+     "fruit_14": "food_produce_orange_d01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "can_6": "food_beverage_can_d01",
+     "can_7": "food_beverage_can_n01",
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01",
+     "jar_1": "paint_container_jar_green_a01"
+    }
+   },
+   "spread_m": 0.13187134155263053
+  },
+  {
+   "task": "kitchen_prep_n12",
+   "condition": "direct",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.5319311618804932,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.5280735492706299,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.5314810276031494,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.530303955078125,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.533064603805542,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.7571799755096436,
+    "failed": [],
+    "swapped": {
+     "knife": "kitchenware_knife_e01",
+     "spoon": "kitchenware_spoon_d01",
+     "bowl": "kitchenware_bowl_q01",
+     "apple_1": "food_produce_apple_s01",
+     "apple_2": "food_produce_apple_q01",
+     "orange": "food_produce_orange_j01",
+     "banana": "food_produce_banana_g01",
+     "bottle": "misc_bottle_corked_a01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "kitchen_prep_n12",
+   "condition": "direct",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.5856950283050537,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.6212215423583984,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.5967991352081299,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.627549409866333,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.5851438045501709,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.8411283493041992,
+    "failed": [],
+    "swapped": {
+     "knife": "kitchenware_knife_e01",
+     "spoon": "kitchenware_spoon_d01",
+     "bowl": "kitchenware_bowl_q01",
+     "apple_1": "food_produce_apple_s01",
+     "apple_2": "food_produce_apple_q01",
+     "orange": "food_produce_orange_j01",
+     "banana": "food_produce_banana_g01",
+     "bottle": "misc_bottle_corked_a01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "kitchen_prep_n12",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.6061151027679443,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.5935239791870117,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.6177196502685547,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.6027359962463379,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.6303837299346924,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.8632588386535645,
+    "failed": [],
+    "swapped": {
+     "knife": "kitchenware_knife_e01",
+     "spoon": "kitchenware_spoon_d01",
+     "bowl": "kitchenware_bowl_q01",
+     "apple_1": "food_produce_apple_s01",
+     "apple_2": "food_produce_apple_q01",
+     "orange": "food_produce_orange_j01",
+     "banana": "food_produce_banana_g01",
+     "bottle": "misc_bottle_corked_a01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "kitchen_prep_n12",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.6306114196777344,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.6835885047912598,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.616483449935913,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.697613000869751,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.65696120262146,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.918976068496704,
+    "failed": [],
+    "swapped": {
+     "knife": "kitchenware_knife_e01",
+     "spoon": "kitchenware_spoon_d01",
+     "bowl": "kitchenware_bowl_q01",
+     "apple_1": "food_produce_apple_s01",
+     "apple_2": "food_produce_apple_q01",
+     "orange": "food_produce_orange_j01",
+     "banana": "food_produce_banana_g01",
+     "bottle": "misc_bottle_corked_a01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01"
+    }
+   },
+   "spread_m": 0.24413021368469517
+  },
+  {
+   "task": "kitchen_prep_n12",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.6990432739257812,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.695662498474121,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.6691617965698242,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.7168474197387695,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.6650185585021973,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 2.41441011428833,
+    "failed": [],
+    "swapped": {
+     "knife": "kitchenware_knife_e01",
+     "spoon": "kitchenware_spoon_d01",
+     "bowl": "kitchenware_bowl_q01",
+     "apple_1": "food_produce_apple_s01",
+     "apple_2": "food_produce_apple_q01",
+     "orange": "food_produce_orange_j01",
+     "banana": "food_produce_banana_g01",
+     "bottle": "misc_bottle_corked_a01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01"
+    }
+   },
+   "spread_m": 0.24413021368469517
+  },
+  {
+   "task": "kitchen_prep_n12",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.652296543121338,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.6866145133972168,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.6354610919952393,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.6650359630584717,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.687648057937622,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.8180382251739502,
+    "failed": [],
+    "swapped": {
+     "knife": "kitchenware_knife_e01",
+     "spoon": "kitchenware_spoon_d01",
+     "bowl": "kitchenware_bowl_q01",
+     "apple_1": "food_produce_apple_s01",
+     "apple_2": "food_produce_apple_q01",
+     "orange": "food_produce_orange_j01",
+     "banana": "food_produce_banana_g01",
+     "bottle": "misc_bottle_corked_a01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01"
+    }
+   },
+   "spread_m": 0.24413021368469517
+  },
+  {
+   "task": "minimal_fix_n12",
+   "condition": "direct",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": false,
+     "solve_s": 1.1188435554504395,
+     "failed": [
+      "max_moved",
+      "max_turned"
+     ]
+    },
+    {
+     "seed": 101,
+     "rubric_ok": false,
+     "solve_s": 1.1788294315338135,
+     "failed": [
+      "max_moved",
+      "max_turned"
+     ]
+    },
+    {
+     "seed": 102,
+     "rubric_ok": false,
+     "solve_s": 1.1151587963104248,
+     "failed": [
+      "max_moved",
+      "max_turned"
+     ]
+    },
+    {
+     "seed": 103,
+     "rubric_ok": false,
+     "solve_s": 1.0985352993011475,
+     "failed": [
+      "max_moved",
+      "max_turned"
+     ]
+    },
+    {
+     "seed": 104,
+     "rubric_ok": false,
+     "solve_s": 1.111863613128662,
+     "failed": [
+      "max_moved",
+      "max_turned"
+     ]
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 1.3988399505615234,
+    "failed": [
+     "max_moved"
+    ],
+    "swapped": {
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01",
+     "glass": "dishware_glass_tumbler_a01",
+     "apple_1": "food_produce_apple_s01",
+     "apple_2": "food_produce_apple_q01",
+     "orange": "food_produce_orange_j01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "bottle": "misc_bottle_corked_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "minimal_fix_n12",
+   "condition": "direct",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": false,
+     "solve_s": 1.1327829360961914,
+     "failed": [
+      "max_moved",
+      "max_turned"
+     ]
+    },
+    {
+     "seed": 101,
+     "rubric_ok": false,
+     "solve_s": 1.1912083625793457,
+     "failed": [
+      "max_moved",
+      "max_turned"
+     ]
+    },
+    {
+     "seed": 102,
+     "rubric_ok": false,
+     "solve_s": 1.1357104778289795,
+     "failed": [
+      "max_moved",
+      "max_turned"
+     ]
+    },
+    {
+     "seed": 103,
+     "rubric_ok": false,
+     "solve_s": 1.1707563400268555,
+     "failed": [
+      "max_moved",
+      "max_turned"
+     ]
+    },
+    {
+     "seed": 104,
+     "rubric_ok": false,
+     "solve_s": 1.181901216506958,
+     "failed": [
+      "max_moved",
+      "max_turned"
+     ]
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 1.4288733005523682,
+    "failed": [
+     "max_moved",
+     "max_turned"
+    ],
+    "swapped": {
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01",
+     "glass": "dishware_glass_tumbler_a01",
+     "apple_1": "food_produce_apple_s01",
+     "apple_2": "food_produce_apple_q01",
+     "orange": "food_produce_orange_j01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "bottle": "misc_bottle_corked_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "minimal_fix_n12",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": false,
+     "solve_s": 0.9798762798309326,
+     "failed": [
+      "max_moved",
+      "max_turned"
+     ]
+    },
+    {
+     "seed": 101,
+     "rubric_ok": false,
+     "solve_s": 0.9808895587921143,
+     "failed": [
+      "max_moved",
+      "max_turned"
+     ]
+    },
+    {
+     "seed": 102,
+     "rubric_ok": false,
+     "solve_s": 0.980290412902832,
+     "failed": [
+      "max_moved",
+      "max_turned"
+     ]
+    },
+    {
+     "seed": 103,
+     "rubric_ok": false,
+     "solve_s": 1.029801368713379,
+     "failed": [
+      "max_moved",
+      "max_turned"
+     ]
+    },
+    {
+     "seed": 104,
+     "rubric_ok": false,
+     "solve_s": 1.0540640354156494,
+     "failed": [
+      "max_moved",
+      "max_turned"
+     ]
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.3117263317108154,
+    "failed": [],
+    "swapped": {
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01",
+     "glass": "dishware_glass_tumbler_a01",
+     "apple_1": "food_produce_apple_s01",
+     "apple_2": "food_produce_apple_q01",
+     "orange": "food_produce_orange_j01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "bottle": "misc_bottle_corked_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "minimal_fix_n12",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 2.3804430961608887,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 2.7079319953918457,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 2.338672399520874,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 2.619281768798828,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 2.477888822555542,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 3.0185344219207764,
+    "failed": [],
+    "swapped": {
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01",
+     "glass": "dishware_glass_tumbler_a01",
+     "apple_1": "food_produce_apple_s01",
+     "apple_2": "food_produce_apple_q01",
+     "orange": "food_produce_orange_j01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "bottle": "misc_bottle_corked_a01"
+    }
+   },
+   "spread_m": 0.4433252526267464
+  },
+  {
+   "task": "minimal_fix_n12",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 2.408561944961548,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 2.7441980838775635,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 2.3805925846099854,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 2.7691993713378906,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 2.6348655223846436,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 2.862107753753662,
+    "failed": [],
+    "swapped": {
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01",
+     "glass": "dishware_glass_tumbler_a01",
+     "apple_1": "food_produce_apple_s01",
+     "apple_2": "food_produce_apple_q01",
+     "orange": "food_produce_orange_j01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "bottle": "misc_bottle_corked_a01"
+    }
+   },
+   "spread_m": 0.4433252526267464
+  },
+  {
+   "task": "minimal_fix_n12",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 2.383124351501465,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 2.7115559577941895,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 2.3843774795532227,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 2.725964069366455,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 2.632854461669922,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 2.6638965606689453,
+    "failed": [],
+    "swapped": {
+     "bowl": "kitchenware_bowl_q01",
+     "mug": "dishware_mug_coffee_b01",
+     "glass": "dishware_glass_tumbler_a01",
+     "apple_1": "food_produce_apple_s01",
+     "apple_2": "food_produce_apple_q01",
+     "orange": "food_produce_orange_j01",
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "bottle": "misc_bottle_corked_a01"
+    }
+   },
+   "spread_m": 0.4433252526267464
+  },
+  {
+   "task": "pack_n10",
+   "condition": "direct",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.401425838470459,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.4010591506958008,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.4224233627319336,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.40342092514038086,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.4060044288635254,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 0.4075908660888672,
+    "failed": [
+     "in_square(10 bodies)",
+     "no_penetration"
+    ],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "pack_n10",
+   "condition": "direct",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.4306802749633789,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.4258108139038086,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.41941404342651367,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.42212629318237305,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.4313633441925049,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 0.41930198669433594,
+    "failed": [
+     "no_penetration"
+    ],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "pack_n10",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.4376082420349121,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.456484317779541,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.44409680366516113,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.4680459499359131,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.4353146553039551,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 0.4352872371673584,
+    "failed": [
+     "in_square(10 bodies)"
+    ],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "pack_n10",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.0770442485809326,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.3477108478546143,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.9866256713867188,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.2633028030395508,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.0257179737091064,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.04701828956604,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01"
+    }
+   },
+   "spread_m": 0.12452311625124657
+  },
+  {
+   "task": "pack_n10",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.0616371631622314,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.34903883934021,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.001593828201294,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.2836451530456543,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.0121440887451172,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.2559478282928467,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01"
+    }
+   },
+   "spread_m": 0.12452311625124657
+  },
+  {
+   "task": "pack_n10",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.0815441608428955,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.3446815013885498,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.0002787113189697,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.2623417377471924,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.0008056163787842,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.1256434917449951,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01"
+    }
+   },
+   "spread_m": 0.12452311625124657
+  },
+  {
+   "task": "pack_n14",
+   "condition": "direct",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.5784568786621094,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.584374189376831,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.5865881443023682,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.5813271999359131,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.5654702186584473,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 0.5971770286560059,
+    "failed": [
+     "no_penetration"
+    ],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01",
+     "fruit_11": "food_produce_banana_g01",
+     "fruit_13": "food_produce_apple_s01",
+     "fruit_14": "food_produce_orange_d01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "pack_n14",
+   "condition": "direct",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.5695888996124268,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.5704655647277832,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.5798780918121338,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.5783860683441162,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.5629560947418213,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 0.60856032371521,
+    "failed": [
+     "no_penetration"
+    ],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01",
+     "fruit_11": "food_produce_banana_g01",
+     "fruit_13": "food_produce_apple_s01",
+     "fruit_14": "food_produce_orange_d01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "pack_n14",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.5296225547790527,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.5489559173583984,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.5347840785980225,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.5298504829406738,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.555020809173584,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 0.5573580265045166,
+    "failed": [
+     "no_penetration"
+    ],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01",
+     "fruit_11": "food_produce_banana_g01",
+     "fruit_13": "food_produce_apple_s01",
+     "fruit_14": "food_produce_orange_d01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "pack_n14",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 2.84812068939209,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 3.0676612854003906,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.6339399814605713,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.5738067626953125,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.8272690773010254,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.6033616065979004,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01",
+     "fruit_11": "food_produce_banana_g01",
+     "fruit_13": "food_produce_apple_s01",
+     "fruit_14": "food_produce_orange_d01"
+    }
+   },
+   "spread_m": 0.14501330042583493
+  },
+  {
+   "task": "pack_n14",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 2.8320422172546387,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 3.0988705158233643,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.6533467769622803,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.6134679317474365,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.8186273574829102,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 2.122988224029541,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01",
+     "fruit_11": "food_produce_banana_g01",
+     "fruit_13": "food_produce_apple_s01",
+     "fruit_14": "food_produce_orange_d01"
+    }
+   },
+   "spread_m": 0.14501330042583493
+  },
+  {
+   "task": "pack_n14",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 2.8237340450286865,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 3.101839065551758,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.6544511318206787,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.6105153560638428,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.8437881469726562,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.6042416095733643,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01",
+     "fruit_11": "food_produce_banana_g01",
+     "fruit_13": "food_produce_apple_s01",
+     "fruit_14": "food_produce_orange_d01"
+    }
+   },
+   "spread_m": 0.14501330042583493
+  },
+  {
+   "task": "palletize_n4",
+   "condition": "direct",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.09252381324768066,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.09279203414916992,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.09119582176208496,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.0916898250579834,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.08859777450561523,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.18277978897094727,
+    "failed": [],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "palletize_n4",
+   "condition": "direct",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.12329745292663574,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.12920832633972168,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.12203645706176758,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.12535905838012695,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.12627458572387695,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.1523268222808838,
+    "failed": [],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "palletize_n4",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.10133218765258789,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.09883451461791992,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.10613155364990234,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.09723091125488281,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.09981107711791992,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.1628708839416504,
+    "failed": [],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "palletize_n4",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.3109314441680908,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.29271769523620605,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.33440208435058594,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.3013913631439209,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.30201172828674316,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.4123191833496094,
+    "failed": [],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09"
+    }
+   },
+   "spread_m": 0.07104879017676566
+  },
+  {
+   "task": "palletize_n4",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.28121352195739746,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.2848968505859375,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.2966465950012207,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.3083324432373047,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.30313706398010254,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.4492664337158203,
+    "failed": [],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09"
+    }
+   },
+   "spread_m": 0.08401294159558272
+  },
+  {
+   "task": "palletize_n4",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.3451974391937256,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": false,
+     "solve_s": 0.34351062774658203,
+     "failed": [
+      "rows(1 lines)",
+      "rows_aligned(1 lines)"
+     ]
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.36304640769958496,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.36675572395324707,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.330172061920166,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.4240908622741699,
+    "failed": [],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09"
+    }
+   },
+   "spread_m": 0.31174231922127066
+  },
+  {
+   "task": "palletize_n6",
+   "condition": "direct",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.18688249588012695,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.18928980827331543,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.20216035842895508,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.18303799629211426,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.1950681209564209,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 0.18454694747924805,
+    "failed": [
+     "in_pallet_inset(6 bodies)"
+    ],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09",
+     "box_5": "box_cube_a01",
+     "box_6": "box_cardboard_d01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "palletize_n6",
+   "condition": "direct",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.2729201316833496,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.26854538917541504,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.27305030822753906,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.27266931533813477,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.26769590377807617,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 0.20777297019958496,
+    "failed": [
+     "min_clearance",
+     "no_penetration"
+    ],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09",
+     "box_5": "box_cube_a01",
+     "box_6": "box_cardboard_d01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "palletize_n6",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.1903069019317627,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.17978978157043457,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.18115234375,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.19935274124145508,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.17863965034484863,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.19914937019348145,
+    "failed": [],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09",
+     "box_5": "box_cube_a01",
+     "box_6": "box_cardboard_d01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "palletize_n6",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.8822369575500488,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.9179246425628662,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.9379217624664307,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.8448953628540039,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.8440415859222412,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.7929935455322266,
+    "failed": [],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09",
+     "box_5": "box_cube_a01",
+     "box_6": "box_cardboard_d01"
+    }
+   },
+   "spread_m": 0.22857014974397627
+  },
+  {
+   "task": "palletize_n6",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.901719331741333,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.9298772811889648,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.9553079605102539,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.8538155555725098,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.832665205001831,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.0071923732757568,
+    "failed": [],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09",
+     "box_5": "box_cube_a01",
+     "box_6": "box_cardboard_d01"
+    }
+   },
+   "spread_m": 0.0652468507442113
+  },
+  {
+   "task": "palletize_n6",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.8922901153564453,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.9597713947296143,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.9186770915985107,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.8899526596069336,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.8409237861633301,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.8293015956878662,
+    "failed": [],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09",
+     "box_5": "box_cube_a01",
+     "box_6": "box_cardboard_d01"
+    }
+   },
+   "spread_m": 0.05741108390654224
+  },
+  {
+   "task": "pick_ready_n8",
+   "condition": "direct",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.0061264038085938,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.9813282489776611,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.9981949329376221,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.9627671241760254,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.0190925598144531,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.5917572975158691,
+    "failed": [],
+    "swapped": {
+     "mug": "dishware_mug_coffee_b01",
+     "bowl": "kitchenware_bowl_b01",
+     "apple": "food_produce_apple_s01",
+     "can": "food_beverage_can_h01",
+     "bottle": "misc_bottle_corked_a01",
+     "screwdriver": "handTool_screwdriver_phillips_ph2_a01",
+     "tumbler": "dishware_glass_8oz_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "pick_ready_n8",
+   "condition": "direct",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.9494833946228027,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.9277727603912354,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.9245567321777344,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.9564285278320312,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.9798405170440674,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.2399964332580566,
+    "failed": [],
+    "swapped": {
+     "mug": "dishware_mug_coffee_b01",
+     "bowl": "kitchenware_bowl_b01",
+     "apple": "food_produce_apple_s01",
+     "can": "food_beverage_can_h01",
+     "bottle": "misc_bottle_corked_a01",
+     "screwdriver": "handTool_screwdriver_phillips_ph2_a01",
+     "tumbler": "dishware_glass_8oz_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "pick_ready_n8",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.0461461544036865,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.0717766284942627,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.0460317134857178,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.0774576663970947,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.9956028461456299,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.6688308715820312,
+    "failed": [],
+    "swapped": {
+     "mug": "dishware_mug_coffee_b01",
+     "bowl": "kitchenware_bowl_b01",
+     "apple": "food_produce_apple_s01",
+     "can": "food_beverage_can_h01",
+     "bottle": "misc_bottle_corked_a01",
+     "screwdriver": "handTool_screwdriver_phillips_ph2_a01",
+     "tumbler": "dishware_glass_8oz_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "pick_ready_n8",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 2.358248710632324,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 2.9261634349823,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 2.947375774383545,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 2.339715003967285,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 2.2660903930664062,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 2.7330241203308105,
+    "failed": [],
+    "swapped": {
+     "mug": "dishware_mug_coffee_b01",
+     "bowl": "kitchenware_bowl_b01",
+     "apple": "food_produce_apple_s01",
+     "can": "food_beverage_can_h01",
+     "bottle": "misc_bottle_corked_a01",
+     "screwdriver": "handTool_screwdriver_phillips_ph2_a01",
+     "tumbler": "dishware_glass_8oz_a01"
+    }
+   },
+   "spread_m": 0.2769827860087178
+  },
+  {
+   "task": "pick_ready_n8",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 2.387382984161377,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 2.9059951305389404,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 2.9939286708831787,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 2.362659215927124,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 2.1953132152557373,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 2.9044604301452637,
+    "failed": [],
+    "swapped": {
+     "mug": "dishware_mug_coffee_b01",
+     "bowl": "kitchenware_bowl_b01",
+     "apple": "food_produce_apple_s01",
+     "can": "food_beverage_can_h01",
+     "bottle": "misc_bottle_corked_a01",
+     "screwdriver": "handTool_screwdriver_phillips_ph2_a01",
+     "tumbler": "dishware_glass_8oz_a01"
+    }
+   },
+   "spread_m": 0.2769827860087178
+  },
+  {
+   "task": "pick_ready_n8",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 2.288759231567383,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 2.9499974250793457,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 2.8362414836883545,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 2.3509719371795654,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 2.1850860118865967,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 3.128596067428589,
+    "failed": [],
+    "swapped": {
+     "mug": "dishware_mug_coffee_b01",
+     "bowl": "kitchenware_bowl_b01",
+     "apple": "food_produce_apple_s01",
+     "can": "food_beverage_can_h01",
+     "bottle": "misc_bottle_corked_a01",
+     "screwdriver": "handTool_screwdriver_phillips_ph2_a01",
+     "tumbler": "dishware_glass_8oz_a01"
+    }
+   },
+   "spread_m": 0.2769827860087178
+  },
+  {
+   "task": "setting_n6",
+   "condition": "direct",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.4032278060913086,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.40403175354003906,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.3868715763092041,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.4066803455352783,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.41373610496520996,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 0.45493054389953613,
+    "failed": [
+     "long_axis_along(fork,x)",
+     "gap(plate->fork,+y)",
+     "gap(fork->mug,+y)",
+     "no_penetration"
+    ],
+    "swapped": {
+     "fork": "kitchenware_fork_c01",
+     "knife": "kitchenware_knife_p01",
+     "spoon": "kitchenware_spoon_d01",
+     "mug": "dishware_mug_coffee_b01",
+     "glass": "dishware_glass_tumbler_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "setting_n6",
+   "condition": "direct",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.3937985897064209,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.39670658111572266,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.4103817939758301,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.43446993827819824,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.3863399028778076,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 0.4524998664855957,
+    "failed": [
+     "long_axis_along(fork,x)",
+     "gap(plate->fork,+y)",
+     "gap(fork->mug,+y)",
+     "no_penetration"
+    ],
+    "swapped": {
+     "fork": "kitchenware_fork_c01",
+     "knife": "kitchenware_knife_p01",
+     "spoon": "kitchenware_spoon_d01",
+     "mug": "dishware_mug_coffee_b01",
+     "glass": "dishware_glass_tumbler_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "setting_n6",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.3884086608886719,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.41274595260620117,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.39219021797180176,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.429976224899292,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.38625431060791016,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 0.4499640464782715,
+    "failed": [
+     "long_axis_along(fork,x)",
+     "gap(plate->fork,+y)",
+     "gap(fork->mug,+y)",
+     "no_penetration"
+    ],
+    "swapped": {
+     "fork": "kitchenware_fork_c01",
+     "knife": "kitchenware_knife_p01",
+     "spoon": "kitchenware_spoon_d01",
+     "mug": "dishware_mug_coffee_b01",
+     "glass": "dishware_glass_tumbler_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "setting_n6",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.0015487670898438,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.0139069557189941,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.9964957237243652,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.05381178855896,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.9223818778991699,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.045708179473877,
+    "failed": [],
+    "swapped": {
+     "fork": "kitchenware_fork_c01",
+     "knife": "kitchenware_knife_p01",
+     "spoon": "kitchenware_spoon_d01",
+     "mug": "dishware_mug_coffee_b01",
+     "glass": "dishware_glass_tumbler_a01"
+    }
+   },
+   "spread_m": 0.08188231332556298
+  },
+  {
+   "task": "setting_n6",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.011927843093872,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.0010390281677246,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.005277395248413,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.0033574104309082,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.9249083995819092,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.0914499759674072,
+    "failed": [],
+    "swapped": {
+     "fork": "kitchenware_fork_c01",
+     "knife": "kitchenware_knife_p01",
+     "spoon": "kitchenware_spoon_d01",
+     "mug": "dishware_mug_coffee_b01",
+     "glass": "dishware_glass_tumbler_a01"
+    }
+   },
+   "spread_m": 0.08188231332556298
+  },
+  {
+   "task": "setting_n6",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.079791784286499,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.1003696918487549,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.0502190589904785,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.984097957611084,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.9175560474395752,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.112703561782837,
+    "failed": [],
+    "swapped": {
+     "fork": "kitchenware_fork_c01",
+     "knife": "kitchenware_knife_p01",
+     "spoon": "kitchenware_spoon_d01",
+     "mug": "dishware_mug_coffee_b01",
+     "glass": "dishware_glass_tumbler_a01"
+    }
+   },
+   "spread_m": 0.08188231332556298
+  },
+  {
+   "task": "stack_n6",
+   "condition": "direct",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.36626100540161133,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.34469127655029297,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.3559916019439697,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.3576343059539795,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.3482086658477783,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.5407774448394775,
+    "failed": [],
+    "swapped": {
+     "box_large": "box_cube_a01",
+     "box_medium": "box_cardboard_d01",
+     "box_small": "box_cube_a03",
+     "apple": "food_produce_apple_s01",
+     "can": "food_beverage_can_h01",
+     "cup": "kitchenware_cup_d01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "stack_n6",
+   "condition": "direct",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.3766462802886963,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.4023773670196533,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.34446001052856445,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.34902453422546387,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.35036683082580566,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.5532207489013672,
+    "failed": [],
+    "swapped": {
+     "box_large": "box_cube_a01",
+     "box_medium": "box_cardboard_d01",
+     "box_small": "box_cube_a03",
+     "apple": "food_produce_apple_s01",
+     "can": "food_beverage_can_h01",
+     "cup": "kitchenware_cup_d01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "stack_n6",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.35346174240112305,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.3555142879486084,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.3469047546386719,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.34535908699035645,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.3403041362762451,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.6154112815856934,
+    "failed": [],
+    "swapped": {
+     "box_large": "box_cube_a01",
+     "box_medium": "box_cardboard_d01",
+     "box_small": "box_cube_a03",
+     "apple": "food_produce_apple_s01",
+     "can": "food_beverage_can_h01",
+     "cup": "kitchenware_cup_d01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "stack_n6",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 3.096348524093628,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 2.8266708850860596,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 2.9851646423339844,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 3.151109218597412,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 3.085425615310669,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 4.048783540725708,
+    "failed": [],
+    "swapped": {
+     "box_large": "box_cube_a01",
+     "box_medium": "box_cardboard_d01",
+     "box_small": "box_cube_a03",
+     "apple": "food_produce_apple_s01",
+     "can": "food_beverage_can_h01",
+     "cup": "kitchenware_cup_d01"
+    }
+   },
+   "spread_m": 0.08992700339812884
+  },
+  {
+   "task": "stack_n6",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 3.3264198303222656,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 2.8586602210998535,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 3.008179187774658,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 3.1924500465393066,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 3.3542263507843018,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 4.1006760597229,
+    "failed": [],
+    "swapped": {
+     "box_large": "box_cube_a01",
+     "box_medium": "box_cardboard_d01",
+     "box_small": "box_cube_a03",
+     "apple": "food_produce_apple_s01",
+     "can": "food_beverage_can_h01",
+     "cup": "kitchenware_cup_d01"
+    }
+   },
+   "spread_m": 0.09023612482257379
+  },
+  {
+   "task": "stack_n6",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 2.911417007446289,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 2.8206684589385986,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 2.9551620483398438,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 3.0198724269866943,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 3.2605929374694824,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 3.698472738265991,
+    "failed": [],
+    "swapped": {
+     "box_large": "box_cube_a01",
+     "box_medium": "box_cardboard_d01",
+     "box_small": "box_cube_a03",
+     "apple": "food_produce_apple_s01",
+     "can": "food_beverage_can_h01",
+     "cup": "kitchenware_cup_d01"
+    }
+   },
+   "spread_m": 0.08989093017429013
+  },
+  {
+   "task": "tool_layout_n7",
+   "condition": "direct",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.718797206878662,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.6604204177856445,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.6957414150238037,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.6936023235321045,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.6681077480316162,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.8037638664245605,
+    "failed": [],
+    "swapped": {
+     "screwdriver_1": "handTool_screwdriver_phillips_ph2_a01",
+     "screwdriver_2": "handTool_screwdriver_slotted_55mm_a01",
+     "marker_1": "stationery_marker_thin_blue_a01",
+     "marker_2": "stationery_marker_thin_green_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "tool_layout_n7",
+   "condition": "direct",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.6606512069702148,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.7062804698944092,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.6428492069244385,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.6934881210327148,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.6526720523834229,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.7101364135742188,
+    "failed": [],
+    "swapped": {
+     "screwdriver_1": "handTool_screwdriver_phillips_ph2_a01",
+     "screwdriver_2": "handTool_screwdriver_slotted_55mm_a01",
+     "marker_1": "stationery_marker_thin_blue_a01",
+     "marker_2": "stationery_marker_thin_green_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "tool_layout_n7",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 1.632882833480835,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 1.7018654346466064,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.6367242336273193,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.6973075866699219,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.6590516567230225,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.648024082183838,
+    "failed": [],
+    "swapped": {
+     "screwdriver_1": "handTool_screwdriver_phillips_ph2_a01",
+     "screwdriver_2": "handTool_screwdriver_slotted_55mm_a01",
+     "marker_1": "stationery_marker_thin_blue_a01",
+     "marker_2": "stationery_marker_thin_green_a01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "tool_layout_n7",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 4.296058654785156,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 4.265866041183472,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 4.090221166610718,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 4.126365423202515,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 4.094405889511108,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 4.052436113357544,
+    "failed": [],
+    "swapped": {
+     "screwdriver_1": "handTool_screwdriver_phillips_ph2_a01",
+     "screwdriver_2": "handTool_screwdriver_slotted_55mm_a01",
+     "marker_1": "stationery_marker_thin_blue_a01",
+     "marker_2": "stationery_marker_thin_green_a01"
+    }
+   },
+   "spread_m": 0.030300053156115808
+  },
+  {
+   "task": "tool_layout_n7",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 4.23034930229187,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 4.323493719100952,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 4.081013202667236,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 4.130051136016846,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 4.043732166290283,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 4.337884426116943,
+    "failed": [],
+    "swapped": {
+     "screwdriver_1": "handTool_screwdriver_phillips_ph2_a01",
+     "screwdriver_2": "handTool_screwdriver_slotted_55mm_a01",
+     "marker_1": "stationery_marker_thin_blue_a01",
+     "marker_2": "stationery_marker_thin_green_a01"
+    }
+   },
+   "spread_m": 0.030300053156115808
+  },
+  {
+   "task": "tool_layout_n7",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 4.043504238128662,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 4.101947546005249,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 3.9530975818634033,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 3.895850896835327,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 3.937286376953125,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 4.364267826080322,
+    "failed": [],
+    "swapped": {
+     "screwdriver_1": "handTool_screwdriver_phillips_ph2_a01",
+     "screwdriver_2": "handTool_screwdriver_slotted_55mm_a01",
+     "marker_1": "stationery_marker_thin_blue_a01",
+     "marker_2": "stationery_marker_thin_green_a01"
+    }
+   },
+   "spread_m": 0.030300053156115808
+  }
+ ]
+}

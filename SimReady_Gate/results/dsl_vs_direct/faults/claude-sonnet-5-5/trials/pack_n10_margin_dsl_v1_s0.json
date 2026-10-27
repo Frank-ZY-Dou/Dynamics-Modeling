@@ -1,0 +1,179 @@
+{
+ "task": "pack_n10",
+ "family": "pack",
+ "n": 10,
+ "condition": "dsl_v1",
+ "seed": 0,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": null,
+   "message_chars": 1778,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "x0": 0.42200000000000004,
+      "x1": 0.6980000000000001,
+      "y0": -0.138,
+      "y1": 0.138
+     }
+    ],
+    "schedule": {
+     "margin": 0.02
+    }
+   },
+   "answer_from": "fault",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "within(fruit_2,region)",
+      0.0238
+     ],
+     [
+      "within(fruit_3,region)",
+      0.0378
+     ],
+     [
+      "within(fruit_4,region)",
+      0.0067
+     ],
+     [
+      "within(fruit_5,region)",
+      0.01
+     ],
+     [
+      "within(fruit_6,region)",
+      0.0129
+     ],
+     [
+      "within(fruit_9,region)",
+      0.0226
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "pairs still penetrated in the closing steps of the tail; 3 step(s) served the contacts alone, the program rows set aside",
+     "a program row was not met within the step at 26 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts exceeded the trust region at 3 step(s); those steps served the contacts alone"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 2.4073214530944824,
+   "solve_cpu_s": 2.2879934819999903,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "in_square(10 bodies)",
+     false,
+     0.0358
+    ]
+   ],
+   "answer_items": 4
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 10.75638484954834,
+    "duration_ms": 10004,
+    "duration_api_ms": 9962,
+    "cost_usd": 0.0187557,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2002,
+     "cache_read": 12037,
+     "output": 954,
+     "thinking": 705
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2792,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "x0": 0.42,
+      "x1": 0.7,
+      "y0": -0.14,
+      "y1": 0.14
+     },
+     {
+      "op": "yaw",
+      "a": "fruit_3",
+      "axis": "long",
+      "deg": 90,
+      "soft": 0.3
+     },
+     {
+      "op": "yaw",
+      "a": "fruit_7",
+      "axis": "long",
+      "deg": 90,
+      "soft": 0.3
+     }
+    ],
+    "schedule": {
+     "margin": 0.002
+    }
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 5 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 4 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 1.1981532573699951,
+   "solve_cpu_s": 1.1772871919999943,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 6
+  }
+ ],
+ "n_rounds": 2,
+ "success": true,
+ "first_round_success": false,
+ "self_ok": true,
+ "fault": {
+  "name": "margin",
+  "kind": "margin"
+ }
+}

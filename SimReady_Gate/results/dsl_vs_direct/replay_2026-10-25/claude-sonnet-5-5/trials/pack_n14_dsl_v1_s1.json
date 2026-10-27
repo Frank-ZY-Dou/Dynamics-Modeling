@@ -1,0 +1,78 @@
+{
+ "task": "pack_n14",
+ "family": "pack",
+ "n": 14,
+ "condition": "dsl_v1",
+ "seed": 1,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 2.454167127609253,
+    "duration_ms": 1803,
+    "duration_api_ms": 1774,
+    "cost_usd": 0.0097529,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1774,
+     "cache_read": 10529,
+     "output": 160,
+     "thinking": 0
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1999,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "fruit_*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_*"
+     },
+     {
+      "op": "within",
+      "a": "fruit_*",
+      "b": "table",
+      "x0": 0.4,
+      "x1": 0.72,
+      "y0": -0.16,
+      "y1": 0.16
+     },
+     {
+      "op": "no_penetration"
+     }
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 3 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts kept the program's margin of 5 mm and set a requirement aside; the repair started again from the same poses with a margin of 2.5 mm"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 4.266452789306641,
+   "solve_cpu_s": 4.2676152669999965,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 4
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

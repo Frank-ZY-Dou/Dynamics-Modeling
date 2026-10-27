@@ -11,171 +11,170 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 41.61310315132141,
-    "duration_ms": 41115,
-    "duration_api_ms": 41083,
-    "cost_usd": 0.062259300000000004,
+    "wall_s": 37.78102374076843,
+    "duration_ms": 37271,
+    "duration_api_ms": 37240,
+    "cost_usd": 0.0584393,
     "usage": {
      "input": 2,
-     "cache_creation": 2736,
+     "cache_creation": 2941,
      "cache_read": 913,
-     "output": 5122,
-     "thinking": 4336
+     "output": 4658,
+     "thinking": 3872
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 3973,
+   "message_chars": 4414,
    "answer": {
     "poses": [
      {
       "name": "fruit_3",
-      "x": 0.4,
-      "y": 0.35,
-      "yaw": 0
-     },
-     {
-      "name": "fruit_11",
-      "x": 0.495,
-      "y": 0.35,
-      "yaw": 0
+      "x": 0.39,
+      "y": 0.49,
+      "yaw": 90
      },
      {
       "name": "fruit_7",
-      "x": 0.59,
-      "y": 0.35,
-      "yaw": 0
+      "x": 0.57,
+      "y": 0.49,
+      "yaw": 90
+     },
+     {
+      "name": "fruit_11",
+      "x": 0.75,
+      "y": 0.49,
+      "yaw": 90
      },
      {
       "name": "fruit_1",
-      "x": 0.36,
-      "y": 0.48,
+      "x": 0.435,
+      "y": 0.4,
       "yaw": 0
      },
      {
       "name": "fruit_2",
-      "x": 0.445,
-      "y": 0.48,
+      "x": 0.525,
+      "y": 0.4,
       "yaw": 0
      },
      {
       "name": "fruit_4",
-      "x": 0.53,
-      "y": 0.48,
+      "x": 0.615,
+      "y": 0.4,
       "yaw": 0
      },
      {
       "name": "fruit_5",
-      "x": 0.615,
-      "y": 0.48,
+      "x": 0.705,
+      "y": 0.4,
       "yaw": 0
      },
      {
       "name": "fruit_6",
-      "x": 0.36,
-      "y": 0.56,
+      "x": 0.435,
+      "y": 0.58,
       "yaw": 0
      },
      {
       "name": "fruit_8",
-      "x": 0.445,
-      "y": 0.56,
+      "x": 0.525,
+      "y": 0.58,
       "yaw": 0
      },
      {
       "name": "fruit_9",
-      "x": 0.53,
-      "y": 0.56,
+      "x": 0.615,
+      "y": 0.58,
       "yaw": 0
      },
      {
       "name": "fruit_10",
-      "x": 0.615,
-      "y": 0.56,
+      "x": 0.705,
+      "y": 0.58,
       "yaw": 0
      },
      {
       "name": "fruit_12",
-      "x": 0.36,
-      "y": 0.64,
+      "x": 0.48,
+      "y": 0.67,
       "yaw": 0
      },
      {
       "name": "fruit_13",
-      "x": 0.445,
-      "y": 0.64,
+      "x": 0.57,
+      "y": 0.67,
       "yaw": 0
      },
      {
       "name": "fruit_14",
-      "x": 0.53,
-      "y": 0.64,
-      "yaw": 0
-     },
-     {
-      "name": "can_6",
-      "x": 0.25,
-      "y": -0.5,
+      "x": 0.66,
+      "y": 0.67,
       "yaw": 0
      },
      {
       "name": "can_1",
-      "x": 0.35,
+      "x": 0.26,
       "y": -0.5,
       "yaw": 0
      },
      {
       "name": "can_2",
-      "x": 0.45,
+      "x": 0.355,
       "y": -0.5,
       "yaw": 0
      },
      {
       "name": "can_3",
-      "x": 0.55,
+      "x": 0.45,
       "y": -0.5,
       "yaw": 0
      },
      {
       "name": "can_4",
-      "x": 0.65,
+      "x": 0.545,
       "y": -0.5,
       "yaw": 0
      },
      {
       "name": "can_5",
-      "x": 0.75,
+      "x": 0.64,
+      "y": -0.5,
+      "yaw": 0
+     },
+     {
+      "name": "can_6",
+      "x": 0.735,
       "y": -0.5,
       "yaw": 0
      },
      {
       "name": "can_7",
-      "x": 0.85,
+      "x": 0.83,
       "y": -0.5,
       "yaw": 0
      },
      {
       "name": "bowl",
-      "x": 0.65,
-      "y": 0,
+      "x": 0.62,
+      "y": 0.12,
       "yaw": 0
      },
      {
       "name": "mug",
-      "x": 0.65,
-      "y": 0.13,
+      "x": 0.74,
+      "y": 0,
       "yaw": 0
      },
      {
       "name": "jar_1",
-      "x": 0.8,
-      "y": -0.1,
+      "x": 0.58,
+      "y": -0.16,
       "yaw": 0
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -184,16 +183,16 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 1.9294142723083496,
-   "solve_cpu_s": 1.9296837300000007,
+   "solve_s": 1.549152135848999,
+   "solve_cpu_s": 1.5490502630000016,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 24,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 4.735758543014526,
-    "solve_cpu_s": 4.735988191000001,
+    "solve_s": 4.050290107727051,
+    "solve_cpu_s": 4.050473589999999,
     "rubric_failed": []
    }
   }

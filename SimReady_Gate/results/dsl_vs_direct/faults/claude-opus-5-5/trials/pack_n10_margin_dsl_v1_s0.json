@@ -1,0 +1,372 @@
+{
+ "task": "pack_n10",
+ "family": "pack",
+ "n": 10,
+ "condition": "dsl_v1",
+ "seed": 0,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": null,
+   "message_chars": 1778,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "x0": 0.42200000000000004,
+      "x1": 0.6980000000000001,
+      "y0": -0.138,
+      "y1": 0.138
+     }
+    ],
+    "schedule": {
+     "margin": 0.02
+    }
+   },
+   "answer_from": "fault",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "within(fruit_2,region)",
+      0.0238
+     ],
+     [
+      "within(fruit_3,region)",
+      0.0378
+     ],
+     [
+      "within(fruit_4,region)",
+      0.0067
+     ],
+     [
+      "within(fruit_5,region)",
+      0.01
+     ],
+     [
+      "within(fruit_6,region)",
+      0.0129
+     ],
+     [
+      "within(fruit_9,region)",
+      0.0226
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "pairs still penetrated in the closing steps of the tail; 3 step(s) served the contacts alone, the program rows set aside",
+     "a program row was not met within the step at 26 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts exceeded the trust region at 3 step(s); those steps served the contacts alone"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 2.3637495040893555,
+   "solve_cpu_s": 2.34920605100001,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "in_square(10 bodies)",
+     false,
+     0.0358
+    ]
+   ],
+   "answer_items": 4
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 48.313416957855225,
+    "duration_ms": 47618,
+    "duration_api_ms": 47576,
+    "cost_usd": 0.1070714,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2022,
+     "cache_read": 12037,
+     "output": 4424,
+     "thinking": 3918
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2792,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "x0": 0.42,
+      "x1": 0.7,
+      "y0": -0.14,
+      "y1": 0.14
+     },
+     {
+      "op": "place",
+      "a": "fruit_3",
+      "x": 0.466,
+      "y": -0.053,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_7",
+      "x": 0.543,
+      "y": -0.058,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_4",
+      "x": 0.605,
+      "y": -0.105
+     },
+     {
+      "op": "place",
+      "a": "fruit_5",
+      "x": 0.667,
+      "y": -0.105
+     },
+     {
+      "op": "place",
+      "a": "fruit_8",
+      "x": 0.605,
+      "y": -0.037
+     },
+     {
+      "op": "place",
+      "a": "fruit_9",
+      "x": 0.667,
+      "y": -0.037,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_1",
+      "x": 0.457,
+      "y": 0.1
+     },
+     {
+      "op": "place",
+      "a": "fruit_2",
+      "x": 0.527,
+      "y": 0.1,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "fruit_6",
+      "x": 0.597,
+      "y": 0.1
+     },
+     {
+      "op": "place",
+      "a": "fruit_10",
+      "x": 0.665,
+      "y": 0.1,
+      "yaw": 90
+     }
+    ],
+    "schedule": {
+     "margin": 0.001
+    }
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "within(fruit_1,region)",
+      0.0064
+     ],
+     [
+      "within(fruit_10,region)",
+      0.0028
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "pairs still penetrated in the closing steps of the tail; 2 step(s) served the contacts alone, the program rows set aside",
+     "a program row was not met within the step at 9 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 1.6705167293548584,
+   "solve_cpu_s": 1.6705430450000165,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "in_square(10 bodies)",
+     false,
+     0.0064
+    ]
+   ],
+   "answer_items": 14
+  },
+  {
+   "round": 3,
+   "llm": {
+    "ok": true,
+    "wall_s": 38.66698884963989,
+    "duration_ms": 38076,
+    "duration_api_ms": 38046,
+    "cost_usd": 0.0965234,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2286,
+     "cache_read": 12037,
+     "output": 3791,
+     "thinking": 3285
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 3146,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "x0": 0.42,
+      "x1": 0.7,
+      "y0": -0.14,
+      "y1": 0.14
+     },
+     {
+      "op": "place",
+      "a": "fruit_3",
+      "x": 0.466,
+      "y": -0.053,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_7",
+      "x": 0.543,
+      "y": -0.055,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_4",
+      "x": 0.605,
+      "y": -0.108
+     },
+     {
+      "op": "place",
+      "a": "fruit_5",
+      "x": 0.667,
+      "y": -0.108
+     },
+     {
+      "op": "place",
+      "a": "fruit_8",
+      "x": 0.605,
+      "y": -0.046
+     },
+     {
+      "op": "place",
+      "a": "fruit_9",
+      "x": 0.667,
+      "y": -0.046,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_10",
+      "x": 0.65,
+      "y": 0.027,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_1",
+      "x": 0.47,
+      "y": 0.104
+     },
+     {
+      "op": "place",
+      "a": "fruit_2",
+      "x": 0.56,
+      "y": 0.104,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_6",
+      "x": 0.655,
+      "y": 0.104
+     }
+    ],
+    "schedule": {
+     "margin": 0.001
+    }
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 1.2144169807434082,
+   "solve_cpu_s": 1.2147579370000017,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 14
+  }
+ ],
+ "n_rounds": 3,
+ "success": true,
+ "first_round_success": false,
+ "self_ok": true,
+ "fault": {
+  "name": "margin",
+  "kind": "margin"
+ }
+}

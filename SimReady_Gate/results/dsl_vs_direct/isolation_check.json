@@ -1,5 +1,5 @@
 {
- "time": "2026-10-25T04:13:57",
+ "time": "2026-10-26T15:55:38",
  "cli": "2.1.310 (Claude Code)",
  "model": "claude-sonnet-5-5",
  "effort": "medium",
@@ -24,9 +24,9 @@
   "CLAUDE_CODE_DISABLE_AUTO_MEMORY=1"
  ],
  "planted": {
-  "claude_md": "<work_root>/calls_replay3/isocheck_qnh6pf33/CLAUDE.md",
-  "auto_memory": "~/.claude/projects/<work_root>-calls-replay3-isocheck-qnh6pf33/memory/MEMORY.md",
-  "cwd_file": "<work_root>/calls_replay3/isocheck_qnh6pf33/notes.txt"
+  "claude_md": "/tmp/isocheck_mbaap7at/CLAUDE.md",
+  "auto_memory": "~/.claude/projects/-tmp-isocheck-mbaap7at/memory/MEMORY.md",
+  "cwd_file": "/tmp/isocheck_mbaap7at/notes.txt"
  },
  "runs": {
   "isolated": {
@@ -38,7 +38,7 @@
    "answer": "(not published: the answer of the control quotes the configuration of the account that ran the check)",
    "usage": {
     "input": 2,
-    "cache_creation": 687,
+    "cache_creation": 591,
     "cache_read": 0
    },
    "returncode": 0
@@ -52,7 +52,7 @@
    "answer": "(not published: the answer of the control quotes the configuration of the account that ran the check)",
    "usage": {
     "input": 2,
-    "cache_creation": 20244,
+    "cache_creation": 19907,
     "cache_read": 0
    },
    "returncode": 0
@@ -126,8 +126,7 @@
    "claude",
    "Explore",
    "general-purpose",
-   "Plan",
-   "web-fetch"
+   "Plan"
   ],
   "skills": [
    "deep-research",
@@ -168,7 +167,7 @@
    }
   ],
   "output_style": "default",
-  "cwd": "<work_root>/calls_replay3/isocheck_qnh6pf33",
+  "cwd": "/tmp/isocheck_mbaap7at",
   "apiKeySource": "none"
  },
  "pass": true,

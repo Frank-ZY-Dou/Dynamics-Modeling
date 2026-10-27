@@ -1,0 +1,121 @@
+{
+ "task": "fruit_cans_n10",
+ "family": "fruit_cans",
+ "n": 10,
+ "condition": "direct",
+ "seed": 2,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 25.40289855003357,
+    "duration_ms": 24918,
+    "duration_api_ms": 24890,
+    "cost_usd": 0.00335233,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1670,
+     "cache_read": 913,
+     "output": 6018,
+     "thinking": 5659
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2020,
+   "answer": {
+    "poses": [
+     {
+      "name": "fruit_1",
+      "x": 0.42,
+      "y": 0.36,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_2",
+      "x": 0.42,
+      "y": 0.46,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_3",
+      "x": 0.6,
+      "y": 0.45,
+      "yaw": 90
+     },
+     {
+      "name": "fruit_4",
+      "x": 0.52,
+      "y": 0.33,
+      "yaw": 0
+     },
+     {
+      "name": "fruit_5",
+      "x": 0.49,
+      "y": 0.54,
+      "yaw": 0
+     },
+     {
+      "name": "can_1",
+      "x": 0.3,
+      "y": -0.4,
+      "yaw": -66
+     },
+     {
+      "name": "can_2",
+      "x": 0.46,
+      "y": -0.4,
+      "yaw": 91
+     },
+     {
+      "name": "can_3",
+      "x": 0.62,
+      "y": -0.4,
+      "yaw": 8
+     },
+     {
+      "name": "can_4",
+      "x": 0.78,
+      "y": -0.4,
+      "yaw": 9
+     },
+     {
+      "name": "bowl",
+      "x": 0.65,
+      "y": 0,
+      "yaw": 76
+     }
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "penetrating_pairs": [],
+    "not_resting_on_anything": [],
+    "off_the_support": [],
+    "missing_poses": []
+   },
+   "self_ok": true,
+   "solve_s": 0.4596433639526367,
+   "solve_cpu_s": 0.45981657100000106,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 10,
+   "direct_repair": {
+    "rubric_ok": true,
+    "self_ok": true,
+    "solve_s": 1.1774046421051025,
+    "solve_cpu_s": 1.177599035,
+    "rubric_failed": []
+   }
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

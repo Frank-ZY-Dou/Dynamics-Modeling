@@ -1,0 +1,504 @@
+{
+ "task": "fruit_cans_n24",
+ "family": "fruit_cans",
+ "n": 24,
+ "condition": "dsl_v1_rewrites",
+ "seed": 0,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": null,
+   "message_chars": 4414,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "within",
+      "a": "fruit_1",
+      "b": "table.top",
+      "y0": 0.27
+     },
+     {
+      "op": "within",
+      "a": "fruit_2",
+      "b": "table.top",
+      "y0": 0.27
+     },
+     {
+      "op": "within",
+      "a": "fruit_3",
+      "b": "table.top",
+      "y0": 0.27
+     },
+     {
+      "op": "within",
+      "a": "fruit_4",
+      "b": "table.top",
+      "y0": 0.27
+     },
+     {
+      "op": "within",
+      "a": "fruit_5",
+      "b": "table.top",
+      "y0": 0.27
+     },
+     {
+      "op": "within",
+      "a": "fruit_6",
+      "b": "table.top",
+      "y0": 0.27
+     },
+     {
+      "op": "within",
+      "a": "fruit_7",
+      "b": "table.top",
+      "y0": 0.27
+     },
+     {
+      "op": "within",
+      "a": "fruit_8",
+      "b": "table.top",
+      "y0": 0.27
+     },
+     {
+      "op": "within",
+      "a": "fruit_9",
+      "b": "table.top",
+      "y0": 0.27
+     },
+     {
+      "op": "within",
+      "a": "fruit_10",
+      "b": "table.top",
+      "y0": 0.27
+     },
+     {
+      "op": "within",
+      "a": "fruit_11",
+      "b": "table.top",
+      "y0": 0.27
+     },
+     {
+      "op": "within",
+      "a": "fruit_12",
+      "b": "table.top",
+      "y0": 0.27
+     },
+     {
+      "op": "within",
+      "a": "fruit_13",
+      "b": "table.top",
+      "y0": 0.27
+     },
+     {
+      "op": "within",
+      "a": "fruit_14",
+      "b": "table.top",
+      "y0": 0.27
+     },
+     {
+      "op": "cluster",
+      "members": [
+       "fruit_1",
+       "fruit_2",
+       "fruit_3",
+       "fruit_4",
+       "fruit_5",
+       "fruit_6",
+       "fruit_7",
+       "fruit_8",
+       "fruit_9",
+       "fruit_10",
+       "fruit_11",
+       "fruit_12",
+       "fruit_13",
+       "fruit_14"
+      ],
+      "r": 0.03
+     },
+     {
+      "op": "within",
+      "a": "can_1",
+      "b": "table.top",
+      "y1": -0.27
+     },
+     {
+      "op": "within",
+      "a": "can_2",
+      "b": "table.top",
+      "y1": -0.27
+     },
+     {
+      "op": "within",
+      "a": "can_3",
+      "b": "table.top",
+      "y1": -0.27
+     },
+     {
+      "op": "within",
+      "a": "can_4",
+      "b": "table.top",
+      "y1": -0.27
+     },
+     {
+      "op": "within",
+      "a": "can_5",
+      "b": "table.top",
+      "y1": -0.27
+     },
+     {
+      "op": "within",
+      "a": "can_6",
+      "b": "table.top",
+      "y1": -0.27
+     },
+     {
+      "op": "within",
+      "a": "can_7",
+      "b": "table.top",
+      "y1": -0.27
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_1",
+       "can_2",
+       "can_3",
+       "can_4",
+       "can_5",
+       "can_6",
+       "can_7"
+      ],
+      "start": "near",
+      "gap": 0.025,
+      "tol": 0.005
+     },
+     {
+      "op": "within",
+      "a": "bowl",
+      "y0": -0.18,
+      "y1": 0.18
+     },
+     {
+      "op": "reach",
+      "a": "bowl",
+      "r": 0.75,
+      "min": 0.57
+     },
+     {
+      "op": "keep_out",
+      "a": "*",
+      "x0": 0.29,
+      "x1": 0.51,
+      "y0": -0.11,
+      "y1": 0.11
+     },
+     {
+      "op": "close_to",
+      "a": "mug",
+      "b": "bowl",
+      "r": 0.18
+     },
+     {
+      "op": "within",
+      "a": "mug",
+      "y0": -0.18,
+      "y1": 0.18
+     },
+     {
+      "op": "place",
+      "a": "bowl",
+      "x": 0.64,
+      "y": 0.05
+     },
+     {
+      "op": "place",
+      "a": "mug",
+      "x": 0.7,
+      "y": -0.1
+     },
+     {
+      "op": "clearance",
+      "a": "jar_1",
+      "gap": 0.035
+     }
+    ]
+   },
+   "answer_from": "fault",
+   "report": {
+    "ok": false,
+    "pen_after": 1,
+    "failed_predicates": [
+     [
+      "within(fruit_3,table.top)",
+      0.1242
+     ],
+     [
+      "within(fruit_5,table.top)",
+      0.0074
+     ],
+     [
+      "within(fruit_11,table.top)",
+      0.0916
+     ],
+     [
+      "cluster(fruit_1,fruit_2,fruit_3,fruit_4,fruit_5,fruit_6,fruit_7,fruit_8,fruit_9,fruit_10,fruit_11,fruit_12,fruit_13,fruit_14)",
+      0.1737
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "pairs still penetrated in the closing steps of the tail; 8 step(s) served the contacts alone, the program rows set aside",
+     "a program row was not met within the step at 54 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts exceeded the trust region at 22 step(s); those steps served the contacts alone",
+     "the program was solved alone at scale 0.05 in 4 step(s) before the scale was restored"
+    ],
+    "rewrites": [
+     {
+      "statement": 6,
+      "text": "within(fruit_3, table.top, y0=0.27)",
+      "relax": null,
+      "weaken": "soft"
+     },
+     {
+      "statement": 8,
+      "text": "within(fruit_5, table.top, y0=0.27)",
+      "relax": null,
+      "weaken": "soft"
+     },
+     {
+      "statement": 14,
+      "text": "within(fruit_11, table.top, y0=0.27)",
+      "relax": null,
+      "weaken": "soft"
+     },
+     {
+      "statement": 18,
+      "text": "cluster(fruit_1, fruit_2, fruit_3, fruit_4, fruit_5, fruit_6, fruit_7, fruit_8, fruit_9, fruit_10, fruit_11, fruit_12, fruit_13, fruit_14, r=0.03)",
+      "relax": {
+       "r": [
+        0.03,
+        0.174
+       ]
+      },
+      "weaken": "soft"
+     }
+    ],
+    "accepted_if_relaxed": false,
+    "accepted_if_weakened": false,
+    "rewrites_note": "rewrites: for each statement whose requirement failed (its index in your statements), relax gives {keyword: [your value, the nearest value at which it holds on the layout the repair returned]} and weaken says whether it may become a preference (soft) or be removed (drop); accepted_if_relaxed and accepted_if_weakened say whether those edits make that layout pass. schedule_rewrites: the repair run again from the same starting scene with a smaller schedule margin ([yours, tried]), and what it ended with; the schedule never changes what is accepted. Your next program is repaired again from the same starting scene.",
+    "schedule_rewrites": [
+     {
+      "margin": [
+       0.005,
+       0.0025
+      ],
+      "ok": false,
+      "pen_after": 2,
+      "failed_predicates": [
+       "within(fruit_2,table.top)",
+       "within(fruit_11,table.top)",
+       "within(fruit_13,table.top)",
+       "cluster(fruit_1,fruit_2,fruit_3,fruit_4,fruit_5,fruit_6,fruit_7,fruit_8,fruit_9,fruit_10,fruit_11,fruit_12,fruit_13,fruit_14)"
+      ]
+     },
+     {
+      "margin": [
+       0.005,
+       0.00125
+      ],
+      "ok": false,
+      "pen_after": 1,
+      "failed_predicates": [
+       "within(fruit_14,table.top)",
+       "cluster(fruit_1,fruit_2,fruit_3,fruit_4,fruit_5,fruit_6,fruit_7,fruit_8,fruit_9,fruit_10,fruit_11,fruit_12,fruit_13,fruit_14)"
+      ]
+     }
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 89.28616380691528,
+   "solve_cpu_s": 89.73259584500002,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "in_left(14 bodies)",
+     false,
+     0.1042
+    ],
+    [
+     "no_penetration",
+     false,
+     1
+    ]
+   ],
+   "answer_items": 35
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 14.45994520187378,
+    "duration_ms": 13751,
+    "duration_api_ms": 13719,
+    "cost_usd": 0.07049140000000001,
+    "usage": {
+     "input": 2,
+     "cache_creation": 5482,
+     "cache_read": 12037,
+     "output": 1211,
+     "thinking": 710
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 9413,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_*",
+      "b": "table.top",
+      "y0": 0.25
+     },
+     {
+      "op": "cluster",
+      "members": [
+       "fruit_*"
+      ],
+      "r": 0.2
+     },
+     {
+      "op": "within",
+      "a": "can_*",
+      "b": "table.top",
+      "y1": -0.25
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_*"
+      ],
+      "axis": "x",
+      "start": "near",
+      "gap": 0.02,
+      "tol": 0.01
+     },
+     {
+      "op": "within",
+      "a": "bowl",
+      "b": "table.top",
+      "y0": -0.2,
+      "y1": 0.2
+     },
+     {
+      "op": "reach",
+      "a": "bowl",
+      "r": 0.95,
+      "min": 0.55
+     },
+     {
+      "op": "close_to",
+      "a": "mug",
+      "b": "bowl",
+      "r": 0.2
+     },
+     {
+      "op": "within",
+      "a": "mug",
+      "b": "table.top",
+      "y0": -0.2,
+      "y1": 0.2
+     },
+     {
+      "op": "clearance",
+      "a": "jar_1",
+      "gap": 0.03
+     },
+     {
+      "op": "keep_out",
+      "a": "*",
+      "x0": 0.3,
+      "x1": 0.5,
+      "y0": -0.1,
+      "y1": 0.1
+     },
+     {
+      "op": "place",
+      "a": "bowl",
+      "x": 0.68,
+      "y": 0.05
+     },
+     {
+      "op": "place",
+      "a": "mug",
+      "x": 0.7,
+      "y": -0.1
+     }
+    ]
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 4 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 4.913042783737183,
+   "solve_cpu_s": 4.912699902000014,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 16
+  }
+ ],
+ "n_rounds": 2,
+ "success": true,
+ "first_round_success": false,
+ "self_ok": true,
+ "fault": {
+  "name": "cluster",
+  "kind": "tight"
+ }
+}

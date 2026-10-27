@@ -11,69 +11,68 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 7.948142766952515,
-    "duration_ms": 7307,
-    "duration_api_ms": 7277,
-    "cost_usd": 0.015517300000000001,
+    "wall_s": 11.144368886947632,
+    "duration_ms": 10464,
+    "duration_api_ms": 10425,
+    "cost_usd": 0.0158293,
     "usage": {
      "input": 2,
-     "cache_creation": 1468,
+     "cache_creation": 1501,
      "cache_read": 913,
-     "output": 955,
-     "thinking": 689
+     "output": 973,
+     "thinking": 706
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1679,
+   "message_chars": 1872,
    "answer": {
     "poses": [
      {
-      "name": "marker_1",
-      "x": 0.4,
-      "y": 0.4,
-      "yaw": 0
-     },
-     {
-      "name": "marker_2",
-      "x": 0.4,
-      "y": 0.35,
-      "yaw": 0
-     },
-     {
-      "name": "screwdriver_1",
-      "x": 0.4,
-      "y": 0.29,
-      "yaw": 0
-     },
-     {
-      "name": "screwdriver_2",
-      "x": 0.4,
-      "y": 0.22,
+      "name": "hammer",
+      "x": 0.43,
+      "y": -0.3,
       "yaw": 0
      },
      {
       "name": "pliers",
-      "x": 0.4,
-      "y": 0.13,
+      "x": 0.43,
+      "y": -0.175,
       "yaw": 0
      },
      {
-      "name": "hammer",
-      "x": 0.4,
-      "y": 0.005,
+      "name": "screwdriver_1",
+      "x": 0.43,
+      "y": -0.085,
+      "yaw": 0
+     },
+     {
+      "name": "screwdriver_2",
+      "x": 0.43,
+      "y": 0.025,
+      "yaw": 0
+     },
+     {
+      "name": "marker_2",
+      "x": 0.43,
+      "y": 0.045,
+      "yaw": 0
+     },
+     {
+      "name": "marker_1",
+      "x": 0.43,
+      "y": 0.095,
       "yaw": 0
      },
      {
       "name": "tape",
       "x": 0.8,
       "y": 0,
-      "yaw": 90
+      "yaw": 0
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -82,22 +81,34 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 1.952913761138916,
-   "solve_cpu_s": 1.9534535009999985,
-   "rubric_ok": true,
-   "rubric_failed": [],
+   "solve_s": 1.6581170558929443,
+   "solve_cpu_s": 1.6578777189999983,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "row_gaps(6 bodies)",
+     false,
+     -0.0009
+    ]
+   ],
    "answer_items": 7,
    "direct_repair": {
-    "rubric_ok": true,
+    "rubric_ok": false,
     "self_ok": true,
-    "solve_s": 4.038161277770996,
-    "solve_cpu_s": 4.039791558999994,
-    "rubric_failed": []
+    "solve_s": 4.102867603302002,
+    "solve_cpu_s": 4.102626665999992,
+    "rubric_failed": [
+     [
+      "row_gaps(6 bodies)",
+      false,
+      0.0014
+     ]
+    ]
    }
   }
  ],
  "n_rounds": 1,
- "success": true,
- "first_round_success": true,
+ "success": false,
+ "first_round_success": false,
  "self_ok": true
 }

@@ -1,0 +1,531 @@
+{
+ "task": "kitchen_prep_n12",
+ "family": "kitchen_prep",
+ "n": 12,
+ "condition": "dsl_v1",
+ "seed": 0,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": null,
+   "message_chars": 2885,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "at",
+      "a": "board",
+      "x": 0.45,
+      "y": 0.0,
+      "tol": 0.01
+     },
+     {
+      "op": "yaw",
+      "a": "board",
+      "deg": 0,
+      "axis": "long",
+      "tol": 3
+     },
+     {
+      "op": "parallel",
+      "a": "knife",
+      "b": "board",
+      "tol": 3
+     },
+     {
+      "op": "parallel",
+      "a": "spoon",
+      "b": "knife",
+      "tol": 3
+     },
+     {
+      "op": "row",
+      "members": [
+       "spoon",
+       "knife",
+       "board"
+      ],
+      "start": "right",
+      "gap": 0.03
+     },
+     {
+      "op": "close_to",
+      "a": "knife",
+      "b": "board",
+      "r": 0.17
+     },
+     {
+      "op": "left_of",
+      "a": "bowl",
+      "b": "board",
+      "gap": 0.32
+     },
+     {
+      "op": "cluster",
+      "members": [
+       "apple_1",
+       "apple_2",
+       "orange",
+       "banana",
+       "tangerine"
+      ],
+      "r": 0.03
+     },
+     {
+      "op": "farther",
+      "a": "apple_1",
+      "b": "bowl",
+      "gap": 0.12
+     },
+     {
+      "op": "farther",
+      "a": "apple_2",
+      "b": "bowl",
+      "gap": 0.12
+     },
+     {
+      "op": "farther",
+      "a": "orange",
+      "b": "bowl",
+      "gap": 0.12
+     },
+     {
+      "op": "farther",
+      "a": "banana",
+      "b": "bowl",
+      "gap": 0.12
+     },
+     {
+      "op": "farther",
+      "a": "tangerine",
+      "b": "bowl",
+      "gap": 0.12
+     },
+     {
+      "op": "row",
+      "members": [
+       "bottle",
+       "can_1",
+       "can_2"
+      ],
+      "start": "right",
+      "gap": 0.03,
+      "tol": 0.005
+     },
+     {
+      "op": "reach",
+      "a": "bottle",
+      "r": 0.88,
+      "min": 0.79
+     },
+     {
+      "op": "reach",
+      "a": "can_1",
+      "r": 0.88,
+      "min": 0.79
+     },
+     {
+      "op": "reach",
+      "a": "can_2",
+      "r": 0.88,
+      "min": 0.79
+     },
+     {
+      "op": "min_distance",
+      "a": "bowl",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "apple_1",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "apple_2",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "orange",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "banana",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "tangerine",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "bottle",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "can_1",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "can_2",
+      "b": "board",
+      "r": 0.27
+     }
+    ]
+   },
+   "answer_from": "fault",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "cluster(apple_1,apple_2,orange,banana,tangerine)",
+      0.0997
+     ],
+     [
+      "farther(banana,bowl,gap=0.12)",
+      -0.0056
+     ],
+     [
+      "min_distance(banana,board,r=0.27)",
+      0.2649
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "pairs still penetrated in the closing steps of the tail; 4 step(s) served the contacts alone, the program rows set aside",
+     "a program row was not met within the step at 45 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts exceeded the trust region at 4 step(s); those steps served the contacts alone",
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 3.1586759090423584,
+   "solve_cpu_s": 3.1591845899999953,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 30
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 18.54173707962036,
+    "duration_ms": 17915,
+    "duration_api_ms": 17883,
+    "cost_usd": 0.0367797,
+    "usage": {
+     "input": 2,
+     "cache_creation": 3288,
+     "cache_read": 12037,
+     "output": 2242,
+     "thinking": 1089
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 5544,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "at",
+      "a": "board",
+      "y": 0,
+      "tol": 0.02
+     },
+     {
+      "op": "reach",
+      "a": "board",
+      "r": 0.5,
+      "min": 0.4
+     },
+     {
+      "op": "yaw",
+      "a": "board",
+      "deg": 0,
+      "axis": "long",
+      "mod": 180,
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "knife",
+      "b": "board",
+      "side": "right",
+      "gap": 0.02,
+      "max": 0.05
+     },
+     {
+      "op": "parallel",
+      "a": "knife",
+      "b": "board",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "spoon",
+      "b": "knife",
+      "side": "right",
+      "gap": 0.02
+     },
+     {
+      "op": "parallel",
+      "a": "spoon",
+      "b": "knife",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "bowl",
+      "b": "board",
+      "side": "left",
+      "gap": 0.05
+     },
+     {
+      "op": "cluster",
+      "members": [
+       "apple_1",
+       "apple_2",
+       "orange",
+       "banana",
+       "tangerine"
+      ],
+      "r": 0.12
+     },
+     {
+      "op": "farther",
+      "a": "apple_1",
+      "b": "bowl"
+     },
+     {
+      "op": "farther",
+      "a": "apple_2",
+      "b": "bowl"
+     },
+     {
+      "op": "farther",
+      "a": "orange",
+      "b": "bowl"
+     },
+     {
+      "op": "farther",
+      "a": "banana",
+      "b": "bowl"
+     },
+     {
+      "op": "farther",
+      "a": "tangerine",
+      "b": "bowl"
+     },
+     {
+      "op": "row",
+      "members": [
+       "bottle",
+       "can_*"
+      ],
+      "axis": "y",
+      "gap": 0.02,
+      "tol": 0.01
+     },
+     {
+      "op": "reach",
+      "a": "bottle",
+      "r": 1.2,
+      "min": 0.75
+     },
+     {
+      "op": "reach",
+      "a": "can_*",
+      "r": 1.2,
+      "min": 0.75
+     },
+     {
+      "op": "min_distance",
+      "a": "bowl",
+      "b": "board",
+      "r": 0.25
+     },
+     {
+      "op": "min_distance",
+      "a": "apple_1",
+      "b": "board",
+      "r": 0.25
+     },
+     {
+      "op": "min_distance",
+      "a": "apple_2",
+      "b": "board",
+      "r": 0.25
+     },
+     {
+      "op": "min_distance",
+      "a": "orange",
+      "b": "board",
+      "r": 0.25
+     },
+     {
+      "op": "min_distance",
+      "a": "banana",
+      "b": "board",
+      "r": 0.25
+     },
+     {
+      "op": "min_distance",
+      "a": "tangerine",
+      "b": "board",
+      "r": 0.25
+     },
+     {
+      "op": "min_distance",
+      "a": "bottle",
+      "b": "board",
+      "r": 0.25
+     },
+     {
+      "op": "min_distance",
+      "a": "can_*",
+      "b": "board",
+      "r": 0.25
+     },
+     {
+      "op": "place",
+      "a": "board",
+      "x": 0.45,
+      "y": 0,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "bowl",
+      "x": 0.45,
+      "y": 0.28
+     },
+     {
+      "op": "place",
+      "a": "apple_1",
+      "x": 0.7,
+      "y": 0.35
+     },
+     {
+      "op": "place",
+      "a": "apple_2",
+      "x": 0.7,
+      "y": 0.4
+     },
+     {
+      "op": "place",
+      "a": "orange",
+      "x": 0.68,
+      "y": 0.3
+     },
+     {
+      "op": "place",
+      "a": "banana",
+      "x": 0.74,
+      "y": 0.32
+     },
+     {
+      "op": "place",
+      "a": "tangerine",
+      "x": 0.72,
+      "y": 0.28
+     },
+     {
+      "op": "place",
+      "a": "bottle",
+      "x": 0.82,
+      "y": -0.4
+     },
+     {
+      "op": "place",
+      "a": "can_1",
+      "x": 0.82,
+      "y": -0.3
+     },
+     {
+      "op": "place",
+      "a": "can_2",
+      "x": 0.82,
+      "y": -0.2
+     }
+    ]
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 1 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts exceeded the trust region at 1 step(s); those steps served the contacts alone",
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 2.2470602989196777,
+   "solve_cpu_s": 2.2475123909999866,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 39
+  }
+ ],
+ "n_rounds": 2,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true,
+ "fault": {
+  "name": "fruit_cluster",
+  "kind": "tight"
+ }
+}

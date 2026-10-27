@@ -1,0 +1,199 @@
+{
+ "task": "fruit_cans_n10",
+ "family": "fruit_cans",
+ "n": 10,
+ "condition": "dsl_v1_rewrites",
+ "seed": 2,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 20.121230840682983,
+    "duration_ms": 19585,
+    "duration_api_ms": 19558,
+    "cost_usd": 0.00263117,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1758,
+     "cache_read": 12037,
+     "output": 4318,
+     "thinking": 3544
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2265,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration",
+      "a": "*"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "keep_out",
+      "a": "*",
+      "x0": 0.3,
+      "x1": 0.5,
+      "y0": -0.1,
+      "y1": 0.1
+     },
+     {
+      "op": "within",
+      "a": "fruit_*",
+      "x0": 0.2,
+      "x1": 0.89,
+      "y0": 0.25,
+      "y1": 0.9
+     },
+     {
+      "op": "cluster",
+      "members": [
+       "fruit_*"
+      ],
+      "r": 0.1
+     },
+     {
+      "op": "place",
+      "a": "fruit_1",
+      "x": 0.5,
+      "y": 0.55,
+      "yaw": -91
+     },
+     {
+      "op": "place",
+      "a": "fruit_2",
+      "x": 0.58,
+      "y": 0.6,
+      "yaw": -160
+     },
+     {
+      "op": "place",
+      "a": "fruit_3",
+      "x": 0.55,
+      "y": 0.68,
+      "yaw": -57
+     },
+     {
+      "op": "place",
+      "a": "fruit_4",
+      "x": 0.5,
+      "y": 0.66,
+      "yaw": 125
+     },
+     {
+      "op": "place",
+      "a": "fruit_5",
+      "x": 0.6,
+      "y": 0.52,
+      "yaw": 102
+     },
+     {
+      "op": "within",
+      "a": "can_*",
+      "x0": 0.2,
+      "x1": 0.89,
+      "y0": -0.89,
+      "y1": -0.25
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_1",
+       "can_2",
+       "can_3",
+       "can_4"
+      ],
+      "axis": "x",
+      "start": "near",
+      "gap": 0.02
+     },
+     {
+      "op": "place",
+      "a": "can_1",
+      "x": 0.45,
+      "y": -0.55,
+      "yaw": -66
+     },
+     {
+      "op": "place",
+      "a": "can_2",
+      "x": 0.53,
+      "y": -0.55,
+      "yaw": 91
+     },
+     {
+      "op": "place",
+      "a": "can_3",
+      "x": 0.61,
+      "y": -0.55,
+      "yaw": 8
+     },
+     {
+      "op": "place",
+      "a": "can_4",
+      "x": 0.69,
+      "y": -0.55,
+      "yaw": 9
+     },
+     {
+      "op": "within",
+      "a": "bowl",
+      "x0": 0.2,
+      "x1": 0.89,
+      "y0": -0.2,
+      "y1": 0.2
+     },
+     {
+      "op": "reach",
+      "a": "bowl",
+      "r": 0.9,
+      "min": 0.55
+     },
+     {
+      "op": "place",
+      "a": "bowl",
+      "x": 0.7,
+      "y": 0,
+      "yaw": 76
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 1.569392204284668,
+   "solve_cpu_s": 1.56943783,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 21
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

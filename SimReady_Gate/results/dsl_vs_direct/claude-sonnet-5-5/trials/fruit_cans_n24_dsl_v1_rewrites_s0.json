@@ -1,0 +1,140 @@
+{
+ "task": "fruit_cans_n24",
+ "family": "fruit_cans",
+ "n": 24,
+ "condition": "dsl_v1_rewrites",
+ "seed": 0,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 11.779157161712646,
+    "duration_ms": 11160,
+    "duration_api_ms": 11131,
+    "cost_usd": 0.024497699999999997,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2940,
+     "cache_read": 12037,
+     "output": 1153,
+     "thinking": 716
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 4414,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "keep_out",
+      "a": "*",
+      "x0": 0.3,
+      "x1": 0.5,
+      "y0": -0.1,
+      "y1": 0.1
+     },
+     {
+      "op": "within",
+      "a": "fruit_*",
+      "b": "table.top",
+      "y0": 0.26
+     },
+     {
+      "op": "cluster",
+      "members": [
+       "fruit_*"
+      ],
+      "r": 0.19
+     },
+     {
+      "op": "within",
+      "a": "can_*",
+      "b": "table.top",
+      "y1": -0.26
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_*"
+      ],
+      "axis": "x",
+      "gap": 0.025
+     },
+     {
+      "op": "within",
+      "a": "bowl",
+      "b": "table.top",
+      "y0": -0.19,
+      "y1": 0.19
+     },
+     {
+      "op": "reach",
+      "a": "bowl",
+      "r": 2,
+      "min": 0.56
+     },
+     {
+      "op": "within",
+      "a": "mug",
+      "b": "table.top",
+      "y0": -0.19,
+      "y1": 0.19
+     },
+     {
+      "op": "close_to",
+      "a": "mug",
+      "b": "bowl",
+      "r": 0.18
+     },
+     {
+      "op": "clearance",
+      "a": "jar_1",
+      "gap": 0.035
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 6 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 5.566617488861084,
+   "solve_cpu_s": 5.564390838,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 14
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

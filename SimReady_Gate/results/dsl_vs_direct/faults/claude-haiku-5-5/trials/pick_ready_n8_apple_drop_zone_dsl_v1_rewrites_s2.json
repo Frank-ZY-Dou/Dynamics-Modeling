@@ -1,0 +1,290 @@
+{
+ "task": "pick_ready_n8",
+ "family": "pick_ready",
+ "n": 8,
+ "condition": "dsl_v1_rewrites",
+ "seed": 2,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": null,
+   "message_chars": 1951,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "reach",
+      "a": "mug",
+      "r": 0.58,
+      "min": 0.47
+     },
+     {
+      "op": "facing",
+      "a": "mug",
+      "axis": "-x",
+      "tol": 10
+     },
+     {
+      "op": "approach",
+      "a": "mug",
+      "length": 0.6,
+      "width": 0.17
+     },
+     {
+      "op": "min_distance",
+      "a": "*",
+      "b": "mug",
+      "r": 0.19
+     },
+     {
+      "op": "keep_out",
+      "a": "*",
+      "x0": 0.24,
+      "x1": 0.41,
+      "y0": 0.19,
+      "y1": 0.41
+     },
+     {
+      "op": "reach",
+      "a": "*",
+      "r": 0.78
+     },
+     {
+      "op": "place",
+      "a": "apple",
+      "x": 0.32,
+      "y": 0.3
+     }
+    ]
+   },
+   "answer_from": "fault",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "place(apple)",
+      0.1415
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 53 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 12 step(s) before the scale was restored"
+    ],
+    "rewrites": [
+     {
+      "statement": 10,
+      "text": "place(apple, x=0.32, y=0.3)",
+      "relax": null,
+      "weaken": "drop"
+     }
+    ],
+    "accepted_if_relaxed": false,
+    "accepted_if_weakened": true,
+    "rewrites_note": "rewrites: for each statement whose requirement failed (its index in your statements), relax gives {keyword: [your value, the nearest value at which it holds on the layout the repair returned]} and weaken says whether it may become a preference (soft) or be removed (drop); accepted_if_relaxed and accepted_if_weakened say whether those edits make that layout pass. schedule_rewrites: the repair run again from the same starting scene with a smaller schedule margin ([yours, tried]), and what it ended with; the schedule never changes what is accepted. Your next program is repaired again from the same starting scene.",
+    "schedule_rewrites": [
+     {
+      "margin": [
+       0.005,
+       0.0025
+      ],
+      "ok": false,
+      "pen_after": 0,
+      "failed_predicates": [
+       "place(apple)"
+      ]
+     },
+     {
+      "margin": [
+       0.005,
+       0.00125
+      ],
+      "ok": false,
+      "pen_after": 0,
+      "failed_predicates": [
+       "place(apple)"
+      ]
+     }
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 11.860178709030151,
+   "solve_cpu_s": 12.06446668700005,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 11
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 29.38874626159668,
+    "duration_ms": 28818,
+    "duration_api_ms": 28780,
+    "cost_usd": 0.00374037,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2464,
+     "cache_read": 12037,
+     "output": 6254,
+     "thinking": 5722
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 3988,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "place",
+      "a": "mug",
+      "x": 0.5,
+      "y": 0,
+      "yaw": 0
+     },
+     {
+      "op": "reach",
+      "a": "mug",
+      "r": 0.6,
+      "min": 0.45
+     },
+     {
+      "op": "facing",
+      "a": "mug",
+      "axis": "-x",
+      "tol": 10
+     },
+     {
+      "op": "approach",
+      "a": "mug",
+      "length": 0.5,
+      "width": 0.15,
+      "toward": "robot"
+     },
+     {
+      "op": "min_distance",
+      "a": "*",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "keep_out",
+      "a": "*",
+      "x0": 0.25,
+      "x1": 0.4,
+      "y0": 0.2,
+      "y1": 0.4
+     },
+     {
+      "op": "reach",
+      "a": "*",
+      "r": 0.78
+     },
+     {
+      "op": "place",
+      "a": "bowl",
+      "x": 0.7,
+      "y": -0.25
+     },
+     {
+      "op": "place",
+      "a": "apple",
+      "x": 0.62,
+      "y": -0.42
+     },
+     {
+      "op": "place",
+      "a": "screwdriver",
+      "x": 0.45,
+      "y": -0.45
+     },
+     {
+      "op": "place",
+      "a": "tumbler",
+      "x": 0.4,
+      "y": -0.6
+     },
+     {
+      "op": "place",
+      "a": "can",
+      "x": 0.7,
+      "y": 0.22
+     },
+     {
+      "op": "place",
+      "a": "bottle",
+      "x": 0.6,
+      "y": 0.4
+     },
+     {
+      "op": "place",
+      "a": "tape",
+      "x": 0.46,
+      "y": 0.55
+     }
+    ]
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 2.8769631385803223,
+   "solve_cpu_s": 2.877532881000036,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 18
+  }
+ ],
+ "n_rounds": 2,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true,
+ "fault": {
+  "name": "apple_drop_zone",
+  "kind": "target"
+ }
+}

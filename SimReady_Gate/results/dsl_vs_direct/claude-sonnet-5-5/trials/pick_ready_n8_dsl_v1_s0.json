@@ -11,22 +11,22 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 3.6638870239257812,
-    "duration_ms": 3008,
-    "duration_api_ms": 2980,
-    "cost_usd": 0.011796899999999999,
+    "wall_s": 6.2557313442230225,
+    "duration_ms": 5597,
+    "duration_api_ms": 5558,
+    "cost_usd": 0.0121537,
     "usage": {
      "input": 2,
-     "cache_creation": 1515,
-     "cache_read": 10529,
-     "output": 468,
+     "cache_creation": 1559,
+     "cache_read": 12037,
+     "output": 471,
      "thinking": 0
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1738,
+   "message_chars": 1955,
    "answer": {
     "statements": [
      {
@@ -35,7 +35,7 @@
      {
       "op": "on_support",
       "a": "*",
-      "b": "table"
+      "b": "table.level2"
      },
      {
       "op": "upright",
@@ -55,7 +55,7 @@
      {
       "op": "facing",
       "a": "mug",
-      "axis": "-x",
+      "axis": "handle",
       "tol": 20
      },
      {
@@ -67,6 +67,12 @@
      {
       "op": "min_distance",
       "a": "apple",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "bowl",
       "b": "mug",
       "r": 0.18
      },
@@ -101,12 +107,6 @@
       "r": 0.18
      },
      {
-      "op": "min_distance",
-      "a": "bowl",
-      "b": "mug",
-      "r": 0.18
-     },
-     {
       "op": "keep_out",
       "a": "*",
       "x0": 0.25,
@@ -121,7 +121,6 @@
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -132,8 +131,8 @@
     ]
    },
    "self_ok": true,
-   "solve_s": 2.8003482818603516,
-   "solve_cpu_s": 2.8004060710000047,
+   "solve_s": 2.0785555839538574,
+   "solve_cpu_s": 2.0790298670000027,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 16

@@ -1,0 +1,127 @@
+{
+ "task": "stack_n6",
+ "family": "stack",
+ "n": 6,
+ "condition": "dsl_v1_rewrites",
+ "seed": 1,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 3.6282496452331543,
+    "duration_ms": 2918,
+    "duration_api_ms": 2891,
+    "cost_usd": 0.0200834,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1336,
+     "cache_read": 12037,
+     "output": 349,
+     "thinking": 0
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1530,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "stack",
+      "members": [
+       "box_large",
+       "box_medium",
+       "box_small"
+      ],
+      "tol": 0.01
+     },
+     {
+      "op": "on_support",
+      "a": "box_large",
+      "b": "table.level2"
+     },
+     {
+      "op": "on_support",
+      "a": "apple",
+      "b": "table.level2"
+     },
+     {
+      "op": "on_support",
+      "a": "can",
+      "b": "table.level2"
+     },
+     {
+      "op": "on_support",
+      "a": "cup",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "box_large",
+      "b": "table.top",
+      "y1": 0
+     },
+     {
+      "op": "reach",
+      "a": "box_large",
+      "r": 0.7
+     },
+     {
+      "op": "within",
+      "a": "apple",
+      "b": "table.top",
+      "y0": 0
+     },
+     {
+      "op": "within",
+      "a": "can",
+      "b": "table.top",
+      "y0": 0
+     },
+     {
+      "op": "within",
+      "a": "cup",
+      "b": "table.top",
+      "y0": 0
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "pairs still penetrated in the closing steps of the tail; 8 step(s) served the contacts alone, the program rows set aside",
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 3.2599918842315674,
+   "solve_cpu_s": 3.2527770789999995,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 13
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

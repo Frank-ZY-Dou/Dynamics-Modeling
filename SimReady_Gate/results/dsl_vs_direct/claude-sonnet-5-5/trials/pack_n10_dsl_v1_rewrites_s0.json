@@ -1,0 +1,77 @@
+{
+ "task": "pack_n10",
+ "family": "pack",
+ "n": 10,
+ "condition": "dsl_v1_rewrites",
+ "seed": 0,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 3.300487756729126,
+    "duration_ms": 2619,
+    "duration_api_ms": 2591,
+    "cost_usd": 0.009115700000000001,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1562,
+     "cache_read": 12037,
+     "output": 166,
+     "thinking": 0
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1778,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_*"
+     },
+     {
+      "op": "within",
+      "a": "fruit_*",
+      "b": "table.level2",
+      "x0": 0.42,
+      "x1": 0.7,
+      "y0": -0.14,
+      "y1": 0.14
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 1 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 1.289675235748291,
+   "solve_cpu_s": 1.2886170490000026,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 4
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

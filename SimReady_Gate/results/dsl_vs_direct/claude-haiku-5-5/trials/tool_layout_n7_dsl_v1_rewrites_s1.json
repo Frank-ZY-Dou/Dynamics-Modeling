@@ -1,0 +1,157 @@
+{
+ "task": "tool_layout_n7",
+ "family": "tool_layout",
+ "n": 7,
+ "condition": "dsl_v1_rewrites",
+ "seed": 1,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 19.526201248168945,
+    "duration_ms": 18900,
+    "duration_api_ms": 18859,
+    "cost_usd": 0.00246867,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1523,
+     "cache_read": 12037,
+     "output": 4087,
+     "thinking": 3193
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1872,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration",
+      "reason": "Nothing interpenetrates."
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2",
+      "reason": "Everything rests on the table top."
+     },
+     {
+      "op": "upright",
+      "a": "*",
+      "reason": "Everything rests upright on the table."
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.level2",
+      "reason": "Everything stays on the table top."
+     },
+     {
+      "op": "row",
+      "members": [
+       "marker_1",
+       "marker_2",
+       "screwdriver_1",
+       "screwdriver_2",
+       "pliers",
+       "hammer"
+      ],
+      "axis": "y",
+      "start": "left",
+      "gap": 0.03,
+      "order": "length",
+      "reason": "One row parallel to y, sorted by length from shortest at left to longest at right, at least 3 cm of table between neighbours; the row's centres share a common x line."
+     },
+     {
+      "op": "yaw",
+      "a": "screwdriver_?",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5,
+      "reason": "Each tool's long side parallel to x within 5 degrees."
+     },
+     {
+      "op": "yaw",
+      "a": "marker_?",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5,
+      "reason": "Each tool's long side parallel to x within 5 degrees."
+     },
+     {
+      "op": "yaw",
+      "a": "pliers",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5,
+      "reason": "Each tool's long side parallel to x within 5 degrees."
+     },
+     {
+      "op": "yaw",
+      "a": "hammer",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5,
+      "reason": "Each tool's long side parallel to x within 5 degrees."
+     },
+     {
+      "op": "within",
+      "a": "screwdriver_?",
+      "x1": 0.6,
+      "reason": "Every tool entirely at x < 0.60."
+     },
+     {
+      "op": "within",
+      "a": "marker_?",
+      "x1": 0.6,
+      "reason": "Every tool entirely at x < 0.60."
+     },
+     {
+      "op": "within",
+      "a": "pliers",
+      "x1": 0.6,
+      "reason": "Every tool entirely at x < 0.60."
+     },
+     {
+      "op": "within",
+      "a": "hammer",
+      "x1": 0.6,
+      "reason": "Every tool entirely at x < 0.60."
+     },
+     {
+      "op": "within",
+      "a": "tape",
+      "x0": 0.7,
+      "x1": 0.89,
+      "reason": "Tape dispenser entirely at x > 0.70, kept on the table."
+     }
+    ],
+    "intent": "Lay the two screwdrivers, pliers, hammer and two markers in a y-parallel row sorted by length (shortest left) on the near half of the table with their long sides along x, and push the tape dispenser to the far side at x > 0.70, all resting upright on the table without interpenetration."
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 4.309445381164551,
+   "solve_cpu_s": 4.310203262000002,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 14
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

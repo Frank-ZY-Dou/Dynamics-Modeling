@@ -1,0 +1,193 @@
+{
+ "task": "drinks_row_n6",
+ "family": "drinks_row",
+ "n": 6,
+ "condition": "dsl_v1",
+ "seed": 2,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": null,
+   "message_chars": 1577,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_1",
+       "can_2",
+       "can_3",
+       "can_4",
+       "can_5",
+       "bottle_1"
+      ],
+      "start": "left",
+      "gap": 0.025,
+      "order": "height",
+      "spacing": "even",
+      "mid": 0.0,
+      "tol": 0.004
+     },
+     {
+      "op": "at",
+      "a": "*",
+      "x": 0.75,
+      "tol": 0.004
+     },
+     {
+      "op": "at",
+      "a": "can_1",
+      "y": 0.0,
+      "tol": 0.005
+     }
+    ]
+   },
+   "answer_from": "fault",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "row(can_1,can_2,can_3,can_4,can_5,bottle_1):order",
+      0.0213
+     ],
+     [
+      "row(can_1,can_2,can_3,can_4,can_5,bottle_1):even",
+      0.0091
+     ],
+     [
+      "row(can_1,can_2,can_3,can_4,can_5,bottle_1):mid",
+      0.0128
+     ],
+     [
+      "at(can_1)",
+      0.0138
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 55 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 1.4220471382141113,
+   "solve_cpu_s": 1.4221356819999968,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 7
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 12.512195587158203,
+    "duration_ms": 11812,
+    "duration_api_ms": 11780,
+    "cost_usd": 0.0016436699999999999,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1898,
+     "cache_read": 12037,
+     "output": 2287,
+     "thinking": 1916
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2661,
+   "answer": {
+    "intent": "Line up all six drinks in one y-parallel row near x = 0.75, ordered by height from left (shortest) to right (tallest), evenly spaced with at least 2 cm of table between neighbours and the row centred on y = 0, all standing upright on the table.",
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_1",
+       "can_2",
+       "can_3",
+       "can_4",
+       "can_5",
+       "bottle_1"
+      ],
+      "axis": "y",
+      "start": "left",
+      "gap": 0.025,
+      "order": "height",
+      "spacing": "even",
+      "mid": 0,
+      "tol": 0.004
+     },
+     {
+      "op": "at",
+      "a": "*",
+      "x": 0.75,
+      "tol": 0.004
+     }
+    ]
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 1.04246187210083,
+   "solve_cpu_s": 1.0423894460000014,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 6
+  }
+ ],
+ "n_rounds": 2,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true,
+ "fault": {
+  "name": "can_at",
+  "kind": "conflict"
+ }
+}

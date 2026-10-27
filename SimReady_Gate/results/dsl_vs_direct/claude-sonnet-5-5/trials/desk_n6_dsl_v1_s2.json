@@ -11,22 +11,22 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 7.555438280105591,
-    "duration_ms": 6948,
-    "duration_api_ms": 6916,
-    "cost_usd": 0.0179249,
+    "wall_s": 10.618193864822388,
+    "duration_ms": 9839,
+    "duration_api_ms": 9813,
+    "cost_usd": 0.0180957,
     "usage": {
      "input": 2,
-     "cache_creation": 1502,
-     "cache_read": 10529,
-     "output": 1086,
-     "thinking": 448
+     "cache_creation": 1527,
+     "cache_read": 12037,
+     "output": 1078,
+     "thinking": 418
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1883,
+   "message_chars": 2072,
    "answer": {
     "statements": [
      {
@@ -35,7 +35,7 @@
      {
       "op": "on_support",
       "a": "*",
-      "b": "table"
+      "b": "table.level2"
      },
      {
       "op": "upright",
@@ -44,7 +44,7 @@
      {
       "op": "within",
       "a": "*",
-      "b": "table.top"
+      "b": "table.level2"
      },
      {
       "op": "at",
@@ -63,6 +63,7 @@
       "a": "keyboard",
       "deg": 90,
       "axis": "long",
+      "mod": 180,
       "tol": 5
      },
      {
@@ -93,6 +94,7 @@
       "op": "parallel",
       "a": "notebook",
       "b": "keyboard",
+      "axis": "long",
       "tol": 5
      },
      {
@@ -107,6 +109,7 @@
       "op": "parallel",
       "a": "marker",
       "b": "notebook",
+      "axis": "long",
       "tol": 5
      },
      {
@@ -119,7 +122,7 @@
      {
       "op": "facing",
       "a": "mug",
-      "axis": "-x",
+      "axis": "handle",
       "tol": 20
      },
      {
@@ -154,34 +157,33 @@
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": false,
     "pen_after": 0,
     "failed_predicates": [
      [
-      "within(mouse,table.top)",
-      0.0206
+      "within(mouse,table.level2)",
+      0.0123
      ],
      [
       "reach(keyboard,r=0.5)",
-      0.5169
+      0.5246
      ],
      [
       "yaw(keyboard,deg=90)",
-      7.6171
+      7.6981
      ],
      [
       "beside(mouse,keyboard,right)",
-      -0.1284
+      -0.1294
      ],
      [
       "offset(mouse,keyboard)",
-      0.2034
+      0.1999
      ],
      [
       "beside(notebook,keyboard,left)",
-      0.0442
+      0.0455
      ]
     ],
     "failed_preferences": [],
@@ -192,34 +194,29 @@
     ]
    },
    "self_ok": false,
-   "solve_s": 4.602762699127197,
-   "solve_cpu_s": 4.603658496000008,
+   "solve_s": 4.106274604797363,
+   "solve_cpu_s": 4.106576593999989,
    "rubric_ok": false,
    "rubric_failed": [
     [
      "dist_to_base(keyboard)",
      false,
-     0.5169
+     0.5246
     ],
     [
      "long_axis_along(keyboard,y)",
      false,
-     7.6171
+     7.6981
     ],
     [
      "gap(keyboard->mouse,-y)",
      false,
-     -0.1284
+     -0.1294
     ],
     [
      "centre_on(mouse)",
      false,
-     0.1849
-    ],
-    [
-     "gap(keyboard->notebook,+y)",
-     false,
-     0.0442
+     0.182
     ]
    ],
    "answer_items": 20
@@ -228,22 +225,22 @@
    "round": 2,
    "llm": {
     "ok": true,
-    "wall_s": 9.655639886856079,
-    "duration_ms": 9018,
-    "duration_api_ms": 8985,
-    "cost_usd": 0.0162152,
+    "wall_s": 12.643787622451782,
+    "duration_ms": 11936,
+    "duration_api_ms": 11903,
+    "cost_usd": 0.0264017,
     "usage": {
      "input": 2,
-     "cache_creation": 404,
-     "cache_read": 12652,
-     "output": 1333,
-     "thinking": 630
+     "cache_creation": 2576,
+     "cache_read": 12037,
+     "output": 1489,
+     "thinking": 799
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 3953,
+   "message_chars": 4203,
    "answer": {
     "statements": [
      {
@@ -252,7 +249,7 @@
      {
       "op": "on_support",
       "a": "*",
-      "b": "table"
+      "b": "table.level2"
      },
      {
       "op": "upright",
@@ -261,7 +258,7 @@
      {
       "op": "within",
       "a": "*",
-      "b": "table.top"
+      "b": "table.level2"
      },
      {
       "op": "at",
@@ -281,15 +278,8 @@
       "a": "keyboard",
       "deg": 90,
       "axis": "long",
+      "mod": 180,
       "tol": 5
-     },
-     {
-      "op": "yaw",
-      "a": "mouse",
-      "deg": 0,
-      "mod": 90,
-      "tol": 15,
-      "soft": 0.5
      },
      {
       "op": "beside",
@@ -306,6 +296,7 @@
        "keyboard"
       ],
       "axis": "x",
+      "edge": "center",
       "tol": 0.02
      },
      {
@@ -320,6 +311,7 @@
       "op": "parallel",
       "a": "notebook",
       "b": "keyboard",
+      "axis": "long",
       "tol": 5
      },
      {
@@ -334,6 +326,7 @@
       "op": "parallel",
       "a": "marker",
       "b": "notebook",
+      "axis": "long",
       "tol": 5
      },
      {
@@ -346,14 +339,8 @@
      {
       "op": "facing",
       "a": "mug",
-      "axis": "-x",
+      "axis": "handle",
       "tol": 20
-     },
-     {
-      "op": "place",
-      "a": "tape",
-      "x": 0.7,
-      "y": -0.6
      },
      {
       "op": "min_distance",
@@ -384,25 +371,30 @@
       "a": "tape",
       "b": "mug",
       "r": 0.2
+     },
+     {
+      "op": "place",
+      "a": "tape",
+      "x": 0.45,
+      "y": -0.65
      }
     ]
    },
-   "answer_from": "called",
    "report": {
     "ok": true,
     "pen_after": 0,
     "failed_predicates": [],
     "failed_preferences": [],
     "solver_notes": [
-     "the program was solved alone at scale 0.05 in 4 step(s) before the scale was restored"
+     "the program was solved alone at scale 0.05 in 2 step(s) before the scale was restored"
     ]
    },
    "self_ok": true,
-   "solve_s": 3.0996317863464355,
-   "solve_cpu_s": 3.099999963000002,
+   "solve_s": 2.7098488807678223,
+   "solve_cpu_s": 2.7103136730000017,
    "rubric_ok": true,
    "rubric_failed": [],
-   "answer_items": 22
+   "answer_items": 21
   }
  ],
  "n_rounds": 2,

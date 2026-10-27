@@ -1,0 +1,192 @@
+{
+ "task": "desk_n6",
+ "family": "desk",
+ "n": 6,
+ "condition": "dsl_v1_rewrites",
+ "seed": 2,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 22.395939111709595,
+    "duration_ms": 21863,
+    "duration_api_ms": 21835,
+    "cost_usd": 0.00290547,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1547,
+     "cache_read": 12037,
+     "output": 4951,
+     "thinking": 4141
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2072,
+   "answer": {
+    "intent": "Lay out a robot-facing desk on the table's top: keyboard centred on y=0 at 40-50 cm reach with mouse to its right, notebook to its left with marker beyond it, mug farther back with handle toward the robot, and the tape dispenser isolated at least 20 cm from every other object.",
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.01
+     },
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "reach",
+      "a": "keyboard",
+      "r": 0.5,
+      "min": 0.4
+     },
+     {
+      "op": "at",
+      "a": "keyboard",
+      "y": 0,
+      "tol": 0.01
+     },
+     {
+      "op": "yaw",
+      "a": "keyboard",
+      "deg": 90,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "mouse",
+      "b": "keyboard",
+      "side": "right",
+      "gap": 0.03,
+      "max": 0.08
+     },
+     {
+      "op": "align",
+      "members": [
+       "mouse",
+       "keyboard"
+      ],
+      "axis": "x",
+      "edge": "center",
+      "tol": 0.02
+     },
+     {
+      "op": "beside",
+      "a": "notebook",
+      "b": "keyboard",
+      "side": "left",
+      "gap": 0.05,
+      "max": 0.1
+     },
+     {
+      "op": "parallel",
+      "a": "notebook",
+      "b": "keyboard",
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "marker",
+      "b": "notebook",
+      "side": "far",
+      "gap": 0.01,
+      "max": 0.04
+     },
+     {
+      "op": "parallel",
+      "a": "marker",
+      "b": "notebook",
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "mug",
+      "b": "keyboard",
+      "side": "far",
+      "gap": 0.05
+     },
+     {
+      "op": "facing",
+      "a": "mug",
+      "axis": "handle",
+      "tol": 20
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "keyboard",
+      "r": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "mouse",
+      "r": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "notebook",
+      "r": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "marker",
+      "r": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "mug",
+      "r": 0.2
+     },
+     {
+      "op": "place",
+      "a": "tape",
+      "x": 0.75,
+      "y": -0.3,
+      "yaw": 0
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 2 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 2.9636318683624268,
+   "solve_cpu_s": 2.9637278100000017,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 21
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

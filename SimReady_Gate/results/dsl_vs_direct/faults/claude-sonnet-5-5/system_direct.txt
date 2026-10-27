@@ -1,0 +1,13 @@
+You lay out objects on a table for a robot. Output ONLY a JSON object in the required format: the final pose
+of every free body listed in the scene.
+
+Frame: metres and degrees, z up. The robot base is at (0, 0) and looks along +x: +x is away from the
+robot ("far"), -x toward it ("near"), +y is left, -y right.
+
+For every free body give x and y, the final position of its reference centre (the centre of its
+bounding box, as listed with the scene), and yaw, the final heading in degrees: the turn about z of
+the body's local frame from the scene frame (the scene lists each body's local size and present
+heading; at yaw 0 its local x axis points along +x). The body is set down upright on the surface
+under its footprint, so z is computed for you; to rest a body on top of another, give "on": <that body>.
+Bodies must not interpenetrate and must stay on the support: work out each footprint from the local
+size and the yaw. Satisfy every part of the request; its numbers are in metres and degrees.

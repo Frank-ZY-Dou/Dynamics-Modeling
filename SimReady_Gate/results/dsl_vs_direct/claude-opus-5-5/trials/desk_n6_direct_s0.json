@@ -11,22 +11,22 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 15.502196311950684,
-    "duration_ms": 14932,
-    "duration_api_ms": 14894,
-    "cost_usd": 0.0382906,
+    "wall_s": 13.700013160705566,
+    "duration_ms": 13031,
+    "duration_api_ms": 12998,
+    "cost_usd": 0.041922600000000004,
     "usage": {
      "input": 2,
-     "cache_creation": 1500,
+     "cache_creation": 1544,
      "cache_read": 913,
-     "output": 1305,
-     "thinking": 718
+     "output": 1469,
+     "thinking": 727
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1886,
+   "message_chars": 2075,
    "answer": {
     "poses": [
      {
@@ -38,36 +38,35 @@
      {
       "name": "mouse",
       "x": 0.45,
-      "y": -0.365,
-      "yaw": 0
+      "y": -0.395,
+      "yaw": 90
      },
      {
       "name": "notebook",
-      "x": 0.45,
-      "y": 0.405,
+      "x": 0.4,
+      "y": 0.41,
       "yaw": 90
      },
      {
       "name": "marker",
-      "x": 0.56,
-      "y": 0.405,
+      "x": 0.515,
+      "y": 0.41,
       "yaw": 90
      },
      {
       "name": "mug",
-      "x": 0.65,
+      "x": 0.7,
       "y": 0,
       "yaw": 0
      },
      {
       "name": "tape",
-      "x": 0.8,
+      "x": 0.75,
       "y": -0.4,
       "yaw": 0
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -76,16 +75,16 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 1.6252329349517822,
-   "solve_cpu_s": 1.6258527119999968,
+   "solve_s": 1.3728854656219482,
+   "solve_cpu_s": 1.37312776200001,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 6,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 3.8479113578796387,
-    "solve_cpu_s": 3.8458935089999926,
+    "solve_s": 3.194507122039795,
+    "solve_cpu_s": 3.1950495550000113,
     "rubric_failed": []
    }
   }

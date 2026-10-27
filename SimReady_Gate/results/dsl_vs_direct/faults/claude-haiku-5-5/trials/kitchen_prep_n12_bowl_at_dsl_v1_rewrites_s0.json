@@ -1,0 +1,565 @@
+{
+ "task": "kitchen_prep_n12",
+ "family": "kitchen_prep",
+ "n": 12,
+ "condition": "dsl_v1_rewrites",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": null,
+   "message_chars": 2885,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "at",
+      "a": "board",
+      "x": 0.45,
+      "y": 0.0,
+      "tol": 0.01
+     },
+     {
+      "op": "yaw",
+      "a": "board",
+      "deg": 0,
+      "axis": "long",
+      "tol": 3
+     },
+     {
+      "op": "parallel",
+      "a": "knife",
+      "b": "board",
+      "tol": 3
+     },
+     {
+      "op": "parallel",
+      "a": "spoon",
+      "b": "knife",
+      "tol": 3
+     },
+     {
+      "op": "row",
+      "members": [
+       "spoon",
+       "knife",
+       "board"
+      ],
+      "start": "right",
+      "gap": 0.03
+     },
+     {
+      "op": "close_to",
+      "a": "knife",
+      "b": "board",
+      "r": 0.17
+     },
+     {
+      "op": "left_of",
+      "a": "bowl",
+      "b": "board",
+      "gap": 0.32
+     },
+     {
+      "op": "cluster",
+      "members": [
+       "apple_1",
+       "apple_2",
+       "orange",
+       "banana",
+       "tangerine"
+      ],
+      "r": 0.1
+     },
+     {
+      "op": "farther",
+      "a": "apple_1",
+      "b": "bowl",
+      "gap": 0.12
+     },
+     {
+      "op": "farther",
+      "a": "apple_2",
+      "b": "bowl",
+      "gap": 0.12
+     },
+     {
+      "op": "farther",
+      "a": "orange",
+      "b": "bowl",
+      "gap": 0.12
+     },
+     {
+      "op": "farther",
+      "a": "banana",
+      "b": "bowl",
+      "gap": 0.12
+     },
+     {
+      "op": "farther",
+      "a": "tangerine",
+      "b": "bowl",
+      "gap": 0.12
+     },
+     {
+      "op": "row",
+      "members": [
+       "bottle",
+       "can_1",
+       "can_2"
+      ],
+      "start": "right",
+      "gap": 0.03,
+      "tol": 0.005
+     },
+     {
+      "op": "reach",
+      "a": "bottle",
+      "r": 0.88,
+      "min": 0.79
+     },
+     {
+      "op": "reach",
+      "a": "can_1",
+      "r": 0.88,
+      "min": 0.79
+     },
+     {
+      "op": "reach",
+      "a": "can_2",
+      "r": 0.88,
+      "min": 0.79
+     },
+     {
+      "op": "min_distance",
+      "a": "bowl",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "apple_1",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "apple_2",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "orange",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "banana",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "tangerine",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "bottle",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "can_1",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "can_2",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "at",
+      "a": "bowl",
+      "y": 0.18,
+      "tol": 0.005
+     }
+    ]
+   },
+   "answer_from": "fault",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "at(board)",
+      0.0517
+     ],
+     [
+      "left_of(bowl,board,gap=0.32)",
+      -0.0417
+     ],
+     [
+      "at(bowl)",
+      0.0467
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 59 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 12 step(s) before the scale was restored, after 8 other start(s) of the bodies over their supports"
+    ],
+    "rewrites": [
+     {
+      "statement": 4,
+      "text": "at(board, tol=0.01, x=0.45, y=0.0)",
+      "relax": {
+       "tol": [
+        0.01,
+        0.052
+       ]
+      },
+      "weaken": "soft"
+     },
+     {
+      "statement": 10,
+      "text": "left_of(bowl, board, gap=0.32)",
+      "relax": {
+       "gap": [
+        0.32,
+        0.278
+       ]
+      },
+      "weaken": "soft"
+     },
+     {
+      "statement": 30,
+      "text": "at(bowl, tol=0.005, y=0.18)",
+      "relax": {
+       "tol": [
+        0.005,
+        0.047
+       ]
+      },
+      "weaken": "soft"
+     }
+    ],
+    "accepted_if_relaxed": true,
+    "accepted_if_weakened": true,
+    "rewrites_note": "rewrites: for each statement whose requirement failed (its index in your statements), relax gives {keyword: [your value, the nearest value at which it holds on the layout the repair returned]} and weaken says whether it may become a preference (soft) or be removed (drop); accepted_if_relaxed and accepted_if_weakened say whether those edits make that layout pass. schedule_rewrites: the repair run again from the same starting scene with a smaller schedule margin ([yours, tried]), and what it ended with; the schedule never changes what is accepted. Your next program is repaired again from the same starting scene.",
+    "schedule_rewrites": [
+     {
+      "margin": [
+       0.005,
+       0.0025
+      ],
+      "ok": false,
+      "pen_after": 0,
+      "failed_predicates": [
+       "at(board)",
+       "left_of(bowl,board,gap=0.32)",
+       "at(bowl)"
+      ]
+     },
+     {
+      "margin": [
+       0.005,
+       0.00125
+      ],
+      "ok": false,
+      "pen_after": 0,
+      "failed_predicates": [
+       "at(board)",
+       "left_of(bowl,board,gap=0.32)",
+       "at(bowl)"
+      ]
+     }
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 8.902758121490479,
+   "solve_cpu_s": 9.161508226999985,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "centre_on(board)",
+     false,
+     0.0517
+    ]
+   ],
+   "answer_items": 31
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 36.88223171234131,
+    "duration_ms": 36310,
+    "duration_api_ms": 36277,
+    "cost_usd": 0.004934569999999999,
+    "usage": {
+     "input": 2,
+     "cache_creation": 3850,
+     "cache_read": 12037,
+     "output": 8088,
+     "thinking": 6983
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 6719,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "at",
+      "a": "board",
+      "y": 0,
+      "tol": 0.01
+     },
+     {
+      "op": "reach",
+      "a": "board",
+      "r": 0.5,
+      "min": 0.4
+     },
+     {
+      "op": "yaw",
+      "a": "board",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5,
+      "mod": 180
+     },
+     {
+      "op": "beside",
+      "a": "knife",
+      "b": "board",
+      "side": "right",
+      "gap": 0.02,
+      "max": 0.05
+     },
+     {
+      "op": "parallel",
+      "a": "knife",
+      "b": "board",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "spoon",
+      "b": "knife",
+      "side": "right",
+      "gap": 0.02
+     },
+     {
+      "op": "parallel",
+      "a": "spoon",
+      "b": "knife",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "bowl",
+      "b": "board",
+      "side": "left",
+      "gap": 0.05
+     },
+     {
+      "op": "cluster",
+      "members": [
+       "apple_1",
+       "apple_2",
+       "orange",
+       "banana",
+       "tangerine"
+      ],
+      "r": 0.11
+     },
+     {
+      "op": "farther",
+      "a": "apple_1",
+      "b": "bowl",
+      "gap": 0.12
+     },
+     {
+      "op": "farther",
+      "a": "apple_2",
+      "b": "bowl",
+      "gap": 0.12
+     },
+     {
+      "op": "farther",
+      "a": "orange",
+      "b": "bowl",
+      "gap": 0.12
+     },
+     {
+      "op": "farther",
+      "a": "banana",
+      "b": "bowl",
+      "gap": 0.12
+     },
+     {
+      "op": "farther",
+      "a": "tangerine",
+      "b": "bowl",
+      "gap": 0.12
+     },
+     {
+      "op": "row",
+      "members": [
+       "bottle",
+       "can_1",
+       "can_2"
+      ],
+      "axis": "y",
+      "gap": 0.03,
+      "mid": 0.35,
+      "tol": 0.005
+     },
+     {
+      "op": "reach",
+      "a": "bottle",
+      "r": 0.95,
+      "min": 0.75
+     },
+     {
+      "op": "reach",
+      "a": "can_1",
+      "r": 0.95,
+      "min": 0.75
+     },
+     {
+      "op": "reach",
+      "a": "can_2",
+      "r": 0.95,
+      "min": 0.75
+     },
+     {
+      "op": "min_distance",
+      "a": "bowl",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "apple_1",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "apple_2",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "orange",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "banana",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "tangerine",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "bottle",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "can_1",
+      "b": "board",
+      "r": 0.27
+     },
+     {
+      "op": "min_distance",
+      "a": "can_2",
+      "b": "board",
+      "r": 0.27
+     }
+    ]
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 1 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 1.5261812210083008,
+   "solve_cpu_s": 1.5261526060000108,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 31
+  }
+ ],
+ "n_rounds": 2,
+ "success": true,
+ "first_round_success": false,
+ "self_ok": true,
+ "fault": {
+  "name": "bowl_at",
+  "kind": "conflict"
+ }
+}

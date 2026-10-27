@@ -1,0 +1,261 @@
+{
+ "task": "palletize_n6",
+ "family": "palletize",
+ "n": 6,
+ "condition": "dsl_v1",
+ "seed": 1,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": null,
+   "message_chars": 1511,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "pallet"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "pallet.top",
+      "inset": 0.03
+     },
+     {
+      "op": "yaw",
+      "a": "*",
+      "deg": 0,
+      "mod": 90,
+      "tol": 2
+     },
+     {
+      "op": "clearance",
+      "a": "*",
+      "gap": 0.15
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_1",
+       "box_2",
+       "box_3"
+      ],
+      "start": "right",
+      "gap": 0.02,
+      "tol": 0.005
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_4",
+       "box_5",
+       "box_6"
+      ],
+      "start": "right",
+      "gap": 0.02,
+      "tol": 0.005
+     },
+     {
+      "op": "farther",
+      "a": "box_4",
+      "b": "box_1",
+      "gap": 0.3
+     }
+    ]
+   },
+   "answer_from": "fault",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "within(box_1,pallet.top)",
+      0.0918
+     ],
+     [
+      "within(box_3,pallet.top)",
+      0.0918
+     ],
+     [
+      "yaw(box_1,deg=0)",
+      2.5833
+     ],
+     [
+      "yaw(box_2,deg=0)",
+      3.1062
+     ],
+     [
+      "yaw(box_3,deg=0)",
+      2.5765
+     ],
+     [
+      "clearance(box_1,gap=0.15)",
+      0.1273
+     ],
+     [
+      "clearance(box_2,gap=0.15)",
+      0.1273
+     ],
+     [
+      "clearance(box_3,gap=0.15)",
+      0.1287
+     ],
+     [
+      "clearance(box_5,gap=0.15)",
+      0.1404
+     ],
+     [
+      "row(box_1,box_2,box_3):aligned",
+      0.0105
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 49 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts exceeded the trust region at 3 step(s); those steps served the contacts alone",
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 1.3898248672485352,
+   "solve_cpu_s": 1.3899145519999934,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "in_pallet_inset(6 bodies)",
+     false,
+     0.0818
+    ],
+    [
+     "in_support_top(6 bodies)",
+     false,
+     0.0618
+    ]
+   ],
+   "answer_items": 9
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 23.700652360916138,
+    "duration_ms": 23162,
+    "duration_api_ms": 23134,
+    "cost_usd": 0.00303847,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2072,
+     "cache_read": 12037,
+     "output": 5007,
+     "thinking": 4532
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2926,
+   "answer": {
+    "intent": "Palletize six cardboard boxes on the pallet's top level in two y-direction columns of three, square to the pallet edges, each at least 2 cm inside the pallet edges and at least 1 cm from its neighbours.",
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "pallet.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "pallet.level2",
+      "inset": 0.02
+     },
+     {
+      "op": "yaw",
+      "a": "*",
+      "deg": 0,
+      "mod": 90,
+      "tol": 3
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_1",
+       "box_2",
+       "box_3"
+      ],
+      "axis": "y",
+      "start": "right",
+      "gap": 0.012,
+      "mid": 0,
+      "tol": 0.005
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_4",
+       "box_5",
+       "box_6"
+      ],
+      "axis": "y",
+      "start": "right",
+      "gap": 0.012,
+      "mid": 0,
+      "tol": 0.005
+     },
+     {
+      "op": "at",
+      "a": "box_1",
+      "x": 0.5,
+      "tol": 0.02
+     },
+     {
+      "op": "at",
+      "a": "box_4",
+      "x": 0.9,
+      "tol": 0.02
+     }
+    ]
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 0.7367973327636719,
+   "solve_cpu_s": 0.7368739560000108,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 9
+  }
+ ],
+ "n_rounds": 2,
+ "success": true,
+ "first_round_success": false,
+ "self_ok": true,
+ "fault": {
+  "name": "clearance",
+  "kind": "tight"
+ }
+}

@@ -1,0 +1,84 @@
+{
+ "task": "pack_n10",
+ "family": "pack",
+ "n": 10,
+ "condition": "dsl_v1_rewrites",
+ "seed": 2,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 8.788187503814697,
+    "duration_ms": 8163,
+    "duration_api_ms": 8133,
+    "cost_usd": 0.00128817,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1583,
+     "cache_read": 12037,
+     "output": 1702,
+     "thinking": 1423
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1767,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "x0": 0.42,
+      "x1": 0.7,
+      "y0": -0.14,
+      "y1": 0.14,
+      "inset": 0
+     },
+     {
+      "op": "minimize"
+     }
+    ],
+    "schedule": {
+     "margin": 0.003
+    },
+    "intent": "Pack all ten fruit inside the 0.28 m square spanning x 0.42\u20130.70 and y \u22120.14\u20130.14 on the table top, each resting upright, with no interpenetration."
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 1 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 1.2176330089569092,
+   "solve_cpu_s": 1.217947842000001,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 5
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

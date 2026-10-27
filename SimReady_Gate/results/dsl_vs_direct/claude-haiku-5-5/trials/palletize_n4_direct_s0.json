@@ -11,51 +11,54 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 9.15293836593628,
-    "duration_ms": 8588,
-    "duration_api_ms": 8559,
-    "cost_usd": 0.0008635600000000001,
+    "wall_s": 12.172166585922241,
+    "duration_ms": 11547,
+    "duration_api_ms": 11513,
+    "cost_usd": 0.0013793299999999998,
     "usage": {
      "input": 2,
-     "cache_creation": 400,
-     "cache_read": 1686,
-     "output": 1533,
-     "thinking": 1362
+     "cache_creation": 1205,
+     "cache_read": 913,
+     "output": 2258,
+     "thinking": 2033
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1079,
+   "message_chars": 1242,
    "answer": {
     "poses": [
      {
       "name": "box_1",
-      "x": 0.52,
-      "y": -0.38,
-      "yaw": 0
+      "x": 0.5,
+      "y": -0.36,
+      "yaw": 0,
+      "on": "pallet"
      },
      {
       "name": "box_2",
-      "x": 0.52,
+      "x": 0.5,
       "y": 0,
-      "yaw": 0
+      "yaw": 0,
+      "on": "pallet"
      },
      {
       "name": "box_3",
-      "x": 0.52,
-      "y": 0.38,
-      "yaw": 0
+      "x": 0.5,
+      "y": 0.36,
+      "yaw": 0,
+      "on": "pallet"
      },
      {
       "name": "box_4",
-      "x": 0.9,
+      "x": 0.92,
       "y": 0,
-      "yaw": 90
+      "yaw": 0,
+      "on": "pallet"
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -64,16 +67,16 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 0.1013486385345459,
-   "solve_cpu_s": 0.10136827099999834,
+   "solve_s": 0.11818480491638184,
+   "solve_cpu_s": 0.11819123000000076,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 4,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 0.23038959503173828,
-    "solve_cpu_s": 0.23049081300000296,
+    "solve_s": 0.22802495956420898,
+    "solve_cpu_s": 0.22804545999999704,
     "rubric_failed": []
    }
   }

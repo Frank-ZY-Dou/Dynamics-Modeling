@@ -1,0 +1,131 @@
+{
+ "task": "palletize_n4",
+ "family": "palletize",
+ "n": 4,
+ "condition": "dsl_v1_rewrites",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 23.93607473373413,
+    "duration_ms": 23395,
+    "duration_api_ms": 23363,
+    "cost_usd": 0.00286607,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1205,
+     "cache_read": 12037,
+     "output": 5009,
+     "thinking": 4427
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1242,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "pallet.level2",
+      "reason": "every box rests on the pallet's open top level"
+     },
+     {
+      "op": "upright",
+      "a": "*",
+      "reason": "every box rests upright on the pallet"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "pallet.level2",
+      "inset": 0.02,
+      "reason": "every box entirely on the pallet at least 2 cm in from its edges"
+     },
+     {
+      "op": "yaw",
+      "a": "*",
+      "deg": 90,
+      "mod": 90,
+      "tol": 3,
+      "reason": "sides parallel to the pallet edges within 3 degrees"
+     },
+     {
+      "op": "no_penetration",
+      "a": "*",
+      "reason": "nothing interpenetrates"
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_1",
+       "box_2",
+       "box_3"
+      ],
+      "axis": "y",
+      "gap": 0.015,
+      "spacing": "even",
+      "mid": 0,
+      "start": "right",
+      "reason": "rows parallel to y, at most 3 per row; the row's centres share one line parallel to y; at least 1 cm between boxes"
+     },
+     {
+      "op": "place",
+      "a": "box_4",
+      "x": 0.78,
+      "y": 0,
+      "yaw": 90,
+      "reason": "second row at the far end of the pallet, kept clear of the first row"
+     },
+     {
+      "op": "place",
+      "a": "box_1",
+      "x": 0.46,
+      "y": -0.355,
+      "yaw": 90,
+      "reason": "rough position for the first row"
+     },
+     {
+      "op": "place",
+      "a": "box_2",
+      "x": 0.46,
+      "y": 0,
+      "yaw": 90,
+      "reason": "rough position for the first row"
+     },
+     {
+      "op": "place",
+      "a": "box_3",
+      "x": 0.46,
+      "y": 0.355,
+      "yaw": 90,
+      "reason": "rough position for the first row"
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 0.23221778869628906,
+   "solve_cpu_s": 0.2322479000000044,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 10
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

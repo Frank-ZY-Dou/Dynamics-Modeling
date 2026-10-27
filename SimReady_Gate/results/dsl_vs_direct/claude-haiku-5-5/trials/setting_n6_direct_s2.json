@@ -11,22 +11,22 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 29.065369129180908,
-    "duration_ms": 28596,
-    "duration_api_ms": 28568,
-    "cost_usd": 0.00329577,
+    "wall_s": 27.678184747695923,
+    "duration_ms": 27178,
+    "duration_api_ms": 27147,
+    "cost_usd": 0.00341993,
     "usage": {
      "input": 2,
-     "cache_creation": 401,
-     "cache_read": 1937,
-     "output": 6392,
-     "thinking": 6165
+     "cache_creation": 1473,
+     "cache_read": 913,
+     "output": 6232,
+     "thinking": 6005
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1707,
+   "message_chars": 1896,
    "answer": {
     "poses": [
      {
@@ -38,36 +38,35 @@
      {
       "name": "fork",
       "x": 0.55,
-      "y": 0.127,
+      "y": 0.125,
       "yaw": 0
      },
      {
       "name": "knife",
       "x": 0.55,
-      "y": -0.127,
+      "y": -0.125,
       "yaw": 90
      },
      {
       "name": "spoon",
-      "x": 0.55,
-      "y": -0.182,
+      "x": 0.52,
+      "y": -0.175,
       "yaw": 90
-     },
-     {
-      "name": "glass",
-      "x": 0.6,
-      "y": -0.24,
-      "yaw": 0
      },
      {
       "name": "mug",
       "x": 0.55,
-      "y": 0.21,
-      "yaw": 21
+      "y": 0.205,
+      "yaw": 0
+     },
+     {
+      "name": "glass",
+      "x": 0.68,
+      "y": -0.18,
+      "yaw": 0
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -76,16 +75,16 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 0.45227885246276855,
-   "solve_cpu_s": 0.4527120820000001,
+   "solve_s": 0.37729644775390625,
+   "solve_cpu_s": 0.37736667499999976,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 6,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 0.8902583122253418,
-    "solve_cpu_s": 0.8904891020000001,
+    "solve_s": 0.8465900421142578,
+    "solve_cpu_s": 0.8467671889999999,
     "rubric_failed": []
    }
   }

@@ -1,0 +1,377 @@
+{
+ "task": "desk_n6",
+ "family": "desk",
+ "n": 6,
+ "condition": "dsl_v0",
+ "seed": 2,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 12.484792470932007,
+    "duration_ms": 11866,
+    "duration_api_ms": 11819,
+    "cost_usd": 0.0230282,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1502,
+     "cache_read": 3962,
+     "output": 1662,
+     "thinking": 1056
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1883,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "no_penetration",
+      "a": "*",
+      "margin": 0.005
+     },
+     {
+      "op": "place",
+      "a": "keyboard",
+      "x": 0.45,
+      "y": 0,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "mouse",
+      "x": 0.45,
+      "y": -0.4,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "notebook",
+      "x": 0.45,
+      "y": 0.41,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "marker",
+      "x": 0.565,
+      "y": 0.41,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "mug",
+      "x": 0.72,
+      "y": 0,
+      "yaw": 102
+     },
+     {
+      "op": "place",
+      "a": "tape",
+      "x": 0.8,
+      "y": -0.55,
+      "yaw": 0
+     },
+     {
+      "op": "right_of",
+      "a": "keyboard",
+      "b": "mouse",
+      "axis": "y",
+      "gap": 0.3
+     },
+     {
+      "op": "left_of",
+      "a": "notebook",
+      "b": "keyboard",
+      "gap": 0.35
+     },
+     {
+      "op": "in_front_of",
+      "a": "marker",
+      "b": "notebook",
+      "gap": 0.1
+     },
+     {
+      "op": "in_front_of",
+      "a": "mug",
+      "b": "keyboard",
+      "gap": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "keyboard",
+      "r": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "mouse",
+      "r": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "notebook",
+      "r": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "marker",
+      "r": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "mug",
+      "r": 0.2
+     }
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "place(keyboard)",
+      0.3796
+     ],
+     [
+      "place(mouse)",
+      0.3796
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 15 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts exceeded the trust region at 2 step(s); those steps served the contacts alone"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 6.761813163757324,
+   "solve_cpu_s": 6.763529849000008,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "centre_on(keyboard)",
+     false,
+     0.3796
+    ],
+    [
+     "dist_to_base(keyboard)",
+     false,
+     0.5874
+    ],
+    [
+     "side_of(mouse,keyboard,-y)",
+     false,
+     -0.3592
+    ],
+    [
+     "gap(keyboard->mouse,-y)",
+     false,
+     -0.7125
+    ],
+    [
+     "gap(keyboard->notebook,+y)",
+     false,
+     0.4538
+    ],
+    [
+     "facing(mug)",
+     false,
+     102.0
+    ]
+   ],
+   "answer_items": 19
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 15.939467191696167,
+    "duration_ms": 15450,
+    "duration_api_ms": 15413,
+    "cost_usd": 0.0470754,
+    "usage": {
+     "input": 4,
+     "cache_creation": 5472,
+     "cache_read": 12194,
+     "output": 2396,
+     "thinking": 1139
+    },
+    "num_turns": 3,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 3515,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "no_penetration",
+      "a": "*",
+      "margin": 0.005
+     },
+     {
+      "op": "place",
+      "a": "keyboard",
+      "x": 0.45,
+      "y": 0,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "mouse",
+      "x": 0.45,
+      "y": -0.395,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "notebook",
+      "x": 0.45,
+      "y": 0.41,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "marker",
+      "x": 0.565,
+      "y": 0.41,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "mug",
+      "x": 0.72,
+      "y": 0,
+      "yaw": 102
+     },
+     {
+      "op": "place",
+      "a": "tape",
+      "x": 0.8,
+      "y": -0.55,
+      "yaw": 0
+     },
+     {
+      "op": "right_of",
+      "a": "mouse",
+      "b": "keyboard",
+      "axis": "y",
+      "gap": 0.38
+     },
+     {
+      "op": "left_of",
+      "a": "notebook",
+      "b": "keyboard",
+      "axis": "y",
+      "gap": 0.38
+     },
+     {
+      "op": "in_front_of",
+      "a": "marker",
+      "b": "notebook",
+      "axis": "x",
+      "gap": 0.1
+     },
+     {
+      "op": "in_front_of",
+      "a": "mug",
+      "b": "keyboard",
+      "axis": "x",
+      "gap": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "keyboard",
+      "r": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "mouse",
+      "r": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "notebook",
+      "r": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "marker",
+      "r": 0.2
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "mug",
+      "r": 0.2
+     }
+    ]
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 3.3904430866241455,
+   "solve_cpu_s": 3.3905389370000023,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "facing(mug)",
+     false,
+     102.0
+    ]
+   ],
+   "answer_items": 19
+  }
+ ],
+ "n_rounds": 2,
+ "success": false,
+ "first_round_success": false,
+ "self_ok": true
+}

@@ -1,0 +1,166 @@
+{
+ "task": "drinks_row_n10",
+ "family": "drinks_row",
+ "n": 10,
+ "condition": "dsl_v0",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 13.641416072845459,
+    "duration_ms": 13084,
+    "duration_api_ms": 13056,
+    "cost_usd": 0.00161464,
+    "usage": {
+     "input": 2,
+     "cache_creation": 400,
+     "cache_read": 5194,
+     "output": 2965,
+     "thinking": 2152
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1944,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "place",
+      "a": "can_4",
+      "x": 0.75,
+      "y": 0.45,
+      "reason": "shortest drink (0.09 m) at left (+y) end; row at x=0.75 between 0.70 and 0.80; 0.10 m spacing gives >=2 cm clearance and ends symmetric about y=0"
+     },
+     {
+      "op": "place",
+      "a": "glass_2",
+      "x": 0.75,
+      "y": 0.35,
+      "reason": "second shortest (0.09 m)"
+     },
+     {
+      "op": "place",
+      "a": "can_5",
+      "x": 0.75,
+      "y": 0.25,
+      "reason": "0.10 m tall, next in height order"
+     },
+     {
+      "op": "place",
+      "a": "bottle_2",
+      "x": 0.75,
+      "y": 0.15,
+      "reason": "0.10 m tall, next in height order"
+     },
+     {
+      "op": "place",
+      "a": "glass_1",
+      "x": 0.75,
+      "y": 0.05,
+      "reason": "0.10 m tall, next in height order"
+     },
+     {
+      "op": "place",
+      "a": "can_1",
+      "x": 0.75,
+      "y": -0.05,
+      "reason": "0.12 m tall, next in height order"
+     },
+     {
+      "op": "place",
+      "a": "can_2",
+      "x": 0.75,
+      "y": -0.15,
+      "reason": "0.12 m tall, next in height order"
+     },
+     {
+      "op": "place",
+      "a": "can_3",
+      "x": 0.75,
+      "y": -0.25,
+      "reason": "0.12 m tall, next in height order"
+     },
+     {
+      "op": "place",
+      "a": "can_6",
+      "x": 0.75,
+      "y": -0.35,
+      "reason": "0.12 m tall, next in height order"
+     },
+     {
+      "op": "place",
+      "a": "bottle_1",
+      "x": 0.75,
+      "y": -0.45,
+      "reason": "tallest drink (0.18 m) at right (-y) end"
+     },
+     {
+      "op": "min_distance",
+      "a": "can_4",
+      "b": "glass_2",
+      "r": 0.095,
+      "reason": "neighbour clearance: centre spacing >= half-diameters plus 2 cm"
+     }
+    ],
+    "intent": "Arrange all ten drinks in one evenly spaced row along y at x\u22480.75, ordered shortest (+y, left) to tallest (-y, right), centred on y=0, upright and resting on the table without penetration."
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 1.9956707954406738,
+   "solve_cpu_s": 1.9956471899999997,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "ordered_by_height",
+     false,
+     [
+      0.09157940887962468,
+      0.08514325322175864,
+      0.10444383877620567,
+      0.1009607969335998,
+      0.1004264010116458,
+      0.11753090641650488,
+      0.1209462242140944,
+      0.12099999986821786,
+      0.1218886886126711,
+      0.17726458608767548
+     ]
+    ]
+   ],
+   "answer_items": 15
+  }
+ ],
+ "n_rounds": 1,
+ "success": false,
+ "first_round_success": false,
+ "self_ok": true
+}

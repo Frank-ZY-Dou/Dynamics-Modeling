@@ -1,0 +1,168 @@
+{
+ "task": "drinks_row_n10",
+ "family": "drinks_row",
+ "n": 10,
+ "condition": "dsl_v1_rewrites",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 15.355515718460083,
+    "duration_ms": 14695,
+    "duration_api_ms": 14664,
+    "cost_usd": 0.00199057,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1720,
+     "cache_read": 12037,
+     "output": 3052,
+     "thinking": 2162
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2189,
+   "answer": {
+    "intent": "Line up all ten drinks in one y-axis row at x between 0.70 and 0.80, ordered by height from shortest (left, +y) to tallest (right), evenly spaced with at least 2 cm between neighbours, centred on y = 0, all upright on the table.",
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_1",
+       "can_2",
+       "can_3",
+       "can_4",
+       "can_5",
+       "can_6",
+       "bottle_1",
+       "bottle_2",
+       "glass_1",
+       "glass_2"
+      ],
+      "axis": "y",
+      "start": "left",
+      "order": "height",
+      "gap": 0.02,
+      "spacing": "even",
+      "mid": 0,
+      "tol": 0.01,
+      "reason": "single row parallel to y, ordered by height shortest left to tallest right, 2 cm table gap, evenly spaced, midpoint of end drinks on y=0"
+     },
+     {
+      "op": "at",
+      "a": "can_1",
+      "x": 0.75,
+      "tol": 0.04,
+      "reason": "row line x between 0.70 and 0.80"
+     },
+     {
+      "op": "at",
+      "a": "can_2",
+      "x": 0.75,
+      "tol": 0.04,
+      "reason": "row line x between 0.70 and 0.80"
+     },
+     {
+      "op": "at",
+      "a": "can_3",
+      "x": 0.75,
+      "tol": 0.04,
+      "reason": "row line x between 0.70 and 0.80"
+     },
+     {
+      "op": "at",
+      "a": "can_4",
+      "x": 0.75,
+      "tol": 0.04,
+      "reason": "row line x between 0.70 and 0.80"
+     },
+     {
+      "op": "at",
+      "a": "can_5",
+      "x": 0.75,
+      "tol": 0.04,
+      "reason": "row line x between 0.70 and 0.80"
+     },
+     {
+      "op": "at",
+      "a": "can_6",
+      "x": 0.75,
+      "tol": 0.04,
+      "reason": "row line x between 0.70 and 0.80"
+     },
+     {
+      "op": "at",
+      "a": "bottle_1",
+      "x": 0.75,
+      "tol": 0.04,
+      "reason": "row line x between 0.70 and 0.80"
+     },
+     {
+      "op": "at",
+      "a": "bottle_2",
+      "x": 0.75,
+      "tol": 0.04,
+      "reason": "row line x between 0.70 and 0.80"
+     },
+     {
+      "op": "at",
+      "a": "glass_1",
+      "x": 0.75,
+      "tol": 0.04,
+      "reason": "row line x between 0.70 and 0.80"
+     },
+     {
+      "op": "at",
+      "a": "glass_2",
+      "x": 0.75,
+      "tol": 0.04,
+      "reason": "row line x between 0.70 and 0.80"
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 2 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 4 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 3.0055224895477295,
+   "solve_cpu_s": 3.002841457,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 15
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

@@ -1,0 +1,96 @@
+{
+ "task": "pack_n10",
+ "family": "pack",
+ "n": 10,
+ "condition": "dsl_v1_rewrites",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 7.985705852508545,
+    "duration_ms": 7355,
+    "duration_api_ms": 7325,
+    "cost_usd": 0.0011649700000000002,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1582,
+     "cache_read": 12037,
+     "output": 1456,
+     "thinking": 1048
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1778,
+   "answer": {
+    "intent": "Pack all ten fruit flat and upright on the table top inside the square x 0.42 to 0.70, y -0.14 to 0.14, with no overlaps.",
+    "schedule": {
+     "margin": 0.002
+    },
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2",
+      "reason": "fruit rest on the table"
+     },
+     {
+      "op": "upright",
+      "a": "*",
+      "reason": "pieces keep their resting orientation"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "x0": 0.42,
+      "x1": 0.7,
+      "y0": -0.14,
+      "y1": 0.14,
+      "inset": 0,
+      "reason": "every piece entirely inside the square"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.level2",
+      "inset": 0,
+      "reason": "pieces stay on the table top"
+     },
+     {
+      "op": "no_penetration",
+      "reason": "nothing interpenetrates"
+     },
+     {
+      "op": "minimize",
+      "reason": "keep the packing compact"
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 1 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 1.1931097507476807,
+   "solve_cpu_s": 1.1933743089999993,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 6
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

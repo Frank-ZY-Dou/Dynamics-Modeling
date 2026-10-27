@@ -1,0 +1,130 @@
+{
+ "task": "pick_ready_n8",
+ "family": "pick_ready",
+ "n": 8,
+ "condition": "dsl_v1_rewrites",
+ "seed": 1,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 15.137240648269653,
+    "duration_ms": 14499,
+    "duration_api_ms": 14471,
+    "cost_usd": 0.00200607,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1580,
+     "cache_read": 12037,
+     "output": 3139,
+     "thinking": 2462
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1947,
+   "answer": {
+    "intent": "Place the mug 45-60 cm from the robot with its handle facing the base, keep a 15 cm corridor and an 18 cm clearance around it, and leave the drop zone empty, with every object resting upright on the table within 80 cm of the base.",
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2",
+      "reason": "everything rests on the table"
+     },
+     {
+      "op": "upright",
+      "a": "*",
+      "reason": "everything rests upright"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "reason": "objects stay on the table top"
+     },
+     {
+      "op": "no_penetration",
+      "reason": "nothing interpenetrates"
+     },
+     {
+      "op": "place",
+      "a": "mug",
+      "x": 0.5,
+      "y": -0.1,
+      "yaw": 0,
+      "reason": "rough start: handle (-x) toward the robot, mug in front of the base"
+     },
+     {
+      "op": "reach",
+      "a": "mug",
+      "r": 0.6,
+      "min": 0.45,
+      "reason": "mug centre 45 to 60 cm from the robot base"
+     },
+     {
+      "op": "facing",
+      "a": "mug",
+      "axis": "handle",
+      "tol": 20,
+      "reason": "handle pointing at the robot base within 20 degrees"
+     },
+     {
+      "op": "approach",
+      "a": "mug",
+      "length": 0.45,
+      "width": 0.15,
+      "toward": "robot",
+      "reason": "15 cm corridor from the mug straight to the robot base free of objects"
+     },
+     {
+      "op": "min_distance",
+      "a": "*",
+      "b": "mug",
+      "r": 0.18,
+      "reason": "every other object centre at least 18 cm from the mug centre"
+     },
+     {
+      "op": "keep_out",
+      "a": "*",
+      "x0": 0.25,
+      "x1": 0.4,
+      "y0": 0.2,
+      "y1": 0.4,
+      "reason": "drop zone x 0.25-0.40, y 0.20-0.40 kept empty"
+     },
+     {
+      "op": "reach",
+      "a": "*",
+      "r": 0.8,
+      "reason": "every object centre within 80 cm of the robot base"
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 1 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 2.3490612506866455,
+   "solve_cpu_s": 2.3489763010000004,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 11
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

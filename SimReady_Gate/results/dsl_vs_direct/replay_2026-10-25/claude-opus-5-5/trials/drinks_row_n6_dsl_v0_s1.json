@@ -1,0 +1,144 @@
+{
+ "task": "drinks_row_n6",
+ "family": "drinks_row",
+ "n": 6,
+ "condition": "dsl_v0",
+ "seed": 1,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 9.901684522628784,
+    "duration_ms": 9301,
+    "duration_api_ms": 9270,
+    "cost_usd": 0.0309964,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1322,
+     "cache_read": 3962,
+     "output": 981,
+     "thinking": 517
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1383,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "fixed",
+      "a": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "place",
+      "a": "can_4",
+      "x": 0.75,
+      "y": 0.25
+     },
+     {
+      "op": "place",
+      "a": "can_5",
+      "x": 0.75,
+      "y": 0.15
+     },
+     {
+      "op": "place",
+      "a": "can_1",
+      "x": 0.75,
+      "y": 0.05
+     },
+     {
+      "op": "place",
+      "a": "can_2",
+      "x": 0.75,
+      "y": -0.05
+     },
+     {
+      "op": "place",
+      "a": "can_3",
+      "x": 0.75,
+      "y": -0.15
+     },
+     {
+      "op": "place",
+      "a": "bottle_1",
+      "x": 0.75,
+      "y": -0.25
+     },
+     {
+      "op": "left_of",
+      "a": "can_4",
+      "b": "can_5",
+      "gap": 0.085
+     },
+     {
+      "op": "left_of",
+      "a": "can_5",
+      "b": "can_1",
+      "gap": 0.085
+     },
+     {
+      "op": "left_of",
+      "a": "can_1",
+      "b": "can_2",
+      "gap": 0.085
+     },
+     {
+      "op": "left_of",
+      "a": "can_2",
+      "b": "can_3",
+      "gap": 0.075
+     },
+     {
+      "op": "left_of",
+      "a": "can_3",
+      "b": "bottle_1",
+      "gap": 0.075
+     },
+     {
+      "op": "minimize"
+     }
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 1.0985658168792725,
+   "solve_cpu_s": 1.0987648090000004,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 17
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

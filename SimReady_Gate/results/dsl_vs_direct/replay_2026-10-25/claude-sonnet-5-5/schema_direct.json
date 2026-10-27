@@ -1,0 +1,40 @@
+{
+ "type": "object",
+ "properties": {
+  "poses": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "name": {
+      "type": "string"
+     },
+     "x": {
+      "type": "number"
+     },
+     "y": {
+      "type": "number"
+     },
+     "yaw": {
+      "type": "number"
+     },
+     "on": {
+      "type": "string",
+      "description": "the body this one rests on, when not the support"
+     }
+    },
+    "required": [
+     "name",
+     "x",
+     "y",
+     "yaw"
+    ],
+    "additionalProperties": false
+   }
+  }
+ },
+ "required": [
+  "poses"
+ ],
+ "additionalProperties": false
+}

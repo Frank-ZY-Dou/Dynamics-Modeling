@@ -24,9 +24,6 @@
         "type": "string",
         "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
        },
-       "margin": {
-        "type": "number"
-       },
        "reason": {
         "type": "string",
         "description": "which words in the request justify this statement"
@@ -108,7 +105,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "reason": {
         "type": "string",
@@ -157,7 +154,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "depth": {
         "type": "number"
@@ -217,7 +214,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "inset": {
         "type": "number"
@@ -257,7 +254,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "gap": {
         "type": "number"
@@ -297,7 +294,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "gap": {
         "type": "number"
@@ -322,7 +319,7 @@
       "properties": {
        "op": {
         "type": "string",
-        "const": "in_front_of"
+        "const": "farther"
        },
        "a": {
         "type": "string",
@@ -337,7 +334,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "gap": {
         "type": "number"
@@ -362,7 +359,7 @@
       "properties": {
        "op": {
         "type": "string",
-        "const": "behind"
+        "const": "nearer"
        },
        "a": {
         "type": "string",
@@ -377,7 +374,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "gap": {
         "type": "number"
@@ -410,7 +407,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "r": {
         "type": "number"
@@ -436,7 +433,7 @@
       "properties": {
        "op": {
         "type": "string",
-        "const": "near"
+        "const": "close_to"
        },
        "a": {
         "type": "string",
@@ -444,7 +441,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "r": {
         "type": "number"
@@ -640,13 +637,15 @@
          "+y",
          "-x",
          "-y",
+         "front",
+         "handle",
          "x",
          "y"
         ]
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "soft": {
         "type": "number"
@@ -689,6 +688,8 @@
          "+y",
          "-x",
          "-y",
+         "front",
+         "handle",
          "long",
          "short",
          "x",
@@ -741,7 +742,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "mod": {
         "type": "number"
@@ -811,7 +812,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "gap": {
         "type": "number"
@@ -856,6 +857,14 @@
         "enum": [
          "x",
          "y"
+        ]
+       },
+       "edge": {
+        "type": "string",
+        "enum": [
+         "center",
+         "max",
+         "min"
         ]
        },
        "gap": {
@@ -1047,6 +1056,71 @@
       "properties": {
        "op": {
         "type": "string",
+        "const": "ring"
+       },
+       "angle": {
+        "type": "number",
+        "description": "ring: the angle of the first member about the centre, degrees from +x"
+       },
+       "axis": {
+        "type": "string",
+        "enum": [
+         "+x",
+         "+y",
+         "-x",
+         "-y",
+         "front",
+         "handle",
+         "x",
+         "y"
+        ]
+       },
+       "face": {
+        "type": "string",
+        "enum": [
+         "in",
+         "out"
+        ]
+       },
+       "members": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        },
+        "description": "bodies of a group statement, in order; * or a pattern (can_*) stands for the free bodies it matches"
+       },
+       "r": {
+        "type": "number"
+       },
+       "soft": {
+        "type": "number"
+       },
+       "tol": {
+        "type": "number"
+       },
+       "x": {
+        "type": "number"
+       },
+       "y": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "members",
+       "r"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
         "const": "cluster"
        },
        "members": {
@@ -1094,7 +1168,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "c": {
         "type": "string",
@@ -1139,7 +1213,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "c": {
         "type": "string",
@@ -1177,7 +1251,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "soft": {
         "type": "number"
@@ -1210,7 +1284,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "dx": {
         "type": "number"
@@ -1256,7 +1330,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "soft": {
         "type": "number"
@@ -1289,7 +1363,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "depth": {
         "type": "number"
@@ -1333,6 +1407,52 @@
       "required": [
        "op",
        "a"
+      ],
+      "additionalProperties": false
+     },
+     {
+      "type": "object",
+      "properties": {
+       "op": {
+        "type": "string",
+        "const": "flush"
+       },
+       "a": {
+        "type": "string",
+        "description": "primary body, * for every free body, or a pattern (can_*) for the free bodies it matches"
+       },
+       "b": {
+        "type": "string",
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
+       },
+       "gap": {
+        "type": "number"
+       },
+       "side": {
+        "type": "string",
+        "enum": [
+         "far",
+         "left",
+         "near",
+         "right"
+        ]
+       },
+       "soft": {
+        "type": "number"
+       },
+       "tol": {
+        "type": "number"
+       },
+       "reason": {
+        "type": "string",
+        "description": "which words in the request justify this statement"
+       }
+      },
+      "required": [
+       "op",
+       "a",
+       "b",
+       "side"
       ],
       "additionalProperties": false
      },
@@ -1435,7 +1555,7 @@
        },
        "b": {
         "type": "string",
-        "description": "reference body / support / container / region"
+        "description": "reference body / support / container / region; <fixture>.level<K> is one of a fixture's levels"
        },
        "margin": {
         "type": "number"
@@ -1462,6 +1582,16 @@
    "type": "array",
    "items": {
     "type": "string"
+   }
+  },
+  "schedule": {
+   "type": "object",
+   "additionalProperties": false,
+   "properties": {
+    "margin": {
+     "type": "number",
+     "description": "the clearance the repair keeps between bodies (default 0.005 m); lower it for a tight packing. It changes how the repair gets there, never what the program requires"
+    }
    }
   },
   "gate": {

@@ -3,18 +3,18 @@
   "dsl_v1": {
    "answers": 48,
    "new_start_scenes": 240,
-   "new_start_pass_rate": 0.9958333333333333,
-   "solve_s_per_scene": 2.3521676023801166,
-   "spread_m": 0.13921794712387928,
+   "new_start_pass_rate": 0.9833333333333333,
+   "solve_s_per_scene": 2.029480144381523,
+   "spread_m": 0.13760618937025557,
    "new_asset_pass_rate": 1.0
   },
   "direct": {
    "answers": 45,
    "new_start_scenes": 225,
    "new_start_pass_rate": 0.9333333333333333,
-   "solve_s_per_scene": 0.8233775350782606,
+   "solve_s_per_scene": 0.6972803995344374,
    "spread_m": 0.0,
-   "new_asset_pass_rate": 0.5555555555555556
+   "new_asset_pass_rate": 0.6666666666666666
   }
  },
  "answers": [
@@ -26,37 +26,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.834611415863037,
+     "solve_s": 1.2600934505462646,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.8586018085479736,
+     "solve_s": 1.2421655654907227,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.7301034927368164,
+     "solve_s": 1.2438929080963135,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.6140429973602295,
+     "solve_s": 1.246683120727539,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.784099817276001,
+     "solve_s": 1.2387804985046387,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.6060335636138916,
+    "solve_s": 1.2589695453643799,
     "failed": [],
     "swapped": {
      "marker": "stationery_marker_thin_blue_a01",
@@ -73,37 +73,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.660569190979004,
+     "solve_s": 1.2425849437713623,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.5476195812225342,
+     "solve_s": 1.2413215637207031,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.6317644119262695,
+     "solve_s": 1.2442026138305664,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.5956006050109863,
+     "solve_s": 1.2437241077423096,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.628399133682251,
+     "solve_s": 1.242983102798462,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.6316285133361816,
+    "solve_s": 1.2632277011871338,
     "failed": [],
     "swapped": {
      "marker": "stationery_marker_thin_blue_a01",
@@ -120,37 +120,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.6760680675506592,
+     "solve_s": 1.2677245140075684,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.6654064655303955,
+     "solve_s": 1.2631762027740479,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.5884621143341064,
+     "solve_s": 1.2618589401245117,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.5965476036071777,
+     "solve_s": 1.273529052734375,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.6131889820098877,
+     "solve_s": 1.2683396339416504,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.6504709720611572,
+    "solve_s": 1.2782654762268066,
     "failed": [],
     "swapped": {
      "marker": "stationery_marker_thin_blue_a01",
@@ -167,37 +167,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 3.536979913711548,
+     "solve_s": 2.71163010597229,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 3.285505533218384,
+     "solve_s": 2.4681320190429688,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 3.5383944511413574,
+     "solve_s": 2.671872854232788,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 4.222553014755249,
+     "solve_s": 3.21579647064209,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 3.7758941650390625,
+     "solve_s": 2.836581230163574,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 3.642188310623169,
+    "solve_s": 2.729496717453003,
     "failed": [],
     "swapped": {
      "marker": "stationery_marker_thin_blue_a01",
@@ -214,37 +214,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 3.636837959289551,
+     "solve_s": 2.7135250568389893,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 3.2012314796447754,
+     "solve_s": 2.4773521423339844,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 3.3964107036590576,
+     "solve_s": 2.7024950981140137,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 3.9091734886169434,
+     "solve_s": 3.1788275241851807,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 3.8251702785491943,
+     "solve_s": 2.8426570892333984,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 3.8804750442504883,
+    "solve_s": 2.802454710006714,
     "failed": [],
     "swapped": {
      "marker": "stationery_marker_thin_blue_a01",
@@ -261,37 +261,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 3.765016555786133,
+     "solve_s": 2.7484307289123535,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 3.380357027053833,
+     "solve_s": 2.477759599685669,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 3.811812400817871,
+     "solve_s": 2.67769193649292,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 4.6494035720825195,
+     "solve_s": 3.2152042388916016,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 3.889101982116699,
+     "solve_s": 2.8363797664642334,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 3.6111602783203125,
+    "solve_s": 2.490424633026123,
     "failed": [],
     "swapped": {
      "marker": "stationery_marker_thin_blue_a01",
@@ -308,37 +308,92 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 3.250296115875244,
+     "solve_s": 2.069868326187134,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 3.2161641120910645,
+     "solve_s": 2.070516586303711,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 3.204190731048584,
+     "solve_s": 2.0341930389404297,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 3.207704544067383,
+     "solve_s": 2.077927589416504,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 2.991111993789673,
+     "solve_s": 2.0002615451812744,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 4.80159068107605,
+    "solve_s": 3.665602922439575,
+    "failed": [],
+    "swapped": {
+     "can_1": "food_beverage_can_h01",
+     "can_2": "food_beverage_can_l01",
+     "can_3": "food_beverage_can_b01",
+     "can_4": "food_beverage_can_k01",
+     "can_5": "food_canned_soup_a02",
+     "can_6": "food_beverage_can_n01",
+     "bottle_1": "misc_bottle_corked_a01",
+     "bottle_2": "food_beverage_whiskyBottle_c01",
+     "glass_1": "dishware_glass_tumbler_a01",
+     "glass_2": "dishware_glass_8oz_a01"
+    }
+   },
+   "spread_m": 0.0002082626021463792
+  },
+  {
+   "task": "drinks_row_n10",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 2.3951385021209717,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 2.427940845489502,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 2.361508846282959,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 2.375497817993164,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 2.3095040321350098,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 3.4495761394500732,
     "failed": [],
     "swapped": {
      "can_1": "food_beverage_can_h01",
@@ -358,97 +413,42 @@
   {
    "task": "drinks_row_n10",
    "condition": "dsl_v1",
-   "seed": 1,
-   "starts": [
-    {
-     "seed": 100,
-     "rubric_ok": true,
-     "solve_s": 2.671043634414673,
-     "failed": []
-    },
-    {
-     "seed": 101,
-     "rubric_ok": true,
-     "solve_s": 2.5858120918273926,
-     "failed": []
-    },
-    {
-     "seed": 102,
-     "rubric_ok": true,
-     "solve_s": 2.526583433151245,
-     "failed": []
-    },
-    {
-     "seed": 103,
-     "rubric_ok": true,
-     "solve_s": 2.6038079261779785,
-     "failed": []
-    },
-    {
-     "seed": 104,
-     "rubric_ok": true,
-     "solve_s": 2.4140193462371826,
-     "failed": []
-    }
-   ],
-   "assets": {
-    "rubric_ok": true,
-    "solve_s": 4.4562013149261475,
-    "failed": [],
-    "swapped": {
-     "can_1": "food_beverage_can_h01",
-     "can_2": "food_beverage_can_l01",
-     "can_3": "food_beverage_can_b01",
-     "can_4": "food_beverage_can_k01",
-     "can_5": "food_canned_soup_a02",
-     "can_6": "food_beverage_can_n01",
-     "bottle_1": "misc_bottle_corked_a01",
-     "bottle_2": "food_beverage_whiskyBottle_c01",
-     "glass_1": "dishware_glass_tumbler_a01",
-     "glass_2": "dishware_glass_8oz_a01"
-    }
-   },
-   "spread_m": 0.0002082626021463792
-  },
-  {
-   "task": "drinks_row_n10",
-   "condition": "dsl_v1",
    "seed": 2,
    "starts": [
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 2.702573537826538,
+     "solve_s": 2.072960138320923,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 2.7530198097229004,
+     "solve_s": 2.0570404529571533,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 2.821361780166626,
+     "solve_s": 2.0359959602355957,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 2.555461883544922,
+     "solve_s": 2.0693182945251465,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 2.53831148147583,
+     "solve_s": 1.9766511917114258,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 4.906304121017456,
+    "solve_s": 3.678490400314331,
     "failed": [],
     "swapped": {
      "can_1": "food_beverage_can_h01",
@@ -473,37 +473,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.44147157669067383,
+     "solve_s": 0.3824326992034912,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.5183908939361572,
+     "solve_s": 0.38254499435424805,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.4638364315032959,
+     "solve_s": 0.38465285301208496,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.49259281158447266,
+     "solve_s": 0.38349056243896484,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.46094679832458496,
+     "solve_s": 0.3872945308685303,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": false,
-    "solve_s": 1.3581867218017578,
+    "solve_s": 1.12009859085083,
     "failed": [
      "ordered_by_height"
     ],
@@ -526,37 +526,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.48920106887817383,
+     "solve_s": 0.38196802139282227,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.5245206356048584,
+     "solve_s": 0.38178491592407227,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.46693897247314453,
+     "solve_s": 0.3824605941772461,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.48701047897338867,
+     "solve_s": 0.3839271068572998,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.46417951583862305,
+     "solve_s": 0.38637566566467285,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": false,
-    "solve_s": 1.4197227954864502,
+    "solve_s": 1.1263782978057861,
     "failed": [
      "ordered_by_height"
     ],
@@ -579,37 +579,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.48572278022766113,
+     "solve_s": 0.38445377349853516,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.5042731761932373,
+     "solve_s": 0.3884096145629883,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.5179264545440674,
+     "solve_s": 0.3844120502471924,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.5009233951568604,
+     "solve_s": 0.3853116035461426,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.4487276077270508,
+     "solve_s": 0.38596200942993164,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": false,
-    "solve_s": 1.4201951026916504,
+    "solve_s": 1.1143872737884521,
     "failed": [
      "ordered_by_height"
     ],
@@ -632,37 +632,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.2052783966064453,
+     "solve_s": 0.9925858974456787,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.1582486629486084,
+     "solve_s": 0.9478144645690918,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.1917998790740967,
+     "solve_s": 0.9619827270507812,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.2872931957244873,
+     "solve_s": 1.0242209434509277,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.251767635345459,
+     "solve_s": 0.9537568092346191,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 3.7822482585906982,
+    "solve_s": 2.952683687210083,
     "failed": [],
     "swapped": {
      "can_1": "food_beverage_can_h01",
@@ -683,37 +683,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.0921499729156494,
+     "solve_s": 0.9970934391021729,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.0632295608520508,
+     "solve_s": 0.9557034969329834,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.0603461265563965,
+     "solve_s": 0.9804093837738037,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.1857852935791016,
+     "solve_s": 1.0279710292816162,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.073817491531372,
+     "solve_s": 0.9643635749816895,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 3.354158401489258,
+    "solve_s": 2.9915122985839844,
     "failed": [],
     "swapped": {
      "can_1": "food_beverage_can_h01",
@@ -724,7 +724,7 @@
      "bottle_1": "misc_bottle_corked_a01"
     }
    },
-   "spread_m": 6.87875188864843e-05
+   "spread_m": 6.034762161805259e-05
   },
   {
    "task": "drinks_row_n6",
@@ -734,37 +734,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.0667610168457031,
+     "solve_s": 0.9935085773468018,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.0103960037231445,
+     "solve_s": 0.9380450248718262,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.0221011638641357,
+     "solve_s": 0.9596021175384521,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.1980490684509277,
+     "solve_s": 1.0189356803894043,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.025059461593628,
+     "solve_s": 0.9546308517456055,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 3.5055224895477295,
+    "solve_s": 3.027134418487549,
     "failed": [],
     "swapped": {
      "can_1": "food_beverage_can_h01",
@@ -775,7 +775,7 @@
      "bottle_1": "misc_bottle_corked_a01"
     }
    },
-   "spread_m": 6.87875188864843e-05
+   "spread_m": 6.034762161805259e-05
   },
   {
    "task": "fruit_cans_n10",
@@ -785,37 +785,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.4716620445251465,
+     "solve_s": 0.41860413551330566,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.5003931522369385,
+     "solve_s": 0.41594409942626953,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.4806547164916992,
+     "solve_s": 0.4118497371673584,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.49972963333129883,
+     "solve_s": 0.41502904891967773,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.47988033294677734,
+     "solve_s": 0.4120311737060547,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 0.5704197883605957,
+    "solve_s": 0.46974825859069824,
     "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
@@ -839,37 +839,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.503969669342041,
+     "solve_s": 0.4166569709777832,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.532773494720459,
+     "solve_s": 0.4215564727783203,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.4887261390686035,
+     "solve_s": 0.4187288284301758,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.5037450790405273,
+     "solve_s": 0.4186387062072754,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.51607346534729,
+     "solve_s": 0.4176614284515381,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 0.5686070919036865,
+    "solve_s": 0.46227288246154785,
     "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
@@ -893,37 +893,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.5147230625152588,
+     "solve_s": 0.41271519660949707,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.5104568004608154,
+     "solve_s": 0.4118919372558594,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.4765200614929199,
+     "solve_s": 0.4121401309967041,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.5063903331756592,
+     "solve_s": 0.41519737243652344,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.5160684585571289,
+     "solve_s": 0.41126036643981934,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 0.599637508392334,
+    "solve_s": 0.45099878311157227,
     "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
@@ -947,37 +947,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.3048200607299805,
+     "solve_s": 1.131831169128418,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.2504057884216309,
+     "solve_s": 1.1327667236328125,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.242140769958496,
+     "solve_s": 1.092679500579834,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.2570712566375732,
+     "solve_s": 1.102221965789795,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.2469820976257324,
+     "solve_s": 1.087003231048584,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.3366491794586182,
+    "solve_s": 1.1804194450378418,
     "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
@@ -1001,37 +1001,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.2942817211151123,
+     "solve_s": 1.1176173686981201,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.3115737438201904,
+     "solve_s": 1.1242811679840088,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.2263338565826416,
+     "solve_s": 1.0947496891021729,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.2330780029296875,
+     "solve_s": 1.1063692569732666,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.249574899673462,
+     "solve_s": 1.0846922397613525,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.2911708354949951,
+    "solve_s": 1.1361031532287598,
     "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
@@ -1055,37 +1055,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.2729268074035645,
+     "solve_s": 1.1186952590942383,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.2921233177185059,
+     "solve_s": 1.120565414428711,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.3089368343353271,
+     "solve_s": 1.093940258026123,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.3072547912597656,
+     "solve_s": 1.1061933040618896,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.2410187721252441,
+     "solve_s": 1.082991123199463,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.3611338138580322,
+    "solve_s": 1.2008426189422607,
     "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
@@ -1109,38 +1109,40 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.4225378036499023,
+     "solve_s": 1.1671979427337646,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.3749840259552002,
+     "solve_s": 1.1850757598876953,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.395186424255371,
+     "solve_s": 1.180495023727417,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.4243245124816895,
+     "solve_s": 1.2054429054260254,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.5313737392425537,
+     "solve_s": 1.2169315814971924,
      "failed": []
     }
    ],
    "assets": {
-    "rubric_ok": true,
-    "solve_s": 1.6068172454833984,
-    "failed": [],
+    "rubric_ok": false,
+    "solve_s": 1.2469916343688965,
+    "failed": [
+     "no_penetration"
+    ],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
      "fruit_2": "food_produce_orange_j01",
@@ -1168,37 +1170,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.5532379150390625,
+     "solve_s": 1.193680763244629,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.5570125579833984,
+     "solve_s": 1.1883714199066162,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.5194118022918701,
+     "solve_s": 1.1797630786895752,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.3890721797943115,
+     "solve_s": 1.1802380084991455,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.416947364807129,
+     "solve_s": 1.1821918487548828,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": false,
-    "solve_s": 1.311309814453125,
+    "solve_s": 1.2594854831695557,
     "failed": [
      "no_penetration"
     ],
@@ -1229,40 +1231,38 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.487313985824585,
+     "solve_s": 1.1453886032104492,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.3895626068115234,
+     "solve_s": 1.1381380558013916,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.4359114170074463,
+     "solve_s": 1.1454179286956787,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.3734328746795654,
+     "solve_s": 1.1448683738708496,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.3427743911743164,
+     "solve_s": 1.1380305290222168,
      "failed": []
     }
    ],
    "assets": {
-    "rubric_ok": false,
-    "solve_s": 1.4365053176879883,
-    "failed": [
-     "row_gaps(6 bodies)"
-    ],
+    "rubric_ok": true,
+    "solve_s": 1.1716632843017578,
+    "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
      "fruit_2": "food_produce_orange_j01",
@@ -1290,37 +1290,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 3.602104425430298,
+     "solve_s": 3.036904811859131,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 3.933260202407837,
+     "solve_s": 3.129542589187622,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 3.913875102996826,
+     "solve_s": 3.1999101638793945,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 3.9393136501312256,
+     "solve_s": 3.155686378479004,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 3.966249704360962,
+     "solve_s": 3.2271718978881836,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 4.157456398010254,
+    "solve_s": 3.287768602371216,
     "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
@@ -1349,37 +1349,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 3.8479502201080322,
+     "solve_s": 3.0426554679870605,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 4.068650484085083,
+     "solve_s": 3.1304590702056885,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 4.106635570526123,
+     "solve_s": 3.1980953216552734,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 4.065231561660767,
+     "solve_s": 3.145017147064209,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 4.255111217498779,
+     "solve_s": 3.2315282821655273,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 4.150457859039307,
+    "solve_s": 3.214249610900879,
     "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
@@ -1408,37 +1408,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 3.8753538131713867,
+     "solve_s": 3.031327962875366,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 3.899928092956543,
+     "solve_s": 3.1245577335357666,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 3.868305206298828,
+     "solve_s": 3.1934292316436768,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 3.901120662689209,
+     "solve_s": 3.1398098468780518,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 3.993543863296509,
+     "solve_s": 3.2371153831481934,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 3.803755283355713,
+    "solve_s": 3.08278751373291,
     "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
@@ -1467,40 +1467,38 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.6564171314239502,
+     "solve_s": 1.4484457969665527,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.78753662109375,
+     "solve_s": 1.4490561485290527,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.7920761108398438,
+     "solve_s": 1.4591090679168701,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.7758467197418213,
+     "solve_s": 1.4484636783599854,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.7361500263214111,
+     "solve_s": 1.449610710144043,
      "failed": []
     }
    ],
    "assets": {
-    "rubric_ok": false,
-    "solve_s": 1.8716371059417725,
-    "failed": [
-     "row_gaps(7 bodies)"
-    ],
+    "rubric_ok": true,
+    "solve_s": 1.512528896331787,
+    "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
      "fruit_2": "food_produce_orange_j01",
@@ -1535,40 +1533,38 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.8610827922821045,
+     "solve_s": 1.465787410736084,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.9105703830718994,
+     "solve_s": 1.4638645648956299,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.8930041790008545,
+     "solve_s": 1.4647243022918701,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.8778893947601318,
+     "solve_s": 1.4671225547790527,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.8111324310302734,
+     "solve_s": 1.4656667709350586,
      "failed": []
     }
    ],
    "assets": {
-    "rubric_ok": false,
-    "solve_s": 1.7468500137329102,
-    "failed": [
-     "row_gaps(7 bodies)"
-    ],
+    "rubric_ok": true,
+    "solve_s": 1.53025484085083,
+    "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
      "fruit_2": "food_produce_orange_j01",
@@ -1603,37 +1599,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.9153332710266113,
+     "solve_s": 1.443497896194458,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.9210257530212402,
+     "solve_s": 1.4668452739715576,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.8728606700897217,
+     "solve_s": 1.4415466785430908,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.9029936790466309,
+     "solve_s": 1.4448764324188232,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.8232204914093018,
+     "solve_s": 1.4393141269683838,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.9584527015686035,
+    "solve_s": 1.5076074600219727,
     "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
@@ -1669,37 +1665,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 5.707768678665161,
+     "solve_s": 4.472201347351074,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 5.6322174072265625,
+     "solve_s": 4.623490333557129,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 5.373548984527588,
+     "solve_s": 4.1855268478393555,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 5.706294775009155,
+     "solve_s": 4.456353425979614,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 5.408778429031372,
+     "solve_s": 4.216335296630859,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 5.579557657241821,
+    "solve_s": 4.487506866455078,
     "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
@@ -1735,37 +1731,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 5.80204176902771,
+     "solve_s": 5.1042375564575195,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 5.6751556396484375,
+     "solve_s": 4.40439772605896,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 5.202476501464844,
+     "solve_s": 4.177510499954224,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 5.560256242752075,
+     "solve_s": 4.791147470474243,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 4.824113607406616,
+     "solve_s": 4.840537071228027,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 5.200438022613525,
+    "solve_s": 4.435088634490967,
     "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
@@ -1791,7 +1787,7 @@
      "jar_1": "paint_container_jar_green_a01"
     }
    },
-   "spread_m": 0.13187134155263053
+   "spread_m": 0.12775292875022565
   },
   {
    "task": "fruit_cans_n24",
@@ -1801,37 +1797,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 4.930160999298096,
+     "solve_s": 4.474151134490967,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 5.0179150104522705,
+     "solve_s": 4.6250035762786865,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 4.588152647018433,
+     "solve_s": 4.180869102478027,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 4.923024892807007,
+     "solve_s": 4.5951313972473145,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 4.686009883880615,
+     "solve_s": 4.228918552398682,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 5.327975273132324,
+    "solve_s": 4.85212516784668,
     "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
@@ -1867,37 +1863,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.5319311618804932,
+     "solve_s": 0.5795176029205322,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.5280735492706299,
+     "solve_s": 0.5770010948181152,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.5314810276031494,
+     "solve_s": 0.5760524272918701,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.530303955078125,
+     "solve_s": 0.5774393081665039,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.533064603805542,
+     "solve_s": 0.576667070388794,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 0.7571799755096436,
+    "solve_s": 0.8065690994262695,
     "failed": [],
     "swapped": {
      "knife": "kitchenware_knife_e01",
@@ -1922,37 +1918,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.5856950283050537,
+     "solve_s": 0.4912986755371094,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.6212215423583984,
+     "solve_s": 0.49184322357177734,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.5967991352081299,
+     "solve_s": 0.48890018463134766,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.627549409866333,
+     "solve_s": 0.49327635765075684,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.5851438045501709,
+     "solve_s": 0.49525022506713867,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 0.8411283493041992,
+    "solve_s": 0.7137322425842285,
     "failed": [],
     "swapped": {
      "knife": "kitchenware_knife_e01",
@@ -1977,37 +1973,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.6061151027679443,
+     "solve_s": 0.5111751556396484,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.5935239791870117,
+     "solve_s": 0.5104100704193115,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.6177196502685547,
+     "solve_s": 0.5108175277709961,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.6027359962463379,
+     "solve_s": 0.5168919563293457,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.6303837299346924,
+     "solve_s": 0.5092859268188477,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 0.8632588386535645,
+    "solve_s": 0.7222697734832764,
     "failed": [],
     "swapped": {
      "knife": "kitchenware_knife_e01",
@@ -2032,37 +2028,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.6306114196777344,
+     "solve_s": 1.522942066192627,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.6835885047912598,
+     "solve_s": 1.565843105316162,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.616483449935913,
+     "solve_s": 1.5147180557250977,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.697613000869751,
+     "solve_s": 1.5916943550109863,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.65696120262146,
+     "solve_s": 1.5426020622253418,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.918976068496704,
+    "solve_s": 1.7839741706848145,
     "failed": [],
     "swapped": {
      "knife": "kitchenware_knife_e01",
@@ -2087,37 +2083,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.6990432739257812,
+     "solve_s": 1.6177732944488525,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.695662498474121,
+     "solve_s": 1.5670969486236572,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.6691617965698242,
+     "solve_s": 1.5291409492492676,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.7168474197387695,
+     "solve_s": 1.5992648601531982,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.6650185585021973,
+     "solve_s": 1.5496528148651123,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 2.41441011428833,
+    "solve_s": 2.216644763946533,
     "failed": [],
     "swapped": {
      "knife": "kitchenware_knife_e01",
@@ -2142,37 +2138,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.652296543121338,
+     "solve_s": 1.5364348888397217,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.6866145133972168,
+     "solve_s": 1.6384925842285156,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.6354610919952393,
+     "solve_s": 1.5428037643432617,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.6650359630584717,
+     "solve_s": 1.5957043170928955,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.687648057937622,
+     "solve_s": 1.5472311973571777,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.8180382251739502,
+    "solve_s": 1.7302422523498535,
     "failed": [],
     "swapped": {
      "knife": "kitchenware_knife_e01",
@@ -2197,7 +2193,7 @@
     {
      "seed": 100,
      "rubric_ok": false,
-     "solve_s": 1.1188435554504395,
+     "solve_s": 1.056596279144287,
      "failed": [
       "max_moved",
       "max_turned"
@@ -2206,7 +2202,7 @@
     {
      "seed": 101,
      "rubric_ok": false,
-     "solve_s": 1.1788294315338135,
+     "solve_s": 1.0590229034423828,
      "failed": [
       "max_moved",
       "max_turned"
@@ -2215,7 +2211,7 @@
     {
      "seed": 102,
      "rubric_ok": false,
-     "solve_s": 1.1151587963104248,
+     "solve_s": 1.0523285865783691,
      "failed": [
       "max_moved",
       "max_turned"
@@ -2224,7 +2220,7 @@
     {
      "seed": 103,
      "rubric_ok": false,
-     "solve_s": 1.0985352993011475,
+     "solve_s": 1.0608208179473877,
      "failed": [
       "max_moved",
       "max_turned"
@@ -2233,7 +2229,7 @@
     {
      "seed": 104,
      "rubric_ok": false,
-     "solve_s": 1.111863613128662,
+     "solve_s": 1.0631849765777588,
      "failed": [
       "max_moved",
       "max_turned"
@@ -2241,11 +2237,9 @@
     }
    ],
    "assets": {
-    "rubric_ok": false,
-    "solve_s": 1.3988399505615234,
-    "failed": [
-     "max_moved"
-    ],
+    "rubric_ok": true,
+    "solve_s": 1.3014440536499023,
+    "failed": [],
     "swapped": {
      "bowl": "kitchenware_bowl_q01",
      "mug": "dishware_mug_coffee_b01",
@@ -2268,7 +2262,7 @@
     {
      "seed": 100,
      "rubric_ok": false,
-     "solve_s": 1.1327829360961914,
+     "solve_s": 1.0834200382232666,
      "failed": [
       "max_moved",
       "max_turned"
@@ -2277,7 +2271,7 @@
     {
      "seed": 101,
      "rubric_ok": false,
-     "solve_s": 1.1912083625793457,
+     "solve_s": 1.0977129936218262,
      "failed": [
       "max_moved",
       "max_turned"
@@ -2286,7 +2280,7 @@
     {
      "seed": 102,
      "rubric_ok": false,
-     "solve_s": 1.1357104778289795,
+     "solve_s": 1.0868244171142578,
      "failed": [
       "max_moved",
       "max_turned"
@@ -2295,7 +2289,7 @@
     {
      "seed": 103,
      "rubric_ok": false,
-     "solve_s": 1.1707563400268555,
+     "solve_s": 1.076258897781372,
      "failed": [
       "max_moved",
       "max_turned"
@@ -2304,7 +2298,7 @@
     {
      "seed": 104,
      "rubric_ok": false,
-     "solve_s": 1.181901216506958,
+     "solve_s": 1.0713884830474854,
      "failed": [
       "max_moved",
       "max_turned"
@@ -2313,7 +2307,7 @@
    ],
    "assets": {
     "rubric_ok": false,
-    "solve_s": 1.4288733005523682,
+    "solve_s": 1.3241839408874512,
     "failed": [
      "max_moved",
      "max_turned"
@@ -2340,7 +2334,7 @@
     {
      "seed": 100,
      "rubric_ok": false,
-     "solve_s": 0.9798762798309326,
+     "solve_s": 0.9336361885070801,
      "failed": [
       "max_moved",
       "max_turned"
@@ -2349,7 +2343,7 @@
     {
      "seed": 101,
      "rubric_ok": false,
-     "solve_s": 0.9808895587921143,
+     "solve_s": 0.9370520114898682,
      "failed": [
       "max_moved",
       "max_turned"
@@ -2358,7 +2352,7 @@
     {
      "seed": 102,
      "rubric_ok": false,
-     "solve_s": 0.980290412902832,
+     "solve_s": 0.9370946884155273,
      "failed": [
       "max_moved",
       "max_turned"
@@ -2367,7 +2361,7 @@
     {
      "seed": 103,
      "rubric_ok": false,
-     "solve_s": 1.029801368713379,
+     "solve_s": 0.9330105781555176,
      "failed": [
       "max_moved",
       "max_turned"
@@ -2376,7 +2370,7 @@
     {
      "seed": 104,
      "rubric_ok": false,
-     "solve_s": 1.0540640354156494,
+     "solve_s": 0.9317193031311035,
      "failed": [
       "max_moved",
       "max_turned"
@@ -2385,7 +2379,7 @@
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.3117263317108154,
+    "solve_s": 1.1655268669128418,
     "failed": [],
     "swapped": {
      "bowl": "kitchenware_bowl_q01",
@@ -2409,37 +2403,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 2.3804430961608887,
+     "solve_s": 2.2077460289001465,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 2.7079319953918457,
+     "solve_s": 2.487201452255249,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 2.338672399520874,
+     "solve_s": 2.240217685699463,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 2.619281768798828,
+     "solve_s": 2.4351212978363037,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 2.477888822555542,
+     "solve_s": 2.313793897628784,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 3.0185344219207764,
+    "solve_s": 2.673978328704834,
     "failed": [],
     "swapped": {
      "bowl": "kitchenware_bowl_q01",
@@ -2463,37 +2457,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 2.408561944961548,
+     "solve_s": 2.207740306854248,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 2.7441980838775635,
+     "solve_s": 2.4727225303649902,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 2.3805925846099854,
+     "solve_s": 2.2313826084136963,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 2.7691993713378906,
+     "solve_s": 2.423840045928955,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 2.6348655223846436,
+     "solve_s": 2.2946410179138184,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 2.862107753753662,
+    "solve_s": 2.5149483680725098,
     "failed": [],
     "swapped": {
      "bowl": "kitchenware_bowl_q01",
@@ -2517,37 +2511,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 2.383124351501465,
+     "solve_s": 2.205467939376831,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 2.7115559577941895,
+     "solve_s": 2.4886634349823,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 2.3843774795532227,
+     "solve_s": 2.2305359840393066,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 2.725964069366455,
+     "solve_s": 2.4250357151031494,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 2.632854461669922,
+     "solve_s": 2.2925801277160645,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 2.6638965606689453,
+    "solve_s": 2.390294075012207,
     "failed": [],
     "swapped": {
      "bowl": "kitchenware_bowl_q01",
@@ -2571,41 +2565,38 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.401425838470459,
+     "solve_s": 0.3972618579864502,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.4010591506958008,
+     "solve_s": 0.3993239402770996,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.4224233627319336,
+     "solve_s": 0.39774227142333984,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.40342092514038086,
+     "solve_s": 0.4018857479095459,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.4060044288635254,
+     "solve_s": 0.4012131690979004,
      "failed": []
     }
    ],
    "assets": {
-    "rubric_ok": false,
-    "solve_s": 0.4075908660888672,
-    "failed": [
-     "in_square(10 bodies)",
-     "no_penetration"
-    ],
+    "rubric_ok": true,
+    "solve_s": 0.40969157218933105,
+    "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
      "fruit_2": "food_produce_orange_j01",
@@ -2627,92 +2618,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.4306802749633789,
+     "solve_s": 0.3811030387878418,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.4258108139038086,
+     "solve_s": 0.38439130783081055,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.41941404342651367,
+     "solve_s": 0.38044095039367676,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.42212629318237305,
+     "solve_s": 0.38437962532043457,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.4313633441925049,
+     "solve_s": 0.3816711902618408,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": false,
-    "solve_s": 0.41930198669433594,
-    "failed": [
-     "no_penetration"
-    ],
-    "swapped": {
-     "fruit_1": "food_produce_apple_s01",
-     "fruit_2": "food_produce_orange_j01",
-     "fruit_3": "food_produce_banana_g01",
-     "fruit_5": "food_produce_apple_q01",
-     "fruit_6": "food_produce_orange_d01",
-     "fruit_7": "food_produce_banana_e01",
-     "fruit_9": "food_produce_apple_u01",
-     "fruit_10": "food_produce_orange_j01"
-    }
-   },
-   "spread_m": 0.0
-  },
-  {
-   "task": "pack_n10",
-   "condition": "direct",
-   "seed": 2,
-   "starts": [
-    {
-     "seed": 100,
-     "rubric_ok": true,
-     "solve_s": 0.4376082420349121,
-     "failed": []
-    },
-    {
-     "seed": 101,
-     "rubric_ok": true,
-     "solve_s": 0.456484317779541,
-     "failed": []
-    },
-    {
-     "seed": 102,
-     "rubric_ok": true,
-     "solve_s": 0.44409680366516113,
-     "failed": []
-    },
-    {
-     "seed": 103,
-     "rubric_ok": true,
-     "solve_s": 0.4680459499359131,
-     "failed": []
-    },
-    {
-     "seed": 104,
-     "rubric_ok": true,
-     "solve_s": 0.4353146553039551,
-     "failed": []
-    }
-   ],
-   "assets": {
-    "rubric_ok": false,
-    "solve_s": 0.4352872371673584,
+    "solve_s": 0.3753042221069336,
     "failed": [
      "in_square(10 bodies)"
     ],
@@ -2731,43 +2667,98 @@
   },
   {
    "task": "pack_n10",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.41150498390197754,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.4020819664001465,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.3893876075744629,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.3999335765838623,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.389193058013916,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": false,
+    "solve_s": 0.39304518699645996,
+    "failed": [
+     "no_penetration"
+    ],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "pack_n10",
    "condition": "dsl_v1",
    "seed": 0,
    "starts": [
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.0770442485809326,
+     "solve_s": 0.9916336536407471,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.3477108478546143,
+     "solve_s": 1.1160390377044678,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.9866256713867188,
+     "solve_s": 0.939605712890625,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.2633028030395508,
+     "solve_s": 1.7542293071746826,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.0257179737091064,
+     "solve_s": 0.9539840221405029,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.04701828956604,
+    "solve_s": 0.9219841957092285,
     "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
@@ -2780,7 +2771,7 @@
      "fruit_10": "food_produce_orange_j01"
     }
    },
-   "spread_m": 0.12452311625124657
+   "spread_m": 0.12177706145513412
   },
   {
    "task": "pack_n10",
@@ -2790,37 +2781,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.0616371631622314,
+     "solve_s": 0.9961404800415039,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.34903883934021,
+     "solve_s": 1.0863337516784668,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.001593828201294,
+     "solve_s": 0.940911054611206,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.2836451530456543,
+     "solve_s": 1.7535960674285889,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.0121440887451172,
+     "solve_s": 0.9554851055145264,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.2559478282928467,
+    "solve_s": 1.0548334121704102,
     "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
@@ -2833,7 +2824,7 @@
      "fruit_10": "food_produce_orange_j01"
     }
    },
-   "spread_m": 0.12452311625124657
+   "spread_m": 0.12177706145513412
   },
   {
    "task": "pack_n10",
@@ -2843,37 +2834,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.0815441608428955,
+     "solve_s": 0.9973659515380859,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.3446815013885498,
+     "solve_s": 1.0985653400421143,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.0002787113189697,
+     "solve_s": 0.9460856914520264,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.2623417377471924,
+     "solve_s": 1.7722887992858887,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.0008056163787842,
+     "solve_s": 0.9574089050292969,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.1256434917449951,
+    "solve_s": 1.3016796112060547,
     "failed": [],
     "swapped": {
      "fruit_1": "food_produce_apple_s01",
@@ -2886,7 +2877,7 @@
      "fruit_10": "food_produce_orange_j01"
     }
    },
-   "spread_m": 0.12452311625124657
+   "spread_m": 0.12177706145513412
   },
   {
    "task": "pack_n14",
@@ -2896,37 +2887,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.5784568786621094,
+     "solve_s": 0.5116264820098877,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.584374189376831,
+     "solve_s": 0.5036892890930176,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.5865881443023682,
+     "solve_s": 0.50453782081604,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.5813271999359131,
+     "solve_s": 0.5027365684509277,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.5654702186584473,
+     "solve_s": 0.5022742748260498,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": false,
-    "solve_s": 0.5971770286560059,
+    "solve_s": 0.56056809425354,
     "failed": [
      "no_penetration"
     ],
@@ -2954,37 +2945,93 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.5695888996124268,
+     "solve_s": 0.4818713665008545,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.5704655647277832,
+     "solve_s": 0.4835500717163086,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.5798780918121338,
+     "solve_s": 0.48050451278686523,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.5783860683441162,
+     "solve_s": 0.4814629554748535,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.5629560947418213,
+     "solve_s": 0.48301053047180176,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.5434107780456543,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01",
+     "fruit_11": "food_produce_banana_g01",
+     "fruit_13": "food_produce_apple_s01",
+     "fruit_14": "food_produce_orange_d01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "pack_n14",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.43976378440856934,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.44069504737854004,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.44161367416381836,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.43827128410339355,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.4416651725769043,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": false,
-    "solve_s": 0.60856032371521,
+    "solve_s": 0.49355459213256836,
     "failed": [
      "no_penetration"
     ],
@@ -3006,369 +3053,320 @@
   },
   {
    "task": "pack_n14",
+   "condition": "dsl_v1",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": false,
+     "solve_s": 2.7387900352478027,
+     "failed": [
+      "in_square(14 bodies)"
+     ]
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 2.7115390300750732,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.8084220886230469,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.394101619720459,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.4467813968658447,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 2.080578565597534,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01",
+     "fruit_11": "food_produce_banana_g01",
+     "fruit_13": "food_produce_apple_s01",
+     "fruit_14": "food_produce_orange_d01"
+    }
+   },
+   "spread_m": 0.14327878011467365
+  },
+  {
+   "task": "pack_n14",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": false,
+     "solve_s": 2.76700758934021,
+     "failed": [
+      "in_square(14 bodies)"
+     ]
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 2.7117717266082764,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.811528205871582,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.3928642272949219,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.4573819637298584,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 2.570514440536499,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01",
+     "fruit_11": "food_produce_banana_g01",
+     "fruit_13": "food_produce_apple_s01",
+     "fruit_14": "food_produce_orange_d01"
+    }
+   },
+   "spread_m": 0.14327878011467365
+  },
+  {
+   "task": "pack_n14",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": false,
+     "solve_s": 2.7299625873565674,
+     "failed": [
+      "in_square(14 bodies)"
+     ]
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 2.710132598876953,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 1.805213451385498,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 1.3950340747833252,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 1.459169864654541,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 1.451490879058838,
+    "failed": [],
+    "swapped": {
+     "fruit_1": "food_produce_apple_s01",
+     "fruit_2": "food_produce_orange_j01",
+     "fruit_3": "food_produce_banana_g01",
+     "fruit_5": "food_produce_apple_q01",
+     "fruit_6": "food_produce_orange_d01",
+     "fruit_7": "food_produce_banana_e01",
+     "fruit_9": "food_produce_apple_u01",
+     "fruit_10": "food_produce_orange_j01",
+     "fruit_11": "food_produce_banana_g01",
+     "fruit_13": "food_produce_apple_s01",
+     "fruit_14": "food_produce_orange_d01"
+    }
+   },
+   "spread_m": 0.14327878011467365
+  },
+  {
+   "task": "palletize_n4",
+   "condition": "direct",
+   "seed": 0,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.09932518005371094,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.09723424911499023,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.09995913505554199,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.09793972969055176,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.09753704071044922,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.16376018524169922,
+    "failed": [],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "palletize_n4",
+   "condition": "direct",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.1137857437133789,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.1117851734161377,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.11347818374633789,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.11174726486206055,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.11459660530090332,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.14477181434631348,
+    "failed": [],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "palletize_n4",
    "condition": "direct",
    "seed": 2,
    "starts": [
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.5296225547790527,
+     "solve_s": 0.10741519927978516,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.5489559173583984,
+     "solve_s": 0.10754632949829102,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.5347840785980225,
+     "solve_s": 0.1066899299621582,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.5298504829406738,
+     "solve_s": 0.1071786880493164,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.555020809173584,
+     "solve_s": 0.10896730422973633,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": false,
-    "solve_s": 0.5573580265045166,
+    "solve_s": 0.1449754238128662,
     "failed": [
+     "min_clearance",
      "no_penetration"
     ],
     "swapped": {
-     "fruit_1": "food_produce_apple_s01",
-     "fruit_2": "food_produce_orange_j01",
-     "fruit_3": "food_produce_banana_g01",
-     "fruit_5": "food_produce_apple_q01",
-     "fruit_6": "food_produce_orange_d01",
-     "fruit_7": "food_produce_banana_e01",
-     "fruit_9": "food_produce_apple_u01",
-     "fruit_10": "food_produce_orange_j01",
-     "fruit_11": "food_produce_banana_g01",
-     "fruit_13": "food_produce_apple_s01",
-     "fruit_14": "food_produce_orange_d01"
-    }
-   },
-   "spread_m": 0.0
-  },
-  {
-   "task": "pack_n14",
-   "condition": "dsl_v1",
-   "seed": 0,
-   "starts": [
-    {
-     "seed": 100,
-     "rubric_ok": true,
-     "solve_s": 2.84812068939209,
-     "failed": []
-    },
-    {
-     "seed": 101,
-     "rubric_ok": true,
-     "solve_s": 3.0676612854003906,
-     "failed": []
-    },
-    {
-     "seed": 102,
-     "rubric_ok": true,
-     "solve_s": 1.6339399814605713,
-     "failed": []
-    },
-    {
-     "seed": 103,
-     "rubric_ok": true,
-     "solve_s": 1.5738067626953125,
-     "failed": []
-    },
-    {
-     "seed": 104,
-     "rubric_ok": true,
-     "solve_s": 1.8272690773010254,
-     "failed": []
-    }
-   ],
-   "assets": {
-    "rubric_ok": true,
-    "solve_s": 1.6033616065979004,
-    "failed": [],
-    "swapped": {
-     "fruit_1": "food_produce_apple_s01",
-     "fruit_2": "food_produce_orange_j01",
-     "fruit_3": "food_produce_banana_g01",
-     "fruit_5": "food_produce_apple_q01",
-     "fruit_6": "food_produce_orange_d01",
-     "fruit_7": "food_produce_banana_e01",
-     "fruit_9": "food_produce_apple_u01",
-     "fruit_10": "food_produce_orange_j01",
-     "fruit_11": "food_produce_banana_g01",
-     "fruit_13": "food_produce_apple_s01",
-     "fruit_14": "food_produce_orange_d01"
-    }
-   },
-   "spread_m": 0.14501330042583493
-  },
-  {
-   "task": "pack_n14",
-   "condition": "dsl_v1",
-   "seed": 1,
-   "starts": [
-    {
-     "seed": 100,
-     "rubric_ok": true,
-     "solve_s": 2.8320422172546387,
-     "failed": []
-    },
-    {
-     "seed": 101,
-     "rubric_ok": true,
-     "solve_s": 3.0988705158233643,
-     "failed": []
-    },
-    {
-     "seed": 102,
-     "rubric_ok": true,
-     "solve_s": 1.6533467769622803,
-     "failed": []
-    },
-    {
-     "seed": 103,
-     "rubric_ok": true,
-     "solve_s": 1.6134679317474365,
-     "failed": []
-    },
-    {
-     "seed": 104,
-     "rubric_ok": true,
-     "solve_s": 1.8186273574829102,
-     "failed": []
-    }
-   ],
-   "assets": {
-    "rubric_ok": true,
-    "solve_s": 2.122988224029541,
-    "failed": [],
-    "swapped": {
-     "fruit_1": "food_produce_apple_s01",
-     "fruit_2": "food_produce_orange_j01",
-     "fruit_3": "food_produce_banana_g01",
-     "fruit_5": "food_produce_apple_q01",
-     "fruit_6": "food_produce_orange_d01",
-     "fruit_7": "food_produce_banana_e01",
-     "fruit_9": "food_produce_apple_u01",
-     "fruit_10": "food_produce_orange_j01",
-     "fruit_11": "food_produce_banana_g01",
-     "fruit_13": "food_produce_apple_s01",
-     "fruit_14": "food_produce_orange_d01"
-    }
-   },
-   "spread_m": 0.14501330042583493
-  },
-  {
-   "task": "pack_n14",
-   "condition": "dsl_v1",
-   "seed": 2,
-   "starts": [
-    {
-     "seed": 100,
-     "rubric_ok": true,
-     "solve_s": 2.8237340450286865,
-     "failed": []
-    },
-    {
-     "seed": 101,
-     "rubric_ok": true,
-     "solve_s": 3.101839065551758,
-     "failed": []
-    },
-    {
-     "seed": 102,
-     "rubric_ok": true,
-     "solve_s": 1.6544511318206787,
-     "failed": []
-    },
-    {
-     "seed": 103,
-     "rubric_ok": true,
-     "solve_s": 1.6105153560638428,
-     "failed": []
-    },
-    {
-     "seed": 104,
-     "rubric_ok": true,
-     "solve_s": 1.8437881469726562,
-     "failed": []
-    }
-   ],
-   "assets": {
-    "rubric_ok": true,
-    "solve_s": 1.6042416095733643,
-    "failed": [],
-    "swapped": {
-     "fruit_1": "food_produce_apple_s01",
-     "fruit_2": "food_produce_orange_j01",
-     "fruit_3": "food_produce_banana_g01",
-     "fruit_5": "food_produce_apple_q01",
-     "fruit_6": "food_produce_orange_d01",
-     "fruit_7": "food_produce_banana_e01",
-     "fruit_9": "food_produce_apple_u01",
-     "fruit_10": "food_produce_orange_j01",
-     "fruit_11": "food_produce_banana_g01",
-     "fruit_13": "food_produce_apple_s01",
-     "fruit_14": "food_produce_orange_d01"
-    }
-   },
-   "spread_m": 0.14501330042583493
-  },
-  {
-   "task": "palletize_n4",
-   "condition": "direct",
-   "seed": 0,
-   "starts": [
-    {
-     "seed": 100,
-     "rubric_ok": true,
-     "solve_s": 0.09252381324768066,
-     "failed": []
-    },
-    {
-     "seed": 101,
-     "rubric_ok": true,
-     "solve_s": 0.09279203414916992,
-     "failed": []
-    },
-    {
-     "seed": 102,
-     "rubric_ok": true,
-     "solve_s": 0.09119582176208496,
-     "failed": []
-    },
-    {
-     "seed": 103,
-     "rubric_ok": true,
-     "solve_s": 0.0916898250579834,
-     "failed": []
-    },
-    {
-     "seed": 104,
-     "rubric_ok": true,
-     "solve_s": 0.08859777450561523,
-     "failed": []
-    }
-   ],
-   "assets": {
-    "rubric_ok": true,
-    "solve_s": 0.18277978897094727,
-    "failed": [],
-    "swapped": {
-     "box_1": "box_cardboard_d02",
-     "box_2": "box_cardboard_d03",
-     "box_3": "box_printer_a08",
-     "box_4": "box_flat_a09"
-    }
-   },
-   "spread_m": 0.0
-  },
-  {
-   "task": "palletize_n4",
-   "condition": "direct",
-   "seed": 1,
-   "starts": [
-    {
-     "seed": 100,
-     "rubric_ok": true,
-     "solve_s": 0.12329745292663574,
-     "failed": []
-    },
-    {
-     "seed": 101,
-     "rubric_ok": true,
-     "solve_s": 0.12920832633972168,
-     "failed": []
-    },
-    {
-     "seed": 102,
-     "rubric_ok": true,
-     "solve_s": 0.12203645706176758,
-     "failed": []
-    },
-    {
-     "seed": 103,
-     "rubric_ok": true,
-     "solve_s": 0.12535905838012695,
-     "failed": []
-    },
-    {
-     "seed": 104,
-     "rubric_ok": true,
-     "solve_s": 0.12627458572387695,
-     "failed": []
-    }
-   ],
-   "assets": {
-    "rubric_ok": true,
-    "solve_s": 0.1523268222808838,
-    "failed": [],
-    "swapped": {
-     "box_1": "box_cardboard_d02",
-     "box_2": "box_cardboard_d03",
-     "box_3": "box_printer_a08",
-     "box_4": "box_flat_a09"
-    }
-   },
-   "spread_m": 0.0
-  },
-  {
-   "task": "palletize_n4",
-   "condition": "direct",
-   "seed": 2,
-   "starts": [
-    {
-     "seed": 100,
-     "rubric_ok": true,
-     "solve_s": 0.10133218765258789,
-     "failed": []
-    },
-    {
-     "seed": 101,
-     "rubric_ok": true,
-     "solve_s": 0.09883451461791992,
-     "failed": []
-    },
-    {
-     "seed": 102,
-     "rubric_ok": true,
-     "solve_s": 0.10613155364990234,
-     "failed": []
-    },
-    {
-     "seed": 103,
-     "rubric_ok": true,
-     "solve_s": 0.09723091125488281,
-     "failed": []
-    },
-    {
-     "seed": 104,
-     "rubric_ok": true,
-     "solve_s": 0.09981107711791992,
-     "failed": []
-    }
-   ],
-   "assets": {
-    "rubric_ok": true,
-    "solve_s": 0.1628708839416504,
-    "failed": [],
-    "swapped": {
      "box_1": "box_cardboard_d02",
      "box_2": "box_cardboard_d03",
      "box_3": "box_printer_a08",
@@ -3385,111 +3383,13 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.3109314441680908,
-     "failed": []
-    },
-    {
-     "seed": 101,
-     "rubric_ok": true,
-     "solve_s": 0.29271769523620605,
-     "failed": []
-    },
-    {
-     "seed": 102,
-     "rubric_ok": true,
-     "solve_s": 0.33440208435058594,
-     "failed": []
-    },
-    {
-     "seed": 103,
-     "rubric_ok": true,
-     "solve_s": 0.3013913631439209,
-     "failed": []
-    },
-    {
-     "seed": 104,
-     "rubric_ok": true,
-     "solve_s": 0.30201172828674316,
-     "failed": []
-    }
-   ],
-   "assets": {
-    "rubric_ok": true,
-    "solve_s": 0.4123191833496094,
-    "failed": [],
-    "swapped": {
-     "box_1": "box_cardboard_d02",
-     "box_2": "box_cardboard_d03",
-     "box_3": "box_printer_a08",
-     "box_4": "box_flat_a09"
-    }
-   },
-   "spread_m": 0.07104879017676566
-  },
-  {
-   "task": "palletize_n4",
-   "condition": "dsl_v1",
-   "seed": 1,
-   "starts": [
-    {
-     "seed": 100,
-     "rubric_ok": true,
-     "solve_s": 0.28121352195739746,
-     "failed": []
-    },
-    {
-     "seed": 101,
-     "rubric_ok": true,
-     "solve_s": 0.2848968505859375,
-     "failed": []
-    },
-    {
-     "seed": 102,
-     "rubric_ok": true,
-     "solve_s": 0.2966465950012207,
-     "failed": []
-    },
-    {
-     "seed": 103,
-     "rubric_ok": true,
-     "solve_s": 0.3083324432373047,
-     "failed": []
-    },
-    {
-     "seed": 104,
-     "rubric_ok": true,
-     "solve_s": 0.30313706398010254,
-     "failed": []
-    }
-   ],
-   "assets": {
-    "rubric_ok": true,
-    "solve_s": 0.4492664337158203,
-    "failed": [],
-    "swapped": {
-     "box_1": "box_cardboard_d02",
-     "box_2": "box_cardboard_d03",
-     "box_3": "box_printer_a08",
-     "box_4": "box_flat_a09"
-    }
-   },
-   "spread_m": 0.08401294159558272
-  },
-  {
-   "task": "palletize_n4",
-   "condition": "dsl_v1",
-   "seed": 2,
-   "starts": [
-    {
-     "seed": 100,
-     "rubric_ok": true,
-     "solve_s": 0.3451974391937256,
+     "solve_s": 0.32804179191589355,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": false,
-     "solve_s": 0.34351062774658203,
+     "solve_s": 0.3198838233947754,
      "failed": [
       "rows(1 lines)",
       "rows_aligned(1 lines)"
@@ -3498,25 +3398,25 @@
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.36304640769958496,
+     "solve_s": 0.33852410316467285,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.36675572395324707,
+     "solve_s": 0.334414005279541,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.330172061920166,
+     "solve_s": 0.2937805652618408,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 0.4240908622741699,
+    "solve_s": 0.407167911529541,
     "failed": [],
     "swapped": {
      "box_1": "box_cardboard_d02",
@@ -3528,6 +3428,104 @@
    "spread_m": 0.31174231922127066
   },
   {
+   "task": "palletize_n4",
+   "condition": "dsl_v1",
+   "seed": 1,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.28008174896240234,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.2587432861328125,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.25774168968200684,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.27063918113708496,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.266803503036499,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.3853945732116699,
+    "failed": [],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09"
+    }
+   },
+   "spread_m": 0.1302134585441164
+  },
+  {
+   "task": "palletize_n4",
+   "condition": "dsl_v1",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.29329347610473633,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.24422645568847656,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.3024938106536865,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.2839982509613037,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.2646000385284424,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.3739128112792969,
+    "failed": [],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09"
+    }
+   },
+   "spread_m": 0.12442947234602737
+  },
+  {
    "task": "palletize_n6",
    "condition": "direct",
    "seed": 0,
@@ -3535,40 +3533,38 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.18688249588012695,
+     "solve_s": 0.16608524322509766,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.18928980827331543,
+     "solve_s": 0.16637516021728516,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.20216035842895508,
+     "solve_s": 0.16624927520751953,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.18303799629211426,
+     "solve_s": 0.16735172271728516,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.1950681209564209,
+     "solve_s": 0.16605830192565918,
      "failed": []
     }
    ],
    "assets": {
-    "rubric_ok": false,
-    "solve_s": 0.18454694747924805,
-    "failed": [
-     "in_pallet_inset(6 bodies)"
-    ],
+    "rubric_ok": true,
+    "solve_s": 0.1834251880645752,
+    "failed": [],
     "swapped": {
      "box_1": "box_cardboard_d02",
      "box_2": "box_cardboard_d03",
@@ -3588,37 +3584,88 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.2729201316833496,
+     "solve_s": 0.1881699562072754,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.26854538917541504,
+     "solve_s": 0.18853378295898438,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.27305030822753906,
+     "solve_s": 0.1883866786956787,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.27266931533813477,
+     "solve_s": 0.19364047050476074,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.26769590377807617,
+     "solve_s": 0.18859553337097168,
+     "failed": []
+    }
+   ],
+   "assets": {
+    "rubric_ok": true,
+    "solve_s": 0.1565232276916504,
+    "failed": [],
+    "swapped": {
+     "box_1": "box_cardboard_d02",
+     "box_2": "box_cardboard_d03",
+     "box_3": "box_printer_a08",
+     "box_4": "box_flat_a09",
+     "box_5": "box_cube_a01",
+     "box_6": "box_cardboard_d01"
+    }
+   },
+   "spread_m": 0.0
+  },
+  {
+   "task": "palletize_n6",
+   "condition": "direct",
+   "seed": 2,
+   "starts": [
+    {
+     "seed": 100,
+     "rubric_ok": true,
+     "solve_s": 0.17307114601135254,
+     "failed": []
+    },
+    {
+     "seed": 101,
+     "rubric_ok": true,
+     "solve_s": 0.17460298538208008,
+     "failed": []
+    },
+    {
+     "seed": 102,
+     "rubric_ok": true,
+     "solve_s": 0.1742997169494629,
+     "failed": []
+    },
+    {
+     "seed": 103,
+     "rubric_ok": true,
+     "solve_s": 0.17273402214050293,
+     "failed": []
+    },
+    {
+     "seed": 104,
+     "rubric_ok": true,
+     "solve_s": 0.17255234718322754,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": false,
-    "solve_s": 0.20777297019958496,
+    "solve_s": 0.18732666969299316,
     "failed": [
      "min_clearance",
      "no_penetration"
@@ -3636,94 +3683,43 @@
   },
   {
    "task": "palletize_n6",
-   "condition": "direct",
-   "seed": 2,
-   "starts": [
-    {
-     "seed": 100,
-     "rubric_ok": true,
-     "solve_s": 0.1903069019317627,
-     "failed": []
-    },
-    {
-     "seed": 101,
-     "rubric_ok": true,
-     "solve_s": 0.17978978157043457,
-     "failed": []
-    },
-    {
-     "seed": 102,
-     "rubric_ok": true,
-     "solve_s": 0.18115234375,
-     "failed": []
-    },
-    {
-     "seed": 103,
-     "rubric_ok": true,
-     "solve_s": 0.19935274124145508,
-     "failed": []
-    },
-    {
-     "seed": 104,
-     "rubric_ok": true,
-     "solve_s": 0.17863965034484863,
-     "failed": []
-    }
-   ],
-   "assets": {
-    "rubric_ok": true,
-    "solve_s": 0.19914937019348145,
-    "failed": [],
-    "swapped": {
-     "box_1": "box_cardboard_d02",
-     "box_2": "box_cardboard_d03",
-     "box_3": "box_printer_a08",
-     "box_4": "box_flat_a09",
-     "box_5": "box_cube_a01",
-     "box_6": "box_cardboard_d01"
-    }
-   },
-   "spread_m": 0.0
-  },
-  {
-   "task": "palletize_n6",
    "condition": "dsl_v1",
    "seed": 0,
    "starts": [
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.8822369575500488,
+     "solve_s": 0.7550854682922363,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.9179246425628662,
+     "solve_s": 0.8300061225891113,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.9379217624664307,
+     "solve_s": 0.8140807151794434,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.8448953628540039,
+     "solve_s": 0.7275736331939697,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.8440415859222412,
+     "solve_s": 0.7165107727050781,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 0.7929935455322266,
+    "solve_s": 0.6889433860778809,
     "failed": [],
     "swapped": {
      "box_1": "box_cardboard_d02",
@@ -3734,7 +3730,7 @@
      "box_6": "box_cardboard_d01"
     }
    },
-   "spread_m": 0.22857014974397627
+   "spread_m": 0.065883871419209
   },
   {
    "task": "palletize_n6",
@@ -3744,37 +3740,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.901719331741333,
+     "solve_s": 0.6772964000701904,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.9298772811889648,
+     "solve_s": 0.6938779354095459,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.9553079605102539,
+     "solve_s": 1.1628282070159912,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.8538155555725098,
+     "solve_s": 0.6494925022125244,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.832665205001831,
+     "solve_s": 0.6613831520080566,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.0071923732757568,
+    "solve_s": 0.7082691192626953,
     "failed": [],
     "swapped": {
      "box_1": "box_cardboard_d02",
@@ -3785,7 +3781,7 @@
      "box_6": "box_cardboard_d01"
     }
    },
-   "spread_m": 0.0652468507442113
+   "spread_m": 0.05445548560364316
   },
   {
    "task": "palletize_n6",
@@ -3795,37 +3791,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.8922901153564453,
+     "solve_s": 0.7475144863128662,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.9597713947296143,
+     "solve_s": 0.8387787342071533,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.9186770915985107,
+     "solve_s": 0.8111636638641357,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.8899526596069336,
+     "solve_s": 0.7388105392456055,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.8409237861633301,
+     "solve_s": 0.7190935611724854,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 0.8293015956878662,
+    "solve_s": 0.7353332042694092,
     "failed": [],
     "swapped": {
      "box_1": "box_cardboard_d02",
@@ -3836,7 +3832,7 @@
      "box_6": "box_cardboard_d01"
     }
    },
-   "spread_m": 0.05741108390654224
+   "spread_m": 0.06913558657137484
   },
   {
    "task": "pick_ready_n8",
@@ -3846,37 +3842,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.0061264038085938,
+     "solve_s": 0.8196170330047607,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.9813282489776611,
+     "solve_s": 0.8218128681182861,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.9981949329376221,
+     "solve_s": 0.8218307495117188,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.9627671241760254,
+     "solve_s": 0.8210172653198242,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.0190925598144531,
+     "solve_s": 0.8203930854797363,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.5917572975158691,
+    "solve_s": 1.1145122051239014,
     "failed": [],
     "swapped": {
      "mug": "dishware_mug_coffee_b01",
@@ -3898,37 +3894,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.9494833946228027,
+     "solve_s": 0.8973171710968018,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.9277727603912354,
+     "solve_s": 0.9008450508117676,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.9245567321777344,
+     "solve_s": 0.9001970291137695,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.9564285278320312,
+     "solve_s": 0.8975727558135986,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.9798405170440674,
+     "solve_s": 0.9067447185516357,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.2399964332580566,
+    "solve_s": 1.1824672222137451,
     "failed": [],
     "swapped": {
      "mug": "dishware_mug_coffee_b01",
@@ -3950,37 +3946,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.0461461544036865,
+     "solve_s": 0.8529465198516846,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.0717766284942627,
+     "solve_s": 0.8535244464874268,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.0460317134857178,
+     "solve_s": 0.8517410755157471,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.0774576663970947,
+     "solve_s": 0.8528900146484375,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.9956028461456299,
+     "solve_s": 0.852837085723877,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.6688308715820312,
+    "solve_s": 1.3570165634155273,
     "failed": [],
     "swapped": {
      "mug": "dishware_mug_coffee_b01",
@@ -4002,37 +3998,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 2.358248710632324,
+     "solve_s": 2.068594455718994,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 2.9261634349823,
+     "solve_s": 2.530003547668457,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 2.947375774383545,
+     "solve_s": 2.5143179893493652,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 2.339715003967285,
+     "solve_s": 2.073030710220337,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 2.2660903930664062,
+     "solve_s": 1.9339826107025146,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 2.7330241203308105,
+    "solve_s": 2.358022928237915,
     "failed": [],
     "swapped": {
      "mug": "dishware_mug_coffee_b01",
@@ -4054,37 +4050,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 2.387382984161377,
+     "solve_s": 2.0550765991210938,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 2.9059951305389404,
+     "solve_s": 2.5214409828186035,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 2.9939286708831787,
+     "solve_s": 2.519923448562622,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 2.362659215927124,
+     "solve_s": 2.0896644592285156,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 2.1953132152557373,
+     "solve_s": 1.9519662857055664,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 2.9044604301452637,
+    "solve_s": 2.5658092498779297,
     "failed": [],
     "swapped": {
      "mug": "dishware_mug_coffee_b01",
@@ -4106,37 +4102,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 2.288759231567383,
+     "solve_s": 2.065321922302246,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 2.9499974250793457,
+     "solve_s": 2.597158193588257,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 2.8362414836883545,
+     "solve_s": 2.5212886333465576,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 2.3509719371795654,
+     "solve_s": 2.1049153804779053,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 2.1850860118865967,
+     "solve_s": 1.9741034507751465,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 3.128596067428589,
+    "solve_s": 2.701387405395508,
     "failed": [],
     "swapped": {
      "mug": "dishware_mug_coffee_b01",
@@ -4158,37 +4154,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.4032278060913086,
+     "solve_s": 0.3586874008178711,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.40403175354003906,
+     "solve_s": 0.3586251735687256,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.3868715763092041,
+     "solve_s": 0.3589918613433838,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.4066803455352783,
+     "solve_s": 0.35758328437805176,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.41373610496520996,
+     "solve_s": 0.355557918548584,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": false,
-    "solve_s": 0.45493054389953613,
+    "solve_s": 0.401503324508667,
     "failed": [
      "long_axis_along(fork,x)",
      "gap(plate->fork,+y)",
@@ -4213,37 +4209,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.3937985897064209,
+     "solve_s": 0.35739922523498535,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.39670658111572266,
+     "solve_s": 0.35761165618896484,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.4103817939758301,
+     "solve_s": 0.3580048084259033,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.43446993827819824,
+     "solve_s": 0.36090993881225586,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.3863399028778076,
+     "solve_s": 0.35668253898620605,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": false,
-    "solve_s": 0.4524998664855957,
+    "solve_s": 0.40593695640563965,
     "failed": [
      "long_axis_along(fork,x)",
      "gap(plate->fork,+y)",
@@ -4268,37 +4264,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.3884086608886719,
+     "solve_s": 0.3566603660583496,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.41274595260620117,
+     "solve_s": 0.3580794334411621,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.39219021797180176,
+     "solve_s": 0.3564600944519043,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.429976224899292,
+     "solve_s": 0.35636258125305176,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.38625431060791016,
+     "solve_s": 0.3568756580352783,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": false,
-    "solve_s": 0.4499640464782715,
+    "solve_s": 0.40277528762817383,
     "failed": [
      "long_axis_along(fork,x)",
      "gap(plate->fork,+y)",
@@ -4323,37 +4319,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.0015487670898438,
+     "solve_s": 0.9222443103790283,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.0139069557189941,
+     "solve_s": 0.9056863784790039,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.9964957237243652,
+     "solve_s": 0.9127707481384277,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.05381178855896,
+     "solve_s": 0.9092321395874023,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.9223818778991699,
+     "solve_s": 0.8356776237487793,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.045708179473877,
+    "solve_s": 0.9594857692718506,
     "failed": [],
     "swapped": {
      "fork": "kitchenware_fork_c01",
@@ -4373,37 +4369,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.011927843093872,
+     "solve_s": 0.9140207767486572,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.0010390281677246,
+     "solve_s": 0.9031062126159668,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.005277395248413,
+     "solve_s": 0.9088895320892334,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.0033574104309082,
+     "solve_s": 0.9086899757385254,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.9249083995819092,
+     "solve_s": 0.8345766067504883,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.0914499759674072,
+    "solve_s": 0.9713659286499023,
     "failed": [],
     "swapped": {
      "fork": "kitchenware_fork_c01",
@@ -4423,37 +4419,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.079791784286499,
+     "solve_s": 0.9209127426147461,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.1003696918487549,
+     "solve_s": 0.9044651985168457,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.0502190589904785,
+     "solve_s": 0.9110443592071533,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.984097957611084,
+     "solve_s": 0.9063327312469482,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.9175560474395752,
+     "solve_s": 0.8348073959350586,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.112703561782837,
+    "solve_s": 0.991340160369873,
     "failed": [],
     "swapped": {
      "fork": "kitchenware_fork_c01",
@@ -4473,37 +4469,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.36626100540161133,
+     "solve_s": 0.3102438449859619,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.34469127655029297,
+     "solve_s": 0.3157320022583008,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.3559916019439697,
+     "solve_s": 0.31168031692504883,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.3576343059539795,
+     "solve_s": 0.3143765926361084,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.3482086658477783,
+     "solve_s": 0.31511640548706055,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 0.5407774448394775,
+    "solve_s": 0.4757225513458252,
     "failed": [],
     "swapped": {
      "box_large": "box_cube_a01",
@@ -4524,37 +4520,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.3766462802886963,
+     "solve_s": 0.3162956237792969,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.4023773670196533,
+     "solve_s": 0.31450939178466797,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.34446001052856445,
+     "solve_s": 0.31508660316467285,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.34902453422546387,
+     "solve_s": 0.31505346298217773,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.35036683082580566,
+     "solve_s": 0.3154475688934326,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 0.5532207489013672,
+    "solve_s": 0.4818263053894043,
     "failed": [],
     "swapped": {
      "box_large": "box_cube_a01",
@@ -4575,37 +4571,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 0.35346174240112305,
+     "solve_s": 0.31206727027893066,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 0.3555142879486084,
+     "solve_s": 0.31351637840270996,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 0.3469047546386719,
+     "solve_s": 0.3122828006744385,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 0.34535908699035645,
+     "solve_s": 0.31363368034362793,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 0.3403041362762451,
+     "solve_s": 0.31251049041748047,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 0.6154112815856934,
+    "solve_s": 0.47794008255004883,
     "failed": [],
     "swapped": {
      "box_large": "box_cube_a01",
@@ -4626,37 +4622,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 3.096348524093628,
+     "solve_s": 2.601250648498535,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 2.8266708850860596,
+     "solve_s": 2.5965664386749268,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 2.9851646423339844,
+     "solve_s": 2.66851806640625,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 3.151109218597412,
+     "solve_s": 2.7620158195495605,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 3.085425615310669,
+     "solve_s": 2.9305930137634277,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 4.048783540725708,
+    "solve_s": 3.1869800090789795,
     "failed": [],
     "swapped": {
      "box_large": "box_cube_a01",
@@ -4667,7 +4663,7 @@
      "cup": "kitchenware_cup_d01"
     }
    },
-   "spread_m": 0.08992700339812884
+   "spread_m": 0.0908128819405705
   },
   {
    "task": "stack_n6",
@@ -4677,37 +4673,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 3.3264198303222656,
+     "solve_s": 3.437227249145508,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 2.8586602210998535,
+     "solve_s": 2.845012903213501,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 3.008179187774658,
+     "solve_s": 2.917780876159668,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 3.1924500465393066,
+     "solve_s": 3.0069079399108887,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 3.3542263507843018,
+     "solve_s": 3.2128140926361084,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 4.1006760597229,
+    "solve_s": 3.25112247467041,
     "failed": [],
     "swapped": {
      "box_large": "box_cube_a01",
@@ -4718,7 +4714,7 @@
      "cup": "kitchenware_cup_d01"
     }
    },
-   "spread_m": 0.09023612482257379
+   "spread_m": 0.0908128819413854
   },
   {
    "task": "stack_n6",
@@ -4728,37 +4724,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 2.911417007446289,
+     "solve_s": 2.6143176555633545,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 2.8206684589385986,
+     "solve_s": 2.5750839710235596,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 2.9551620483398438,
+     "solve_s": 2.666010618209839,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 3.0198724269866943,
+     "solve_s": 2.760025978088379,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 3.2605929374694824,
+     "solve_s": 2.9130942821502686,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 3.698472738265991,
+    "solve_s": 3.1681528091430664,
     "failed": [],
     "swapped": {
      "box_large": "box_cube_a01",
@@ -4769,7 +4765,7 @@
      "cup": "kitchenware_cup_d01"
     }
    },
-   "spread_m": 0.08989093017429013
+   "spread_m": 0.0908128819405705
   },
   {
    "task": "tool_layout_n7",
@@ -4779,37 +4775,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.718797206878662,
+     "solve_s": 1.515134334564209,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.6604204177856445,
+     "solve_s": 1.514815330505371,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.6957414150238037,
+     "solve_s": 1.506436824798584,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.6936023235321045,
+     "solve_s": 1.5455865859985352,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.6681077480316162,
+     "solve_s": 1.5124149322509766,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.8037638664245605,
+    "solve_s": 1.4987075328826904,
     "failed": [],
     "swapped": {
      "screwdriver_1": "handTool_screwdriver_phillips_ph2_a01",
@@ -4828,37 +4824,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.6606512069702148,
+     "solve_s": 1.557783842086792,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.7062804698944092,
+     "solve_s": 1.5617804527282715,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.6428492069244385,
+     "solve_s": 1.558974266052246,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.6934881210327148,
+     "solve_s": 1.5599989891052246,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.6526720523834229,
+     "solve_s": 1.5569522380828857,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.7101364135742188,
+    "solve_s": 1.570573091506958,
     "failed": [],
     "swapped": {
      "screwdriver_1": "handTool_screwdriver_phillips_ph2_a01",
@@ -4877,37 +4873,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 1.632882833480835,
+     "solve_s": 1.558398723602295,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 1.7018654346466064,
+     "solve_s": 1.5599839687347412,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 1.6367242336273193,
+     "solve_s": 1.5661847591400146,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 1.6973075866699219,
+     "solve_s": 1.5598034858703613,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 1.6590516567230225,
+     "solve_s": 1.5583226680755615,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 1.648024082183838,
+    "solve_s": 1.5673279762268066,
     "failed": [],
     "swapped": {
      "screwdriver_1": "handTool_screwdriver_phillips_ph2_a01",
@@ -4926,37 +4922,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 4.296058654785156,
+     "solve_s": 3.786813735961914,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 4.265866041183472,
+     "solve_s": 3.825186252593994,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 4.090221166610718,
+     "solve_s": 3.6401376724243164,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 4.126365423202515,
+     "solve_s": 3.6413135528564453,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 4.094405889511108,
+     "solve_s": 3.649587631225586,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 4.052436113357544,
+    "solve_s": 3.6502068042755127,
     "failed": [],
     "swapped": {
      "screwdriver_1": "handTool_screwdriver_phillips_ph2_a01",
@@ -4975,37 +4971,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 4.23034930229187,
+     "solve_s": 3.8699538707733154,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 4.323493719100952,
+     "solve_s": 3.8408102989196777,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 4.081013202667236,
+     "solve_s": 3.6332077980041504,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 4.130051136016846,
+     "solve_s": 3.6479268074035645,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 4.043732166290283,
+     "solve_s": 3.6487019062042236,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 4.337884426116943,
+    "solve_s": 4.026231288909912,
     "failed": [],
     "swapped": {
      "screwdriver_1": "handTool_screwdriver_phillips_ph2_a01",
@@ -5024,37 +5020,37 @@
     {
      "seed": 100,
      "rubric_ok": true,
-     "solve_s": 4.043504238128662,
+     "solve_s": 3.7904579639434814,
      "failed": []
     },
     {
      "seed": 101,
      "rubric_ok": true,
-     "solve_s": 4.101947546005249,
+     "solve_s": 3.8367950916290283,
      "failed": []
     },
     {
      "seed": 102,
      "rubric_ok": true,
-     "solve_s": 3.9530975818634033,
+     "solve_s": 3.6326253414154053,
      "failed": []
     },
     {
      "seed": 103,
      "rubric_ok": true,
-     "solve_s": 3.895850896835327,
+     "solve_s": 3.644441604614258,
      "failed": []
     },
     {
      "seed": 104,
      "rubric_ok": true,
-     "solve_s": 3.937286376953125,
+     "solve_s": 3.6536865234375,
      "failed": []
     }
    ],
    "assets": {
     "rubric_ok": true,
-    "solve_s": 4.364267826080322,
+    "solve_s": 4.126522541046143,
     "failed": [],
     "swapped": {
      "screwdriver_1": "handTool_screwdriver_phillips_ph2_a01",

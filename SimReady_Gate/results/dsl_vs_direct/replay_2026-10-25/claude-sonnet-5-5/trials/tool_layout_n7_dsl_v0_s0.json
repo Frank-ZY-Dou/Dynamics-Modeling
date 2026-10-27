@@ -1,0 +1,122 @@
+{
+ "task": "tool_layout_n7",
+ "family": "tool_layout",
+ "n": 7,
+ "condition": "dsl_v0",
+ "seed": 0,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 8.011598825454712,
+    "duration_ms": 7378,
+    "duration_api_ms": 7346,
+    "cost_usd": 0.0161962,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1469,
+     "cache_read": 3962,
+     "output": 992,
+     "thinking": 612
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1690,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "no_penetration",
+      "a": "*",
+      "margin": 0.03
+     },
+     {
+      "op": "place",
+      "a": "marker_1",
+      "x": 0.42,
+      "y": 0.3,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "marker_2",
+      "x": 0.42,
+      "y": 0.22,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "screwdriver_1",
+      "x": 0.42,
+      "y": 0.14,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "screwdriver_2",
+      "x": 0.42,
+      "y": 0.06,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "pliers",
+      "x": 0.42,
+      "y": -0.04,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "hammer",
+      "x": 0.42,
+      "y": -0.17,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "tape",
+      "x": 0.8,
+      "y": 0,
+      "yaw": 0
+     }
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 4.380406141281128,
+   "solve_cpu_s": 4.381253279999996,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 11
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

@@ -11,63 +11,62 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 18.721060276031494,
-    "duration_ms": 18189,
-    "duration_api_ms": 18158,
-    "cost_usd": 0.0438946,
+    "wall_s": 17.22756052017212,
+    "duration_ms": 16707,
+    "duration_api_ms": 16670,
+    "cost_usd": 0.0454186,
     "usage": {
      "input": 2,
-     "cache_creation": 1313,
+     "cache_creation": 1361,
      "cache_read": 913,
-     "output": 1660,
-     "thinking": 812
+     "output": 1717,
+     "thinking": 873
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1330,
+   "message_chars": 1521,
    "answer": {
     "poses": [
      {
       "name": "box_1",
-      "x": 0.45,
-      "y": -0.36,
-      "yaw": 90
+      "x": 0.5,
+      "y": -0.31,
+      "yaw": 180
      },
      {
       "name": "box_2",
-      "x": 0.45,
+      "x": 0.5,
       "y": 0,
-      "yaw": 90
+      "yaw": 0
      },
      {
       "name": "box_3",
-      "x": 0.45,
-      "y": 0.36,
-      "yaw": -90
+      "x": 0.5,
+      "y": 0.31,
+      "yaw": 180
      },
      {
       "name": "box_4",
-      "x": 0.85,
-      "y": -0.3,
+      "x": 0.88,
+      "y": -0.33,
       "yaw": 90
      },
      {
       "name": "box_5",
-      "x": 0.85,
+      "x": 0.88,
       "y": 0,
       "yaw": -90
      },
      {
       "name": "box_6",
-      "x": 0.85,
-      "y": 0.3,
+      "x": 0.88,
+      "y": 0.29,
       "yaw": -90
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -76,16 +75,16 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 0.25322484970092773,
-   "solve_cpu_s": 0.2502706840000002,
+   "solve_s": 0.17688441276550293,
+   "solve_cpu_s": 0.1768922029999942,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 6,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 0.5712144374847412,
-    "solve_cpu_s": 0.571445017000002,
+    "solve_s": 0.44702887535095215,
+    "solve_cpu_s": 0.44711191000000383,
     "rubric_failed": []
    }
   }

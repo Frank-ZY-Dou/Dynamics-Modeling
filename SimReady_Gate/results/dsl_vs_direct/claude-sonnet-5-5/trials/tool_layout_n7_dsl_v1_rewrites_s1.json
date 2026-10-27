@@ -1,0 +1,179 @@
+{
+ "task": "tool_layout_n7",
+ "family": "tool_layout",
+ "n": 7,
+ "condition": "dsl_v1_rewrites",
+ "seed": 1,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 7.789322376251221,
+    "duration_ms": 7186,
+    "duration_api_ms": 7157,
+    "cost_usd": 0.0170457,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1502,
+     "cache_read": 12037,
+     "output": 983,
+     "thinking": 337
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1872,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "row",
+      "members": [
+       "screwdriver_1",
+       "screwdriver_2",
+       "pliers",
+       "hammer",
+       "marker_1",
+       "marker_2"
+      ],
+      "axis": "y",
+      "start": "left",
+      "gap": 0.03,
+      "order": "length",
+      "tol": 0.01
+     },
+     {
+      "op": "yaw",
+      "a": "screwdriver_1",
+      "deg": 0,
+      "axis": "long",
+      "mod": 180,
+      "tol": 5
+     },
+     {
+      "op": "yaw",
+      "a": "screwdriver_2",
+      "deg": 0,
+      "axis": "long",
+      "mod": 180,
+      "tol": 5
+     },
+     {
+      "op": "yaw",
+      "a": "pliers",
+      "deg": 0,
+      "axis": "long",
+      "mod": 180,
+      "tol": 5
+     },
+     {
+      "op": "yaw",
+      "a": "hammer",
+      "deg": 0,
+      "axis": "long",
+      "mod": 180,
+      "tol": 5
+     },
+     {
+      "op": "yaw",
+      "a": "marker_1",
+      "deg": 0,
+      "axis": "long",
+      "mod": 180,
+      "tol": 5
+     },
+     {
+      "op": "yaw",
+      "a": "marker_2",
+      "deg": 0,
+      "axis": "long",
+      "mod": 180,
+      "tol": 5
+     },
+     {
+      "op": "within",
+      "a": "screwdriver_1",
+      "b": "table.top",
+      "x1": 0.6
+     },
+     {
+      "op": "within",
+      "a": "screwdriver_2",
+      "b": "table.top",
+      "x1": 0.6
+     },
+     {
+      "op": "within",
+      "a": "pliers",
+      "b": "table.top",
+      "x1": 0.6
+     },
+     {
+      "op": "within",
+      "a": "hammer",
+      "b": "table.top",
+      "x1": 0.6
+     },
+     {
+      "op": "within",
+      "a": "marker_1",
+      "b": "table.top",
+      "x1": 0.6
+     },
+     {
+      "op": "within",
+      "a": "marker_2",
+      "b": "table.top",
+      "x1": 0.6
+     },
+     {
+      "op": "within",
+      "a": "tape",
+      "b": "table.top",
+      "x0": 0.7
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 5.055431842803955,
+   "solve_cpu_s": 5.039362594,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 18
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

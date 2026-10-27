@@ -1,0 +1,91 @@
+{
+ "task": "pack_n14",
+ "family": "pack",
+ "n": 14,
+ "condition": "dsl_v1",
+ "seed": 1,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 4.3265557289123535,
+    "duration_ms": 3610,
+    "duration_api_ms": 3584,
+    "cost_usd": 0.021969799999999998,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1772,
+     "cache_read": 10529,
+     "output": 284,
+     "thinking": 0
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1999,
+   "answer": {
+    "intent": "Pack all 14 fruits so each sits fully inside the square x 0.40\u20130.72, y \u22120.16\u20130.16, resting upright on the table with nothing overlapping.",
+    "statements": [
+     {
+      "op": "fixed",
+      "a": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_*"
+     },
+     {
+      "op": "within",
+      "a": "fruit_*",
+      "b": "table.top",
+      "x0": 0.4,
+      "x1": 0.72,
+      "y0": -0.16,
+      "y1": 0.16
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "minimize"
+     }
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 3 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts kept the program's margin of 5 mm and set a requirement aside; the repair started again from the same poses with a margin of 2.5 mm"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 4.209185361862183,
+   "solve_cpu_s": 4.2098189420000125,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 7
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

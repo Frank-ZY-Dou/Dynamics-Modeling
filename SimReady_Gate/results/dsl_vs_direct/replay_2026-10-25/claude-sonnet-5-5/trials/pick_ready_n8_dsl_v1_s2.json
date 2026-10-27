@@ -1,0 +1,146 @@
+{
+ "task": "pick_ready_n8",
+ "family": "pick_ready",
+ "n": 8,
+ "condition": "dsl_v1",
+ "seed": 2,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 4.15864372253418,
+    "duration_ms": 3516,
+    "duration_api_ms": 3487,
+    "cost_usd": 0.011792899999999999,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1514,
+     "cache_read": 10529,
+     "output": 468,
+     "thinking": 0
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1734,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "reach",
+      "a": "mug",
+      "r": 0.6,
+      "min": 0.45
+     },
+     {
+      "op": "facing",
+      "a": "mug",
+      "axis": "-x",
+      "tol": 20
+     },
+     {
+      "op": "approach",
+      "a": "mug",
+      "width": 0.15,
+      "toward": "robot"
+     },
+     {
+      "op": "min_distance",
+      "a": "bowl",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "apple",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "can",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "bottle",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "screwdriver",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "min_distance",
+      "a": "tumbler",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "keep_out",
+      "a": "*",
+      "x0": 0.25,
+      "x1": 0.4,
+      "y0": 0.2,
+      "y1": 0.4
+     },
+     {
+      "op": "reach",
+      "a": "*",
+      "r": 0.8
+     }
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 2 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 3.3097903728485107,
+   "solve_cpu_s": 3.308535941999999,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 16
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

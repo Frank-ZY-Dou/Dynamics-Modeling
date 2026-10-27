@@ -11,35 +11,81 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 17.52890157699585,
-    "duration_ms": 16978,
-    "duration_api_ms": 16934,
-    "cost_usd": 0.0401092,
+    "wall_s": 13.165769577026367,
+    "duration_ms": 12446,
+    "duration_api_ms": 12403,
+    "cost_usd": 0.073744,
     "usage": {
      "input": 2,
-     "cache_creation": 398,
-     "cache_read": 4986,
-     "output": 1796,
-     "thinking": 1276
+     "cache_creation": 5767,
+     "cache_read": 0,
+     "output": 1380,
+     "thinking": 732
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1710,
+   "message_chars": 1899,
    "answer": {
     "statements": [
      {
-      "op": "no_penetration"
+      "op": "no_penetration",
+      "a": "*"
      },
      {
       "op": "on_support",
-      "a": "*",
+      "a": "plate",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "fork",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "knife",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "spoon",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "mug",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "glass",
       "b": "table"
      },
      {
       "op": "upright",
-      "a": "*"
+      "a": "plate"
+     },
+     {
+      "op": "upright",
+      "a": "fork"
+     },
+     {
+      "op": "upright",
+      "a": "knife"
+     },
+     {
+      "op": "upright",
+      "a": "spoon"
+     },
+     {
+      "op": "upright",
+      "a": "mug"
+     },
+     {
+      "op": "upright",
+      "a": "glass"
      },
      {
       "op": "within",
@@ -50,7 +96,8 @@
       "op": "place",
       "a": "plate",
       "x": 0.55,
-      "y": 0
+      "y": 0,
+      "yaw": 0
      },
      {
       "op": "place",
@@ -75,86 +122,77 @@
      },
      {
       "op": "place",
-      "a": "glass",
-      "x": 0.67,
-      "y": -0.07
+      "a": "mug",
+      "x": 0.55,
+      "y": 0.225,
+      "yaw": 0
      },
      {
       "op": "place",
-      "a": "mug",
-      "x": 0.55,
-      "y": 0.23,
+      "a": "glass",
+      "x": 0.68,
+      "y": -0.13,
       "yaw": 0
      },
      {
       "op": "left_of",
       "a": "fork",
-      "b": "plate",
-      "gap": 0.12
-     },
-     {
-      "op": "near",
-      "a": "fork",
-      "b": "plate",
-      "r": 0.15
+      "b": "plate"
      },
      {
       "op": "right_of",
       "a": "knife",
-      "b": "plate",
-      "gap": 0.12
-     },
-     {
-      "op": "near",
-      "a": "knife",
-      "b": "plate",
-      "r": 0.15
+      "b": "plate"
      },
      {
       "op": "right_of",
       "a": "spoon",
-      "b": "knife",
-      "gap": 0.045
-     },
-     {
-      "op": "in_front_of",
-      "a": "glass",
-      "b": "plate"
-     },
-     {
-      "op": "near",
-      "a": "glass",
-      "b": "knife",
-      "r": 0.15
+      "b": "knife"
      },
      {
       "op": "left_of",
       "a": "mug",
-      "b": "fork",
-      "gap": 0.08
+      "b": "fork"
+     },
+     {
+      "op": "farther",
+      "a": "glass",
+      "b": "plate"
+     },
+     {
+      "op": "close_to",
+      "a": "glass",
+      "b": "knife",
+      "r": 0.15
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
     "failed_predicates": [],
     "failed_preferences": [],
-    "solver_notes": []
+    "solver_notes": [
+     "a program row was not met within the step at 1 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome"
+    ]
    },
    "self_ok": true,
-   "solve_s": 1.0754647254943848,
-   "solve_cpu_s": 1.075778912,
+   "solve_s": 0.906116247177124,
+   "solve_cpu_s": 0.9061723640000001,
    "rubric_ok": false,
    "rubric_failed": [
     [
+     "gap(knife->spoon,-y)",
+     false,
+     0.0066
+    ],
+    [
      "facing(mug)",
      false,
-     22.6938
+     22.249
     ]
    ],
-   "answer_items": 18
+   "answer_items": 26
   }
  ],
  "n_rounds": 1,

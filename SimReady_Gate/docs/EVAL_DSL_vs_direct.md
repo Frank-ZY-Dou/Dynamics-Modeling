@@ -83,6 +83,33 @@ A trial has up to three rounds. Each round is a new isolated call whose message 
 with the previous answer and that condition's report; a trial ends when its own check passes. The
 rubric grades the scene of every round.
 
+## After a failure: two reports compared
+
+`dsl_v1_rewrites` is `dsl_v1` with more in the report of a failed program: the rewrites of each
+failed statement (the nearest values of its bounds at which it holds on the layout returned, and
+whether it may be weakened) and what the repair ends with from the same start at a smaller margin
+([`docs/DSL.md`](DSL.md#when-a-requirement-fails)). Its first answer is dsl_v1's for the same task
+and seed, so the two differ only after that answer fails, and each such trial is a pair; pairs are
+compared with the exact McNemar test.
+
+A model's first answer seldom fails, so the reports are also compared on faulted first answers. A
+fault is one edit of a task's reference program (`tasks.py`, `faults`), of one of four kinds, each
+with the recovery the request asks for:
+
+| kind | the edit | the recovery the request asks for |
+|---|---|---|
+| tight | a bound the program chose, tightened past what the scene allows | relax it within what the request allows |
+| target | a `place` target the request contradicts | drop it |
+| margin | a schedule margin that leaves the contacts no room | lower it |
+| conflict | a statement the program chose that contradicts a number the request states | change that statement: relaxing the stated number breaks the request |
+
+`run.py --check-faults` runs every reference and every faulted program without a call, on three
+seeds (`faults_check.json`). A fault takes part where the reference passes the gate and the rubric
+and the faulted program fails the gate. A trial then goes on as any other from its second round:
+the request, the faulted program as the previous answer and the condition's report, at most two
+calls. The rubric decides; a final program that passes the gate but not the rubric has weakened the
+request.
+
 ## Costs and timing
 
 Tokens and cost are the CLI's own accounting of each call (`usage`, `total_cost_usd`): output tokens
@@ -90,40 +117,22 @@ include the model's thinking, prompt tokens are split into those read from the p
 rest. Model time is the call's duration as the CLI reports it. Solver time is the wall-clock time of
 the pipeline after the answer (validation, compilation, S4R and verification for a program; seating
 and verification for poses), with the worker's CPU seconds recorded beside it. Each run used six
-worker processes, one thread each, on eight physical cores reserved for it (no SMT siblings in use);
+worker processes, one thread each, on eight physical cores reserved for it (no SMT siblings in use; in the run of
+2026-10-26 two siblings carried another job for 13 minutes, and the 201 fault trials that overlap them were timed
+again from their recorded answers on the idle cores: 1.004 times the recorded solver time, which is kept);
 models ran one after another, three seeds per task and condition, the trials submitted in one fixed
 order.
 
-## The first run and the replay
+## The runs
 
 The comparison was first run on 2026-10-24 (`results/dsl_vs_direct/first_run/`) and replayed on
-2026-10-25 with the current solver: seating through a grid of the meshes' triangles, contacts without
-a new BVH for each scale of the continuation, the contact witness over all of FCL's contacts, a body
-centred over another separated along their axis of least overlap, a program that stops short at the
-shrunken scale solved again from other starts, the contacts' margin yielding to the requirements,
-and a body recognised as resting on a surface the sampled heights miss.
-
-Typed poses are set down as the repair sets a body down: from above what the body rests on, and
-seated clear of it at the end. The first run set them down from their starting height, so a carton
-put on a taller carton, or a fruit on a fruit, met the inside of it (every typed tower, 9 / 9, though
-the answers stacked them as asked), and a drop residual of a fraction of a millimetre counted as
-interpenetration; its results for typed towers, pallets and fruit set on fruit carry this. The
-ablation that repairs typed poses with the shared statements keeps the supports the answer named (the
-first run set every body on the table). What a model receives is unchanged: the system prompts, the
-formats and the first message of every trial (the request and the scene) are the same, byte for byte.
-
-The replay (`run.py --replay`) runs every trial again, keeping the recorded answer for each round
-whose message is the recorded one (the first round always; a later round when the answer before it
-was the recorded one and checking it found word for word what it found then), and calls the model, as
-a run does, for any other round: where the current report differs from the recorded one, or where the
-recorded trial had stopped and the current check does not pass. It ran in two passes, the second
-replaying the first after the seating of typed poses was updated (the first pass's records are not
-kept; each `run_meta.json` names the commits of the replay, of the pass it replays and of the first
-run). The passes called the model for 59 and 3 rounds; of the replay's 469 rounds, 446 keep the first
-run's answer and 23 hold an answer of such a call (`answer_from` in each round), and each answers
-exactly the message that the final code sends. The first answer of every trial is the first run's, so
-the two runs share their samples. The results below are the replay's, and
-`results/dsl_vs_direct/replay_diff.md` lists every trial whose verdict changed.
+2026-10-25 with the updated solver, keeping every recorded answer whose message was unchanged
+(`results/dsl_vs_direct/replay_2026-10-25/`, with `replay_diff.md`). The language then changed: a
+written semantics, the solver's margin moved into the program's `schedule`, three statements
+renamed, and the rewrites of failed requirements in the report ([`docs/DSL.md`](DSL.md)). The system
+prompts changed with it, so the earlier answers answer another prompt: the comparison was run afresh
+on 2026-10-26 with every condition, together with the faulted first answers. The results below are
+that run's.
 
 ## Isolation
 
@@ -150,11 +159,12 @@ nothing of the tasks or of earlier trials.
 
 ## Results
 
-Every number below comes from the trial files of the replay (`results/dsl_vs_direct/<model>/trials/`);
+Every number below comes from the trial files of the run of 2026-10-26
+(`results/dsl_vs_direct/<model>/trials/`, the faulted ones in `results/dsl_vs_direct/faults/`);
 `analyze.py` writes every table, per task and per scene size, to
-[`results/dsl_vs_direct/summary.md`](../results/dsl_vs_direct/summary.md), and the same tables of
-the first run are in `results/dsl_vs_direct/first_run/summary.md`. Pass rates carry 95 % Wilson
-intervals; a condition's time per passing scene is its total over its passing trials.
+[`results/dsl_vs_direct/summary.md`](../results/dsl_vs_direct/summary.md), and the tables of the
+earlier runs are in `replay_2026-10-25/summary.md` and `first_run/summary.md`. Pass rates carry 95 %
+Wilson intervals; a condition's time per passing scene is its total over its passing trials.
 
 ![pass rate, output tokens and seconds per passing scene](media/dsl_vs_direct.png)
 
@@ -162,79 +172,78 @@ intervals; a condition's time per passing scene is its total over its passing tr
 
 | model | answer | pass (95% CI) | round 1 | rounds | output tokens / trial | prompt tokens / trial (not cached) | cost / trial | model s / trial | solver s / trial | s / passing scene |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Haiku 5.5 | program | 47/48 (89-100%) | 98% | 1.08 | 4,020 | 13,241 (1,600) | $0.0024 | 19 | 2.8 | 22 |
-|  | program, earlier statements | 38/48 (66-88%) | 73% | 1.12 | 6,960 | 8,914 (3,238) | $0.0042 | 31 | 3.1 | 43 |
-|  | poses | 43/48 (78-95%) | 81% | 1.12 | 14,374 | 2,919 (1,352) | $0.0075 | 62 | 0.9 | 70 |
-|  | poses, repaired | 37/48 (63-87%) | 77% | 1.12 | 14,374 | 2,919 (1,352) | $0.0075 | 62 | 3.1 | 84 |
-| Sonnet 5.5 | program | 48/48 (93-100%) | 94% | 1.06 | 620 | 12,990 (1,568) | $0.0136 | 5 | 3.1 | 8 |
-|  | program, earlier statements | 30/48 (48-75%) | 60% | 1.06 | 1,451 | 6,689 (1,959) | $0.0228 | 10 | 2.7 | 21 |
-|  | poses | 39/48 (68-90%) | 75% | 1.21 | 3,223 | 3,200 (1,764) | $0.0394 | 25 | 1.0 | 33 |
-|  | poses, repaired | 37/48 (63-87%) | 75% | 1.21 | 3,223 | 3,200 (1,764) | $0.0394 | 25 | 3.2 | 37 |
-| Opus 5.5 | program | 48/48 (93-100%) | 100% | 1.02 | 764 | 12,414 (1,582) | $0.0301 | 8 | 2.6 | 10 |
-|  | program, earlier statements | 37/48 (63-87%) | 75% | 1.04 | 2,317 | 5,891 (1,700) | $0.0608 | 22 | 2.4 | 32 |
-|  | poses | 45/48 (83-98%) | 90% | 1.04 | 2,481 | 2,661 (1,665) | $0.0631 | 25 | 0.9 | 28 |
-|  | poses, repaired | 39/48 (68-90%) | 81% | 1.04 | 2,481 | 2,661 (1,665) | $0.0631 | 25 | 3.1 | 35 |
+| Haiku 5.5 | program | 45/48 (83-98%) | 90% | 1.19 | 6,761 | 17,519 (3,130) | $0.0041 | 31 | 2.8 | 36 |
+|  | program, rewrites in the report | 48/48 (93-100%) | 90% | 1.17 | 6,446 | 17,575 (3,062) | $0.0040 | 29 | 4.0 | 33 |
+|  | program, earlier statements | 37/48 (63-87%) | 69% | 1.10 | 8,834 | 10,734 (4,691) | $0.0054 | 39 | 2.2 | 54 |
+|  | poses | 42/48 (75-94%) | 81% | 1.15 | 12,474 | 4,082 (3,011) | $0.0068 | 54 | 0.9 | 63 |
+|  | poses, repaired | 37/48 (63-87%) | 77% | 1.15 | 12,474 | 4,082 (3,011) | $0.0068 | 54 | 2.7 | 74 |
+| Sonnet 5.5 | program | 48/48 (93-100%) | 90% | 1.12 | 812 | 15,533 (2,493) | $0.0194 | 7 | 2.6 | 10 |
+|  | program, rewrites in the report | 48/48 (93-100%) | 90% | 1.15 | 859 | 15,922 (2,595) | $0.0203 | 8 | 5.4 | 13 |
+|  | program, earlier statements | 31/48 (50-77%) | 50% | 1.19 | 1,619 | 7,231 (2,307) | $0.0259 | 13 | 2.2 | 24 |
+|  | poses | 41/48 (73-93%) | 79% | 1.10 | 2,134 | 2,923 (1,934) | $0.0292 | 18 | 0.8 | 22 |
+|  | poses, repaired | 36/48 (61-85%) | 75% | 1.10 | 2,134 | 2,923 (1,934) | $0.0292 | 18 | 2.8 | 28 |
+| Opus 5.5 | program | 48/48 (93-100%) | 100% | 1.00 | 795 | 13,749 (2,213) | $0.0359 | 8 | 2.2 | 10 |
+|  | program, rewrites in the report | 48/48 (93-100%) | 100% | 1.00 | 795 | 13,749 (2,213) | $0.0359 | 8 | 2.6 | 10 |
+|  | program, earlier statements | 38/48 (66-88%) | 69% | 1.12 | 2,463 | 7,016 (2,361) | $0.0691 | 23 | 2.1 | 32 |
+|  | poses | 45/48 (83-98%) | 88% | 1.06 | 3,122 | 2,813 (1,881) | $0.0777 | 30 | 0.8 | 33 |
+|  | poses, repaired | 42/48 (75-94%) | 85% | 1.06 | 3,122 | 2,813 (1,881) | $0.0777 | 30 | 2.6 | 38 |
 
-A program passed in 143 of 144 trials and typed poses in 127. The one failing program (Haiku, ten
-drinks) placed one can at x = 0.75 within 4 cm instead of the row; the solver, which moves each body
-as little as the statements allow, left that can at 0.71 and the others at 0.69, and the row's line
-at 0.693, short of the band from 0.70 to 0.80 the request named. Programs passed at the first round
-in 94-100 % of trials and needed 1.02-1.08 rounds on average; poses passed at the first round in
-75-90 % and needed 1.04-1.21. Programs took 3.2 to 5.2 times fewer output tokens per trial and cost
-2.1 to 3.1 times less, and a passing scene took 2.7 to 4.0 times less time, the solver's 2.6-3.1 s
-per trial included (its wall-clock and CPU seconds agree to 0.1 s: the cores were the run's alone).
-The language makes the system prompt longer, 12-13k prompt tokens per trial against 3k, but that
-part is read from the prompt cache: a program trial sent about as many tokens fresh (1.6k) as a pose
-trial (1.4-1.8k).
+A program passed in 141 of 144 trials and typed poses in 128. The three failing programs (Haiku,
+packing ten and fourteen fruit) left fruit outside the square the request names; told the rewrites of
+their failed statements, the same first answers passed (`program, rewrites in the report`, 144 of
+144). Programs passed at the first round in 90-100 % of trials and needed 1.00-1.19 rounds on
+average; poses passed at the first round in 79-88 % and needed 1.06-1.15. Programs took 1.8 to 3.9
+times fewer output tokens per trial and cost 1.5 to 2.2 times less, and a passing scene took 1.7 to
+3.3 times less time, the solver's 2.2-2.8 s per trial included. The language makes the system prompt
+longer, 14-18k prompt tokens per trial against 3-4k, but that part is read from the prompt cache: a
+program trial sent 2.2-3.1k tokens fresh, a pose trial 1.9-3.0k.
 
 ### Where each answer fails
 
-- Poses: the order of height in the row of ten drinks (8 / 9, and 1 / 9 of six: the scene summary
-  gives sizes to the centimetre, the compiler sorts on the meshes); 1 cm between the six cartons on
-  the pallet (2 / 9, at 5-6 mm); interpenetration in the square of ten fruit (2 / 9, by 0.5-0.6 mm);
-  a group not clustered (2), the mug's handle (1), and a tower too far from the robot (1). Every
-  typed tower stacked the three cartons centred, as every program did.
-- Programs restricted to the earlier statements: no region bounded by coordinates (15 failed square
-  containments in the packing tasks), no sorting (all nine rows of ten drinks), no handle turned to
-  the robot (setting, desk).
-- Programs: the one row above.
+- Poses: the order of height in the row of ten drinks (7 / 9, and 1 / 9 of six: the scene summary
+  gives sizes to the centimetre, the compiler sorts on the meshes); interpenetration in the packing
+  tasks (3); the mug's handle (2); a group not clustered (1), two objects beyond the robot's reach
+  (1) and the gaps of a row of tools (1).
+- Programs restricted to the earlier statements: no region bounded by coordinates (the squares of
+  the packing tasks), no sorting (the rows of ten drinks), no handle turned to the robot.
+- Programs: the three packing trials above.
 
 ### Held-out tasks
 
 | model | answer | development tasks (42 trials) | held-out tasks (6 trials) | held out: output tokens / trial | held out: s / passing scene |
 |---|---|---|---|---|---|
-| Haiku 5.5 | program | 41/42 | 6/6 | 4,689 | 26 |
-|  | program, earlier statements | 33/42 | 5/6 | 7,249 | 43 |
-|  | poses | 37/42 | 6/6 | 3,052 | 15 |
-| Sonnet 5.5 | program | 42/42 | 6/6 | 1,260 | 16 |
-|  | program, earlier statements | 26/42 | 4/6 | 2,079 | 29 |
-|  | poses | 33/42 | 6/6 | 957 | 10 |
-| Opus 5.5 | program | 42/42 | 6/6 | 897 | 12 |
-|  | program, earlier statements | 31/42 | 6/6 | 1,818 | 21 |
-|  | poses | 39/42 | 6/6 | 1,113 | 14 |
+| Haiku 5.5 | program | 39/42 | 6/6 | 4,622 | 25 |
+|  | program, earlier statements | 31/42 | 6/6 | 6,923 | 34 |
+|  | poses | 36/42 | 6/6 | 3,075 | 15 |
+| Sonnet 5.5 | program | 42/42 | 6/6 | 1,783 | 22 |
+|  | program, earlier statements | 26/42 | 5/6 | 1,519 | 18 |
+|  | poses | 36/42 | 5/6 | 974 | 13 |
+| Opus 5.5 | program | 42/42 | 6/6 | 926 | 12 |
+|  | program, earlier statements | 32/42 | 6/6 | 2,186 | 23 |
+|  | poses | 39/42 | 6/6 | 1,134 | 14 |
 
-The two tasks written after the language was frozen passed in every trial, with programs and with
-poses, for every model. They are small (six and seven objects) and need no geometry the model cannot
-read off the summary; poses were the cheaper and the faster answer there for Haiku and Sonnet (10-16 s
-per passing scene against 16-26 s) and about as fast as programs for Opus (14 s against 12 s), as the
-solver took 4-8 s per trial on the tools' and the desk's meshes (up to 92k faces each).
+The two tasks written after the language was frozen passed in every trial with programs, for every
+model; poses failed one of Sonnet's (the gaps of the row of tools). They are small (six and seven
+objects); poses were the cheaper and the faster answer there for Haiku and Sonnet (13-15 s per
+passing scene against 22-25 s) and about as fast as programs for Opus (14 s against 12 s).
 
 ### Scene size
 
 | model | objects | program: pass, output tokens / trial, model s / trial | poses: pass, output tokens / trial, model s / trial |
 |---|---|---|---|
-| Haiku 5.5 | 10 | 3/3, 3,516, 17 | 3/3, 6,616, 28 |
-|  | 16 | 3/3, 5,455, 25 | 3/3, 23,038, 99 |
-|  | 24 | 3/3, 4,898, 22 | 3/3, 29,007, 122 |
-| Sonnet 5.5 | 10 | 3/3, 351, 3 | 3/3, 1,753, 14 |
-|  | 16 | 3/3, 413, 3 | 3/3, 4,737, 39 |
-|  | 24 | 3/3, 975, 7 | 2/3, 5,875, 47 |
-| Opus 5.5 | 10 | 3/3, 821, 8 | 3/3, 1,208, 12 |
-|  | 16 | 3/3, 955, 10 | 3/3, 4,754, 46 |
-|  | 24 | 3/3, 1,015, 10 | 3/3, 5,283, 53 |
+| Haiku 5.5 | 10 | 3/3, 5,651, 26 | 3/3, 6,063, 27 |
+|  | 16 | 3/3, 4,644, 21 | 3/3, 24,315, 107 |
+|  | 24 | 3/3, 6,659, 30 | 3/3, 23,577, 102 |
+| Sonnet 5.5 | 10 | 3/3, 400, 4 | 3/3, 1,267, 11 |
+|  | 16 | 3/3, 880, 7 | 2/3, 5,017, 41 |
+|  | 24 | 3/3, 1,011, 8 | 3/3, 4,243, 34 |
+| Opus 5.5 | 10 | 3/3, 875, 11 | 3/3, 2,088, 20 |
+|  | 16 | 3/3, 1,073, 10 | 3/3, 6,472, 62 |
+|  | 24 | 3/3, 1,111, 10 | 3/3, 6,231, 62 |
 
-Sorting a heap of 10, 16 and 24 objects: a program's output barely grows (patterns name the groups,
-the solver places every body), typed poses grow with every object.
+Sorting a heap of 10, 16 and 24 objects: a program stays within 400 to 1,100 output tokens for
+Sonnet and Opus and 4,600 to 6,700 for Haiku at every size (patterns name the groups, the solver
+places every body); typed poses grow three- to fourfold from 10 to 16 objects.
 
 ![output tokens and model seconds per trial against the number of objects](media/dsl_vs_direct_scaling.png)
 
@@ -242,33 +251,58 @@ the solver places every body), typed poses grow with every object.
 
 | model | answer | pass | settles | passes and settles | new starts pass | spread of the layouts | other assets pass |
 |---|---|---|---|---|---|---|---|
-| Haiku 5.5 | program | 47/48 | 48/48 | 47/48 | 235 / 235 | 8.8 cm | 47 / 47 |
-|  | program, earlier statements | 38/48 | 47/48 | 37/48 | — | — | — |
-|  | poses | 43/48 | 47/48 | 42/48 | 200 / 215 | 0.0 cm | 28 / 43 |
-| Sonnet 5.5 | program | 48/48 | 48/48 | 48/48 | 240 / 240 | 12.9 cm | 48 / 48 |
-|  | program, earlier statements | 30/48 | 48/48 | 30/48 | — | — | — |
-|  | poses | 39/48 | 47/48 | 38/48 | 180 / 195 | 0.0 cm | 22 / 39 |
-| Opus 5.5 | program | 48/48 | 48/48 | 48/48 | 239 / 240 | 13.9 cm | 48 / 48 |
+| Haiku 5.5 | program | 45/48 | 48/48 | 45/48 | 222 / 225 | 10.0 cm | 45 / 45 |
 |  | program, earlier statements | 37/48 | 48/48 | 37/48 | — | — | — |
-|  | poses | 45/48 | 48/48 | 45/48 | 210 / 225 | 0.0 cm | 25 / 45 |
+|  | poses | 42/48 | 48/48 | 42/48 | 195 / 210 | 0.0 cm | 26 / 42 |
+| Sonnet 5.5 | program | 48/48 | 48/48 | 48/48 | 239 / 240 | 13.0 cm | 47 / 48 |
+|  | program, earlier statements | 31/48 | 48/48 | 31/48 | — | — | — |
+|  | poses | 41/48 | 48/48 | 41/48 | 190 / 205 | 0.0 cm | 23 / 41 |
+| Opus 5.5 | program | 48/48 | 48/48 | 48/48 | 236 / 240 | 13.8 cm | 48 / 48 |
+|  | program, earlier statements | 38/48 | 48/48 | 38/48 | — | — | — |
+|  | poses | 45/48 | 48/48 | 45/48 | 210 / 225 | 0.0 cm | 30 / 45 |
 
-Every scene a program produced stays at rest in MuJoCo (CoACD pieces, the assets' friction and
-mass). Two passing scenes of typed poses do not: each sets a fruit on another fruit (an answer may
-name the body a pose rests on), which the rubric's resting check accepts and MuJoCo rolls off. Reuse
-applies each passing answer, with no further call, to five new starting heaps of its task and to the
-task's scene with every object replaced by another package of its category. A program is solved
-again from each start and passes 714 of 715 starts (the one failure, a pallet of four, laid its
-cartons in one row), its bodies 9 to 14 cm from where they stood for another start (it moves each
-body as little as the statements allow). Typed poses are one layout and pass 92-93 % of the new
-starts: they fail only where the request depends on the start (nothing moved more than 3 cm). With
-other assets, programs pass every scene and typed poses 56-65 %: poses typed for one geometry
-interpenetrate or fall out of order with another.
+Every scene of every answer stays at rest in MuJoCo (CoACD pieces, the assets' friction and mass).
+Reuse applies each passing answer, with no further call, to five new starting heaps of its task and
+to the task's scene with every object replaced by another package of its category. A program is
+solved again from each start and passes 697 of 705 starts, its bodies 10 to 14 cm from where they
+stood for another start (it moves each body as little as the statements allow); typed poses are one
+layout and pass 595 of 640. With other assets, programs pass 140 of 141 scenes and typed poses 79 of
+128: poses typed for one geometry interpenetrate or fall out of order with another.
 
-Poses repaired by S4R with only the statements every task shares, and the supports the answer
-named (`direct+repair` in the first table), pass 37, 37 and 39 of 48, fewer than the poses
-themselves: the repair removes interpenetration, so one more pallet passes, but it does not know the
-request: it pushed packed fruit out of their square (9 trials), moved stacked cartons off each
-other's centre (4), and left unsupported the fruit that two answers set on other fruit (2).
+Poses repaired by S4R with only the statements every task shares, and the supports the answer named
+(`poses, repaired`), pass 37, 36 and 42 of 48, fewer than the poses themselves: the repair removes
+interpenetration but does not know the request, and it pushed packed fruit out of their square (14
+trials) and a knife and a spoon out of their gap (3).
+
+### After a failure
+
+| model | faults (pairs) | pass: plain / rewrites | gate passes at round 2 | request weakened | output tokens after round 1 | plain only / rewrites only | p |
+|---|---|---|---|---|---|---|---|
+| Haiku 5.5 | all (100) | 97 / 100 | 91 / 95 | 2 / 0 | 6,646 / 5,191 | 0 / 3 | 0.25 |
+|  | tight (40) | 40 / 40 | 36 / 37 | 0 / 0 | 5,548 / 4,917 | 0 / 0 | 1 |
+|  | target (27) | 27 / 27 | 26 / 26 | 0 / 0 | 4,507 / 4,170 | 0 / 0 | 1 |
+|  | margin (7) | 7 / 7 | 6 / 6 | 0 / 0 | 11,792 / 3,423 | 0 / 0 | 1 |
+|  | conflict (18) | 18 / 18 | 16 / 18 | 0 / 0 | 6,817 / 4,735 | 0 / 0 | 1 |
+|  | model (8) | 5 / 8 | 7 / 8 | 2 / 0 | 14,464 / 12,574 | 0 / 3 | 0.25 |
+| Sonnet 5.5 | all (98) | 97 / 98 | 95 / 95 | 1 / 0 | 979 / 920 | 0 / 1 | 1 |
+|  | tight (40) | 40 / 40 | 40 / 39 | 0 / 0 | 925 / 957 | 0 / 0 | 1 |
+|  | target (27) | 27 / 27 | 27 / 27 | 0 / 0 | 801 / 793 | 0 / 0 | 1 |
+|  | margin (7) | 7 / 7 | 6 / 6 | 0 / 0 | 1,298 / 569 | 0 / 0 | 1 |
+|  | conflict (18) | 17 / 18 | 16 / 18 | 1 / 0 | 1,248 / 1,024 | 0 / 1 | 1 |
+|  | model (6) | 6 / 6 | 6 / 5 | 0 / 0 | 968 / 1,341 | 0 / 0 | 1 |
+| Opus 5.5 | all (92) | 92 / 92 | 91 / 92 | 0 / 0 | 1,033 / 898 | 0 / 0 | 1 |
+|  | tight (40) | 40 / 40 | 40 / 40 | 0 / 0 | 886 / 918 | 0 / 0 | 1 |
+|  | target (27) | 27 / 27 | 27 / 27 | 0 / 0 | 856 / 844 | 0 / 0 | 1 |
+|  | margin (7) | 7 / 7 | 6 / 7 | 0 / 0 | 2,560 / 580 | 0 / 0 | 1 |
+|  | conflict (18) | 18 / 18 | 18 / 18 | 0 / 0 | 1,033 / 1,061 | 0 / 0 | 1 |
+
+The first rows of each model pool the 92 faulted first answers (34 faults on three seeds, where the
+reference passes and the fault fails) and the pairs whose own first answer failed (`model`). Both
+reports recover nearly every fault: with the plain report Sonnet missed one conflict and Haiku three
+of its own packing answers, three of these final programs passing the gate but not the request (the
+request weakened); with the rewrites every pair passed and no request was weakened. The difference is not significant at this size (3 and 1 pairs pass with the rewrites
+alone; exact McNemar p = 0.25 and 1). Where the fault is the margin, the rewrites name the smaller
+margin that ends the repair: the round after the failure took 2.3 to 4.4 times fewer output tokens.
 
 ### Limits
 
@@ -276,7 +310,7 @@ other's centre (4), and left unsupported the fruit that two answers set on other
   only tasks the revisions never saw, is small.
 - One check of the rubric was corrected after the first model's run of the first run (above); every
   verdict of that run it could change was regraded from the recorded answers, and both verdicts are
-  published. The replay was graded with the corrected check.
+  published. The later runs were graded with the corrected check.
 - The rubric's resting check is geometric: it accepts a fruit balanced on another, which the settle
   test reports.
 - Costs are the CLI's accounting at list price. The CLI adds its account and environment block

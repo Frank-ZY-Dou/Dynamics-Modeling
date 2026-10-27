@@ -11,87 +11,86 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 10.963760614395142,
-    "duration_ms": 10411,
-    "duration_api_ms": 10382,
-    "cost_usd": 0.0011290499999999997,
+    "wall_s": 14.861531257629395,
+    "duration_ms": 14263,
+    "duration_api_ms": 14234,
+    "cost_usd": 0.00184533,
     "usage": {
      "input": 2,
-     "cache_creation": 402,
-     "cache_read": 2145,
-     "output": 2054,
-     "thinking": 1699
+     "cache_creation": 1720,
+     "cache_read": 913,
+     "output": 2984,
+     "thinking": 2629
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1936,
+   "message_chars": 2181,
    "answer": {
     "poses": [
      {
       "name": "can_4",
       "x": 0.75,
-      "y": 0.495,
+      "y": 0.54,
       "yaw": 0
      },
      {
       "name": "glass_2",
       "x": 0.75,
-      "y": 0.385,
+      "y": 0.42,
       "yaw": 0
      },
      {
       "name": "can_5",
       "x": 0.75,
-      "y": 0.275,
+      "y": 0.3,
       "yaw": 0
      },
      {
       "name": "bottle_2",
       "x": 0.75,
-      "y": 0.165,
+      "y": 0.18,
       "yaw": 0
      },
      {
       "name": "glass_1",
       "x": 0.75,
-      "y": 0.055,
+      "y": 0.06,
       "yaw": 0
      },
      {
       "name": "can_1",
       "x": 0.75,
-      "y": -0.055,
+      "y": -0.06,
       "yaw": 0
      },
      {
       "name": "can_2",
       "x": 0.75,
-      "y": -0.165,
+      "y": -0.18,
       "yaw": 0
      },
      {
       "name": "can_3",
       "x": 0.75,
-      "y": -0.275,
+      "y": -0.3,
       "yaw": 0
      },
      {
       "name": "can_6",
       "x": 0.75,
-      "y": -0.385,
+      "y": -0.42,
       "yaw": 0
      },
      {
       "name": "bottle_1",
       "x": 0.75,
-      "y": -0.495,
+      "y": -0.54,
       "yaw": 0
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -100,8 +99,8 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 0.9313483238220215,
-   "solve_cpu_s": 0.9316574129999999,
+   "solve_s": 0.8784523010253906,
+   "solve_cpu_s": 0.8785393359999993,
    "rubric_ok": false,
    "rubric_failed": [
     [
@@ -125,8 +124,8 @@
    "direct_repair": {
     "rubric_ok": false,
     "self_ok": true,
-    "solve_s": 1.8024542331695557,
-    "solve_cpu_s": 1.8027420639999994,
+    "solve_s": 1.6124634742736816,
+    "solve_cpu_s": 1.6126907890000002,
     "rubric_failed": [
      [
       "ordered_by_height",

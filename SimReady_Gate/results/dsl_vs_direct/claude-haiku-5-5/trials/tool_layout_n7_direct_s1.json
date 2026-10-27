@@ -11,69 +11,68 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 11.288700103759766,
-    "duration_ms": 10707,
-    "duration_api_ms": 10549,
-    "cost_usd": 0.0014832299999999999,
+    "wall_s": 12.69223666191101,
+    "duration_ms": 12083,
+    "duration_api_ms": 12051,
+    "cost_usd": 0.0015480299999999997,
     "usage": {
      "input": 2,
-     "cache_creation": 1467,
+     "cache_creation": 1521,
      "cache_read": 913,
-     "output": 2361,
-     "thinking": 2067
+     "output": 2469,
+     "thinking": 2169
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1679,
+   "message_chars": 1872,
    "answer": {
     "poses": [
      {
       "name": "marker_1",
-      "x": 0.42,
-      "y": 0.2,
+      "x": 0.4,
+      "y": 0.22,
       "yaw": 0
      },
      {
       "name": "marker_2",
-      "x": 0.42,
-      "y": 0.155,
+      "x": 0.4,
+      "y": 0.17,
       "yaw": 0
      },
      {
       "name": "screwdriver_1",
-      "x": 0.42,
-      "y": 0.1,
+      "x": 0.4,
+      "y": 0.11,
       "yaw": 0
      },
      {
       "name": "screwdriver_2",
-      "x": 0.42,
-      "y": 0.035,
+      "x": 0.4,
+      "y": 0.04,
       "yaw": 0
      },
      {
       "name": "pliers",
-      "x": 0.42,
+      "x": 0.4,
       "y": -0.05,
       "yaw": 0
      },
      {
       "name": "hammer",
-      "x": 0.42,
-      "y": -0.17,
+      "x": 0.4,
+      "y": -0.175,
       "yaw": 0
      },
      {
       "name": "tape",
       "x": 0.8,
-      "y": 0,
-      "yaw": 96
+      "y": -0.2,
+      "yaw": 0
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -82,16 +81,16 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 1.7876553535461426,
-   "solve_cpu_s": 1.788364033999997,
+   "solve_s": 1.5984289646148682,
+   "solve_cpu_s": 1.5984028359999911,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 7,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 4.116290807723999,
-    "solve_cpu_s": 4.114960222000008,
+    "solve_s": 3.3801329135894775,
+    "solve_cpu_s": 3.3797750840000162,
     "rubric_failed": []
    }
   }

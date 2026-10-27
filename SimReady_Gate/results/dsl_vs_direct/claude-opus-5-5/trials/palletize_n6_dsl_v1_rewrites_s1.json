@@ -1,0 +1,129 @@
+{
+ "task": "palletize_n6",
+ "family": "palletize",
+ "n": 6,
+ "condition": "dsl_v1_rewrites",
+ "seed": 1,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 14.732173204421997,
+    "duration_ms": 14048,
+    "duration_api_ms": 14022,
+    "cost_usd": 0.039319400000000004,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1363,
+     "cache_read": 12037,
+     "output": 1300,
+     "thinking": 766
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1511,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "box_*",
+      "b": "pallet.level2"
+     },
+     {
+      "op": "upright",
+      "a": "box_*"
+     },
+     {
+      "op": "within",
+      "a": "box_*",
+      "b": "pallet.level2",
+      "inset": 0.02
+     },
+     {
+      "op": "yaw",
+      "a": "box_*",
+      "deg": 0,
+      "mod": 90,
+      "tol": 3
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_1",
+       "box_2",
+       "box_3"
+      ],
+      "axis": "y",
+      "gap": 0.01,
+      "tol": 0.01
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_4",
+       "box_5",
+       "box_6"
+      ],
+      "axis": "y",
+      "gap": 0.01,
+      "tol": 0.01
+     },
+     {
+      "op": "farther",
+      "a": "box_4",
+      "b": "box_1",
+      "gap": 0.36
+     },
+     {
+      "op": "farther",
+      "a": "box_5",
+      "b": "box_2",
+      "gap": 0.36
+     },
+     {
+      "op": "farther",
+      "a": "box_6",
+      "b": "box_3",
+      "gap": 0.36
+     }
+    ],
+    "assumptions": [
+     "Six boxes with at most 3 per row means two rows: box_1-3 (all the same size) in one row and box_4-6 in the other.",
+     "The surface the boxes stand on is pallet.level2, the open top deck.",
+     "Spacing between the two rows is enforced through centre gaps of 0.36 m. That is enough for the largest footprint half-depths plus 1 cm, whatever the yaw."
+    ],
+    "schedule": {
+     "margin": 0.01
+    }
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 2 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 0.9008872509002686,
+   "solve_cpu_s": 0.900191607,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 10
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

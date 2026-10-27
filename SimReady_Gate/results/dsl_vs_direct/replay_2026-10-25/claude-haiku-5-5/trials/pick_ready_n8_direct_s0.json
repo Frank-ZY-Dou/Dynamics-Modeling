@@ -1,0 +1,109 @@
+{
+ "task": "pick_ready_n8",
+ "family": "pick_ready",
+ "n": 8,
+ "condition": "direct",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 14.158787727355957,
+    "duration_ms": 13582,
+    "duration_api_ms": 13554,
+    "cost_usd": 0.0014783399999999999,
+    "usage": {
+     "input": 2,
+     "cache_creation": 402,
+     "cache_read": 2024,
+     "output": 2755,
+     "thinking": 2439
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1738,
+   "answer": {
+    "poses": [
+     {
+      "name": "mug",
+      "x": 0.5,
+      "y": 0,
+      "yaw": 0
+     },
+     {
+      "name": "bowl",
+      "x": 0.45,
+      "y": -0.25,
+      "yaw": 69
+     },
+     {
+      "name": "apple",
+      "x": 0.7,
+      "y": -0.25,
+      "yaw": -161
+     },
+     {
+      "name": "can",
+      "x": 0.7,
+      "y": 0.25,
+      "yaw": 89
+     },
+     {
+      "name": "bottle",
+      "x": 0.76,
+      "y": -0.05,
+      "yaw": -119
+     },
+     {
+      "name": "screwdriver",
+      "x": 0.65,
+      "y": -0.45,
+      "yaw": -135
+     },
+     {
+      "name": "tape",
+      "x": 0.62,
+      "y": 0.42,
+      "yaw": -9
+     },
+     {
+      "name": "tumbler",
+      "x": 0.36,
+      "y": -0.4,
+      "yaw": 161
+     }
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "penetrating_pairs": [],
+    "not_resting_on_anything": [],
+    "off_the_support": [],
+    "missing_poses": []
+   },
+   "self_ok": true,
+   "solve_s": 1.3541326522827148,
+   "solve_cpu_s": 1.3543374189999966,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 8,
+   "direct_repair": {
+    "rubric_ok": true,
+    "self_ok": true,
+    "solve_s": 2.974163293838501,
+    "solve_cpu_s": 2.974171638999998,
+    "rubric_failed": []
+   }
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

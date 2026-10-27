@@ -1,0 +1,589 @@
+{
+ "task": "stack_n6",
+ "family": "stack",
+ "n": 6,
+ "condition": "dsl_v0",
+ "seed": 1,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 18.16780400276184,
+    "duration_ms": 17620,
+    "duration_api_ms": 17588,
+    "cost_usd": 0.00218112,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1289,
+     "cache_read": 3962,
+     "output": 3767,
+     "thinking": 2968
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1341,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration",
+      "margin": 0.005
+     },
+     {
+      "op": "on_support",
+      "a": "box_large",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "box_large"
+     },
+     {
+      "op": "on_support",
+      "a": "box_medium",
+      "b": "box_large"
+     },
+     {
+      "op": "upright",
+      "a": "box_medium"
+     },
+     {
+      "op": "on_support",
+      "a": "box_small",
+      "b": "box_medium"
+     },
+     {
+      "op": "upright",
+      "a": "box_small"
+     },
+     {
+      "op": "on_support",
+      "a": "apple",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "apple"
+     },
+     {
+      "op": "on_support",
+      "a": "can",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "can"
+     },
+     {
+      "op": "on_support",
+      "a": "cup",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "cup"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "place",
+      "a": "box_large",
+      "x": 0.5,
+      "y": -0.3
+     },
+     {
+      "op": "place",
+      "a": "box_medium",
+      "x": 0.5,
+      "y": -0.3
+     },
+     {
+      "op": "place",
+      "a": "box_small",
+      "x": 0.5,
+      "y": -0.3
+     },
+     {
+      "op": "right_of",
+      "a": "box_large",
+      "b": "table",
+      "axis": "y",
+      "gap": 0.2,
+      "reason": "bottom box entirely at y<0 (right half of table)"
+     },
+     {
+      "op": "place",
+      "a": "apple",
+      "x": 0.4,
+      "y": 0.45
+     },
+     {
+      "op": "place",
+      "a": "can",
+      "x": 0.55,
+      "y": 0.45
+     },
+     {
+      "op": "place",
+      "a": "cup",
+      "x": 0.7,
+      "y": 0.45
+     },
+     {
+      "op": "left_of",
+      "a": "apple",
+      "b": "table",
+      "axis": "y",
+      "gap": 0.1,
+      "reason": "every other object on left half, entirely at y>0"
+     },
+     {
+      "op": "left_of",
+      "a": "can",
+      "b": "table",
+      "axis": "y",
+      "gap": 0.1,
+      "reason": "every other object on left half, entirely at y>0"
+     },
+     {
+      "op": "left_of",
+      "a": "cup",
+      "b": "table",
+      "axis": "y",
+      "gap": 0.1,
+      "reason": "every other object on left half, entirely at y>0"
+     }
+    ],
+    "intent": "Stack the three cardboard boxes into a centred tower on the table's right half (y<0) with the bottom box within 0.7 m of the robot, and place the apple, can and cup on the left half (y>0), all upright and non-penetrating."
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "place(box_medium)",
+      0.0861
+     ],
+     [
+      "place(box_small)",
+      0.0568
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 1 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts exceeded the trust region at 1 step(s); those steps served the contacts alone"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 1.5891473293304443,
+   "solve_cpu_s": 1.5852695690000047,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "centred(box_medium,box_large)",
+     false,
+     0.0981
+    ],
+    [
+     "centred(box_small,box_medium)",
+     false,
+     0.1305
+    ]
+   ],
+   "answer_items": 24
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 17.155746459960938,
+    "duration_ms": 16523,
+    "duration_api_ms": 16457,
+    "cost_usd": 0.0029627,
+    "usage": {
+     "input": 2,
+     "cache_creation": 6260,
+     "cache_read": 0,
+     "output": 3421,
+     "thinking": 2719
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 3546,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration",
+      "margin": 0.005
+     },
+     {
+      "op": "on_support",
+      "a": "box_large",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "box_large"
+     },
+     {
+      "op": "on_support",
+      "a": "box_medium",
+      "b": "box_large"
+     },
+     {
+      "op": "upright",
+      "a": "box_medium"
+     },
+     {
+      "op": "on_support",
+      "a": "box_small",
+      "b": "box_medium"
+     },
+     {
+      "op": "upright",
+      "a": "box_small"
+     },
+     {
+      "op": "on_support",
+      "a": "apple",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "apple"
+     },
+     {
+      "op": "on_support",
+      "a": "can",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "can"
+     },
+     {
+      "op": "on_support",
+      "a": "cup",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "cup"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "place",
+      "a": "box_large",
+      "x": 0.45,
+      "y": -0.35
+     },
+     {
+      "op": "place",
+      "a": "box_medium",
+      "x": 0.45,
+      "y": -0.35
+     },
+     {
+      "op": "place",
+      "a": "box_small",
+      "x": 0.45,
+      "y": -0.35
+     },
+     {
+      "op": "right_of",
+      "a": "box_large",
+      "b": "table",
+      "axis": "y",
+      "gap": 0.25
+     },
+     {
+      "op": "place",
+      "a": "apple",
+      "x": 0.4,
+      "y": 0.45
+     },
+     {
+      "op": "place",
+      "a": "can",
+      "x": 0.55,
+      "y": 0.45
+     },
+     {
+      "op": "place",
+      "a": "cup",
+      "x": 0.7,
+      "y": 0.45
+     },
+     {
+      "op": "left_of",
+      "a": "apple",
+      "b": "table",
+      "axis": "y",
+      "gap": 0.1
+     },
+     {
+      "op": "left_of",
+      "a": "can",
+      "b": "table",
+      "axis": "y",
+      "gap": 0.1
+     },
+     {
+      "op": "left_of",
+      "a": "cup",
+      "b": "table",
+      "axis": "y",
+      "gap": 0.1
+     }
+    ],
+    "intent": "Build a centred three-box tower (largest at bottom) on the table's right half at y<0 with the bottom box near the robot, and place the apple, can and cup upright on the left half at y>0, non-penetrating."
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "place(box_medium)",
+      0.0861
+     ],
+     [
+      "place(box_small)",
+      0.0568
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 1 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts exceeded the trust region at 1 step(s); those steps served the contacts alone"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 1.6532347202301025,
+   "solve_cpu_s": 1.6505386850000008,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "centred(box_medium,box_large)",
+     false,
+     0.0981
+    ],
+    [
+     "centred(box_small,box_medium)",
+     false,
+     0.1305
+    ]
+   ],
+   "answer_items": 24
+  },
+  {
+   "round": 3,
+   "llm": {
+    "ok": true,
+    "wall_s": 14.107340574264526,
+    "duration_ms": 13400,
+    "duration_api_ms": 13353,
+    "cost_usd": 0.0019660199999999997,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2201,
+     "cache_read": 3962,
+     "output": 2972,
+     "thinking": 2159
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 3287,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration",
+      "margin": 0.005
+     },
+     {
+      "op": "on_support",
+      "a": "box_large",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "box_large"
+     },
+     {
+      "op": "on_support",
+      "a": "box_medium",
+      "b": "box_large"
+     },
+     {
+      "op": "upright",
+      "a": "box_medium"
+     },
+     {
+      "op": "on_support",
+      "a": "box_small",
+      "b": "box_medium"
+     },
+     {
+      "op": "upright",
+      "a": "box_small"
+     },
+     {
+      "op": "near",
+      "a": "box_medium",
+      "b": "box_large",
+      "r": 0.01
+     },
+     {
+      "op": "near",
+      "a": "box_small",
+      "b": "box_medium",
+      "r": 0.01
+     },
+     {
+      "op": "near",
+      "a": "box_small",
+      "b": "box_large",
+      "r": 0.01
+     },
+     {
+      "op": "place",
+      "a": "box_large",
+      "x": 0.45,
+      "y": -0.35
+     },
+     {
+      "op": "right_of",
+      "a": "box_large",
+      "b": "table",
+      "axis": "y",
+      "gap": 0.25
+     },
+     {
+      "op": "right_of",
+      "a": "box_medium",
+      "b": "table",
+      "axis": "y",
+      "gap": 0.25
+     },
+     {
+      "op": "right_of",
+      "a": "box_small",
+      "b": "table",
+      "axis": "y",
+      "gap": 0.25
+     },
+     {
+      "op": "on_support",
+      "a": "apple",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "apple"
+     },
+     {
+      "op": "on_support",
+      "a": "can",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "can"
+     },
+     {
+      "op": "on_support",
+      "a": "cup",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "cup"
+     },
+     {
+      "op": "place",
+      "a": "apple",
+      "x": 0.4,
+      "y": 0.45
+     },
+     {
+      "op": "place",
+      "a": "can",
+      "x": 0.55,
+      "y": 0.45
+     },
+     {
+      "op": "place",
+      "a": "cup",
+      "x": 0.7,
+      "y": 0.45
+     },
+     {
+      "op": "left_of",
+      "a": "apple",
+      "b": "table",
+      "axis": "y",
+      "gap": 0.1
+     },
+     {
+      "op": "left_of",
+      "a": "can",
+      "b": "table",
+      "axis": "y",
+      "gap": 0.1
+     },
+     {
+      "op": "left_of",
+      "a": "cup",
+      "b": "table",
+      "axis": "y",
+      "gap": 0.1
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     }
+    ]
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "pairs still penetrated in the closing steps of the tail; 3 step(s) served the contacts alone, the program rows set aside",
+     "a program row was not met within the step at 12 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts exceeded the trust region at 2 step(s); those steps served the contacts alone"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 3.0116817951202393,
+   "solve_cpu_s": 3.0121455150000003,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 27
+  }
+ ],
+ "n_rounds": 3,
+ "success": true,
+ "first_round_success": false,
+ "self_ok": true
+}

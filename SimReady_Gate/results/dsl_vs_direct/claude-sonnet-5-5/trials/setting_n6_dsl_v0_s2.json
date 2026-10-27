@@ -11,28 +11,32 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 8.733711004257202,
-    "duration_ms": 8173,
-    "duration_api_ms": 8144,
-    "cost_usd": 0.013814600000000002,
+    "wall_s": 12.640764713287354,
+    "duration_ms": 12039,
+    "duration_api_ms": 12010,
+    "cost_usd": 0.022323700000000002,
     "usage": {
      "input": 2,
-     "cache_creation": 403,
-     "cache_read": 4986,
-     "output": 1170,
-     "thinking": 648
+     "cache_creation": 1450,
+     "cache_read": 4297,
+     "output": 1609,
+     "thinking": 1213
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1707,
+   "message_chars": 1896,
    "answer": {
+    "intent": "Single place setting: plate centred, fork left, knife right, spoon beyond knife, glass far near knife, mug left of fork with handle toward robot.",
     "statements": [
+     {
+      "op": "no_penetration"
+     },
      {
       "op": "on_support",
       "a": "*",
-      "b": "table"
+      "b": "table.level2"
      },
      {
       "op": "upright",
@@ -41,99 +45,52 @@
      {
       "op": "within",
       "a": "*",
-      "b": "table.top"
-     },
-     {
-      "op": "no_penetration",
-      "margin": 0.005
+      "b": "table.level2"
      },
      {
       "op": "place",
       "a": "plate",
-      "x": 0.55,
+      "x": 0.52,
       "y": 0,
       "yaw": 0
      },
      {
       "op": "place",
       "a": "fork",
-      "x": 0.55,
-      "y": 0.13,
+      "x": 0.56,
+      "y": 0.135,
       "yaw": 0
      },
      {
       "op": "place",
       "a": "knife",
-      "x": 0.55,
-      "y": -0.13,
+      "x": 0.56,
+      "y": -0.135,
       "yaw": 90
      },
      {
       "op": "place",
       "a": "spoon",
-      "x": 0.55,
-      "y": -0.2,
+      "x": 0.56,
+      "y": -0.19,
       "yaw": 90
      },
      {
       "op": "place",
       "a": "glass",
-      "x": 0.68,
-      "y": -0.1,
+      "x": 0.67,
+      "y": -0.07,
       "yaw": 0
      },
      {
       "op": "place",
       "a": "mug",
       "x": 0.55,
-      "y": 0.26,
+      "y": 0.23,
       "yaw": 0
-     },
-     {
-      "op": "left_of",
-      "a": "fork",
-      "b": "plate",
-      "gap": 0.1
-     },
-     {
-      "op": "right_of",
-      "a": "knife",
-      "b": "plate",
-      "gap": 0.1
-     },
-     {
-      "op": "right_of",
-      "a": "spoon",
-      "b": "knife",
-      "gap": 0.06
-     },
-     {
-      "op": "in_front_of",
-      "a": "glass",
-      "b": "plate",
-      "gap": 0.1
-     },
-     {
-      "op": "near",
-      "a": "glass",
-      "b": "knife",
-      "r": 0.14
-     },
-     {
-      "op": "left_of",
-      "a": "mug",
-      "b": "fork",
-      "gap": 0.1
-     },
-     {
-      "op": "min_distance",
-      "a": "mug",
-      "b": "fork",
-      "r": 0.1
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -142,17 +99,17 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 1.0683560371398926,
-   "solve_cpu_s": 1.068337266,
+   "solve_s": 0.9819436073303223,
+   "solve_cpu_s": 0.9820000960000002,
    "rubric_ok": false,
    "rubric_failed": [
     [
      "facing(mug)",
      false,
-     25.3014
+     22.6938
     ]
    ],
-   "answer_items": 17
+   "answer_items": 10
   }
  ],
  "n_rounds": 1,

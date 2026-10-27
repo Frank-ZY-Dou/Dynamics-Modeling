@@ -1,0 +1,102 @@
+{
+ "task": "palletize_n4",
+ "family": "palletize",
+ "n": 4,
+ "condition": "dsl_v0",
+ "seed": 1,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 12.79944372177124,
+    "duration_ms": 12185,
+    "duration_api_ms": 12158,
+    "cost_usd": 0.0016495199999999998,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1171,
+     "cache_read": 3962,
+     "output": 2751,
+     "thinking": 2385
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1072,
+   "answer": {
+    "intent": "Palletize four boxes on the pallet top in two x-aligned rows (three boxes at x=0.52, one at x=0.90), square to the pallet edges, all inset 2 cm and separated by at least 1 cm.",
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "pallet"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "pallet.top",
+      "inset": 0.02
+     },
+     {
+      "op": "no_penetration",
+      "margin": 0.01
+     },
+     {
+      "op": "place",
+      "a": "box_1",
+      "x": 0.52,
+      "y": -0.3,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "box_2",
+      "x": 0.52,
+      "y": 0,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "box_3",
+      "x": 0.52,
+      "y": 0.3,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "box_4",
+      "x": 0.9,
+      "y": 0,
+      "yaw": 0
+     }
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 0.300321102142334,
+   "solve_cpu_s": 0.3005781290000016,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 8
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

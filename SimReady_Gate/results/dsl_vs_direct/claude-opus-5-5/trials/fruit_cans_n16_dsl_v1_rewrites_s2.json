@@ -1,0 +1,137 @@
+{
+ "task": "fruit_cans_n16",
+ "family": "fruit_cans",
+ "n": 16,
+ "condition": "dsl_v1_rewrites",
+ "seed": 2,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 11.237923622131348,
+    "duration_ms": 10593,
+    "duration_api_ms": 10564,
+    "cost_usd": 0.0410314,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2297,
+     "cache_read": 12037,
+     "output": 1012,
+     "thinking": 484
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 3240,
+   "answer": {
+    "intent": "Group the fruit on the left (y > 0.25) and line the cans up along x on the right (y < -0.25). Put the bowl and mug in the central band, with the bowl at least 0.55 m from the robot and the mug near the bowl. Keep a square near the robot empty.",
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_*",
+      "b": "table.top",
+      "y0": 0.25
+     },
+     {
+      "op": "cluster",
+      "members": [
+       "fruit_*"
+      ],
+      "r": 0.13
+     },
+     {
+      "op": "within",
+      "a": "can_*",
+      "b": "table.top",
+      "y1": -0.25
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_*"
+      ],
+      "axis": "x",
+      "gap": 0.02,
+      "tol": 0.01
+     },
+     {
+      "op": "within",
+      "a": "bowl",
+      "b": "table.top",
+      "y0": -0.2,
+      "y1": 0.2
+     },
+     {
+      "op": "reach",
+      "a": "bowl",
+      "r": 1.5,
+      "min": 0.55
+     },
+     {
+      "op": "close_to",
+      "a": "mug",
+      "b": "bowl",
+      "r": 0.2
+     },
+     {
+      "op": "within",
+      "a": "mug",
+      "b": "table.top",
+      "y0": -0.2,
+      "y1": 0.2
+     },
+     {
+      "op": "keep_out",
+      "a": "*",
+      "x0": 0.3,
+      "x1": 0.5,
+      "y0": -0.1,
+      "y1": 0.1
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 2 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 4.683563470840454,
+   "solve_cpu_s": 4.681797508,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 13
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

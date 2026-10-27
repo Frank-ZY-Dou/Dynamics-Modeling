@@ -11,22 +11,22 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 5.496500492095947,
-    "duration_ms": 4741,
-    "duration_api_ms": 4712,
-    "cost_usd": 0.0107653,
+    "wall_s": 7.126591205596924,
+    "duration_ms": 6486,
+    "duration_api_ms": 6451,
+    "cost_usd": 0.059786,
     "usage": {
      "input": 2,
-     "cache_creation": 404,
-     "cache_read": 11553,
-     "output": 799,
-     "thinking": 281
+     "cache_creation": 13488,
+     "cache_read": 0,
+     "output": 583,
+     "thinking": 0
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1700,
+   "message_chars": 1889,
    "answer": {
     "statements": [
      {
@@ -35,7 +35,7 @@
      {
       "op": "on_support",
       "a": "*",
-      "b": "table"
+      "b": "table.level2"
      },
      {
       "op": "upright",
@@ -59,6 +59,40 @@
       "min": 0.5
      },
      {
+      "op": "left_of",
+      "a": "fork",
+      "b": "plate"
+     },
+     {
+      "op": "right_of",
+      "a": "knife",
+      "b": "plate"
+     },
+     {
+      "op": "symmetric",
+      "a": "fork",
+      "b": "knife",
+      "c": "plate",
+      "axis": "y",
+      "tol": 0.01
+     },
+     {
+      "op": "yaw",
+      "a": "fork",
+      "deg": 0,
+      "tol": 5,
+      "mod": 180,
+      "axis": "long"
+     },
+     {
+      "op": "yaw",
+      "a": "knife",
+      "deg": 0,
+      "tol": 5,
+      "mod": 180,
+      "axis": "long"
+     },
+     {
       "op": "beside",
       "a": "fork",
       "b": "plate",
@@ -73,28 +107,6 @@
       "side": "right",
       "gap": 0.02,
       "max": 0.05
-     },
-     {
-      "op": "symmetric",
-      "a": "fork",
-      "b": "knife",
-      "c": "plate",
-      "axis": "y",
-      "tol": 0.01
-     },
-     {
-      "op": "yaw",
-      "a": "fork",
-      "deg": 0,
-      "axis": "long",
-      "tol": 5
-     },
-     {
-      "op": "yaw",
-      "a": "knife",
-      "deg": 0,
-      "axis": "long",
-      "tol": 5
      },
      {
       "op": "beside",
@@ -109,12 +121,13 @@
       "b": "knife"
      },
      {
-      "op": "in_front_of",
+      "op": "farther",
       "a": "glass",
-      "b": "plate"
+      "b": "plate",
+      "gap": 0
      },
      {
-      "op": "near",
+      "op": "close_to",
       "a": "glass",
       "b": "knife",
       "r": 0.15
@@ -129,12 +142,11 @@
      {
       "op": "facing",
       "a": "mug",
-      "axis": "-x",
+      "axis": "handle",
       "tol": 20
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -145,11 +157,11 @@
     ]
    },
    "self_ok": true,
-   "solve_s": 1.1000075340270996,
-   "solve_cpu_s": 1.100091586,
+   "solve_s": 0.8946750164031982,
+   "solve_cpu_s": 0.8947751099999999,
    "rubric_ok": true,
    "rubric_failed": [],
-   "answer_items": 17
+   "answer_items": 19
   }
  ],
  "n_rounds": 1,

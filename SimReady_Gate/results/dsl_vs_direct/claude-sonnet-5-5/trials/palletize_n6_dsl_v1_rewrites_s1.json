@@ -1,0 +1,149 @@
+{
+ "task": "palletize_n6",
+ "family": "palletize",
+ "n": 6,
+ "condition": "dsl_v1_rewrites",
+ "seed": 1,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 8.413805961608887,
+    "duration_ms": 7730,
+    "duration_api_ms": 7702,
+    "cost_usd": 0.0169577,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1345,
+     "cache_read": 12037,
+     "output": 1037,
+     "thinking": 590
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1511,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "pallet.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "pallet.level2",
+      "inset": 0.025
+     },
+     {
+      "op": "yaw",
+      "a": "*",
+      "deg": 0,
+      "mod": 90,
+      "tol": 2
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_1",
+       "box_2",
+       "box_3"
+      ],
+      "axis": "y",
+      "gap": 0.015
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_4",
+       "box_5",
+       "box_6"
+      ],
+      "axis": "y",
+      "gap": 0.015
+     },
+     {
+      "op": "at",
+      "a": "box_1",
+      "x": 0.5,
+      "tol": 0.005
+     },
+     {
+      "op": "align",
+      "members": [
+       "box_1",
+       "box_2",
+       "box_3"
+      ],
+      "axis": "x"
+     },
+     {
+      "op": "align",
+      "members": [
+       "box_4",
+       "box_5",
+       "box_6"
+      ],
+      "axis": "x"
+     },
+     {
+      "op": "at",
+      "a": "box_4",
+      "x": 0.9,
+      "tol": 0.005
+     },
+     {
+      "op": "min_distance",
+      "a": "box_4",
+      "b": "box_1",
+      "r": 0.36
+     },
+     {
+      "op": "min_distance",
+      "a": "box_5",
+      "b": "box_2",
+      "r": 0.36
+     },
+     {
+      "op": "min_distance",
+      "a": "box_6",
+      "b": "box_3",
+      "r": 0.36
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 5 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 0.8602514266967773,
+   "solve_cpu_s": 0.8604461500000014,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 14
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

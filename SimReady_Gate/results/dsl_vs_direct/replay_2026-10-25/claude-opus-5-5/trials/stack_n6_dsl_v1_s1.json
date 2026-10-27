@@ -1,0 +1,153 @@
+{
+ "task": "stack_n6",
+ "family": "stack",
+ "n": 6,
+ "condition": "dsl_v1",
+ "seed": 1,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 7.7397918701171875,
+    "duration_ms": 7106,
+    "duration_api_ms": 7071,
+    "cost_usd": 0.0271178,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1288,
+     "cache_read": 10529,
+     "output": 735,
+     "thinking": 306
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1341,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "fixed",
+      "a": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "box_large",
+      "b": "table"
+     },
+     {
+      "op": "stack",
+      "members": [
+       "box_large",
+       "box_medium",
+       "box_small"
+      ],
+      "tol": 0.01
+     },
+     {
+      "op": "on_support",
+      "a": "apple",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "can",
+      "b": "table"
+     },
+     {
+      "op": "on_support",
+      "a": "cup",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "box_large",
+      "b": "table.top",
+      "side": "right"
+     },
+     {
+      "op": "within",
+      "a": "box_large",
+      "y1": 0
+     },
+     {
+      "op": "reach",
+      "a": "box_large",
+      "r": 0.7
+     },
+     {
+      "op": "within",
+      "a": "apple",
+      "b": "table.top",
+      "side": "left"
+     },
+     {
+      "op": "within",
+      "a": "can",
+      "b": "table.top",
+      "side": "left"
+     },
+     {
+      "op": "within",
+      "a": "cup",
+      "b": "table.top",
+      "side": "left"
+     },
+     {
+      "op": "within",
+      "a": "apple",
+      "y0": 0
+     },
+     {
+      "op": "within",
+      "a": "can",
+      "y0": 0
+     },
+     {
+      "op": "within",
+      "a": "cup",
+      "y0": 0
+     }
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "pairs still penetrated in the closing steps of the tail; 3 step(s) served the contacts alone, the program rows set aside",
+     "a program row was not met within the step at 4 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the contacts exceeded the trust region at 1 step(s); those steps served the contacts alone",
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 3.08607816696167,
+   "solve_cpu_s": 3.077427606999997,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 18
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

@@ -1,0 +1,82 @@
+{
+ "task": "minimal_fix_n12",
+ "family": "minimal_fix",
+ "n": 12,
+ "condition": "dsl_v1_rewrites",
+ "seed": 1,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 5.480370044708252,
+    "duration_ms": 4606,
+    "duration_api_ms": 4554,
+    "cost_usd": 0.0009195700000000001,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1775,
+     "cache_read": 12037,
+     "output": 888,
+     "thinking": 653
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2209,
+   "answer": {
+    "intent": "Separate the interpenetrating objects on the table with minimal movement, keeping every object upright and on the table top.",
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "max_move",
+      "a": "*",
+      "d": 0.03
+     },
+     {
+      "op": "max_turn",
+      "a": "*",
+      "deg": 10
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 2.6050822734832764,
+   "solve_cpu_s": 2.605164473000002,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 6
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

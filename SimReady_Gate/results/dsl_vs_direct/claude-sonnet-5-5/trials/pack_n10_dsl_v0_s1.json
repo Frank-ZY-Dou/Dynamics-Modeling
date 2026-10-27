@@ -11,105 +11,103 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 8.57461929321289,
-    "duration_ms": 7992,
-    "duration_api_ms": 7961,
-    "cost_usd": 0.0169022,
+    "wall_s": 24.07992172241211,
+    "duration_ms": 23506,
+    "duration_api_ms": 23472,
+    "cost_usd": 0.027437700000000002,
     "usage": {
      "input": 2,
-     "cache_creation": 1498,
-     "cache_read": 3962,
-     "output": 1051,
-     "thinking": 632
+     "cache_creation": 1561,
+     "cache_read": 4297,
+     "output": 2076,
+     "thinking": 1633
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1518,
+   "message_chars": 1763,
    "answer": {
     "statements": [
      {
       "op": "on_support",
       "a": "*",
-      "b": "table"
+      "b": "table.level2"
      },
      {
       "op": "upright",
       "a": "*"
      },
      {
-      "op": "within",
-      "a": "*",
-      "b": "table.top"
-     },
-     {
-      "op": "no_penetration",
-      "a": "*"
-     },
-     {
-      "op": "place",
-      "a": "fruit_7",
-      "x": 0.455,
-      "y": 0
+      "op": "no_penetration"
      },
      {
       "op": "place",
       "a": "fruit_3",
-      "x": 0.655,
-      "y": 0
+      "x": 0.47,
+      "y": -0.04,
+      "yaw": 0
      },
      {
       "op": "place",
-      "a": "fruit_1",
-      "x": 0.52,
-      "y": -0.105
-     },
-     {
-      "op": "place",
-      "a": "fruit_2",
-      "x": 0.52,
-      "y": -0.035
-     },
-     {
-      "op": "place",
-      "a": "fruit_4",
-      "x": 0.52,
-      "y": 0.035
-     },
-     {
-      "op": "place",
-      "a": "fruit_5",
-      "x": 0.52,
-      "y": 0.105
-     },
-     {
-      "op": "place",
-      "a": "fruit_6",
-      "x": 0.59,
-      "y": -0.105
-     },
-     {
-      "op": "place",
-      "a": "fruit_8",
-      "x": 0.59,
-      "y": -0.035
+      "a": "fruit_7",
+      "x": 0.548,
+      "y": 0.05,
+      "yaw": 0
      },
      {
       "op": "place",
       "a": "fruit_9",
-      "x": 0.59,
-      "y": 0.035
+      "x": 0.465,
+      "y": 0.098
+     },
+     {
+      "op": "place",
+      "a": "fruit_8",
+      "x": 0.545,
+      "y": -0.105
+     },
+     {
+      "op": "place",
+      "a": "fruit_1",
+      "x": 0.612,
+      "y": -0.1
+     },
+     {
+      "op": "place",
+      "a": "fruit_2",
+      "x": 0.612,
+      "y": -0.03
+     },
+     {
+      "op": "place",
+      "a": "fruit_6",
+      "x": 0.612,
+      "y": 0.04
      },
      {
       "op": "place",
       "a": "fruit_10",
-      "x": 0.59,
+      "x": 0.612,
       "y": 0.105
+     },
+     {
+      "op": "place",
+      "a": "fruit_4",
+      "x": 0.668,
+      "y": -0.06
+     },
+     {
+      "op": "place",
+      "a": "fruit_5",
+      "x": 0.668,
+      "y": 0.03
      }
-    ]
+    ],
+    "schedule": {
+     "margin": 0.001
+    }
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
@@ -118,17 +116,17 @@
     "solver_notes": []
    },
    "self_ok": true,
-   "solve_s": 1.7539300918579102,
-   "solve_cpu_s": 1.7545095079999982,
+   "solve_s": 1.0713205337524414,
+   "solve_cpu_s": 1.0713010899999986,
    "rubric_ok": false,
    "rubric_failed": [
     [
      "in_square(10 bodies)",
      false,
-     0.0741
+     0.0119
     ]
    ],
-   "answer_items": 14
+   "answer_items": 13
   }
  ],
  "n_rounds": 1,

@@ -1,0 +1,97 @@
+{
+ "task": "drinks_row_n6",
+ "family": "drinks_row",
+ "n": 6,
+ "condition": "direct",
+ "seed": 2,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 5.38661527633667,
+    "duration_ms": 4748,
+    "duration_api_ms": 4717,
+    "cost_usd": 0.0200626,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1319,
+     "cache_read": 913,
+     "output": 466,
+     "thinking": 229
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1388,
+   "answer": {
+    "poses": [
+     {
+      "name": "can_4",
+      "x": 0.75,
+      "y": 0.25,
+      "yaw": 125
+     },
+     {
+      "name": "can_5",
+      "x": 0.75,
+      "y": 0.15,
+      "yaw": 102
+     },
+     {
+      "name": "can_1",
+      "x": 0.75,
+      "y": 0.05,
+      "yaw": -91
+     },
+     {
+      "name": "can_2",
+      "x": 0.75,
+      "y": -0.05,
+      "yaw": -160
+     },
+     {
+      "name": "can_3",
+      "x": 0.75,
+      "y": -0.15,
+      "yaw": -57
+     },
+     {
+      "name": "bottle_1",
+      "x": 0.75,
+      "y": -0.25,
+      "yaw": -66
+     }
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "penetrating_pairs": [],
+    "not_resting_on_anything": [],
+    "off_the_support": [],
+    "missing_poses": []
+   },
+   "self_ok": true,
+   "solve_s": 0.47228264808654785,
+   "solve_cpu_s": 0.47237122499999984,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 6,
+   "direct_repair": {
+    "rubric_ok": true,
+    "self_ok": true,
+    "solve_s": 1.0386943817138672,
+    "solve_cpu_s": 1.0385691379999997,
+    "rubric_failed": []
+   }
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

@@ -1,0 +1,155 @@
+{
+ "task": "palletize_n4",
+ "family": "palletize",
+ "n": 4,
+ "condition": "dsl_v1_rewrites",
+ "seed": 1,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 24.662530660629272,
+    "duration_ms": 24108,
+    "duration_api_ms": 24079,
+    "cost_usd": 0.00292027,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1206,
+     "cache_read": 12037,
+     "output": 5117,
+     "thinking": 4298
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1235,
+   "answer": {
+    "intent": "Palletize four cardboard boxes on the pallet's top level in two rows parallel to y, square to the pallet edges, inset 2 cm from the edges and at least 1 cm apart.",
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "pallet.level2",
+      "reason": "palletize: the boxes rest on the pallet"
+     },
+     {
+      "op": "upright",
+      "a": "*",
+      "reason": "every box rests upright on the pallet"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "pallet.level2",
+      "inset": 0.02,
+      "reason": "every box entirely on the pallet, at least 2 cm in from its edges"
+     },
+     {
+      "op": "yaw",
+      "a": "*",
+      "deg": 0,
+      "tol": 3,
+      "mod": 90,
+      "reason": "every box's sides parallel to the pallet edges within 3 degrees"
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_1",
+       "box_2"
+      ],
+      "axis": "y",
+      "gap": 0.01,
+      "mid": 0,
+      "reason": "rows parallel to the y axis; centres of a row share a line parallel to y"
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_3",
+       "box_4"
+      ],
+      "axis": "y",
+      "gap": 0.01,
+      "mid": 0,
+      "reason": "rows parallel to the y axis, at most 3 boxes per row; at least 1 cm between boxes"
+     },
+     {
+      "op": "beside",
+      "a": "box_3",
+      "b": "box_1",
+      "side": "far",
+      "gap": 0.01,
+      "reason": "second row sits at least 1 cm beyond the first row"
+     },
+     {
+      "op": "beside",
+      "a": "box_4",
+      "b": "box_2",
+      "side": "far",
+      "gap": 0.01,
+      "reason": "second row sits at least 1 cm beyond the first row"
+     },
+     {
+      "op": "no_penetration",
+      "reason": "nothing interpenetrates"
+     },
+     {
+      "op": "place",
+      "a": "box_1",
+      "x": 0.53,
+      "y": -0.15,
+      "yaw": 0,
+      "reason": "rough position for the first row"
+     },
+     {
+      "op": "place",
+      "a": "box_2",
+      "x": 0.53,
+      "y": 0.15,
+      "yaw": 0,
+      "reason": "rough position for the first row"
+     },
+     {
+      "op": "place",
+      "a": "box_3",
+      "x": 0.9,
+      "y": -0.15,
+      "yaw": 0,
+      "reason": "rough position for the second row"
+     },
+     {
+      "op": "place",
+      "a": "box_4",
+      "x": 0.9,
+      "y": 0.15,
+      "yaw": 0,
+      "reason": "rough position for the second row"
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 0.28658366203308105,
+   "solve_cpu_s": 0.2865807029999985,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 13
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

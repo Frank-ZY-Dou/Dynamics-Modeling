@@ -11,22 +11,22 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 37.867188930511475,
-    "duration_ms": 37262,
-    "duration_api_ms": 37232,
-    "cost_usd": 0.0048356300000000005,
+    "wall_s": 29.099838495254517,
+    "duration_ms": 28548,
+    "duration_api_ms": 28515,
+    "cost_usd": 0.00379133,
     "usage": {
      "input": 2,
-     "cache_creation": 1664,
+     "cache_creation": 1775,
      "cache_read": 913,
-     "output": 8987,
-     "thinking": 8529
+     "output": 6854,
+     "thinking": 6396
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1937,
+   "message_chars": 2210,
    "answer": {
     "poses": [
      {
@@ -62,7 +62,7 @@
      {
       "name": "apple_2",
       "x": 0.614,
-      "y": -0.4,
+      "y": -0.401,
       "yaw": 146
      },
      {
@@ -73,26 +73,26 @@
      },
      {
       "name": "can_1",
-      "x": 0.313,
-      "y": -0.362,
+      "x": 0.318,
+      "y": -0.356,
       "yaw": 94
      },
      {
       "name": "can_2",
-      "x": 0.551,
-      "y": -0.113,
+      "x": 0.55,
+      "y": -0.11,
       "yaw": -131
      },
      {
       "name": "bottle",
       "x": 0.78,
-      "y": 0.485,
+      "y": 0.46,
       "yaw": -126
      },
      {
       "name": "notebook",
       "x": 0.75,
-      "y": 0.33,
+      "y": 0.31,
       "yaw": 89
      },
      {
@@ -103,7 +103,6 @@
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -112,16 +111,16 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 1.1703228950500488,
-   "solve_cpu_s": 1.1667290170000015,
+   "solve_s": 1.0776793956756592,
+   "solve_cpu_s": 1.0778886209999996,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 12,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 2.529160499572754,
-    "solve_cpu_s": 2.5198078980000034,
+    "solve_s": 2.474769353866577,
+    "solve_cpu_s": 2.475289181000001,
     "rubric_failed": []
    }
   }

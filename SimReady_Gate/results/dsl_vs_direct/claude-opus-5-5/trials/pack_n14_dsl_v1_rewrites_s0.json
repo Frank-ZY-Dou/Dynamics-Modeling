@@ -1,0 +1,83 @@
+{
+ "task": "pack_n14",
+ "family": "pack",
+ "n": 14,
+ "condition": "dsl_v1_rewrites",
+ "seed": 0,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 6.896897554397583,
+    "duration_ms": 6275,
+    "duration_api_ms": 6247,
+    "cost_usd": 0.0272914,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1897,
+     "cache_read": 12037,
+     "output": 485,
+     "thinking": 281
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2314,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "fruit_*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "fruit_*"
+     },
+     {
+      "op": "within",
+      "a": "fruit_*",
+      "b": "table.top",
+      "x0": 0.4,
+      "x1": 0.72,
+      "y0": -0.16,
+      "y1": 0.16
+     },
+     {
+      "op": "minimize"
+     }
+    ],
+    "schedule": {
+     "margin": 0.002
+    }
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 2 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 2.432582378387451,
+   "solve_cpu_s": 2.432145551999998,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 5
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

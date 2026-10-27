@@ -11,22 +11,22 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 5.839829444885254,
-    "duration_ms": 5257,
-    "duration_api_ms": 5226,
-    "cost_usd": 0.014979300000000001,
+    "wall_s": 8.342699527740479,
+    "duration_ms": 7738,
+    "duration_api_ms": 7709,
+    "cost_usd": 0.0146973,
     "usage": {
      "input": 2,
-     "cache_creation": 1636,
+     "cache_creation": 1698,
      "cache_read": 913,
-     "output": 834,
-     "thinking": 479
+     "output": 781,
+     "thinking": 426
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1944,
+   "message_chars": 2189,
    "answer": {
     "poses": [
      {
@@ -42,19 +42,19 @@
       "yaw": 0
      },
      {
-      "name": "can_5",
+      "name": "bottle_2",
       "x": 0.75,
       "y": 0.25,
       "yaw": 0
      },
      {
-      "name": "bottle_2",
+      "name": "glass_1",
       "x": 0.75,
       "y": 0.15,
       "yaw": 0
      },
      {
-      "name": "glass_1",
+      "name": "can_5",
       "x": 0.75,
       "y": 0.05,
       "yaw": 0
@@ -91,7 +91,6 @@
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -100,8 +99,8 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 0.9911589622497559,
-   "solve_cpu_s": 0.9911927499999997,
+   "solve_s": 0.9173750877380371,
+   "solve_cpu_s": 0.9174573349999999,
    "rubric_ok": false,
    "rubric_failed": [
     [
@@ -110,9 +109,9 @@
      [
       0.09157940887962468,
       0.08514325322175864,
-      0.10444383877620567,
       0.1009607969335998,
       0.1004264010116458,
+      0.10444383877620567,
       0.11753090641650488,
       0.1209462242140944,
       0.12099999986821786,
@@ -125,8 +124,8 @@
    "direct_repair": {
     "rubric_ok": false,
     "self_ok": true,
-    "solve_s": 1.9966928958892822,
-    "solve_cpu_s": 1.9960145820000008,
+    "solve_s": 1.7482941150665283,
+    "solve_cpu_s": 1.748674889000001,
     "rubric_failed": [
      [
       "ordered_by_height",
@@ -134,9 +133,9 @@
       [
        0.09157940887962468,
        0.08514325322175864,
-       0.10444383877620567,
        0.1009607969335998,
        0.1004264010116458,
+       0.10444383877620567,
        0.11753090641650488,
        0.1209462242140944,
        0.12099999986821786,

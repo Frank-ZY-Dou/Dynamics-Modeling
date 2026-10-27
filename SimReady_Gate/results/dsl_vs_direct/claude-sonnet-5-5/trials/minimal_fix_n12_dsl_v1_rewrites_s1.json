@@ -1,0 +1,157 @@
+{
+ "task": "minimal_fix_n12",
+ "family": "minimal_fix",
+ "n": 12,
+ "condition": "dsl_v1_rewrites",
+ "seed": 1,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 3.70139217376709,
+    "duration_ms": 2857,
+    "duration_api_ms": 2794,
+    "cost_usd": 0.0105757,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1752,
+     "cache_read": 12037,
+     "output": 236,
+     "thinking": 0
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2209,
+   "answer": {
+    "intent": "Resolve interpenetration with minimal displacement (<=3 cm, <=10 deg), all objects upright on the table.",
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.level2.top"
+     },
+     {
+      "op": "max_move",
+      "a": "*",
+      "d": 0.03
+     },
+     {
+      "op": "max_turn",
+      "a": "*",
+      "deg": 10
+     },
+     {
+      "op": "minimize"
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": false,
+    "error": "ProgramError: statement 3 (within): body name 'table.level2.top' cannot be written in the DSL"
+   },
+   "self_ok": false,
+   "solve_s": 8.082389831542969e-05,
+   "solve_cpu_s": 7.659999999987122e-05,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "no_penetration",
+     false,
+     4
+    ]
+   ],
+   "answer_items": 7
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 3.3665568828582764,
+    "duration_ms": 2437,
+    "duration_api_ms": 2377,
+    "cost_usd": 0.0043152,
+    "usage": {
+     "input": 2,
+     "cache_creation": 309,
+     "cache_read": 13752,
+     "output": 170,
+     "thinking": 0
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2811,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "max_move",
+      "a": "*",
+      "d": 0.03
+     },
+     {
+      "op": "max_turn",
+      "a": "*",
+      "deg": 10
+     },
+     {
+      "op": "minimize"
+     }
+    ]
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 3.083117961883545,
+   "solve_cpu_s": 3.0797002199999994,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 7
+  }
+ ],
+ "n_rounds": 2,
+ "success": true,
+ "first_round_success": false,
+ "self_ok": true
+}

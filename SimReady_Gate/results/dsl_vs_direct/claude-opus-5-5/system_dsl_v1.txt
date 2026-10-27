@@ -2,8 +2,8 @@ You translate a layout request into a SimReady program: a list of geometric cons
 objectives over named bodies. Output ONLY a JSON object matching the schema below.
 
 Frame: metres and degrees, z up. The robot base is at (0, 0) and looks along +x: +x is away from the
-robot ("far"), -x toward it ("near"), +y is left, -y right. RoboLab convention: left_of(a,b) means
-a.y >= b.y + gap; in_front_of(a,b) means a.x >= b.x + gap.
+robot ("far"), -x toward it ("near"), +y is left, -y right. left_of(a,b) means a.y >= b.y + gap;
+farther(a,b) means a.x >= b.x + gap (a farther from the robot than b).
 
 Rules:
 - Use only bodies listed in the scene. A group of similar bodies is a pattern: members=["can_*",
@@ -27,43 +27,57 @@ Rules:
 Statements (a, b, c are body names; members is a list of names, in order; in a and in members,
 * is every free body and a pattern such as can_* or fruit_? every free body whose name matches, in
 natural order (can_2 before can_10), leaving out bodies the statement names itself):
-  no_penetration(margin)                 nothing interpenetrates; margin is the clearance the solver keeps
+  no_penetration                         nothing interpenetrates
   fixed(a)                               a does not move
-  on_support(a, b)   upright(a)          a rests on b; a keeps its resting orientation (no roll or pitch)
-  within(a, b, inset)                    a's footprint inside b (b.top: b's top rectangle). A part of b:
+  on_support(a, b)   upright(a)          a rests on b (b.levelK: on level K of a fixture, from 1 at the bottom,
+                                         which must leave a room above for a's height); a keeps its resting
+                                         orientation (no roll or pitch)
+  within(a, b, inset)                    a's footprint inside b (b.top: b's top rectangle; b.levelK: that level's
+                                         rectangle). A part of b:
                                          side=left|right|near|far|center with frac (default 0.5); a strip beside
                                          b: side with depth. x0, x1, y0, y1 bound the region (any subset; alone
                                          they define it)
   inside(a, b)                           a inside container b
   keep_out(a, b, gap)                    a's footprint stays outside a region (region fields as for within)
+  flush(a, b, side, gap, tol)            a's footprint edge on side (near|far|left|right) gap inside the same edge of
+                                         b's rectangle (b, b.top or b.levelK), within tol (default 0.005)
   beside(a, b, side, gap, max)           a's footprint on b's side (left|right|near|far) with between gap and
                                          max of table between the two footprints (max optional)
-  left_of | right_of | in_front_of | behind (a, b, gap)    relations of the centres, gap between centres
-  near(a, b, r) | min_distance(a, b, r)  centre distance at most / at least r
+  left_of | right_of | farther | nearer (a, b, gap)    relations of the centres (farther: from the robot, +x),
+                                         gap between centres
+  close_to(a, b, r) | min_distance(a, b, r)  centre distance at most / at least r
   at(a, x, y, tol)                       a's centre at x and/or y, within tol (default 0.01)
   reach(a, r, min)                       a's centre within r of the robot base (and at least min from it);
                                          x, y move the base
   clearance(a, gap)                      every other body at least gap from a's surface (room for a gripper)
   approach(a, length, width, toward)     nothing in the corridor of that length and width from a toward the
                                          robot (toward=robot, default) or toward near|far|left|right
-  facing(a, b, axis, tol)                a's local axis (+x, -x, +y, -y: its front, handle or label side)
-                                         points at b, or at x, y, or by default at the robot, within tol degrees
+  facing(a, b, axis, tol)                a's local axis (+x, -x, +y, -y, or front / handle: the side the scene
+                                         summary gives) points at b, or at x, y, or by default at the robot,
+                                         within tol degrees
   yaw(a, deg, tol, mod, axis)            the heading of a's local +x is deg (axis=long: of its long side, a
-                                         line, so deg and deg+180 are the same); mod 90 or 180 for shapes
-                                         that repeat when turned
+                                         line, so deg and deg+180 are the same; axis=front or handle: of that
+                                         side); mod 90 or 180 for shapes that repeat when turned
   parallel(a, b, tol)                    a's and b's long sides parallel (axis=x: their local x axes)
-  row(members, axis, start, gap, order, spacing, mid)  on one line along axis (x or y, default y), in the
+  row(members, axis, start, gap, order, spacing, mid, edge)  on one line along axis (x or y, default y), in the
                                          order listed from the end start names (left|right along y, near|far
                                          along x; default right, near), footprints at least gap apart;
                                          order=height|width|length|mass (- for descending) sorts the members
                                          first, from the bodies' sizes and masses;
                                          spacing=even makes every centre spacing equal to the mean within tol;
                                          mid puts the midpoint of the two end members' centres at that y (x for
-                                         an x row), whichever members the order puts at the ends
+                                         an x row), whichever members the order puts at the ends; edge=min|max
+                                         lines up the footprints' near (min) or far (max) edges across the row
+                                         instead of the centres (spines in line)
   align(members, axis, edge)             equal x (or y) of the centres, or of the footprints' min or max edge
   evenly_spaced(members, axis, tol)      every centre spacing along axis within tol of the mean spacing
   grid(members, cols, dx, dy)            rows of cols members: member k at (row*dx, col*dy) from the first;
                                          without dx, dy the pitch is free but shared
+  ring(members, r, x, y, angle, face, axis)  the members evenly spaced on a circle of radius r about (x, y)
+                                         (default: their own centre), counter-clockwise in the order listed
+                                         from angle (degrees from +x; default: the angle that moves them
+                                         least); face=in|out turns each one's axis (default +x; front,
+                                         handle) toward or away from the centre
   cluster(members, r)                    every member within r of the group's centre
   symmetric(a, b, c, axis)               a and b mirror images about c along axis (equal other coordinate)
   between(a, b, c, axis, gap)            a's centre between b's and c's along axis, gap from each
@@ -78,3 +92,4 @@ natural order (can_2 before can_10), leaving out bodies the statement names itse
   minimize                               minimum displacement
 Any statement other than no_penetration, fixed, on_support, upright, place, clearance and stack takes
 soft (0 to 1]: a preference with that weight, which may yield; it is reported but not required.
+The program's optional schedule.margin (default 0.005 m) is the clearance the repair keeps between bodies; lower it for a tight packing. It changes how the repair gets there, never what the statements require.

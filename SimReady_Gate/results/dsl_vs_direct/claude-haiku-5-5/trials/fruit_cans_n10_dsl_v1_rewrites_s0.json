@@ -1,0 +1,146 @@
+{
+ "task": "fruit_cans_n10",
+ "family": "fruit_cans",
+ "n": 10,
+ "condition": "dsl_v1_rewrites",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 18.21606731414795,
+    "duration_ms": 17620,
+    "duration_api_ms": 17592,
+    "cost_usd": 0.00243667,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1758,
+     "cache_read": 12037,
+     "output": 3929,
+     "thinking": 3085
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 2276,
+   "answer": {
+    "intent": "Sort the heap: fruit grouped on the left of the table (y > 0.25), cans in a line parallel to x on the right (y < -0.25) with 2 cm gaps, the bowl centred between y = -0.20 and 0.20 and at least 0.55 m from the robot, and the square x 0.30\u20130.50, y -0.10\u20130.10 kept empty, all resting upright on the table.",
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2",
+      "reason": "everything rests on the table"
+     },
+     {
+      "op": "upright",
+      "a": "*",
+      "reason": "everything rests upright"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.level2",
+      "inset": 0.01,
+      "reason": "keep every body on the table top"
+     },
+     {
+      "op": "keep_out",
+      "a": "*",
+      "x0": 0.3,
+      "x1": 0.5,
+      "y0": -0.1,
+      "y1": 0.1,
+      "reason": "the square must stay completely empty"
+     },
+     {
+      "op": "within",
+      "a": "fruit_*",
+      "x0": 0.22,
+      "x1": 0.87,
+      "y0": 0.28,
+      "y1": 0.89,
+      "reason": "fruit entirely on the left, y > 0.25"
+     },
+     {
+      "op": "cluster",
+      "members": [
+       "fruit_1",
+       "fruit_2",
+       "fruit_3",
+       "fruit_4",
+       "fruit_5"
+      ],
+      "r": 0.08,
+      "reason": "fruit kept together in one group"
+     },
+     {
+      "op": "within",
+      "a": "can_*",
+      "x0": 0.22,
+      "x1": 0.87,
+      "y0": -0.89,
+      "y1": -0.28,
+      "reason": "cans entirely on the right, y < -0.25"
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_1",
+       "can_2",
+       "can_3",
+       "can_4"
+      ],
+      "axis": "x",
+      "start": "near",
+      "gap": 0.02,
+      "reason": "cans in one line parallel to x with at least 2 cm between neighbours"
+     },
+     {
+      "op": "within",
+      "a": "bowl",
+      "x0": 0.22,
+      "x1": 0.87,
+      "y0": -0.2,
+      "y1": 0.2,
+      "reason": "bowl entirely between y = -0.20 and 0.20"
+     },
+     {
+      "op": "reach",
+      "a": "bowl",
+      "r": 1,
+      "min": 0.55,
+      "reason": "bowl centre at least 55 cm from the robot base"
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 1.3514807224273682,
+   "solve_cpu_s": 1.3520954169999997,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 11
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

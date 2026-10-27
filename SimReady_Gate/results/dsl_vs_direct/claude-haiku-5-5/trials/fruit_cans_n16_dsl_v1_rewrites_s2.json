@@ -1,0 +1,159 @@
+{
+ "task": "fruit_cans_n16",
+ "family": "fruit_cans",
+ "n": 16,
+ "condition": "dsl_v1_rewrites",
+ "seed": 2,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 19.275380849838257,
+    "duration_ms": 18622,
+    "duration_api_ms": 18591,
+    "cost_usd": 0.00266807,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2300,
+     "cache_read": 12037,
+     "output": 4175,
+     "thinking": 3415
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 3240,
+   "answer": {
+    "intent": "Sort the heap: fruit grouped on the table's left (y > 0.25), cans in one x-parallel line on the right (y < -0.25), bowl and mug centred in the middle strip (|y| <= 0.20), and the square x 0.30\u20130.50, y -0.10\u20130.10 kept empty.",
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "within",
+      "a": "fruit_*",
+      "b": "table.level2",
+      "x0": 0.2,
+      "x1": 0.89,
+      "y0": 0.25,
+      "y1": 0.89
+     },
+     {
+      "op": "cluster",
+      "members": [
+       "fruit_1",
+       "fruit_2",
+       "fruit_3",
+       "fruit_4",
+       "fruit_5",
+       "fruit_6",
+       "fruit_7",
+       "fruit_8"
+      ],
+      "r": 0.12
+     },
+     {
+      "op": "within",
+      "a": "can_*",
+      "b": "table.level2",
+      "x0": 0.2,
+      "x1": 0.89,
+      "y0": -0.89,
+      "y1": -0.25
+     },
+     {
+      "op": "row",
+      "members": [
+       "can_1",
+       "can_2",
+       "can_3",
+       "can_4",
+       "can_5",
+       "can_6"
+      ],
+      "axis": "x",
+      "start": "near",
+      "gap": 0.02
+     },
+     {
+      "op": "within",
+      "a": "bowl",
+      "b": "table.level2",
+      "x0": 0.2,
+      "x1": 0.89,
+      "y0": -0.2,
+      "y1": 0.2
+     },
+     {
+      "op": "reach",
+      "a": "bowl",
+      "r": 0.85,
+      "min": 0.55
+     },
+     {
+      "op": "within",
+      "a": "mug",
+      "b": "table.level2",
+      "x0": 0.2,
+      "x1": 0.89,
+      "y0": -0.2,
+      "y1": 0.2
+     },
+     {
+      "op": "close_to",
+      "a": "mug",
+      "b": "bowl",
+      "r": 0.2
+     },
+     {
+      "op": "keep_out",
+      "a": "*",
+      "x0": 0.3,
+      "x1": 0.5,
+      "y0": -0.1,
+      "y1": 0.1
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 1 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 3.6335456371307373,
+   "solve_cpu_s": 3.6335039589999996,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 13
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

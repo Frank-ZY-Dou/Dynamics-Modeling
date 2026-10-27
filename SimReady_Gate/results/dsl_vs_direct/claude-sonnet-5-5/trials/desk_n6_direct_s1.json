@@ -11,22 +11,22 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 9.141923427581787,
-    "duration_ms": 8569,
-    "duration_api_ms": 8535,
-    "cost_usd": 0.016647300000000004,
+    "wall_s": 9.384020566940308,
+    "duration_ms": 8814,
+    "duration_api_ms": 8782,
+    "cost_usd": 0.016607300000000002,
     "usage": {
      "input": 2,
-     "cache_creation": 1503,
+     "cache_creation": 1528,
      "cache_read": 913,
-     "output": 1054,
-     "thinking": 830
+     "output": 1040,
+     "thinking": 816
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1876,
+   "message_chars": 2065,
    "answer": {
     "poses": [
      {
@@ -38,8 +38,8 @@
      {
       "name": "mouse",
       "x": 0.45,
-      "y": -0.365,
-      "yaw": 0
+      "y": -0.395,
+      "yaw": 90
      },
      {
       "name": "notebook",
@@ -49,7 +49,7 @@
      },
      {
       "name": "marker",
-      "x": 0.565,
+      "x": 0.56,
       "y": 0.405,
       "yaw": 90
      },
@@ -61,13 +61,12 @@
      },
      {
       "name": "tape",
-      "x": 0.3,
-      "y": -0.65,
+      "x": 0.7,
+      "y": -0.4,
       "yaw": 0
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -76,16 +75,16 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 1.6093251705169678,
-   "solve_cpu_s": 1.608906933,
+   "solve_s": 1.4108121395111084,
+   "solve_cpu_s": 1.4108391510000047,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 6,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 3.7360148429870605,
-    "solve_cpu_s": 3.7371866179999955,
+    "solve_s": 3.586862325668335,
+    "solve_cpu_s": 3.58742585600001,
     "rubric_failed": []
    }
   }

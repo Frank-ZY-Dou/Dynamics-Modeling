@@ -1,0 +1,526 @@
+{
+ "task": "setting_n6",
+ "family": "setting",
+ "n": 6,
+ "condition": "dsl_v1_rewrites",
+ "seed": 1,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 11.779780864715576,
+    "duration_ms": 11063,
+    "duration_api_ms": 11031,
+    "cost_usd": 0.0038848,
+    "usage": {
+     "input": 2,
+     "cache_creation": 13508,
+     "cache_read": 0,
+     "output": 2366,
+     "thinking": 1795
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1889,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "at",
+      "a": "plate",
+      "y": 0,
+      "tol": 0.01
+     },
+     {
+      "op": "reach",
+      "a": "plate",
+      "r": 0.6,
+      "min": 0.5
+     },
+     {
+      "op": "beside",
+      "a": "fork",
+      "b": "plate",
+      "side": "left",
+      "gap": 0.02,
+      "max": 0.05
+     },
+     {
+      "op": "beside",
+      "a": "knife",
+      "b": "plate",
+      "side": "right",
+      "gap": 0.02,
+      "max": 0.05
+     },
+     {
+      "op": "symmetric",
+      "a": "fork",
+      "b": "knife",
+      "c": "plate",
+      "axis": "y",
+      "tol": 0.01
+     },
+     {
+      "op": "yaw",
+      "a": "fork",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "yaw",
+      "a": "knife",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "yaw",
+      "a": "spoon",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "parallel",
+      "a": "spoon",
+      "b": "knife",
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "spoon",
+      "b": "knife",
+      "side": "right",
+      "gap": 0.02
+     },
+     {
+      "op": "farther",
+      "a": "glass",
+      "b": "plate",
+      "gap": 0.03
+     },
+     {
+      "op": "close_to",
+      "a": "glass",
+      "b": "knife",
+      "r": 0.15
+     },
+     {
+      "op": "beside",
+      "a": "mug",
+      "b": "fork",
+      "side": "left",
+      "gap": 0.03
+     },
+     {
+      "op": "facing",
+      "a": "mug",
+      "axis": "handle",
+      "tol": 20
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "beside(fork,plate,left)",
+      0.0674
+     ],
+     [
+      "beside(knife,plate,right)",
+      0.0026
+     ],
+     [
+      "symmetric(fork,knife,plate)",
+      0.0274
+     ],
+     [
+      "yaw(knife,deg=0)",
+      60.0
+     ],
+     [
+      "yaw(spoon,deg=0)",
+      60.0
+     ],
+     [
+      "parallel(spoon,knife)",
+      60.0
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "a program row was not met within the step at 59 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
+     "the program was solved alone at scale 0.05 in 12 step(s) before the scale was restored, after 8 other start(s) of the bodies over their supports"
+    ],
+    "rewrites": [
+     {
+      "statement": 6,
+      "text": "beside(fork, plate, side=left, gap=0.02, max=0.05)",
+      "relax": {
+       "max": [
+        0.05,
+        0.068
+       ]
+      },
+      "weaken": "soft"
+     },
+     {
+      "statement": 7,
+      "text": "beside(knife, plate, side=right, gap=0.02, max=0.05)",
+      "relax": {
+       "gap": [
+        0.02,
+        0.002
+       ]
+      },
+      "weaken": "soft"
+     },
+     {
+      "statement": 8,
+      "text": "symmetric(fork, knife, plate, axis=y, tol=0.01)",
+      "relax": {
+       "tol": [
+        0.01,
+        0.028
+       ]
+      },
+      "weaken": "soft"
+     },
+     {
+      "statement": 10,
+      "text": "yaw(knife, axis=long, deg=0.0, tol=5.0)",
+      "relax": {
+       "tol": [
+        5.0,
+        60.0
+       ]
+      },
+      "weaken": "soft"
+     },
+     {
+      "statement": 11,
+      "text": "yaw(spoon, axis=long, deg=0.0, tol=5.0)",
+      "relax": {
+       "tol": [
+        5.0,
+        60.0
+       ]
+      },
+      "weaken": "soft"
+     },
+     {
+      "statement": 12,
+      "text": "parallel(spoon, knife, axis=long, tol=5.0)",
+      "relax": {
+       "tol": [
+        5.0,
+        60.0
+       ]
+      },
+      "weaken": "soft"
+     }
+    ],
+    "accepted_if_relaxed": true,
+    "accepted_if_weakened": true,
+    "rewrites_note": "rewrites: for each statement whose requirement failed (its index in your statements), relax gives {keyword: [your value, the nearest value at which it holds on the layout the repair returned]} and weaken says whether it may become a preference (soft) or be removed (drop); accepted_if_relaxed and accepted_if_weakened say whether those edits make that layout pass. schedule_rewrites: the repair run again from the same starting scene with a smaller schedule margin ([yours, tried]), and what it ended with; the schedule never changes what is accepted. Your next program is repaired again from the same starting scene.",
+    "schedule_rewrites": [
+     {
+      "margin": [
+       0.005,
+       0.0025
+      ],
+      "ok": false,
+      "pen_after": 0,
+      "failed_predicates": [
+       "beside(fork,plate,left)",
+       "beside(knife,plate,right)",
+       "symmetric(fork,knife,plate)",
+       "yaw(knife,deg=0)",
+       "yaw(spoon,deg=0)",
+       "parallel(spoon,knife)"
+      ]
+     },
+     {
+      "margin": [
+       0.005,
+       0.00125
+      ],
+      "ok": false,
+      "pen_after": 0,
+      "failed_predicates": [
+       "beside(fork,plate,left)",
+       "beside(knife,plate,right)",
+       "symmetric(fork,knife,plate)",
+       "yaw(knife,deg=0)",
+       "yaw(spoon,deg=0)",
+       "parallel(spoon,knife)"
+      ]
+     }
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 5.961601257324219,
+   "solve_cpu_s": 6.0314517290000005,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "mirror(fork,knife,plate)",
+     false,
+     0.0274
+    ],
+    [
+     "long_axis_along(knife,x)",
+     false,
+     60.0
+    ],
+    [
+     "gap(plate->fork,+y)",
+     false,
+     0.0674
+    ],
+    [
+     "gap(plate->knife,-y)",
+     false,
+     0.0026
+    ],
+    [
+     "parallel(spoon,knife)",
+     false,
+     60.0
+    ]
+   ],
+   "answer_items": 18
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 34.84677004814148,
+    "duration_ms": 34218,
+    "duration_api_ms": 34184,
+    "cost_usd": 0.00457467,
+    "usage": {
+     "input": 2,
+     "cache_creation": 3303,
+     "cache_read": 12037,
+     "output": 7587,
+     "thinking": 6563
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 5653,
+   "answer": {
+    "intent": "A single place setting on the table at 0.5 to 0.6 m from the robot, with fork, knife and spoon flanking the plate, the glass behind it, and the mug beyond the fork with its handle toward the robot.",
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "place",
+      "a": "plate",
+      "x": 0.55,
+      "y": 0,
+      "yaw": 68
+     },
+     {
+      "op": "place",
+      "a": "fork",
+      "x": 0.55,
+      "y": 0.1525,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "knife",
+      "x": 0.55,
+      "y": -0.1525,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "spoon",
+      "x": 0.55,
+      "y": -0.1975,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "glass",
+      "x": 0.62,
+      "y": -0.09,
+      "yaw": -31
+     },
+     {
+      "op": "place",
+      "a": "mug",
+      "x": 0.55,
+      "y": 0.2525,
+      "yaw": 24
+     },
+     {
+      "op": "at",
+      "a": "plate",
+      "y": 0,
+      "tol": 0.01
+     },
+     {
+      "op": "reach",
+      "a": "plate",
+      "r": 0.6,
+      "min": 0.5
+     },
+     {
+      "op": "beside",
+      "a": "fork",
+      "b": "plate",
+      "side": "left",
+      "gap": 0.02,
+      "max": 0.05
+     },
+     {
+      "op": "beside",
+      "a": "knife",
+      "b": "plate",
+      "side": "right",
+      "gap": 0.02,
+      "max": 0.05
+     },
+     {
+      "op": "symmetric",
+      "a": "fork",
+      "b": "knife",
+      "c": "plate",
+      "axis": "y",
+      "tol": 0.01
+     },
+     {
+      "op": "yaw",
+      "a": "fork",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "yaw",
+      "a": "knife",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "yaw",
+      "a": "spoon",
+      "deg": 0,
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "parallel",
+      "a": "spoon",
+      "b": "knife",
+      "axis": "long",
+      "tol": 5
+     },
+     {
+      "op": "beside",
+      "a": "spoon",
+      "b": "knife",
+      "side": "right",
+      "gap": 0.02
+     },
+     {
+      "op": "farther",
+      "a": "glass",
+      "b": "plate",
+      "gap": 0.03
+     },
+     {
+      "op": "close_to",
+      "a": "glass",
+      "b": "knife",
+      "r": 0.15
+     },
+     {
+      "op": "beside",
+      "a": "mug",
+      "b": "fork",
+      "side": "left",
+      "gap": 0.03
+     },
+     {
+      "op": "facing",
+      "a": "mug",
+      "axis": "handle",
+      "tol": 20
+     }
+    ],
+    "schedule": {
+     "margin": 0.0025
+    }
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 12 step(s) before the scale was restored, after 8 other start(s) of the bodies over their supports"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 1.0881435871124268,
+   "solve_cpu_s": 1.0882874680000008,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 24
+  }
+ ],
+ "n_rounds": 2,
+ "success": true,
+ "first_round_success": false,
+ "self_ok": true
+}

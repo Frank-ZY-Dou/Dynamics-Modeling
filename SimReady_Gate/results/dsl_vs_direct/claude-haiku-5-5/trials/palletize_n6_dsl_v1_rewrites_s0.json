@@ -1,0 +1,158 @@
+{
+ "task": "palletize_n6",
+ "family": "palletize",
+ "n": 6,
+ "condition": "dsl_v1_rewrites",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 27.96855926513672,
+    "duration_ms": 27329,
+    "duration_api_ms": 27299,
+    "cost_usd": 0.0033005699999999996,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1365,
+     "cache_read": 12037,
+     "output": 5814,
+     "thinking": 4971
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1521,
+   "answer": {
+    "intent": "Palletize six cardboard boxes flat on the pallet's upper level as two columns of three boxes each, with boxes in each column lined up along y, at least 2 cm in from the pallet edges, and at least 1 cm between boxes.",
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "pallet.level2",
+      "reason": "boxes sit on the pallet"
+     },
+     {
+      "op": "upright",
+      "a": "*",
+      "reason": "boxes rest on their faces"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "pallet.level2",
+      "inset": 0.02,
+      "reason": "every box at least 2 cm in from the pallet edges"
+     },
+     {
+      "op": "no_penetration",
+      "reason": "nothing interpenetrates"
+     },
+     {
+      "op": "yaw",
+      "a": "*",
+      "deg": 0,
+      "tol": 3,
+      "mod": 90,
+      "axis": "x",
+      "reason": "sides parallel to pallet edges within 3 degrees"
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_1",
+       "box_2",
+       "box_3"
+      ],
+      "axis": "y",
+      "gap": 0.02,
+      "mid": 0,
+      "reason": "rows parallel to y, at most 3 per row, centres on a common line within 1 cm, at least 1 cm between boxes"
+     },
+     {
+      "op": "row",
+      "members": [
+       "box_4",
+       "box_5",
+       "box_6"
+      ],
+      "axis": "y",
+      "gap": 0.02,
+      "mid": 0,
+      "reason": "second row of three parallel to y, centres on a common line, gaps of at least 1 cm"
+     },
+     {
+      "op": "place",
+      "a": "box_1",
+      "x": 0.5,
+      "y": -0.28,
+      "yaw": 0,
+      "reason": "rough column position on the pallet"
+     },
+     {
+      "op": "place",
+      "a": "box_2",
+      "x": 0.5,
+      "y": 0,
+      "yaw": 0,
+      "reason": "rough column position on the pallet"
+     },
+     {
+      "op": "place",
+      "a": "box_3",
+      "x": 0.5,
+      "y": 0.28,
+      "yaw": 0,
+      "reason": "rough column position on the pallet"
+     },
+     {
+      "op": "place",
+      "a": "box_4",
+      "x": 0.9,
+      "y": -0.28,
+      "yaw": 0,
+      "reason": "rough second column position with a gap to the first"
+     },
+     {
+      "op": "place",
+      "a": "box_5",
+      "x": 0.9,
+      "y": 0,
+      "yaw": 0,
+      "reason": "rough second column position with a gap to the first"
+     },
+     {
+      "op": "place",
+      "a": "box_6",
+      "x": 0.9,
+      "y": 0.28,
+      "yaw": 0,
+      "reason": "rough second column position with a gap to the first"
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 1.1822466850280762,
+   "solve_cpu_s": 1.1823335169999964,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 13
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

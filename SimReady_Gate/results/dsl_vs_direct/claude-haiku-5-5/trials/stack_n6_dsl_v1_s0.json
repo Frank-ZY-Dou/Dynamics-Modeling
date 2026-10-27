@@ -11,32 +11,29 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 11.460743427276611,
-    "duration_ms": 10822,
-    "duration_api_ms": 10786,
-    "cost_usd": 0.00154919,
+    "wall_s": 12.503723621368408,
+    "duration_ms": 11691,
+    "duration_api_ms": 11655,
+    "cost_usd": 0.00165817,
     "usage": {
      "input": 2,
-     "cache_creation": 1291,
-     "cache_read": 10529,
-     "output": 2371,
-     "thinking": 1814
+     "cache_creation": 1338,
+     "cache_read": 12037,
+     "output": 2540,
+     "thinking": 1575
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1347,
+   "message_chars": 1536,
    "answer": {
     "statements": [
      {
-      "op": "no_penetration",
-      "margin": 0.005
-     },
-     {
       "op": "on_support",
       "a": "box_large",
-      "b": "table"
+      "b": "table.level2",
+      "reason": "the tower rests on the table"
      },
      {
       "op": "stack",
@@ -45,122 +42,147 @@
        "box_medium",
        "box_small"
       ],
-      "tol": 0.01
-     },
-     {
-      "op": "on_support",
-      "a": "apple",
-      "b": "table"
-     },
-     {
-      "op": "on_support",
-      "a": "can",
-      "b": "table"
-     },
-     {
-      "op": "on_support",
-      "a": "cup",
-      "b": "table"
+      "reason": "one tower, each box centred on the one below"
      },
      {
       "op": "upright",
-      "a": "*"
+      "a": "box_large",
+      "reason": "boxes keep resting orientation"
      },
      {
-      "op": "within",
-      "a": "*",
-      "b": "table.top",
-      "inset": 0.01
+      "op": "upright",
+      "a": "box_medium",
+      "reason": "boxes keep resting orientation"
+     },
+     {
+      "op": "upright",
+      "a": "box_small",
+      "reason": "boxes keep resting orientation"
      },
      {
       "op": "within",
       "a": "box_large",
-      "b": "table.top",
-      "side": "right",
-      "frac": 0.5
+      "b": "table.level2",
+      "x0": 0.2,
+      "x1": 0.89,
+      "y0": -0.9,
+      "y1": 0,
+      "inset": 0.005,
+      "reason": "bottom box entirely on the right half (y<0)"
      },
      {
       "op": "within",
       "a": "box_medium",
-      "b": "table.top",
-      "side": "right",
-      "frac": 0.5
+      "b": "table.level2",
+      "x0": 0.2,
+      "x1": 0.89,
+      "y0": -0.9,
+      "y1": 0,
+      "inset": 0.005,
+      "reason": "tower on the right half of the table"
      },
      {
       "op": "within",
       "a": "box_small",
-      "b": "table.top",
-      "side": "right",
-      "frac": 0.5
-     },
-     {
-      "op": "within",
-      "a": "apple",
-      "b": "table.top",
-      "side": "left",
-      "frac": 0.5
-     },
-     {
-      "op": "within",
-      "a": "can",
-      "b": "table.top",
-      "side": "left",
-      "frac": 0.5
-     },
-     {
-      "op": "within",
-      "a": "cup",
-      "b": "table.top",
-      "side": "left",
-      "frac": 0.5
+      "b": "table.level2",
+      "x0": 0.2,
+      "x1": 0.89,
+      "y0": -0.9,
+      "y1": 0,
+      "inset": 0.005,
+      "reason": "tower on the right half of the table"
      },
      {
       "op": "reach",
       "a": "box_large",
-      "r": 0.7
+      "r": 0.7,
+      "reason": "bottom box centre within 70 cm of the robot base"
      },
      {
-      "op": "place",
-      "a": "box_large",
-      "x": 0.5,
-      "y": -0.35,
-      "yaw": 0
-     },
-     {
-      "op": "place",
+      "op": "on_support",
       "a": "apple",
-      "x": 0.65,
-      "y": 0.3
+      "b": "table.level2",
+      "reason": "apple rests on the table"
      },
      {
-      "op": "place",
+      "op": "on_support",
       "a": "can",
-      "x": 0.75,
-      "y": 0.25
+      "b": "table.level2",
+      "reason": "can rests on the table"
      },
      {
-      "op": "place",
+      "op": "on_support",
       "a": "cup",
-      "x": 0.5,
-      "y": 0.3
+      "b": "table.level2",
+      "reason": "cup rests on the table"
+     },
+     {
+      "op": "upright",
+      "a": "apple",
+      "reason": "resting orientation kept"
+     },
+     {
+      "op": "upright",
+      "a": "can",
+      "reason": "resting orientation kept"
+     },
+     {
+      "op": "upright",
+      "a": "cup",
+      "reason": "resting orientation kept"
+     },
+     {
+      "op": "within",
+      "a": "apple",
+      "b": "table.level2",
+      "x0": 0.2,
+      "x1": 0.89,
+      "y0": 0,
+      "y1": 0.9,
+      "inset": 0.005,
+      "reason": "other objects on the left half (y>0)"
+     },
+     {
+      "op": "within",
+      "a": "can",
+      "b": "table.level2",
+      "x0": 0.2,
+      "x1": 0.89,
+      "y0": 0,
+      "y1": 0.9,
+      "inset": 0.005,
+      "reason": "other objects on the left half (y>0)"
+     },
+     {
+      "op": "within",
+      "a": "cup",
+      "b": "table.level2",
+      "x0": 0.2,
+      "x1": 0.89,
+      "y0": 0,
+      "y1": 0.9,
+      "inset": 0.005,
+      "reason": "other objects on the left half (y>0)"
+     },
+     {
+      "op": "no_penetration",
+      "reason": "nothing interpenetrates"
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
     "failed_predicates": [],
     "failed_preferences": [],
     "solver_notes": [
-     "pairs still penetrated in the closing steps of the tail; 3 step(s) served the contacts alone, the program rows set aside",
-     "a program row was not met within the step at 1 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
-     "the program was solved alone at scale 0.05 in 10 step(s) before the scale was restored"
+     "pairs still penetrated in the closing steps of the tail; 8 step(s) served the contacts alone, the program rows set aside",
+     "the program was solved alone at scale 0.05 in 2 step(s) before the scale was restored"
     ]
    },
    "self_ok": true,
-   "solve_s": 3.2020487785339355,
-   "solve_cpu_s": 3.189804056,
+   "solve_s": 3.401801824569702,
+   "solve_cpu_s": 3.4023286279999922,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 19

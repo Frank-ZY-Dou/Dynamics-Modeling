@@ -11,69 +11,68 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 14.511332035064697,
-    "duration_ms": 13906,
-    "duration_api_ms": 13876,
-    "cost_usd": 0.00186173,
+    "wall_s": 13.502450466156006,
+    "duration_ms": 12879,
+    "duration_api_ms": 12850,
+    "cost_usd": 0.0017486299999999997,
     "usage": {
      "input": 2,
-     "cache_creation": 1467,
+     "cache_creation": 1519,
      "cache_read": 913,
-     "output": 3118,
-     "thinking": 2850
+     "output": 2871,
+     "thinking": 2571
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1686,
+   "message_chars": 1879,
    "answer": {
     "poses": [
      {
       "name": "marker_1",
       "x": 0.4,
-      "y": 0.195,
+      "y": 0.245,
       "yaw": 0
      },
      {
       "name": "marker_2",
       "x": 0.4,
-      "y": 0.145,
+      "y": 0.185,
       "yaw": 0
      },
      {
       "name": "screwdriver_1",
       "x": 0.4,
-      "y": 0.085,
+      "y": 0.115,
       "yaw": 0
      },
      {
       "name": "screwdriver_2",
       "x": 0.4,
-      "y": 0.015,
+      "y": 0.035,
       "yaw": 0
      },
      {
       "name": "pliers",
       "x": 0.4,
-      "y": -0.075,
+      "y": -0.055,
       "yaw": 0
      },
      {
       "name": "hammer",
       "x": 0.4,
-      "y": -0.2,
+      "y": -0.19,
       "yaw": 0
      },
      {
       "name": "tape",
       "x": 0.78,
       "y": 0,
-      "yaw": 91
+      "yaw": 90
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -82,16 +81,16 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 1.7774856090545654,
-   "solve_cpu_s": 1.7779392070000029,
+   "solve_s": 1.6846561431884766,
+   "solve_cpu_s": 1.6847983019999901,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 7,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 4.2519330978393555,
-    "solve_cpu_s": 4.252621651999988,
+    "solve_s": 3.4172987937927246,
+    "solve_cpu_s": 3.417902065000007,
     "rubric_failed": []
    }
   }

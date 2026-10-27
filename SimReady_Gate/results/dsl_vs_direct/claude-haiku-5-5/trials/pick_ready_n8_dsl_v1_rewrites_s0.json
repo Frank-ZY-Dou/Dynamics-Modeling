@@ -1,0 +1,127 @@
+{
+ "task": "pick_ready_n8",
+ "family": "pick_ready",
+ "n": 8,
+ "condition": "dsl_v1_rewrites",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 12.559427976608276,
+    "duration_ms": 11785,
+    "duration_api_ms": 11753,
+    "cost_usd": 0.0016701700000000001,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1578,
+     "cache_read": 12037,
+     "output": 2468,
+     "thinking": 1906
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1955,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration",
+      "reason": "Nothing interpenetrates."
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table.level2",
+      "reason": "Everything rests on the table."
+     },
+     {
+      "op": "upright",
+      "a": "*",
+      "reason": "Everything rests upright on the table."
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "reason": "Every object stays on the table top."
+     },
+     {
+      "op": "reach",
+      "a": "mug",
+      "r": 0.6,
+      "min": 0.45,
+      "reason": "Mug centre 45 to 60 cm from the robot base."
+     },
+     {
+      "op": "facing",
+      "a": "mug",
+      "axis": "handle",
+      "x": 0,
+      "y": 0,
+      "tol": 20,
+      "reason": "Handle points at the robot base within 20 degrees."
+     },
+     {
+      "op": "approach",
+      "a": "mug",
+      "length": 0.45,
+      "width": 0.15,
+      "toward": "robot",
+      "reason": "15 cm corridor from the mug straight to the robot base stays free."
+     },
+     {
+      "op": "min_distance",
+      "a": "*",
+      "b": "mug",
+      "r": 0.18,
+      "reason": "Every other object's centre at least 18 cm from the mug centre."
+     },
+     {
+      "op": "keep_out",
+      "a": "*",
+      "x0": 0.25,
+      "x1": 0.4,
+      "y0": 0.2,
+      "y1": 0.4,
+      "reason": "Drop zone x 0.25 to 0.40, y 0.20 to 0.40 stays empty."
+     },
+     {
+      "op": "reach",
+      "a": "*",
+      "r": 0.8,
+      "reason": "Every object's centre within 80 cm of the robot base."
+     },
+     {
+      "op": "minimize",
+      "reason": "Keep the rearrangement small."
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 4 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 2.0714268684387207,
+   "solve_cpu_s": 2.071856264999999,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 11
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

@@ -11,7 +11,8 @@
  "conditions": [
   "dsl_v1",
   "dsl_v0",
-  "direct"
+  "direct",
+  "dsl_v1_rewrites"
  ],
  "flags": [
   "--safe-mode",
@@ -35,18 +36,21 @@
  ],
  "system_prompts": {
   "dsl_v1": {
-   "chars": 7143
+   "chars": 8690
   },
   "dsl_v0": {
-   "chars": 2452
+   "chars": 2701
   },
   "direct": {
    "chars": 998
+  },
+  "dsl_v1_rewrites": {
+   "chars": 8690
   }
  },
- "started": "2026-10-25T04:14:16",
+ "started": "2026-10-26T15:55:57",
  "code": {
-  "commit": "41859844b9e96232e058bf3c4c9fd9a9641a697a",
+  "commit": "14bd0f0db878e361bfe375075090dc9982f2abc0",
   "local_changes": false
  },
  "assets_revision": "524747d9b5e1f21b5b18b56041788c01d745f1a1",
@@ -83,23 +87,5 @@
   14,
   15
  ],
- "omp_threads": "1",
- "replay_of": {
-  "run": "claude-haiku-5-5",
-  "started": "2026-10-25T03:03:20",
-  "code": {
-   "commit": "eb408bbfa95ecaa397fac8cc04cfac8ae0eabe21",
-   "local_changes": false
-  },
-  "cli": "2.1.310 (Claude Code)",
-  "replay_of": {
-   "run": "claude-haiku-5-5",
-   "started": "2026-10-24T22:13:32",
-   "code": {
-    "commit": "70b766323243a6a99902ff22112cc11ab5744198",
-    "local_changes": false
-   },
-   "cli": "2.1.310 (Claude Code)"
-  }
- }
+ "omp_threads": "1"
 }

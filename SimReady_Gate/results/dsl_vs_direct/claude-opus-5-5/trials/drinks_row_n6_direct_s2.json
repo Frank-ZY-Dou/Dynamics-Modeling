@@ -11,22 +11,22 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 5.38661527633667,
-    "duration_ms": 4748,
-    "duration_api_ms": 4717,
-    "cost_usd": 0.0200626,
+    "wall_s": 4.66306209564209,
+    "duration_ms": 3903,
+    "duration_api_ms": 3868,
+    "cost_usd": 0.0204426,
     "usage": {
      "input": 2,
-     "cache_creation": 1319,
+     "cache_creation": 1369,
      "cache_read": 913,
-     "output": 466,
-     "thinking": 229
+     "output": 465,
+     "thinking": 228
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1388,
+   "message_chars": 1577,
    "answer": {
     "poses": [
      {
@@ -67,7 +67,6 @@
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -76,16 +75,16 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 0.47228264808654785,
-   "solve_cpu_s": 0.47237122499999984,
+   "solve_s": 0.42192649841308594,
+   "solve_cpu_s": 0.42195342199999963,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 6,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 1.0386943817138672,
-    "solve_cpu_s": 1.0385691379999997,
+    "solve_s": 0.848752498626709,
+    "solve_cpu_s": 0.8488604869999996,
     "rubric_failed": []
    }
   }

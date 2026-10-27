@@ -11,22 +11,22 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 4.430235862731934,
-    "duration_ms": 3823,
-    "duration_api_ms": 3782,
-    "cost_usd": 0.010297299999999999,
+    "wall_s": 7.846001386642456,
+    "duration_ms": 7216,
+    "duration_api_ms": 7180,
+    "cost_usd": 0.010959299999999998,
     "usage": {
      "input": 2,
-     "cache_creation": 1293,
+     "cache_creation": 1316,
      "cache_read": 913,
-     "output": 503,
-     "thinking": 252
+     "output": 560,
+     "thinking": 309
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1346,
+   "message_chars": 1535,
    "answer": {
     "poses": [
      {
@@ -52,24 +52,23 @@
      {
       "name": "apple",
       "x": 0.5,
-      "y": 0.3,
+      "y": 0.2,
       "yaw": 125
      },
      {
       "name": "can",
-      "x": 0.7,
-      "y": 0.3,
+      "x": 0.5,
+      "y": 0.4,
       "yaw": 102
      },
      {
       "name": "cup",
       "x": 0.5,
-      "y": 0.55,
+      "y": 0.6,
       "yaw": -66
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -78,16 +77,16 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 0.4112274646759033,
-   "solve_cpu_s": 0.4105433519999906,
+   "solve_s": 0.37427425384521484,
+   "solve_cpu_s": 0.37434063000000606,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 6,
    "direct_repair": {
     "rubric_ok": true,
     "self_ok": true,
-    "solve_s": 2.833993673324585,
-    "solve_cpu_s": 2.829877228000001,
+    "solve_s": 2.568211555480957,
+    "solve_cpu_s": 2.568645074999992,
     "rubric_failed": []
    }
   }

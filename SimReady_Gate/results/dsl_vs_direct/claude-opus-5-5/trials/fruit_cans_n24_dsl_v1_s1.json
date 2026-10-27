@@ -11,22 +11,22 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 11.142183542251587,
-    "duration_ms": 10515,
-    "duration_api_ms": 10485,
-    "cost_usd": 0.0463778,
+    "wall_s": 11.57526707649231,
+    "duration_ms": 10857,
+    "duration_api_ms": 10829,
+    "cost_usd": 0.05006340000000001,
     "usage": {
      "input": 2,
-     "cache_creation": 2733,
-     "cache_read": 10529,
-     "output": 1120,
-     "thinking": 680
+     "cache_creation": 2961,
+     "cache_read": 12037,
+     "output": 1198,
+     "thinking": 634
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 3962,
+   "message_chars": 4403,
    "answer": {
     "statements": [
      {
@@ -84,11 +84,11 @@
      {
       "op": "reach",
       "a": "bowl",
-      "r": 1.3,
+      "r": 1.5,
       "min": 0.55
      },
      {
-      "op": "near",
+      "op": "close_to",
       "a": "mug",
       "b": "bowl",
       "r": 0.2
@@ -113,23 +113,28 @@
       "y0": -0.1,
       "y1": 0.1
      }
+    ],
+    "schedule": {
+     "margin": 0.003
+    },
+    "assumptions": [
+     "reach requires a maximum radius; 1.5 m is used as a non-binding upper bound covering the whole table so only the 0.55 m minimum matters",
+     "The only paint jar in the scene is jar_1"
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "pen_after": 0,
     "failed_predicates": [],
     "failed_preferences": [],
     "solver_notes": [
-     "a program row was not met within the step at 4 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
-     "the contacts exceeded the trust region at 1 step(s); those steps served the contacts alone",
+     "a program row was not met within the step at 3 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome",
      "the program was solved alone at scale 0.05 in 3 step(s) before the scale was restored"
     ]
    },
    "self_ok": true,
-   "solve_s": 6.29372763633728,
-   "solve_cpu_s": 6.293887635000001,
+   "solve_s": 4.63200044631958,
+   "solve_cpu_s": 4.632323668999998,
    "rubric_ok": true,
    "rubric_failed": [],
    "answer_items": 14

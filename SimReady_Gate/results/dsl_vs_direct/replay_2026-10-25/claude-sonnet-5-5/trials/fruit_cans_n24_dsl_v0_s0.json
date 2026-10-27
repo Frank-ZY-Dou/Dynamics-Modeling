@@ -1,0 +1,247 @@
+{
+ "task": "fruit_cans_n24",
+ "family": "fruit_cans",
+ "n": 24,
+ "condition": "dsl_v0",
+ "seed": 0,
+ "model": "claude-sonnet-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 15.628573179244995,
+    "duration_ms": 15167,
+    "duration_api_ms": 15137,
+    "cost_usd": 0.0331382,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2737,
+     "cache_read": 3962,
+     "output": 2179,
+     "thinking": 1169
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 3973,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration",
+      "a": "*",
+      "margin": 0.02
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "place",
+      "a": "fruit_1",
+      "x": 0.4225,
+      "y": 0.5,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_2",
+      "x": 0.4225,
+      "y": 0.585,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_3",
+      "x": 0.4225,
+      "y": 0.67,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "fruit_4",
+      "x": 0.5075,
+      "y": 0.4225,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_5",
+      "x": 0.5075,
+      "y": 0.5075,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_6",
+      "x": 0.5075,
+      "y": 0.5925,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_7",
+      "x": 0.5075,
+      "y": 0.6775,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "fruit_8",
+      "x": 0.5925,
+      "y": 0.4225,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_9",
+      "x": 0.5925,
+      "y": 0.5075,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_10",
+      "x": 0.5925,
+      "y": 0.5925,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_11",
+      "x": 0.5925,
+      "y": 0.6775,
+      "yaw": 90
+     },
+     {
+      "op": "place",
+      "a": "fruit_12",
+      "x": 0.6775,
+      "y": 0.5,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_13",
+      "x": 0.6775,
+      "y": 0.585,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "fruit_14",
+      "x": 0.6775,
+      "y": 0.45,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "can_1",
+      "x": 0.265,
+      "y": -0.55,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "can_2",
+      "x": 0.36,
+      "y": -0.55,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "can_3",
+      "x": 0.455,
+      "y": -0.55,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "can_4",
+      "x": 0.55,
+      "y": -0.55,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "can_5",
+      "x": 0.645,
+      "y": -0.55,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "can_6",
+      "x": 0.74,
+      "y": -0.55,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "can_7",
+      "x": 0.835,
+      "y": -0.55,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "bowl",
+      "x": 0.7,
+      "y": 0.05,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "mug",
+      "x": 0.7,
+      "y": -0.12,
+      "yaw": 0
+     },
+     {
+      "op": "place",
+      "a": "jar_1",
+      "x": 0.28,
+      "y": 0.22,
+      "yaw": 0
+     }
+    ]
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 5.098392724990845,
+   "solve_cpu_s": 5.098012613999998,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "cluster(14 bodies)",
+     false,
+     0.2096
+    ]
+   ],
+   "answer_items": 28
+  }
+ ],
+ "n_rounds": 1,
+ "success": false,
+ "first_round_success": false,
+ "self_ok": true
+}

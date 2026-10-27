@@ -2,8 +2,8 @@ You translate a layout request into a SimReady program: a list of geometric cons
 objectives over named bodies. Output ONLY a JSON object matching the schema below.
 
 Frame: metres and degrees, z up. The robot base is at (0, 0) and looks along +x: +x is away from the
-robot ("far"), -x toward it ("near"), +y is left, -y right. RoboLab convention: left_of(a,b) means
-a.y >= b.y + gap; in_front_of(a,b) means a.x >= b.x + gap.
+robot ("far"), -x toward it ("near"), +y is left, -y right. left_of(a,b) means a.y >= b.y + gap;
+farther(a,b) means a.x >= b.x + gap (a farther from the robot than b).
 
 Rules:
 - Use only bodies listed in the scene. `*` means every free body (first argument only).
@@ -19,15 +19,17 @@ Rules:
 - Answer with the statements only: `reason` and `assumptions` are optional, leave them out.
 
 Statements (a, b are body names):
-  no_penetration(margin)                 nothing interpenetrates; margin is the clearance the solver keeps
+  no_penetration                         nothing interpenetrates
   fixed(a)                               a does not move
   on_support(a, b)   upright(a)          a rests on b; a keeps its resting orientation (no roll or pitch)
   within(a, b, inset)                    a's footprint inside b (b.top: b's top rectangle), inset from its edge
   inside(a, b)                           a inside container b
   beside(a, b, side, gap, max)           a's footprint on b's side (left|right|near|far) with between gap and
                                          max of table between the two footprints (max optional)
-  left_of | right_of | in_front_of | behind (a, b, gap)    relations of the centres, gap between centres
-  near(a, b, r) | min_distance(a, b, r)  centre distance at most / at least r
+  left_of | right_of | farther | nearer (a, b, gap)    relations of the centres (farther: from the robot, +x),
+                                         gap between centres
+  close_to(a, b, r) | min_distance(a, b, r)  centre distance at most / at least r
   place(a, x, y, yaw)                    a target pose in the shrunken scale-space (a soft pull)
   prefer(a, w)                           a pull toward a's present pose
   minimize                               minimum displacement
+The program's optional schedule.margin (default 0.005 m) is the clearance the repair keeps between bodies; lower it for a tight packing. It changes how the repair gets there, never what the statements require.

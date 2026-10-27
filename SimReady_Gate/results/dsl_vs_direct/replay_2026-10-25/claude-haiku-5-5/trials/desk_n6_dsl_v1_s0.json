@@ -1,0 +1,203 @@
+{
+ "task": "desk_n6",
+ "family": "desk",
+ "n": 6,
+ "condition": "dsl_v1",
+ "seed": 0,
+ "model": "claude-haiku-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 14.517888307571411,
+    "duration_ms": 13913,
+    "duration_api_ms": 13885,
+    "cost_usd": 0.00206949,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1500,
+     "cache_read": 10529,
+     "output": 3328,
+     "thinking": 2149
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1886,
+   "answer": {
+    "statements": [
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "at",
+      "a": "keyboard",
+      "y": 0,
+      "tol": 0.01,
+      "reason": "keyboard centre on y = 0 within 1 cm"
+     },
+     {
+      "op": "reach",
+      "a": "keyboard",
+      "r": 0.5,
+      "min": 0.4,
+      "reason": "keyboard 40 to 50 cm from the robot base"
+     },
+     {
+      "op": "yaw",
+      "a": "keyboard",
+      "deg": 90,
+      "axis": "long",
+      "mod": 180,
+      "tol": 5,
+      "reason": "keyboard long side parallel to y within 5 degrees"
+     },
+     {
+      "op": "beside",
+      "a": "mouse",
+      "b": "keyboard",
+      "side": "right",
+      "gap": 0.03,
+      "max": 0.08,
+      "reason": "mouse on the right of the keyboard with 3 to 8 cm of table between"
+     },
+     {
+      "op": "align",
+      "members": [
+       "mouse",
+       "keyboard"
+      ],
+      "axis": "x",
+      "edge": "center",
+      "tol": 0.02,
+      "reason": "mouse centre x within 2 cm of keyboard centre x"
+     },
+     {
+      "op": "beside",
+      "a": "notebook",
+      "b": "keyboard",
+      "side": "left",
+      "gap": 0.05,
+      "max": 0.1,
+      "reason": "notebook on the left of the keyboard with 5 to 10 cm of table between"
+     },
+     {
+      "op": "parallel",
+      "a": "notebook",
+      "b": "keyboard",
+      "axis": "long",
+      "tol": 5,
+      "reason": "notebook long side parallel to keyboard long side within 5 degrees"
+     },
+     {
+      "op": "beside",
+      "a": "marker",
+      "b": "notebook",
+      "side": "far",
+      "gap": 0.01,
+      "max": 0.04,
+      "reason": "marker beyond the notebook, farther from the robot, with 1 to 4 cm of table between"
+     },
+     {
+      "op": "parallel",
+      "a": "marker",
+      "b": "notebook",
+      "axis": "long",
+      "tol": 5,
+      "reason": "marker parallel to notebook long side within 5 degrees"
+     },
+     {
+      "op": "beside",
+      "a": "mug",
+      "b": "keyboard",
+      "side": "far",
+      "gap": 0.05,
+      "reason": "mug farther from the robot than the keyboard with at least 5 cm of table between"
+     },
+     {
+      "op": "facing",
+      "a": "mug",
+      "axis": "-x",
+      "x": 0,
+      "y": 0,
+      "tol": 20,
+      "reason": "mug handle (-x side) points at the robot base within 20 degrees"
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "keyboard",
+      "r": 0.2,
+      "reason": "tape centre at least 20 cm from every other object"
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "mouse",
+      "r": 0.2,
+      "reason": "tape centre at least 20 cm from every other object"
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "notebook",
+      "r": 0.2,
+      "reason": "tape centre at least 20 cm from every other object"
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "marker",
+      "r": 0.2,
+      "reason": "tape centre at least 20 cm from every other object"
+     },
+     {
+      "op": "min_distance",
+      "a": "tape",
+      "b": "mug",
+      "r": 0.2,
+      "reason": "tape centre at least 20 cm from every other object"
+     }
+    ],
+    "intent": "Arrange the desk so the keyboard sits centred in front of the robot with the mouse, notebook, marker, mug and tape dispenser placed around it as specified, all resting upright on the table without interpenetration."
+   },
+   "answer_from": "recorded",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 5 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 3.612438201904297,
+   "solve_cpu_s": 3.613065227000007,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 20
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}

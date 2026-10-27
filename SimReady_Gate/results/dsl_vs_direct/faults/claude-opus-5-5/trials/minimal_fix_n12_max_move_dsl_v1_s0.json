@@ -1,0 +1,168 @@
+{
+ "task": "minimal_fix_n12",
+ "family": "minimal_fix",
+ "n": 12,
+ "condition": "dsl_v1",
+ "seed": 0,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": null,
+   "message_chars": 2208,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top",
+      "inset": 0.02
+     },
+     {
+      "op": "max_move",
+      "a": "*",
+      "d": 0.003
+     },
+     {
+      "op": "max_turn",
+      "a": "*",
+      "deg": 8
+     }
+    ]
+   },
+   "answer_from": "fault",
+   "report": {
+    "ok": false,
+    "pen_after": 0,
+    "failed_predicates": [
+     [
+      "max_move(bowl,d=0.003)",
+      0.0085
+     ],
+     [
+      "max_move(glass,d=0.003)",
+      0.0083
+     ],
+     [
+      "max_move(apple_1,d=0.003)",
+      0.0187
+     ],
+     [
+      "max_move(apple_2,d=0.003)",
+      0.0083
+     ],
+     [
+      "max_move(can_2,d=0.003)",
+      0.0085
+     ],
+     [
+      "max_move(bottle,d=0.003)",
+      0.0187
+     ],
+     [
+      "max_turn(apple_1,deg=8)",
+      11.3497
+     ]
+    ],
+    "failed_preferences": [],
+    "solver_notes": [
+     "pairs still penetrated in the closing steps of the tail; 1 step(s) served the contacts alone, the program rows set aside",
+     "a program row was not met within the step at 37 step(s) (a contact in the way, or the step's trust region); the predicates report the outcome"
+    ]
+   },
+   "self_ok": false,
+   "solve_s": 4.581825017929077,
+   "solve_cpu_s": 4.569758164000007,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 6
+  },
+  {
+   "round": 2,
+   "llm": {
+    "ok": true,
+    "wall_s": 6.268923282623291,
+    "duration_ms": 5516,
+    "duration_api_ms": 5456,
+    "cost_usd": 0.0308954,
+    "usage": {
+     "input": 2,
+     "cache_creation": 2235,
+     "cache_read": 12037,
+     "output": 530,
+     "thinking": 158
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 3183,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "max_move",
+      "a": "*",
+      "d": 0.03
+     },
+     {
+      "op": "max_turn",
+      "a": "*",
+      "deg": 10
+     }
+    ]
+   },
+   "answer_from": "called",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": []
+   },
+   "self_ok": true,
+   "solve_s": 3.3362107276916504,
+   "solve_cpu_s": 3.336562346999983,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 6
+  }
+ ],
+ "n_rounds": 2,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true,
+ "fault": {
+  "name": "max_move",
+  "kind": "tight"
+ }
+}

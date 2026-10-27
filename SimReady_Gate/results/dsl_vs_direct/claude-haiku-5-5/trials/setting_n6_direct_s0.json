@@ -11,63 +11,62 @@
    "round": 1,
    "llm": {
     "ok": true,
-    "wall_s": 18.407947063446045,
-    "duration_ms": 17896,
-    "duration_api_ms": 17863,
-    "cost_usd": 0.00204037,
+    "wall_s": 25.561153173446655,
+    "duration_ms": 25007,
+    "duration_api_ms": 24961,
+    "cost_usd": 0.0032339,
     "usage": {
      "input": 2,
-     "cache_creation": 399,
-     "cache_read": 1937,
-     "output": 3882,
-     "thinking": 3628
+     "cache_creation": 2386,
+     "cache_read": 0,
+     "output": 5513,
+     "thinking": 5261
     },
     "num_turns": 2,
     "stop_reason": "tool_use",
     "error": null
    },
-   "message_chars": 1710,
+   "message_chars": 1899,
    "answer": {
     "poses": [
      {
       "name": "plate",
-      "x": 0.55,
+      "x": 0.5,
       "y": 0,
       "yaw": 170
      },
      {
       "name": "fork",
-      "x": 0.55,
-      "y": 0.14,
+      "x": 0.5,
+      "y": 0.148,
       "yaw": 0
      },
      {
       "name": "knife",
-      "x": 0.55,
-      "y": -0.14,
-      "yaw": -90
+      "x": 0.5,
+      "y": -0.148,
+      "yaw": 90
      },
      {
       "name": "spoon",
-      "x": 0.55,
-      "y": -0.19,
-      "yaw": -90
+      "x": 0.5,
+      "y": -0.198,
+      "yaw": 90
      },
      {
       "name": "mug",
-      "x": 0.55,
-      "y": 0.25,
-      "yaw": 24.5
+      "x": 0.5,
+      "y": 0.23,
+      "yaw": 0
      },
      {
       "name": "glass",
-      "x": 0.62,
-      "y": -0.25,
-      "yaw": -135
+      "x": 0.635,
+      "y": -0.095,
+      "yaw": 0
      }
     ]
    },
-   "answer_from": "recorded",
    "report": {
     "ok": true,
     "penetrating_pairs": [],
@@ -76,22 +75,34 @@
     "missing_poses": []
    },
    "self_ok": true,
-   "solve_s": 0.49738597869873047,
-   "solve_cpu_s": 0.4978014660000001,
-   "rubric_ok": true,
-   "rubric_failed": [],
+   "solve_s": 0.3615846633911133,
+   "solve_cpu_s": 0.3616242009999999,
+   "rubric_ok": false,
+   "rubric_failed": [
+    [
+     "facing(mug)",
+     false,
+     24.7024
+    ]
+   ],
    "answer_items": 6,
    "direct_repair": {
-    "rubric_ok": true,
+    "rubric_ok": false,
     "self_ok": true,
-    "solve_s": 0.902432918548584,
-    "solve_cpu_s": 0.900937589,
-    "rubric_failed": []
+    "solve_s": 0.824793815612793,
+    "solve_cpu_s": 0.8249196350000001,
+    "rubric_failed": [
+     [
+      "facing(mug)",
+      false,
+      24.7024
+     ]
+    ]
    }
   }
  ],
  "n_rounds": 1,
- "success": true,
- "first_round_success": true,
+ "success": false,
+ "first_round_success": false,
  "self_ok": true
 }

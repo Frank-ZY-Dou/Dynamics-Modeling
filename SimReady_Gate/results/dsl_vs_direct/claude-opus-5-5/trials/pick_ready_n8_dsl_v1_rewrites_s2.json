@@ -1,0 +1,110 @@
+{
+ "task": "pick_ready_n8",
+ "family": "pick_ready",
+ "n": 8,
+ "condition": "dsl_v1_rewrites",
+ "seed": 2,
+ "model": "claude-opus-5-5",
+ "effort": "medium",
+ "rounds": [
+  {
+   "round": 1,
+   "llm": {
+    "ok": true,
+    "wall_s": 6.891979217529297,
+    "duration_ms": 6222,
+    "duration_api_ms": 6196,
+    "cost_usd": 0.026491400000000002,
+    "usage": {
+     "input": 2,
+     "cache_creation": 1577,
+     "cache_read": 12037,
+     "output": 573,
+     "thinking": 279
+    },
+    "num_turns": 2,
+    "stop_reason": "tool_use",
+    "error": null
+   },
+   "message_chars": 1951,
+   "answer": {
+    "statements": [
+     {
+      "op": "no_penetration"
+     },
+     {
+      "op": "on_support",
+      "a": "*",
+      "b": "table"
+     },
+     {
+      "op": "upright",
+      "a": "*"
+     },
+     {
+      "op": "within",
+      "a": "*",
+      "b": "table.top"
+     },
+     {
+      "op": "reach",
+      "a": "mug",
+      "r": 0.6,
+      "min": 0.45
+     },
+     {
+      "op": "facing",
+      "a": "mug",
+      "axis": "handle",
+      "tol": 20
+     },
+     {
+      "op": "approach",
+      "a": "mug",
+      "width": 0.15,
+      "toward": "robot"
+     },
+     {
+      "op": "min_distance",
+      "a": "*",
+      "b": "mug",
+      "r": 0.18
+     },
+     {
+      "op": "keep_out",
+      "a": "*",
+      "x0": 0.25,
+      "x1": 0.4,
+      "y0": 0.2,
+      "y1": 0.4
+     },
+     {
+      "op": "reach",
+      "a": "*",
+      "r": 0.8
+     }
+    ]
+   },
+   "answer_from": "dsl_v1",
+   "report": {
+    "ok": true,
+    "pen_after": 0,
+    "failed_predicates": [],
+    "failed_preferences": [],
+    "solver_notes": [
+     "the program was solved alone at scale 0.05 in 2 step(s) before the scale was restored"
+    ]
+   },
+   "self_ok": true,
+   "solve_s": 3.547147035598755,
+   "solve_cpu_s": 3.5430445650000006,
+   "rubric_ok": true,
+   "rubric_failed": [],
+   "answer_items": 10
+  }
+ ],
+ "n_rounds": 1,
+ "success": true,
+ "first_round_success": true,
+ "self_ok": true
+}
