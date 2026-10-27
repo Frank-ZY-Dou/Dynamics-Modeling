@@ -32,7 +32,7 @@ from mesh_collision import _vertex_components, _piece_inside, _piece_layout, _pi
 from mesh_collision import _signed_volume  # noqa: E402
 from mesh_collision import _aabb_candidate_pairs  # noqa: E402
 from mesh_collision import _fcl_all_contacts, _contact_witness, _least_separating_direction  # noqa: E402
-from mesh_collision import _no_crossing_at_zero_distance  # noqa: E402
+from mesh_collision import _nested, _no_crossing_at_zero_distance  # noqa: E402
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -421,7 +421,9 @@ class PrebuiltFCLOracle:
                 cp_on_a = cp_i_u * s
                 cp_on_b = cp_j_u * s
                 if self._nested(i, j, cp_i_u, cp_j_u, s, lo, hi, C, rots, piece_boxes):
-                    # one body inside the other: the translation that parts the pair the least
+                    # one body inside the other: the translation that parts the pair the least; the
+                    # contact points stay the nearest surface points, which the rotation rows take
+                    # their lever arms from
                     t_u, n = _least_separating_direction(fcl, fcl_objs[i], fcl_objs[j], (lo[i], hi[i]), (lo[j], hi[j]))
                     d_signed = -t_u * s
                 else:
@@ -1805,6 +1807,22 @@ def _optimize_rotations_fcl(centers, rots, nfs, mverts, mfaces, N,
     aabbs = [_world_aabb_u(i) for i in range(N)]
     near_thresh_u = d_hat * 1.5 * inv_s
     margin = 2.0 * d_hat * inv_s
+    pieces = [len(_vertex_components(np.asarray(mfaces[i]), len(model_verts_scaled[i]))) for i in range(N)]
+    meshes_u = {}
+
+    def _mesh_u(k):
+        """Body k's mesh in u-space at its current pose (dropped when it turns)."""
+        if k not in meshes_u:
+            Vw = (rots[k] @ model_verts_scaled[k].T).T + centers[k] * inv_s
+            meshes_u[k] = trimesh.Trimesh(vertices=Vw, faces=np.asarray(mfaces[k]), process=False)
+        return meshes_u[k]
+
+    def _box(k):
+        return np.array(aabbs[k][:3]), np.array(aabbs[k][3:])
+
+    def _box_inside(a, b):
+        return (all(aabbs[a][t] >= aabbs[b][t] - 1e-12 for t in range(3))
+                and all(aabbs[a][3 + t] <= aabbs[b][3 + t] + 1e-12 for t in range(3)))
 
     total_rot = 0.0
     for _ in range(max_rot_iters):
@@ -1824,11 +1842,23 @@ def _optimize_rotations_fcl(centers, rots, nfs, mverts, mfaces, N,
                                           enable_signed_distance=True)
                 res = fcl.DistanceResult()
                 d_u = fcl.distance(fcl_objs[i], fcl_objs[j], req, res)
-                if d_u > near_thresh_u:
-                    continue
+                nested = False
                 if d_u > 0.0:
                     cp_i_u = np.asarray(res.nearest_points[0], dtype=np.float64)
                     cp_j_u = np.asarray(res.nearest_points[1], dtype=np.float64)
+                    # surfaces apart: one body can still be inside the other (only when the boxes
+                    # nest or a body has several pieces), a penetration however far the surfaces are
+                    nested = ((_box_inside(i, j) or _box_inside(j, i) or pieces[i] > 1 or pieces[j] > 1)
+                              and _nested(_mesh_u(i), _mesh_u(j), cp_i_u, cp_j_u))
+                if d_u > near_thresh_u and not nested:
+                    continue
+                if nested:
+                    # the translation that parts the pair the least; the lever arm stays at the
+                    # nearest surface point
+                    t_u, n_ij = _least_separating_direction(fcl, fcl_objs[i], fcl_objs[j], _box(i), _box(j))
+                    cl_world = cp_i_u * scale
+                    d_min_world = -t_u * scale
+                elif d_u > 0.0:
                     raw = cp_j_u - cp_i_u          # from i's surface toward j
                     gap = float(np.linalg.norm(raw))
                     if gap < 1e-12:
@@ -1843,9 +1873,7 @@ def _optimize_rotations_fcl(centers, rots, nfs, mverts, mfaces, N,
                         raise _no_crossing_at_zero_distance(d_u * scale)
                     # The witness normal is the exit direction of body j
                     # (second argument) through the crossed triangles.
-                    depth_u, n_ij, pos_u = _contact_witness(fcl, fcl_objs[i], fcl_objs[j], pair_contacts,
-                                                            (np.array(aabbs[i][:3]), np.array(aabbs[i][3:])),
-                                                            (np.array(aabbs[j][:3]), np.array(aabbs[j][3:])))
+                    depth_u, n_ij, pos_u = _contact_witness(fcl, fcl_objs[i], fcl_objs[j], pair_contacts, _box(i), _box(j))
                     cl_world = pos_u * scale
                     d_min_world = -depth_u * scale
                 force_mag = max(0.0, d_hat - d_min_world)
@@ -1866,6 +1894,7 @@ def _optimize_rotations_fcl(centers, rots, nfs, mverts, mfaces, N,
                 any_updated = True
                 fcl_objs[i] = _make_fcl_obj(i)
                 aabbs[i] = _world_aabb_u(i)
+                meshes_u.pop(i, None)
         if not any_updated:
             break
     return total_rot

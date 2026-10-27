@@ -37,7 +37,7 @@ scenes for downstream robot policy training.</sub></p>
 
 ## 📢 Updates
 
-* [October 2026] The contact witness is taken over all of FCL's contacts, and the CPU solver is up to 1.6 times faster at large N. Timing tables re-measured on an Intel Core Ultra 7 265K and an RTX 5080.
+* [October 2026] The contact witness is taken over all of FCL's contacts, its depth is the translation along its normal that parts the pair, and the CPU solver is up to 1.6 times faster at large N. Timing tables re-measured on an Intel Core Ultra 7 265K and an RTX 5080.
 * [September 2026] Optional anchor term that pulls each object back toward its input position at every step, suggested by [Sarvex Jatasra](https://www.linkedin.com/in/sarvex/); see [Anchoring to the input layout](#anchoring-to-the-input-layout-optional).
 * [September 2026] **SimReady Gate** — an agentic, language-driven layer on top of S4R that turns generated RoboLab and RoboCasa scenes into certified simulation-ready ones: a request becomes a typed constraint program, S4R repairs under it in scale-space, a probed mesh-level evaluator and a MuJoCo settle decide, and a certificate with provenance is written. Measured on RoboLab's 68 shipped scenes, on layouts from RoboLab's own placement solver, and on RoboCasa's counter regions with RoboCasa's own placement test. A separate project in this repository: [`../SimReady_Gate/`](../SimReady_Gate/).
 * [September 2026] Timing tables extended to N = 2000 and 3000 on both the CPU and the GPU solver, with the hardware noted.
@@ -210,11 +210,11 @@ python examples/run_kubric.py --N 1000 --seed 42
 | N | init pen. | final pen. | RMSD | solve |
 |---|---|---|---|---|
 | 40 | 30 | 0 | 0.0400 | 0.15 s |
-| 100 | 80 | 0 | 0.0371 | 0.40 s |
+| 100 | 80 | 0 | 0.0360 | 0.40 s |
 | 500 | 371 | 0 | 0.0348 | 2.2 s |
 | 1000 | 760 | 0 | 0.0355 | 4.9 s |
-| 2000 | 1587 | 0 | 0.0367 | 10.2 s |
-| 3000 | 2423 | 0 | 0.0381 | 18.7 s |
+| 2000 | 1587 | 0 | 0.0366 | 10.3 s |
+| 3000 | 2423 | 0 | 0.0369 | 16.4 s |
 
 Every run ends with `status = converged`. The tail stops at zero
 penetration: a pair may end with a positive gap smaller than d_hat, and no

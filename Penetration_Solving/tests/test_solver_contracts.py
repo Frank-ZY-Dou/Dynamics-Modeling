@@ -421,6 +421,18 @@ class RotationHelper(unittest.TestCase):
         self.assertGreater(moved, 0.0)
         self.assertGreater(self.gap(centers, rotations, verts, faces), before)
 
+    def test_fcl_helper_reads_a_nested_pair_as_penetrating(self):
+        # a small box inside a big one, 0.1 from its +x face: the surfaces are farther apart
+        # than the helper's near threshold (0.03), yet the pair penetrates and turns the bodies
+        a = trimesh.creation.box(extents=[1.0, 1.0, 1.0])
+        b = trimesh.creation.box(extents=[0.2, 0.2, 0.2])
+        centers = np.array([[0.0, 0.0, 0.0], [0.3, 0.1, 0.0]])
+        rotations = [np.eye(3), np.eye(3)]
+        verts = [np.asarray(m.vertices).copy() for m in (a, b)]
+        faces = [np.asarray(m.faces).copy() for m in (a, b)]
+        moved = _optimize_rotations_fcl(centers, rotations, [1.0, 1.0], verts, faces, 2, 0.02, 1.0, 1)
+        self.assertGreater(moved, 0.0)
+
 
 class ContactWitness(unittest.TestCase):
     """The witness of a crossing pair (depth, normal, position) is taken from
