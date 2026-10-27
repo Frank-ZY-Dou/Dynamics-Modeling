@@ -577,12 +577,16 @@ class RemovedTrimeshBackend(unittest.TestCase):
         meshes = [trimesh.creation.box(extents=[0.2] * 3), trimesh.creation.box(extents=[0.2] * 3)]
         with self.assertRaisesRegex(ValueError, "removed"):
             evaluate_world_collision_meshes(meshes, use_fcl=False)
+        saved = os.environ.get("MESH_EVAL_USE_FCL")
         os.environ["MESH_EVAL_USE_FCL"] = "0"
         try:
             with self.assertRaisesRegex(ValueError, "removed"):
                 evaluate_world_collision_meshes(meshes)
         finally:
-            os.environ.pop("MESH_EVAL_USE_FCL", None)
+            if saved is None:
+                os.environ.pop("MESH_EVAL_USE_FCL", None)
+            else:
+                os.environ["MESH_EVAL_USE_FCL"] = saved
         with self.assertRaisesRegex(ValueError, "removed"):
             MeshOracle(objects, use_fcl=False)
 
