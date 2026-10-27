@@ -410,13 +410,13 @@ python examples/run_isaac.py pile_export --seconds 2       # Isaac Sim (its own 
 Each runner takes `--record poses.json` (the world pose of every free body at 30 frames per second) and `--report report.json`; `viz/make_engine_video.py` turns the recordings into a side-by-side clip, and `viz/run_engines.sh` runs the whole check: the export, each engine for 2 s, and the clip.
 
 <p align="center"><img src="docs/media/pile_n20_engines.gif" width="100%" alt="Example 2's twenty-object layout simulated for 2 s in MuJoCo, Genesis and Isaac Sim, left to right"/></p>
-<p align="center"><i>The twenty-object layout of Example 2, 2 s in MuJoCo 3.17, Genesis 1.2.3 and Isaac Sim 5.1 (left to right), played in real time from the recorded trajectories. The round fruit rolls a little (an orange by 3.6 cm in MuJoCo, 5.2 cm in Genesis, 4.1 cm in Isaac Sim); no other body turns by more than 10°, and none leaves the table.</i></p>
+<p align="center"><i>The twenty-object layout of Example 2, 2 s in MuJoCo 3.17, Genesis 1.2.3 and Isaac Sim 5.1 (left to right), played in real time from the recorded trajectories. The round fruit rolls a little (an orange by 3.6 cm in MuJoCo, 5.2 cm in Genesis, 4.15 cm in Isaac Sim); no other body turns by more than 10°, and none leaves the table.</i></p>
 
 | engine | peak displacement of a free body | bodies below the ground |
 |---|---|---|
 | MuJoCo 3.17 | 0.036 m (an orange rolling) | none |
 | Genesis 1.2.3, GPU, conjugate-gradient solver | 0.052 m (an orange rolling) | none |
-| Isaac Sim 5.1 (PhysX), RTX 5080, driver 580.65.06 | 0.042 m (an orange rolling) | none |
+| Isaac Sim 5.1 (PhysX), RTX 5080, driver 580.65.06 | 0.0415 m (an orange rolling) | none |
 
 <details>
 <summary><b>Collision proxies and the ground</b></summary>
