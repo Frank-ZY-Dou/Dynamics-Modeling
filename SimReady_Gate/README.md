@@ -142,7 +142,7 @@ supports. SimReady Gate is the layer between a scene generator and the simulator
 settle and still carries three object-object interpenetrations, the largest scoring 9.9 mm (keyboard and
 smartphone). Below it goes through the gate with one sentence of intent.
 
-![raw layout (penetrating bodies tinted), scale continuation at s = 0.22 and s = 0.57, repaired](docs/media/workdesk_strip.png)
+![raw layout (penetrating bodies tinted), scale continuation at s = 0.05 and s = 0.69, repaired](docs/media/workdesk_strip.png)
 
 *Left to right: the scene as shipped with the interpenetrating bodies tinted; S4R shrinking every
 free body about its reference center and growing it back while the QP moves bodies in the plane;

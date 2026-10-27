@@ -60,7 +60,7 @@ def encode(paths, out, width, ms, spread=10.0, gate=3.0):
             seen = np.where(keep[..., None], seen, f)
             shown = np.where(keep, TRANSPARENT, idx).astype(np.uint8)
         prev = idx
-        im = Image.fromarray(shown, mode="P"); im.putpalette(pal_bytes)
+        im = Image.fromarray(shown); im.putpalette(pal_bytes)            # palette indices: an L image the palette makes P
         out_frames.append(im)
     out_frames[0].save(out, save_all=True, append_images=out_frames[1:], duration=ms, loop=0, transparency=TRANSPARENT,
                        disposal=1, optimize=False)
