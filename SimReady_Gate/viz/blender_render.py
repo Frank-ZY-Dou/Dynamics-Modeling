@@ -117,6 +117,91 @@ def file_of(rec, key):
     return path
 
 
+CARPAINT_KEYS = {"name", "prim", "mdl", "mdl_file", "model", "model_defaults", "not_parameters", "preset", "carpaint",
+                 "coat_roughness_texture", "coat_roughness_texture_colorspace", "texture_scale", "texture_translate", "evaluated_as"}
+
+
+def build_carpaint(mat, rec, red=False, has_uv=True):
+    """A vMaterials 2 car paint whose flake layer does not show, approximated as its record's evaluated_as says: a clear
+    coat weighted by Fresnel(IOR) x its visibility (GGX of the roughness the coat texture's mean maps to, linearly between
+    roughness_range) over the ground coat (GGX) blended over the base colour's diffuse by its weight, both tinted by the
+    paint's two directional factors, taken as Blender's facing ratio (1 - |N.I|) to the exponent."""
+    name = rec.get("name")
+    unknown = set(rec) - CARPAINT_KEYS
+    if unknown:
+        raise RuntimeError(f"material {name}: keys the render does not know: {sorted(unknown)}")
+    absent = [k for k in CARPAINT_KEYS - {"not_parameters", "model_defaults", "mdl"} if k not in rec]
+    if absent:
+        raise RuntimeError(f"material {name}: no {absent}")
+    if not has_uv:
+        raise RuntimeError(f"material {name}: a texture on a mesh without texture coordinates")
+    cp = rec["carpaint"]
+    mat.use_nodes = True; nt = mat.node_tree; nt.nodes.clear()
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    uv = nt.nodes.new("ShaderNodeUVMap"); mapping = nt.nodes.new("ShaderNodeMapping")
+    mapping.inputs["Scale"].default_value = (float(rec["texture_scale"][0]), float(rec["texture_scale"][1]), 1.0)
+    mapping.inputs["Location"].default_value = (float(rec["texture_translate"][0]), float(rec["texture_translate"][1]), 0.0)
+    nt.links.new(uv.outputs["UV"], mapping.inputs["Vector"])
+    tex = nt.nodes.new("ShaderNodeTexImage")
+    tex.image = image(file_of(rec, "coat_roughness_texture"), {"sRGB": "sRGB", "raw": "Non-Color"}[rec["coat_roughness_texture_colorspace"]])
+    nt.links.new(mapping.outputs["Vector"], tex.inputs["Vector"])
+    sep = nt.nodes.new("ShaderNodeSeparateColor"); nt.links.new(tex.outputs["Color"], sep.inputs["Color"])
+
+    def math(op, a_, b_, c_=None):
+        m = nt.nodes.new("ShaderNodeMath"); m.operation = op
+        for k, x in enumerate((a_, b_, c_)):
+            if x is None:
+                continue
+            if isinstance(x, (int, float)):
+                m.inputs[k].default_value = float(x)
+            else:
+                nt.links.new(x, m.inputs[k])
+        return m.outputs["Value"]
+
+    low, high = (float(x) for x in cp["coat"]["roughness_range"])
+    mean = math("MULTIPLY", math("ADD", math("ADD", sep.outputs["Red"], sep.outputs["Green"]), sep.outputs["Blue"]), 1.0 / 3.0)
+    coat_rough = math("MULTIPLY_ADD", mean, high - low, low)      # base::file_texture(..., mono_average).mono, histogram_range
+    lw = nt.nodes.new("ShaderNodeLayerWeight"); lw.inputs["Blend"].default_value = 0.5
+
+    def tint(spec):
+        f = lw.outputs["Facing"]
+        if float(spec["exponent"]) != 1.0:
+            f = math("POWER", f, float(spec["exponent"]))
+        mx = nt.nodes.new("ShaderNodeMixRGB"); mx.blend_type = "MIX"; nt.links.new(f, mx.inputs["Fac"])
+        mx.inputs["Color1"].default_value = (*[float(x) for x in spec["normal"]], 1.0)
+        mx.inputs["Color2"].default_value = (*[float(x) for x in spec["grazing"]], 1.0)
+        return mx.outputs["Color"]
+
+    inner, outer = tint(cp["base_tint"]), tint(cp["outer_tint"])
+
+    def tinted(rgb):
+        col = nt.nodes.new("ShaderNodeRGB"); col.outputs["Color"].default_value = (*[float(x) for x in rgb], 1.0)
+        sock = col.outputs["Color"]
+        for t in (inner, outer):
+            mul = nt.nodes.new("ShaderNodeMixRGB"); mul.blend_type = "MULTIPLY"; mul.inputs["Fac"].default_value = 1.0
+            nt.links.new(sock, mul.inputs["Color1"]); nt.links.new(t, mul.inputs["Color2"]); sock = mul.outputs["Color"]
+        if red:
+            mixr = nt.nodes.new("ShaderNodeMixRGB"); mixr.blend_type = "MIX"; mixr.inputs["Fac"].default_value = a.red_mix
+            mixr.inputs["Color2"].default_value = (0.85, 0.12, 0.10, 1.0)
+            nt.links.new(sock, mixr.inputs["Color1"]); sock = mixr.outputs["Color"]
+        return sock
+
+    gc = cp["ground_coat"]
+    diffuse = nt.nodes.new("ShaderNodeBsdfDiffuse"); diffuse.inputs["Roughness"].default_value = 0.0
+    nt.links.new(tinted(cp["base_color"]), diffuse.inputs["Color"])
+    ground = nt.nodes.new("ShaderNodeBsdfAnisotropic"); ground.distribution = "GGX"
+    ground.inputs["Roughness"].default_value = float(gc["roughness"]); nt.links.new(tinted(gc["tint"]), ground.inputs["Color"])
+    under = nt.nodes.new("ShaderNodeMixShader"); under.inputs["Fac"].default_value = float(gc["weight"])
+    nt.links.new(diffuse.outputs["BSDF"], under.inputs[1]); nt.links.new(ground.outputs["BSDF"], under.inputs[2])
+    coat = nt.nodes.new("ShaderNodeBsdfAnisotropic"); coat.distribution = "GGX"
+    coat.inputs["Color"].default_value = (*[float(x) for x in cp["coat"]["tint"]], 1.0); nt.links.new(coat_rough, coat.inputs["Roughness"])
+    fres = nt.nodes.new("ShaderNodeFresnel"); fres.inputs["IOR"].default_value = float(cp["coat"]["ior"])
+    top = nt.nodes.new("ShaderNodeMixShader"); nt.links.new(math("MULTIPLY", fres.outputs["Fac"], float(cp["coat"]["weight"])), top.inputs["Fac"])
+    nt.links.new(under.outputs["Shader"], top.inputs[1]); nt.links.new(coat.outputs["BSDF"], top.inputs[2])
+    nt.links.new(top.outputs["Shader"], out.inputs["Surface"])
+    return mat
+
+
 def build_material(mat, rec, red=False, has_uv=True):
     """Rebuild `mat`'s node tree from a material record: the diffuse colour (texture with its albedo adjustment, or
     constant) times the tint and the occlusion by ao_to_diffuse; roughness and metallic from their source, met with the
@@ -128,6 +213,8 @@ def build_material(mat, rec, red=False, has_uv=True):
     name = rec.get("name")
     if rec.get("missing") or rec.get("unknown"):
         raise RuntimeError(f"material {name} cannot be rendered as authored: {rec.get('missing') or rec.get('unknown')}")
+    if rec.get("model") == "Carpaint_Solid":
+        return build_carpaint(mat, rec, red, has_uv)
     unknown = set(rec) - set(ALWAYS) - set(OPTIONAL) - set(INFO)
     if unknown:
         raise RuntimeError(f"material {name}: keys the render does not know: {sorted(unknown)}")

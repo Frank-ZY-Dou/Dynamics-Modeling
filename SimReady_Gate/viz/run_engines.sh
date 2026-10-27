@@ -19,7 +19,7 @@ $IPY examples/run_isaac.py "$OUT/export" --seconds 2 --record "$OUT/poses_isaac.
 $PY viz/make_engine_video.py --base "$BASE" --seconds 2 --out "$OUT/clip" \
     --record mujoco="$OUT/poses_mujoco.json" genesis="$OUT/poses_genesis.json" isaac="$OUT/poses_isaac.json"
 for k in 0 1 2; do
-  $B -b --python viz/blender_render.py -- --shots "$OUT/clip/shots.json" --list settle --panel $k --out "$OUT/clip/blender_settle" \
+  $B -b --python-exit-code 1 --python viz/blender_render.py -- --shots "$OUT/clip/shots.json" --list settle --panel $k --out "$OUT/clip/blender_settle" \
      --width 960 --height 540 --samples 96 --red-mix 0.45
 done
 $PY viz/make_engine_video.py --out "$OUT/clip" --assemble

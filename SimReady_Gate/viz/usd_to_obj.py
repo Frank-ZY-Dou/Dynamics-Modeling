@@ -138,6 +138,21 @@ OMNIGLASS = {   # OmniGlass.mdl, evaluated by OmniGlass_Opacity.mdl
     "texture_scale": ("texture_scale", (1.0, 1.0)),
 }
 OMNIGLASS_GATES = {"cutout_opacity_mono_source": "cutout_opacity_texture"}
+CARPAINT = {   # vMaterials 2 Carpaint_Solid.mdl (NVIDIA), its own parameters; carried only while its flake layer does not show
+    "base_color": ("cp_base_color", (0.002125, 0.051269, 0.046665)), "ground_coat_influence": ("cp_ground_coat_influence", 0.9),
+    "ground_coat_brightness": ("cp_ground_coat_brightness", 0.24), "edge_darkening": ("cp_edge_darkening", 0.96),
+    "flakes_tint": ("cp_flakes_tint", (0.016807, 0.171441, 0.417885)), "flakes_density": ("cp_flakes_density", 0.29),
+    "spread": (INERT, 0.12), "flakes_roughness": (INERT, 0.46), "flakes_size": (INERT, 0.1),   # read by the flake layer only
+    "candy_flip": ("cp_candy_flip", 0.0), "flake_layer_visibility": ("cp_flake_layer_visibility", 0.0),
+    "roughness_texture": ("coat_roughness_texture", None), "clearcoat_rough": ("cp_clearcoat_rough", 0.0),
+    "roughness_variation": ("cp_roughness_variation", 0.0), "clearcoat_ior": ("cp_clearcoat_ior", 1.6),
+    "clearcoat_visibility": ("cp_clearcoat_visibility", 1.0), "orange_peel_strength": (None, 0.0), "orange_peel_size": (None, 1.0),
+    "texture_translate": ("cp_texture_translate", (0.0, 0.0)), "texture_rotate": (None, 0.0), "texture_scale": ("cp_texture_scale", (1.0, 1.0)),
+    "roundcorners_enable": (None, False), "roundcorners_radius_mm": (None, 1.5), "roundcorners_across_materials": (None, False),
+    "uv_space_index": (None, 0),
+}
+CARPAINT_GATES = {"orange_peel_size": "orange_peel_strength", "roundcorners_radius_mm": "roundcorners_enable",
+                  "roundcorners_across_materials": "roundcorners_enable"}
 PREVIEW = {   # UsdPreviewSurface, its specification
     "diffuseColor": ("diffuse_color", (0.18, 0.18, 0.18)), "emissiveColor": (None, (0.0, 0.0, 0.0)),
     "useSpecularWorkflow": (None, 0), "specularColor": (None, (0.0, 0.0, 0.0)), "metallic": ("metallic", 0.0),
@@ -151,7 +166,7 @@ PREVIEW_GATES = {"specularColor": "useSpecularWorkflow", "clearcoatRoughness": "
 PREVIEW_TEXTURES = {"diffuseColor": ("diffuse_texture", ("rgb",)), "roughness": ("roughness_texture", ("r", "g", "b")),
                     "metallic": ("metallic_texture", ("r", "g", "b")), "normal": ("normal_texture", ("rgb",))}
 MODELS = {"OmniPBR": (OMNIPBR, OMNIPBR_GATES), "OmniPBR_Opacity": (OMNIPBR_OPACITY, OMNIPBR_OPACITY_GATES),
-          "SimPBR": (SIMPBR, SIMPBR_GATES), "OmniGlass": (OMNIGLASS, OMNIGLASS_GATES),
+          "SimPBR": (SIMPBR, SIMPBR_GATES), "OmniGlass": (OMNIGLASS, OMNIGLASS_GATES), "Carpaint_Solid": (CARPAINT, CARPAINT_GATES),
           "UsdPreviewSurface": (PREVIEW, PREVIEW_GATES)}
 # what the render reads that a model has no parameter for, at the value that model's evaluation amounts to
 NEUTRAL_ALBEDO = {"albedo_brightness": 1.0, "albedo_add": 0.0, "albedo_desaturation": 0.0}
@@ -284,15 +299,20 @@ def _mdl_call_args(txt):
     the material does not call OmniPBR."""
     import re
     m = re.search(r"::OmniPBR::OmniPBR\s*\(", txt)
-    if not m:
-        return None
-    i, depth, start = m.end(), 1, m.end()
+    return _call_args(txt, m.end()) if m else None
+
+
+def _call_args(txt, start):
+    """The `name: value` arguments of the call whose opening parenthesis ends at `start`, as raw strings (comments
+    removed)."""
+    import re
+    i, depth = start, 1
     while depth:
         c = txt[i]
         depth += c == "("
         depth -= c == ")"
         i += 1
-    body = re.sub(r"/\*.*?\*/", "", txt[start:i - 1], flags=re.S)
+    body = re.sub(r"//[^\n]*", "", re.sub(r"/\*.*?\*/", "", txt[start:i - 1], flags=re.S))
     args, depth, cur = {}, 0, ""
     for c in body + ",":
         if c == "," and depth == 0:
@@ -375,6 +395,77 @@ def _library_values(shader, rec):
     return out
 
 
+def _carpaint_values(shader, rec):
+    """A vMaterials 2 car paint: the material the shader names in Carpaint_Solid.mdl, the base material or one of the
+    file's presets (`export material <name>(*) = Carpaint_Solid(...)`), as values over the base material's defaults
+    (the default coat texture is the file's own), with the USD shader's inputs over them."""
+    import re
+    prim = shader.GetPrim()
+    asset, sub = prim.GetAttribute("info:mdl:sourceAsset").Get(), prim.GetAttribute("info:mdl:sourceAsset:subIdentifier").Get()
+    path = asset.resolvedPath
+    if not path or not os.path.isfile(path):
+        rec["missing"] = [asset.path]
+        return {}
+    txt, mdl_dir = open(path, errors="ignore").read(), os.path.dirname(path)
+    sig = re.search(r"texture_2d\s+roughness_texture\s*=\s*(texture_2d\([^)]*\))", txt)
+    out = {"roughness_texture": _mdl_literal(re.sub(r"/\*.*?\*/", "", sig.group(1)), None, mdl_dir, rec)}
+    if sub != "Carpaint_Solid":
+        m = re.search(r"export\s+material\s+" + re.escape(sub) + r"\s*\(\s*\*\s*\)\s*(?:\[\[.*?\]\])?\s*=\s*Carpaint_Solid\s*\(", txt, flags=re.S)
+        if m is None:
+            raise ValueError(f"{path}: no material {sub} that is a Carpaint_Solid")
+        for name, raw in _call_args(txt, m.end()).items():
+            if name not in CARPAINT:
+                raise ValueError(f"{path}: {name} is no parameter of Carpaint_Solid")
+            out[name] = _mdl_literal(raw, CARPAINT[name][1], mdl_dir, rec)
+    rec["mdl_file"], rec["preset"] = path, sub
+    return {**out, **_authored(shader, rec, CARPAINT)}
+
+
+GLTF_READ = {"base_color_factor", "base_color_texture", "metallic_factor", "roughness_factor", "alpha_mode", "alpha_cutoff", "base_alpha",
+             "emissive_strength"}
+
+
+def _read_gltf(rec, shader):
+    """NVIDIA's gltf/pbr.mdl gltf_material, read as the glTF 2.0 metallic-roughness model: base colour = factor x the
+    base colour texture (sRGB, through a gltf_texture_lookup: texture coordinate set 0, uv * scale + offset, no rotation,
+    repeating), metallic and roughness their factors, opaque. Its alpha settings are not read in opaque mode, nor its
+    emissive strength without an emissive colour; any other authored input is refused."""
+    from pxr import UsdShade
+    for inp in shader.GetInputs():
+        n, attr = inp.GetBaseName(), _producing(inp)
+        if attr is None:
+            continue
+        if n not in GLTF_READ:
+            raise ValueError(f"{shader.GetPath()}: glTF {n} is not carried into the export")
+        if n == "base_color_texture":
+            if not UsdShade.Output.IsOutput(attr):
+                raise ValueError(f"{shader.GetPath()}: a base colour texture that no texture lookup gives")
+            look = UsdShade.Shader(attr.GetPrim())
+            sub = look.GetPrim().GetAttribute("info:mdl:sourceAsset:subIdentifier")
+            if not sub or sub.Get() != "gltf_texture_lookup":
+                raise ValueError(f"{look.GetPath()}: not a gltf_texture_lookup")
+            val = {i.GetBaseName(): (_producing(i).Get() if _producing(i) is not None else None) for i in look.GetInputs()}
+            if (val.get("tex_coord_index") or 0) != 0 or (val.get("rotation") or 0.0) != 0.0 or {val.get("wrap_s", 10497), val.get("wrap_t", 10497)} != {10497}:
+                raise ValueError(f"{look.GetPath()}: a texture lookup other than set 0, unrotated, repeating, is not carried into the export")
+            t = _texture(val["texture"], "sRGB", rec, "MDL") if val.get("texture") is not None else None
+            if t is not None:
+                rec["diffuse_texture"], rec["diffuse_texture_colorspace"] = t["file"], t["colorspace"]
+            rec["texture_scale"] = [float(x) for x in (val.get("scale") or (1.0, 1.0))]
+            rec["texture_translate"] = [float(x) for x in (val.get("offset") or (0.0, 0.0))]
+            continue
+        v = attr.Get()
+        if n == "alpha_mode" and int(v) != 0:
+            raise ValueError(f"{shader.GetPath()}: glTF alpha mode {v} (not opaque) is not carried into the export")
+        if n == "base_color_factor":
+            rec["diffuse_tint"] = [float(x) for x in v]
+        elif n in ("metallic_factor", "roughness_factor"):
+            rec[n.split("_")[0]] = float(v)
+    rec.setdefault("diffuse_tint", [1.0, 1.0, 1.0]); rec.setdefault("metallic", 1.0); rec.setdefault("roughness", 1.0)   # glTF defaults
+    if not rec.get("diffuse_texture"):
+        rec["diffuse_color"] = rec.pop("diffuse_tint"); rec["diffuse_tint"] = [1.0, 1.0, 1.0]
+    rec.setdefault("texture_scale", [1.0, 1.0]); rec.setdefault("texture_translate", [0.0, 0.0])
+
+
 def _model_of(shader):
     """The model of a shader: a name of MODELS when its definition is one the export carries (UsdPreviewSurface, or the
     MDL file and material of OmniPBR, OmniPBR_Opacity, SimPBR or OmniGlass), "library" for another MDL material, else
@@ -388,6 +479,10 @@ def _model_of(shader):
     sub = sub.Get() if sub else None
     if sub in ("OmniPBR", "OmniPBR_Opacity", "SimPBR", "OmniGlass") and os.path.basename(path) == sub + ".mdl":
         return sub
+    if sub == "gltf_material" and path.endswith("gltf/pbr.mdl"):
+        return "gltf_material"
+    if os.path.basename(path) == "Carpaint_Solid.mdl":
+        return "Carpaint_Solid"                # its base material or a preset (the subIdentifier)
     return "library" if path.endswith(".mdl") else None
 
 
@@ -519,6 +614,29 @@ def _resolve_reads(rec, model):
         rec["opacity"] = (value if threshold == 0 else float(value >= threshold)) if on else 1.0
         rec.update(NEUTRAL_ALBEDO, diffuse_tint=[1.0, 1.0, 1.0], metallic=0.0, metallic_source="constant", ao_source="one",
                    ao_to_diffuse=0.0, texture_combine="lerp", specular=0.5, glass=True, normal_formula="scale_xy")
+    elif model == "gltf_material":                                # F0 0.04 (IOR 1.5); no occlusion
+        rec.update(NEUTRAL_ALBEDO, roughness_source="constant", metallic_source="constant", texture_combine="replace", ao_source="one",
+                   ao_to_diffuse=0.0, specular=0.5, ior=1.5)
+    elif model == "Carpaint_Solid":
+        v = lambda k: rec.pop("cp_" + k)
+        if v("flakes_density") > 0 and v("flake_layer_visibility") != 0:
+            raise ValueError(f"{rec['prim']}: a car paint whose flake layer shows is not carried into the export")
+        base, edge, flip, flakes = v("base_color"), v("edge_darkening"), v("candy_flip"), v("flakes_tint")
+        rough, var = v("clearcoat_rough"), v("roughness_variation")       # histogram_range(texture, var, rough)
+        low = min(max(1 - min((1 - rough) + 0.5 * var, 2 * (1 - rough)), 0.0), 1.0)
+        high = min(max(min(rough + 0.5 * var, 2 * rough), 0.0), 1.0)
+        gc = 0.95 * v("ground_coat_brightness") + 0.05
+        rec["carpaint"] = {"base_color": list(base), "ground_coat": {"weight": 0.5 * v("ground_coat_influence"), "tint": [gc] * 3,
+                                                                     "roughness": 0.64},                 # GGX alpha 0.4096
+                           "base_tint": {"normal": list(base), "grazing": [1 - edge] * 3, "exponent": 1.0},
+                           "outer_tint": {"normal": [1.0] * 3, "grazing": [1 - edge] * 3, "exponent": 1.0},
+                           "coat": {"ior": v("clearcoat_ior"), "weight": v("clearcoat_visibility"), "roughness_range": [low, high],
+                                    "tint": [(1 - flip) + flip * t for t in flakes]}}
+        scale = v("texture_scale")
+        rec["texture_scale"], rec["texture_translate"] = [1.0 / x for x in scale], list(v("texture_translate"))   # vmat_transform divides
+        rec["evaluated_as"] = ("an approximation, as chosen: the layers, weights, colours, IOR and the coat's roughness map as "
+                               "Carpaint_Solid.mdl has them; its simple_glossy_bsdf, microfacet_ggx_vcavities_bsdf and "
+                               "directional_factor as Blender's GGX, Fresnel and facing ratio, which have no exact equivalent")
     else:                                                          # UsdPreviewSurface
         for key in ("roughness", "metallic"):
             rec.setdefault(key + "_source", "constant")
@@ -541,6 +659,10 @@ def _material_record(material, layer_dir, cache):
         rec["mdl"] = src.Get().path if src and src.Get() is not None else None
     if model == "UsdPreviewSurface":
         _read_preview(rec, sh)
+    elif model == "Carpaint_Solid":
+        _carry(rec, sh.GetPath(), model, _carpaint_values(sh, rec))
+    elif model == "gltf_material":
+        _read_gltf(rec, sh)
     elif model in MODELS:
         _carry(rec, sh.GetPath(), model, _authored(sh, rec, MODELS[model][0]))
     elif model == "library":
