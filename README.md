@@ -14,6 +14,9 @@ Research code and open-source projects on dynamics modeling and simulation.
 
 ## Projects
 
+- [**NDM Gym**](https://github.com/Frank-ZY-Dou/ndm-gym) — Neural world models for humanoid control: SuperTrack
+  and SuperMimic on one Isaac Lab + MuJoCo Warp pipeline for the Unitree G1, with MLP or
+  [RigidFormer](https://frank-zy-dou.github.io/projects/RigidFormer/) world models.
 - [**Differentiable SuperDex**](https://github.com/Frank-ZY-Dou/differentiable-superdex) — A fork of Meta's
   [Project SuperDex](https://github.com/facebookresearch/project_superdex) whose contact-first physics engine
   is made differentiable: the discrete adjoint through frictional contact for rigid, articulated, soft and rod
