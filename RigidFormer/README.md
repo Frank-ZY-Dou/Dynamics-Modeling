@@ -44,7 +44,7 @@ Learning-based simulation of multi-object rigid-body dynamics remains difficult 
 
 - **Mesh-free.** Each object is a set of points without mesh connectivity: mesh vertices, points sampled on its surface, or the points a depth camera sees of it.
 - **Object-level reasoning.** Each object advances through a few compact anchors; *Anchor-Vertex Pooling* enriches the anchors with local vertex features, keeping contact-relevant geometry without dense vertex-level interaction.
-- **Anchor-based RoPE.** Anchor geometry enters attention while respecting the unordered nature of objects and anchors: object-token processing is permutation-equivariant, and the mean-pooled anchor descriptor is invariant to anchor reindexing while preserving shape extent.
+- **Anchor-based RoPE.** The objects' spatial layout enters attention while respecting the unordered nature of objects and anchors: object-token processing is permutation-equivariant, and the mean-pooled anchor descriptor is invariant to anchor reindexing.
 - **Rigidity by construction.** Predicted updates are projected onto the rigid-body manifold with differentiable Kabsch alignment.
 - **Controllable step size.** One model rolls out with step sizes 1, 5 and 10.
 
