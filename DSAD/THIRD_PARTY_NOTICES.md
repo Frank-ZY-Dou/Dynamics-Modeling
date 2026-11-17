@@ -222,8 +222,9 @@ official source under its own terms (`data/README.md`):
 | [DAVIS 2017](https://davischallenge.org/) (Perazzi et al., CVPR 2016; Pont-Tuset et al., 2017) | DAVIS-Small and DAVIS-Large (Tab. 2) | CC BY-NC 4.0, per the Terms of Use in the dataset archive's README (`data/README.md`) |
 
 `data/` holds SHA-256 checksums of the pixels of the paper's frames (no frame
-data), to check a local preparation. The two figures in `assets/` show frames
-of the UVG sequences Jockey and ReadySetGo, under UVG's terms.
+data), to check a local preparation. The figures in `assets/` show frames of
+the UVG sequences Jockey and ReadySetGo (UVG's terms) and of Big Buck Bunny
+(`bunny.gif`, `bunny.mp4`: CC BY 3.0, (c) Blender Foundation).
 
 **UVG.** The sequences and all intellectual property rights in them are
 Digiturk's, which licenses them under CC BY-NC 3.0 Unported. The notice that

@@ -12,14 +12,18 @@ Zhiyang Dou<sup>1</sup>, Laki Iinbor<sup>2</sup>, Wojciech Matusik<sup>1</sup>
 
 <sup>1</sup>MIT CSAIL&emsp;<sup>2</sup>Independent Researcher
 
-<img src="assets/teaser.png" alt="DSAD representation" width="100%">
+<a href="assets/bunny.mp4"><img src="assets/bunny.gif" alt="Big Buck Bunny decoded by DSAD" width="100%"></a>
 </div>
+
+<p align="center"><sub>Big Buck Bunny (&copy; Blender Foundation), 13 GoPs decoded from the released models at 3 M parameters per video. Click for the 24 fps video.</sub></p>
 
 DSAD represents a group of pictures (GoP) with explicit primitives and no neural network. One soft-distance rule is used at two scales:
 
 - **Sites.** Dense sites of a [Soft Anisotropic Diagram](https://luckyiyi.github.io/SAD/) (SAD) hold the colors. A pixel is a softmax blend of its top-8 sites.
 - **Anchors.** A few hundred coarser anchors use the same score. Their weights form a sparse partition of unity over the sites.
 - **Reduced-order motion.** Each anchor carries knot-based temporal curves for displacement and color residual, and a site follows its anchors. The motion model has 20,224 parameters at 256 anchors.
+
+<p align="center"><img src="assets/teaser.png" alt="DSAD representation" width="100%"></p>
 
 Fused CUDA kernels fit a 10-frame 720p GoP in about 3 minutes and decode it at 706-1,095 FPS (benchmark means) from a cold start on one RTX 2080 Ti. DSAD extends [SAD](https://luckyiyi.github.io/SAD/) (SIGGRAPH 2026), our image representation, to video.
 
