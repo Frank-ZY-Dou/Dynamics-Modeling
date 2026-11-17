@@ -11,6 +11,8 @@ Research code and open-source projects on dynamics modeling and simulation.
 - [**S4R**](Penetration_Solving/) — Scaling for Rigid-Body Interpenetration Resolution.
   SIGGRAPH Asia 2026 (ACM Transactions on Graphics). An agentic, language-driven front end that repairs generated RoboLab and RoboCasa
   scenes with S4R is in [SimReady Gate](SimReady_Gate/).
+- [**DSAD**](DSAD/) — Dynamic Soft Anisotropic Diagrams for Reduced-Order Video Representation.
+  Conference on Neural Information Processing Systems (NeurIPS) 2026.
 
 ## Projects
 
