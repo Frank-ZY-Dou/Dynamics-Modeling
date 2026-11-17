@@ -1,0 +1,71 @@
+# The GoPs of the paper's benchmarks with their site and anchor counts.
+# scripts/make_jobs.py writes one fit per GoP from this file; scripts/summarize.py reads the scores.
+#
+#   tag      name of a run, and its folder under checkpoints/
+#   gop      folder of a GoP; {data} is the data root (default: data)
+#   options  trainer options added to configs/dsad.yaml
+#   scenes   <scene>: N sites (num_points), M anchors (num_anchors, default 256), number of GoPs
+#
+# A GoP stores 9 N + 7 M + 9 M K_t parameters (K_t = 8 knots): 20,224 for the ROM at M = 256.
+# The Large budgets use more anchors, M = 32 floor(8 B / B_S + 1/2) for a GoP budget B and its
+# Small budget B_S, and N fills the rest of the budget.
+
+uvgS:        # UVG, Small budget (3.5 M parameters per video), Tab. 2
+  tag: dsad_tab2_uvgS_{scene}_{g}
+  gop: "{data}/uvg_proto/uvg720/{scene}/{scene}_{g}"
+  scenes:
+    Beauty:     {num_points: 23714, num_anchors: 256, gops: 15}
+    Bosphorus:  {num_points: 23714, num_anchors: 256, gops: 15}
+    HoneyBee:   {num_points: 23714, num_anchors: 256, gops: 15}
+    ShakeNDry:  {num_points: 46270, num_anchors: 256, gops: 8}
+    Jockey:     {num_points: 23714, num_anchors: 256, gops: 15}
+    ReadySetGo: {num_points: 23714, num_anchors: 256, gops: 15}
+    YachtRide:  {num_points: 23714, num_anchors: 256, gops: 15}
+
+uvgL:        # UVG, Large budget (5.8 M parameters per video), Tab. 2
+  tag: dsad_tab2_uvgL_{scene}_{g}
+  gop: "{data}/uvg_proto/uvg720/{scene}/{scene}_{g}"
+  scenes:
+    Beauty:     {num_points: 39310, num_anchors: 416, gops: 15}
+    Bosphorus:  {num_points: 39310, num_anchors: 416, gops: 15}
+    HoneyBee:   {num_points: 39310, num_anchors: 416, gops: 15}
+    ShakeNDry:  {num_points: 76865, num_anchors: 416, gops: 8}
+    Jockey:     {num_points: 39310, num_anchors: 416, gops: 15}
+    ReadySetGo: {num_points: 39310, num_anchors: 416, gops: 15}
+    YachtRide:  {num_points: 39310, num_anchors: 416, gops: 15}
+
+davisS:      # DAVIS, Small budget (1.8 M parameters per video), Tab. 2
+  tag: dsad_tab2_davisS_{scene}_{g}
+  gop: "{data}/davis720/{scene}/{scene}_{g}"
+  scenes:
+    bmx:        {num_points: 22714, num_anchors: 256, gops: 8}
+    boat:       {num_points: 22714, num_anchors: 256, gops: 8}
+    camel:      {num_points: 19936, num_anchors: 256, gops: 9}
+    cows:       {num_points: 15936, num_anchors: 256, gops: 11}
+    swan:       {num_points: 19936, num_anchors: 256, gops: 9}
+    train:      {num_points: 22714, num_anchors: 256, gops: 8}
+
+davisL:      # DAVIS, Large budget (3.3 M parameters per video), Tab. 2
+  tag: dsad_tab2_davisL_{scene}_{g}
+  gop: "{data}/davis720/{scene}/{scene}_{g}"
+  scenes:
+    bmx:        {num_points: 41636, num_anchors: 480, gops: 8}
+    boat:       {num_points: 41636, num_anchors: 480, gops: 8}
+    camel:      {num_points: 36525, num_anchors: 480, gops: 9}
+    cows:       {num_points: 29081, num_anchors: 480, gops: 11}
+    swan:       {num_points: 36525, num_anchors: 480, gops: 9}
+    train:      {num_points: 41636, num_anchors: 480, gops: 8}
+
+bunny:       # Big Buck Bunny, 263,647 parameters per GoP, 60k fine iterations (Tab. 3)
+  tag: dsad_bunny_base_{g}
+  gop: baselines/D2GV/dataset/bunny/bunny_{g}
+  options: --iterations 60000 --sad_step_size 20000
+  scenes:
+    bunny:      {num_points: 27047, gops: 13}
+
+bunny3m:     # Big Buck Bunny, 3 M parameters per video, 60k fine iterations (Tab. I12)
+  tag: dsad_bunny_3m_{g}
+  gop: baselines/D2GV/dataset/bunny/bunny_{g}
+  options: --iterations 60000 --sad_step_size 20000
+  scenes:
+    bunny:      {num_points: 23381, gops: 13}

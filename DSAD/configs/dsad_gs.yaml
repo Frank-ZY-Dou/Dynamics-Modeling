@@ -1,0 +1,31 @@
+# DSAD-GS, the appearance ablation of the paper: D2GV's 2D Gaussians with the same anchor ROM.
+#
+#   python dsad/train_sad_video.py --config configs/dsad_gs.yaml -d <gop> --num_points <N> --data_name <tag>
+#
+# The decoder reads 8 N + ROM parameters (20,224 at M = 256, K_t = 8). The paper uses N = 30,428 on
+# Bunny, 263,648 parameters per GoP (Tab. 3). The fused CUDA kernels do not cover Gaussians, so the
+# PyTorch step runs.
+
+# Schedule
+iterations: 60000                     # fine stage
+coarse_iterations: 10000
+seed: 1
+frame_order: cyclic
+
+# Anchor ROM (as configs/dsad.yaml)
+num_anchors: 256
+num_knots: 8
+anchor_top_k: 12
+anchor_mode: apollonius_aniso
+anchor_init_sigma: 0.25
+enable_features: true
+lr_anchor: 0.005
+lr_coef: 0.002
+lambda_move: 0.0
+lambda_temporal: 0.0
+lambda_arap: 0.0
+lambda_spatial: 0.0
+
+# Appearance: D2GV's Gaussians
+appearance: gaussian
+lr: 0.005

@@ -1,0 +1,17 @@
+# Pixel checksums of the 13 Bunny GoPs of the D2GV submodule: sha256 of each GoP's frames as RGB
+# uint8 pixels, concatenated in file order, then the frame count, the frame size and the GoP folder
+# under baselines/D2GV/dataset.
+# Check with: python scripts/prepare_data.py verify --set bunny
+3bcd2d184ccc55cfd9f37eccddde2ae94b083dc0f25624cf6e58bddf99738aa5  10  1280x720  bunny/bunny_1
+5a8e369dc8d1544e8078239f7ea62c238e129fcfc2e4ac9cd1b16fadd820797a  10  1280x720  bunny/bunny_2
+2c464567057e6e7f7a7370a156439960754929fcf31966cd47185ddf443524bc  10  1280x720  bunny/bunny_3
+4df87d738f27cc0bb1981b81e371b10a2d2786b56adba85faf744320f870fe1f  10  1280x720  bunny/bunny_4
+466225aec96646bfba6519e74b0ba89eae7306533082cd992a10c4a4654947cd  10  1280x720  bunny/bunny_5
+b5e60f51c9a2b86f9ffb744cbd0b21e2105c6b17b3276f1d2a24e923a061436f  10  1280x720  bunny/bunny_6
+15588da703be23e685d17f5862b68b7fba94e9a7b421ebe3534e44392ec0f8ab  10  1280x720  bunny/bunny_7
+99edbfba4340ae4bc5f7faf04516dd94f3444dbfeb5f7ad9959bf6f13520f615  10  1280x720  bunny/bunny_8
+412d7cf750e9ca385aba0456986768c2a96d19c267252ec68dfd9f3654184dbe  10  1280x720  bunny/bunny_9
+332f2e04bd16c931b32d461ceb847b8e1da037c380422f12290d0e08f71d961e  10  1280x720  bunny/bunny_10
+5da177351721248d6e35d7b7f6ba9431be750db54121ad62f4a9eea57211685e  10  1280x720  bunny/bunny_11
+26dd29b58621840ad90ac1067e72eafd09d8bae30b27f4d816b0a25463012924  10  1280x720  bunny/bunny_12
+d3f23fec9d759c167fcf29a3b45daf193e265d0287a1debed2ae7c140a8d3600  12  1280x720  bunny/bunny_13

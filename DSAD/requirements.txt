@@ -1,0 +1,18 @@
+# Install PyTorch first, as the CUDA build matching your driver and toolkit (https://pytorch.org),
+# then: pip install -r requirements.txt
+# The comments give the tested versions (Python 3.10, CUDA 12.8 wheels, nvcc 12.4, RTX 2080 Ti).
+
+torch>=2.0             # tested: 2.9.1+cu128
+torchvision>=0.15      # tested: 0.24.1+cu128
+numpy>=1.24            # tested: 2.2.6
+Pillow>=9.1            # tested: 12.2.0
+pytorch-msssim>=1.0    # tested: 1.0.0 (MS-SSIM)
+tqdm>=4.60             # tested: 4.67.3
+PyYAML>=6.0            # tested: 6.0.3 (configs/)
+rich>=12               # tested: 14.3.3 (imported by D2GV's gsplat; gsplat requires >= 12)
+jaxtyping              # tested: 0.3.7 (imported by D2GV's gsplat, which DSAD loads)
+ninja>=1.10            # tested: 1.13.0 (PyTorch JIT extension builds)
+cmake>=3.26            # tested: 4.3.1 (the SAD extension's CMake build)
+
+# Optional: extracts the UVG .7z archives when the 7z command is not installed.
+# py7zr>=0.20

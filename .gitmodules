@@ -2,3 +2,11 @@
 	path = HandDiffSim/AmazingHand
 	url = https://github.com/pollen-robotics/AmazingHand.git
 	ignore = untracked
+[submodule "DSAD/references/SAD"]
+	path = DSAD/references/SAD
+	url = https://github.com/LuckyIYI/SAD.git
+	ignore = dirty
+[submodule "DSAD/baselines/D2GV"]
+	path = DSAD/baselines/D2GV
+	url = https://github.com/Evan-sudo/D2GV.git
+	ignore = dirty

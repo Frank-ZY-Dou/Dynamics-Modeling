@@ -1,0 +1,49 @@
+# DSAD, the configuration of the paper.
+#
+#   python dsad/train_sad_video.py --config configs/dsad.yaml -d <gop> --num_points <N> \
+#       [--num_anchors <M>] --data_name <tag>
+#
+# Per-GoP options go on the command line: the GoP folder (-d), the site count (--num_points), the
+# anchor count (--num_anchors) and the run name (--data_name). configs/benchmarks.yaml lists N and
+# M for every GoP of the paper's benchmarks, and scripts/make_jobs.py writes the commands.
+# The 60k protocol (Bunny) adds --iterations 60000 --sad_step_size 20000.
+#
+# A GoP stores 9 N + ROM parameters. Per site: position 2, log-temperature 1, radius 1, color 3,
+# axis angle 1, log-anisotropy 1. ROM = 7 M + 9 M K_t, 20,224 at M = 256 and K_t = 8.
+
+# Schedule
+iterations: 120000                    # fine stage (60000 under the 60k protocol)
+coarse_iterations: 10000              # canonical stage, sites only
+seed: 1
+frame_order: shuffle                  # a new seeded permutation of the GoP's frames in every pass
+
+# Anchor ROM
+num_anchors: 256                      # M; more at the Large budgets (configs/benchmarks.yaml)
+num_knots: 8                          # K_t, knots per anchor and channel
+anchor_top_k: 12                      # K_a, anchors per site
+anchor_mode: apollonius_aniso         # the SAD score
+anchor_init_sigma: 0.25
+enable_features: true                 # color residual next to the displacement
+lr_anchor: 0.005
+lr_coef: 0.002
+lambda_move: 0.0                      # movement, temporal and ARAP penalties off (Appendix F)
+lambda_temporal: 0.0
+lambda_arap: 0.0
+lambda_spatial: 0.0
+
+# SAD sites
+appearance: sad
+lr: 0.005                             # position; the other attributes scale it (sad_lr_mults)
+sad_init: gradient                    # half uniform, half by the gradient magnitude of the mean frame
+sad_lr_mults: color=2,tau=2,radius=2,dir=0.5,aniso=5
+sad_step_size: 40000                  # the site learning rates halve every 40k steps (20000 at 60k)
+
+# Per-frame candidates
+cand_freq: 2
+cand_warmup_passes: 16
+cand_flood_every: 1000
+cand_inject_count: 4
+cand_exact_tail: 6000                 # exact top-8 candidates in the last 6k fine iterations
+
+# Training step
+fast: true                            # fused CUDA kernels; --no-fast runs the PyTorch reference step

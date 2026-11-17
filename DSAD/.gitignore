@@ -1,0 +1,18 @@
+__pycache__/
+*.pyc
+*.so
+*.o
+build/
+# JIT-extension cache
+.torch_extensions/
+# run outputs, job files and queues, logs, downloaded records
+checkpoints/
+logs/
+jobs/
+*.queue/
+records/
+*.tar.zst
+# prepared data (data/README.md)
+data/*
+!data/README.md
+!data/checksums/
